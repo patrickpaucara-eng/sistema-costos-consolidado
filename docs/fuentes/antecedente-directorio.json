@@ -1,0 +1,278 @@
+[
+  {
+    "linea": 1,
+    "archivo": "agente_ia_solo_cambios.zip",
+    "tipo": ".zip",
+    "caracteres": 541
+  },
+  {
+    "linea": 2,
+    "archivo": "p_dialogo.png",
+    "tipo": ".png",
+    "caracteres": 1408
+  },
+  {
+    "linea": 3,
+    "archivo": "n_estado_sim.png",
+    "tipo": ".png",
+    "caracteres": 1389
+  },
+  {
+    "linea": 4,
+    "archivo": "n_home.png",
+    "tipo": ".png",
+    "caracteres": 1632
+  },
+  {
+    "linea": 5,
+    "archivo": "simulacion_2010.zip",
+    "tipo": ".zip",
+    "caracteres": 771
+  },
+  {
+    "linea": 6,
+    "archivo": "solo_cambios.zip",
+    "tipo": ".zip",
+    "caracteres": 2664
+  },
+  {
+    "linea": 7,
+    "archivo": "home.png",
+    "tipo": ".png",
+    "caracteres": 389
+  },
+  {
+    "linea": 8,
+    "archivo": "per_resumen2.png",
+    "tipo": ".png",
+    "caracteres": 1485
+  },
+  {
+    "linea": 9,
+    "archivo": "Resumen_simulacion_2010.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 11456
+  },
+  {
+    "linea": 10,
+    "archivo": "captura_kardex_datos_importados.png",
+    "tipo": ".png",
+    "caracteres": 1839
+  },
+  {
+    "linea": 11,
+    "archivo": "frenosa_datos_entrada_abc.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 62868
+  },
+  {
+    "linea": 12,
+    "archivo": "Reporte_Kardex_Promedio.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 9548
+  },
+  {
+    "linea": 13,
+    "archivo": "captura_agente_ia.png",
+    "tipo": ".png",
+    "caracteres": 2267
+  },
+  {
+    "linea": 14,
+    "archivo": "captura_dashboard_ot.png",
+    "tipo": ".png",
+    "caracteres": 1251
+  },
+  {
+    "linea": 15,
+    "archivo": "README.md",
+    "tipo": ".md",
+    "caracteres": 8899
+  },
+  {
+    "linea": 16,
+    "archivo": "AGENTS.md",
+    "tipo": ".md",
+    "caracteres": 15954
+  },
+  {
+    "linea": 17,
+    "archivo": "CONTEXT.md",
+    "tipo": ".md",
+    "caracteres": 14071
+  },
+  {
+    "linea": 18,
+    "archivo": "preguntas_base.txt",
+    "tipo": ".txt",
+    "caracteres": 3052
+  },
+  {
+    "linea": 19,
+    "archivo": "README.md",
+    "tipo": ".md",
+    "caracteres": 288
+  },
+  {
+    "linea": 20,
+    "archivo": "frenosa_datos_entrada_abc_2010_09.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66301
+  },
+  {
+    "linea": 21,
+    "archivo": "LEEME.md",
+    "tipo": ".md",
+    "caracteres": 2063
+  },
+  {
+    "linea": 22,
+    "archivo": "frenosa_datos_entrada_abc_2010_02.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66725
+  },
+  {
+    "linea": 23,
+    "archivo": "Resumen_simulacion_2010.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 13249
+  },
+  {
+    "linea": 24,
+    "archivo": "frenosa_datos_entrada_abc_2010_03.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66686
+  },
+  {
+    "linea": 25,
+    "archivo": "frenosa_datos_entrada_abc_2010_06.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66684
+  },
+  {
+    "linea": 26,
+    "archivo": "frenosa_datos_entrada_abc_2010_07.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 61201
+  },
+  {
+    "linea": 27,
+    "archivo": "frenosa_datos_entrada_abc_2010_10.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66234
+  },
+  {
+    "linea": 28,
+    "archivo": "frenosa_datos_entrada_abc_2010_04.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 67085
+  },
+  {
+    "linea": 29,
+    "archivo": "frenosa_datos_entrada_abc_2010_08.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66714
+  },
+  {
+    "linea": 30,
+    "archivo": "frenosa_datos_entrada_abc_2010_11.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66795
+  },
+  {
+    "linea": 31,
+    "archivo": "frenosa_datos_entrada_abc_2010_05.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66640
+  },
+  {
+    "linea": 32,
+    "archivo": "frenosa_datos_entrada_abc_2010_12.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66699
+  },
+  {
+    "linea": 33,
+    "archivo": "frenosa_datos_entrada_abc_2010_01.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 66442
+  },
+  {
+    "linea": 34,
+    "archivo": "frenosa_datos_entrada_abc.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 60621
+  },
+  {
+    "linea": 35,
+    "archivo": "Reporte_Dashboard.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 6205
+  },
+  {
+    "linea": 36,
+    "archivo": "Dashboard_Costos_Frenosa.png",
+    "tipo": ".png",
+    "caracteres": 822
+  },
+  {
+    "linea": 37,
+    "archivo": "Reporte_Analisis_Periodos_Ano_2010.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 60132
+  },
+  {
+    "linea": 38,
+    "archivo": "Reporte_Dashboard.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 6281
+  },
+  {
+    "linea": 39,
+    "archivo": "Reporte_Estado_Resultados.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 2353
+  },
+  {
+    "linea": 40,
+    "archivo": "Reporte_Hoja_Costos_OT.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 2664
+  },
+  {
+    "linea": 41,
+    "archivo": "Reporte_Kardex_Promedio.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 9122
+  },
+  {
+    "linea": 42,
+    "archivo": "Reporte_Proceso_1_EC_AC.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 23454
+  },
+  {
+    "linea": 43,
+    "archivo": "Reporte_Proceso_2_AC_OT.xlsx",
+    "tipo": ".xlsx",
+    "caracteres": 16196
+  },
+  {
+    "linea": 44,
+    "archivo": "cmd_objetivo_2010.json",
+    "tipo": ".json",
+    "caracteres": 7356
+  },
+  {
+    "linea": 45,
+    "archivo": "indices_precio_2010.json",
+    "tipo": ".json",
+    "caracteres": 299
+  },
+  {
+    "linea": 46,
+    "archivo": "materiales_directos_base_julio_2010.json",
+    "tipo": ".json",
+    "caracteres": 1519
+  }
+]
