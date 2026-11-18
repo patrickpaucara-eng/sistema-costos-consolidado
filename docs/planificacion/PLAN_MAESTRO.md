@@ -1,0 +1,202 @@
+# Plan maestro de consolidación
+
+Versión 1 · 18 de noviembre de 2026 · documento para revisión del dueño.
+
+## Resultado esperado
+
+Un sistema universal de costos e inteligencia de decisiones con funcionamiento offline, cálculos reproducibles, trazabilidad de cada resultado, operación práctica y recuperación comprobable. El alcance comercial se demostrará mediante casos representativos y pruebas de instalación, operación, respaldo y restauración.
+
+El trabajo se organiza en los tres niveles elegidos por el dueño. La Base conserva los datos necesarios y su procedencia. Síntesis, asociada a la macrofunción Entrega, determina los costos solicitados. Analítica usa hechos y resultados para explicar, anticipar, proponer y medir decisiones. La correspondencia formal de estos niveles con MCD y DBD se valida en la fase 1.
+
+## Autoridad y estado
+
+| Asunto | Estado |
+|---|---|
+| Auditoría y pruebas seguras sobre copias | Autorizadas |
+| Conservación de fuentes y documentación en el repositorio consolidado | Autorizada |
+| Mapa HTML del funcionamiento actual | Publicado, vinculado a la revisión auditada |
+| Tres niveles Base / Síntesis / Analítica | Dirección conceptual indicada por el dueño |
+| Modelo conceptual detallado y contratos entre niveles | En preparación, pendientes de validación |
+| Uso individual o varias personas simultáneas | Pendiente de decisión |
+| Stack, migración e implementación del producto | Pendientes de aprobación expresa |
+| Repositorio histórico sistema-costos-reyna | Consulta y pruebas sobre copias |
+| 93 % de avance heredado | Declaración pendiente de validación |
+
+La creación del repositorio consolidado y el archivo de fuentes no aprueban automáticamente el stack ni la reforma. Cada aprobación posterior registra fecha, alcance, restricciones y evidencia.
+
+## Punto de partida reproducible
+
+- Histórico integrado — main a96ba794a6171a325836a5a56bf1c9392dbd8482.
+- Candidata técnica — desarrollo/ola1 cac2501d9f712655dda466d216dc5bff2dd446a5.
+- Demo de referencia — prototipo/v41-congelado 3a2850060c96b2f7eaeae613c8a402aa9486c079.
+- OT-001 inventarió 292 ramas, 290 puntas, 289 árboles y 819 commits alcanzables.
+- En las tres revisiones, la historia Python dio 392/392 y ENVASE 66/66. Ola 1 corrigió 16 errores de coherencia y elevó automatización a 5/5.
+- Continúan abiertos el aislamiento por empresa de la cadena, P20 en la construcción estricta, recuperación de cierre completo, integridad de las huellas y conciliación de cuentas.
+- Los libros completos MCD y DBD llegaron después de OT-001 y están en el índice de fuentes. Su recepción habilita el cotejo metodológico pendiente.
+- El consolidado contiene fuentes y el HTML. La aplicación histórica aún no fue importada.
+
+Los resultados de pruebas expresan su versión y su caso. Para repetir una prueba se fijan también los datos y el entorno. La observación de mezcla entre empresas se reprodujo en el método con hechos mezclados y requiere verificar toda la ruta de operación.
+
+## Cómo se ejecutará
+
+Cada tarea tendrá un identificador, dependencia, responsable por función, entrada, salida y evidencia de aceptación. Los estados serán pendiente, en curso, bloqueada, en revisión y aceptada. El cierre requiere evidencia y revisión. Las fechas y estimaciones se asignan por lote una vez fijado su alcance.
+
+La secuencia principal será recuperación → método → modelo conceptual → pruebas de aceptación → decisión tecnológica → diseño → implementación por recorridos completos → validación de entrega.
+
+Se podrá adelantar la reproducción de un fallo confirmado mientras se cotejan las fuentes. Una discrepancia se registra y se continúa con tareas independientes. Las decisiones materiales sobre finalidad de costos, autoridad de una regla, alcance de producto, stack y publicaciones requieren al dueño. Las elecciones operativas reversibles las resuelve el orquestador.
+
+## Fase 0 · Asegurar continuidad
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| P00 | Ninguna | Verificar fuentes, hashes, permisos y revisiones iniciales. | Se pueden localizar originales y repetir la captura Git. |
+| P01 | P00 | Preservar el expediente OT-001, comandos, inventario y logs fuera del repositorio histórico. Registrar límites y fecha de corte. | Copia remota verificable y manifiesto de integridad. |
+| P02 | P01 | Abrir registro de requisitos, decisiones, dudas y tareas. Vincular los hallazgos a fuente y SHA. | Cada afirmación decisiva tiene procedencia y estado. |
+| P03 | P02 | Fijar protocolo de actualización del HTML y de reanudación. | La siguiente sesión identifica versión, último lote y tarea pendiente desde Git. |
+
+P00 tiene evidencia previa y se reconfirmará al iniciar el lote. P01 requiere trasladar y verificar la evidencia local de OT-001 antes de depender de su persistencia en Cloud.
+
+## Fase 1 · Validar metodología y alcance
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| M01 | P00 | Leer MCD y DBD con índice por páginas. Extraer definiciones y macrofunciones pertinentes. | Matriz de reglas con cita de edición y página PDF. |
+| M02 | M01 | Contrastar MCD v3, la ficha v3.1, enmiendas y borrador v3.2. | Cada diferencia queda como confirmada, pendiente o propuesta, con impacto. |
+| M03 | M01 | Recuperar decisiones del dueño en Git y contrastar notas finales con fuentes. | Cronología sin equiparar fecha reciente con autoridad metodológica. |
+| M04 | M01 | Comparar casos de ORIA, CLEIN y Frenosa. Reconstruir el incidente de robustez hasta donde lo permitan los originales. | Caso reproducible o faltantes concretos identificados. |
+| M05 | M01–M04 | Definir primer entorno empresarial, usuarios simultáneos, industrias y volumen. Identificar restricciones de equipos e instalación. | Escenario inicial y extensiones posteriores aprobados por el dueño. |
+| M06 | M02, M05 | Definir qué significa real, contable, proyectado, calidad, estándar y otras solicitudes. Revisar combinaciones válidas. | Glosario con ejemplos, contraejemplos y preguntas de costo acordados. |
+
+**Puerta de fase.** Aprobación del vocabulario, alcance inicial y reglas con interpretación material. Las preguntas pendientes que no afecten al lote se conservan con su efecto.
+
+## Fase 2 · Cerrar el modelo conceptual
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| C01 | M06 | Definir Base con hechos, maestros, reglas, planes, resultados y decisiones, todos con procedencia. | Cada dato tiene identidad, significado, unidad y responsable. |
+| C02 | C01 | Definir Síntesis como solicitud → selección de hechos/reglas → cálculo → validación → entrega. | El recorrido se explica para una compra, una orden y un periodo. |
+| C03 | C02 | Definir dimensiones de solicitud y selección de método. | Empresa, objeto, periodo, finalidad, base de datos y versión quedan explícitos. |
+| C04 | C03 | Resolver identidad y ámbito de empresa, periodo, recurso, almacén y orden. Considerar historial requerido para promedio y saldos de apertura. | Códigos iguales en empresas distintas conservan significado y saldo propios. |
+| C05 | C02–C04 | Definir fórmulas, unidades, precisión y política de redondeo por publicación. | Un mismo caso tiene respuesta manual, tolerancia y explicación del residuo. |
+| C06 | C04, C05 | Definir resultados oficiales, escenarios, cierre, ajustes y reapertura autorizada. | Se puede reproducir un periodo cerrado y explicar una corrección posterior. |
+| C07 | C01, C06 | Definir Analítica y ciclo de propuesta, aplicación, medición y aprendizaje. | Cada acción indica dato, propósito, límite, autorización y forma de reversión. |
+| C08 | C01–C07 | Dibujar grafo objetivo y mapa MCD → DBD → contrato → caso. | Ningún resultado esencial depende de un concepto sin definición. Revisión del dueño. |
+
+Un proceso común puede invocar distintos métodos y fórmulas. Contable puede expresar finalidad, real/proyectado la base de información y calidad una dimensión de análisis. M06 y C03 deben verificar esa interpretación y sus combinaciones antes de convertirla en diseño definitivo.
+
+La autonomía podrá crecer con evidencia de desempeño y una política aprobada. Se definirán acciones permitidas, límites, vigencia, registro, suspensión y revisión. La IA generativa, si se incorpora, tendrá contrato y funcionamiento opcional acordados.
+
+## Fase 3 · Fijar casos y pruebas de aceptación
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| A01 | C03–C05 | Dos empresas con mismos códigos, precios distintos y una orden cada una. | Operarlas juntas produce lo mismo que operarlas separadas. Se verifica desde entrada hasta reapertura. |
+| A02 | C05 | Casos manuales de compra, moneda/impuesto, consumo, devolución, merma, pérdida y reparto. | Conservación de cantidades y valores, tolerancias explicadas y traza completa. |
+| A03 | C06 | Dos periodos, órdenes abiertas y saldo inicial/final. | El cierre de un mes alimenta exactamente la apertura del siguiente. |
+| A04 | C06 | Interrumpir cada punto crítico de cierre y repetir cargas. | Restauración consistente, reintento sin duplicar y un único resultado confirmado. |
+| A05 | C05, C06 | Reconciliar cuentas suplementarias y resultados publicados. | Responsable de escritura identificado y cuadre del mismo alcance y versión. |
+| A06 | C03, C06 | Variar un insumo, regla, cotización o dependencia de cálculo. | La identidad de corrida y su evidencia reflejan el cambio. El periodo anterior sigue reproducible. |
+| A07 | C07 | Evaluar propuesta válida, fuera de límites, degradada y suspendida. | Se cumplen permisos, vigencia, registro y reversión definidos. |
+| A08 | M04, M05 | Instalar, operar offline, respaldar, restaurar y medir con volumen representativo. | Umbrales acordados y resultados con equipo, filas, tiempo y memoria documentados. |
+| A09 | A01–A08 | Vincular requisitos a casos y revisar cobertura. | Matriz aprobada con estados aprobado, fallido, parcial y sin probar. |
+
+A01 puede empezar como diagnóstico en copias sobre la implementación actual antes de cerrar C08. Sus resultados alimentarán el modelo. Los oráculos manuales se revisan de forma independiente del código que produce el resultado.
+
+## Fase 4 · Decidir tecnología y transición
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| T01 | M05, C08, A09 | Comparar opciones de almacenamiento, motor e interfaz. | Matriz con offline, concurrencia, instalación, auditoría, recuperación, rendimiento y mantenimiento. |
+| T02 | T01 | Medir riesgos técnicos con prototipos acotados autorizados. | Evidencia sobre importación fiel, precisión, cierre recuperable y distribución. |
+| T03 | T01, T02 | Proponer stack con versiones, dependencias y costo de transición. | Documento de decisión revisable por el dueño. |
+| T04 | T03 | Resolver stack y alcance de implementación. | Aprobación expresa del dueño, con sus límites. |
+
+### Estado del stack
+
+El stack vigente del histórico usa Excel para almacenamiento, VBA para la operación e intérprete Python de apoyo, métodos y analítica. La versión auditada registra duplicación del intérprete y rutas con persistencia distinta.
+
+**Candidata para evaluar** — SQLite local, Python como implementación única de reglas y métodos, precisión monetaria definida, Excel/CSV para intercambio. La interfaz se elegirá después de validar el flujo del usuario. Un servidor local y el soporte concurrente se estudian si M05 los requiere.
+
+Se evaluarán mantener Excel, conservarlo como interfaz sobre un motor único o distribuir una aplicación local independiente. SQLite admite un escritor simultáneo; el soporte de varias personas requiere comprobar concurrencia, despliegue y autoridad de escritura. La elección de SQLite no resuelve por sí sola las reglas de integridad o el alcance por empresa.
+
+El prototipo SQL del histórico deberá compararse con el modelo conceptual y los datos reales del caso. Sus tablas derivadas no acreditan una migración completa.
+
+No hay un stack aprobado al emitir este documento.
+
+## Fase 5 · Diseño e importación de la base técnica
+
+Empieza después de T04 y de la autorización concreta del lote.
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| D01 | T04 | Clasificar componentes por conservar, corregir, rediseñar o archivar. Seleccionar cambios de Ola 1 por alcance. | Manifiesto de origen por SHA y justificación por componente. |
+| D02 | D01 | Importar la revisión aprobada al consolidado en rama de trabajo. | Procedencia verificable y revisión de los archivos incluidos. |
+| D03 | D01, C08 | Diseñar modelo lógico/físico, claves, restricciones y evolución de esquema. | Cubre identidades, integridad por empresa, historial y resultados versionados. |
+| D04 | D03 | Diseñar límites de motor, almacenamiento, síntesis, analítica e interfaz. | Cada llamada declara entrada, salida, error y responsable de escritura. |
+| D05 | D03, D04 | Diseñar transacción de cierre, recuperación, reintentos y respaldo. | Puntos de fallo e invariantes trazados a A03–A06. |
+| D06 | D04 | Diseñar flujo del usuario con datos de ejemplo. | El operador puede cargar, corregir, cerrar, consultar y restaurar. |
+| D07 | D02–D06 | Diseñar migración y comparación con la referencia. | Ensayo reversible, inventario de excepciones y plan de retorno. |
+
+## Fase 6 · Construcción incremental
+
+Cada recorrido termina con datos guardados, consulta y prueba de reapertura. El constructor recibe las pruebas y contratos del lote.
+
+| Lote | Dependencia | Entrega funcional | Aceptación |
+|---|---|---|---|
+| I01 | D07 | Instalación local, empresas, usuarios y catálogos mínimos. | Aislamiento y restauración de maestros en un entorno limpio. |
+| I02 | I01 | Compra → ingreso → consumo → kardex → existencia. | A01 y casos de A02, incluida repetición de documento según identidad definida. |
+| I03 | I02 | Orden → horas/servicios → medidas → reparto. | Importe trazable y unidades conservadas en casos manuales. |
+| I04 | I03 | Liquidación → terminado/en proceso → costo de venta. | Casos de referencia y A03–A06. |
+| I05 | I04 | Solicitudes adicionales aprobadas de costo y conciliaciones. | Aceptación independiente por combinación de dimensiones y método. |
+| I06 | I04, C07 | Hallazgos y escenarios → propuestas con evidencia. | Comparación reproducible y aislamiento del escenario. |
+| I07 | I06 | Aplicación supervisada y medición del efecto. | Permisos, vigencia y reversión aprobados en A07. |
+| I08 | I07 | Autonomía para acciones expresamente aprobadas. | Cumplimiento de límites, suspensión y desempeño en historia y casos nuevos. |
+
+La interfaz acompaña cada lote. El ritmo de evolución depende de los contratos del modelo y de la equivalencia probada con los casos validados. Los cambios tecnológicos se hacen en los límites definidos en D04 para conservar resultados que deban mantenerse.
+
+## Fase 7 · Migración y piloto
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| V01 | Lotes requeridos | Migrar copias representativas y validar relaciones, totales y excepciones. | Informe por tabla y por caso, con conteos y saldos reconciliados. |
+| V02 | V01 | Ejecutar referencia y candidata sobre los mismos insumos y reglas. | Diferencias explicadas, revisadas y aceptadas por alcance. |
+| V03 | V02 | Piloto del operador y del dueño en el equipo de destino. | Operaciones y errores previstos ejecutados con evidencia. |
+| V04 | V03 | Ensayo de fallo, recuperación, respaldo y restauración offline. | La operación se retoma y conserva los saldos y la traza. |
+| V05 | V02–V04 | Revisar rendimiento, permisos e integridad de archivos importados. | Cumple los umbrales del entorno aprobado y registra límites. |
+
+## Fase 8 · Entrega y mantenimiento
+
+| Tarea | Dependencia | Acción y salida | Criterio de cierre |
+|---|---|---|---|
+| E01 | V05 | Empaquetar una versión reproducible y la guía de uso. | Instalación desde cero con dependencias y versión identificadas. |
+| E02 | E01 | Auditoría independiente del conjunto y discrepancias pendientes. | Cada requisito aceptado tiene prueba. Los límites se entregan explícitos. |
+| E03 | E02 | Entregar versión, respaldo, procedimiento de actualización y retorno. | Dueño acepta alcance y autoriza distribución. |
+| E04 | E03 | Establecer mantenimiento, cambios de reglas y nuevas industrias. | Cada ampliación tiene caso, evidencia, revisión y actualización del grafo. |
+
+La calidad comercial se evalúa sobre el alcance entregado. Las industrias, normas o usos sin evidencia se mantienen como pendientes identificados.
+
+## Protocolo de cada cambio y del HTML
+
+1. Seleccionar una tarea del plan y verificar sus dependencias.
+2. Revisar fuente y revisión de partida. Precisar entrada, salida e invariantes.
+3. Definir cómo se aceptará el cambio y preparar una reproducción del problema cuando corresponda.
+4. Construir en una rama acotada del consolidado, dentro de la autorización disponible.
+5. Ejecutar las pruebas del alcance, revisar la consistencia al reintentar o reabrir y obtener revisión independiente cuando cambien cálculos, persistencia o permisos.
+6. Actualizar el registro de estado y el HTML en el mismo lote cuando cambie el funcionamiento, sus fuentes o la evidencia mostrada.
+7. Revisar diferencias y guardar el hito remoto autorizado. La fusión o distribución sigue el alcance de autorización correspondiente.
+
+El mapa actual es [sistema-actual-reyna.html](../diagramas/sistema-actual-reyna.html). Sus niveles Base, Síntesis y Analítica organizan el recorrido implementado. El modelo objetivo tendrá identificación propia y estado de aprobación. La referencia a96ba79 seguirá visible mientras sea el funcionamiento representado.
+
+Al importar producto, el HTML deberá identificar la revisión de código que describe. Mostrará qué lee/escribe cada componente, si el estado queda en archivo o memoria, contratos entre niveles y cobertura de las pruebas relevantes. El catálogo de tablas y funciones se regenerará desde esa revisión cuando cambie su estructura. Se comprobarán navegación, enlaces de evidencia, legibilidad móvil y funcionamiento al abrir el archivo localmente.
+
+## Coordinación y recursos
+
+El orquestador mantiene este plan, dependencias y decisiones. Git/documentación recibe tareas de inventario y localización con esfuerzo bajo o medio. Metodología, costos, integridad de datos y revisión independiente usan esfuerzo alto según complejidad. Programación rutinaria usa esfuerzo medio.
+
+Se empieza con el orquestador y hasta tres especialistas cuando existan tareas independientes. Se reutilizan inventarios por SHA y se asignan áreas concretas para evitar releer los mismos archivos. El autor de un cambio crítico y su auditor son agentes distintos. Una revisión multiagente requiere pruebas observables para acreditar el comportamiento.
+
+## Medición y siguiente lote
+
+Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
+
+El siguiente lote ejecutable reúne P00–P03 y M01–M04. Producirá continuidad en Git, matriz metodológica, contraste de versiones y antecedentes. En paralelo puede reproducirse A01 de extremo a extremo en copias. Su cierre permitirá presentar M05–M06 y C01–C08 como una propuesta conceptual concreta para revisión. T03–T04 formalizarán la decisión del stack antes de implementar la reforma.
