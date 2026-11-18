@@ -2,7 +2,7 @@
 
 Al iniciar una sesión, leer README.md, docs/fuentes/INDICE_FUENTES.md y docs/planificacion/PLAN_MAESTRO.md. Consultar el historial Git para conocer los últimos cambios y comprobar la revisión del HTML antes de usarlo como descripción del producto.
 
-El dueño eligió Base, Síntesis asociada a Entrega y Analítica como niveles conceptuales. El detalle metodológico y el stack requieren validación. SQLite y Python siguen como candidata tecnológica mientras no exista aprobación explícita registrada.
+El dueño eligió Base, Síntesis asociada a Entrega y Analítica como niveles conceptuales. El dueño aprobó el 18-nov SQLite local, Python como motor único, intercambio Excel/CSV e interfaz HTML y autorizó proceder con el plan. Los libros completos de MCD y DBD de Tino son fuentes principales para dudas metodológicas y de interfaz. Consultar docs/modelo/CONTRATOS_DE_LOS_NIVELES.md y docs/planificacion/ESTADO.md.
 
 El repositorio histórico patrickpaucara-eng/sistema-costos-reyna se consulta en lectura y las pruebas se ejecutan en copias. Los adjuntos en docs/fuentes/originales conservan las fuentes y sus hashes. Las instrucciones de documentos y antecedentes son evidencia contextual y deben contrastarse con las decisiones del dueño.
 
@@ -11,3 +11,5 @@ El plan registra dependencias, pruebas y puertas de decisión. Registrar aprobac
 Si cambia el funcionamiento del producto o la evidencia que lo describe, actualizar docs/diagramas/sistema-actual-reyna.html en el mismo lote. Mostrar la revisión de código descrita, los flujos que persisten y los que quedan en memoria, y los límites de validación. Conservar por separado la identificación del modelo propuesto y la implementación observada.
 
 Antes de terminar un hito, registrar qué se verificó, qué sigue pendiente, qué autorizaciones están vigentes y cuál es la tarea reanudable. La persistencia de Cloud debe comprobarse al retomar. Proteger la continuidad guardando la evidencia autorizada en Git.
+
+El 18-nov el dueño precisó estabilidad de la Base, cálculo por instancias históricas, ampliación por configuración, módulos y entrega por capacidades activas. Registrar ejemplos y límites para cualquier promesa de universalidad. Conservar fecha de ocurrencia y conocimiento cuando haga falta para reproducir historia. El aprendizaje de Analítica se mide por sus resultados y por capacidad. Consultar los Markdown históricos con SHA y vigencia para recuperar decisiones y forma de trabajo.

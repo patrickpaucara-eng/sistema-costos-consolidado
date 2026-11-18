@@ -1,0 +1,481 @@
+Looking in links: /tmp/wheels
+Processing ./wheels/pytest-8.4.2-py3-none-any.whl
+Processing ./wheels/openpyxl-3.1.5-py2.py3-none-any.whl
+Processing ./wheels/iniconfig-2.3.1-py3-none-any.whl (from pytest==8.4.2)
+Processing ./wheels/packaging-26.3-py3-none-any.whl (from pytest==8.4.2)
+Processing ./wheels/pluggy-1.7.0-py3-none-any.whl (from pytest==8.4.2)
+Processing ./wheels/pygments-2.21.0-py3-none-any.whl (from pytest==8.4.2)
+Processing ./wheels/et_xmlfile-2.0.0-py3-none-any.whl (from openpyxl==3.1.5)
+Installing collected packages: pygments, pluggy, packaging, iniconfig, et-xmlfile, pytest, openpyxl
+Successfully installed et-xmlfile-2.0.0 iniconfig-2.3.1 openpyxl-3.1.5 packaging-26.3 pluggy-1.7.0 pygments-2.21.0 pytest-8.4.2
+7a91720bc756843502c3b7504c77b8fe44217c85c537d85037f0f536151b2caa  /tmp/wheels/et_xmlfile-2.0.0-py3-none-any.whl
+9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7  /tmp/wheels/iniconfig-2.3.1-py3-none-any.whl
+5282c12b107bffeef825f4617dc029afaf41d0ea60823bbb665ef3079dc79de2  /tmp/wheels/openpyxl-3.1.5-py2.py3-none-any.whl
+d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c  /tmp/wheels/packaging-26.3-py3-none-any.whl
+7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec  /tmp/wheels/pluggy-1.7.0-py3-none-any.whl
+2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9  /tmp/wheels/pygments-2.21.0-py3-none-any.whl
+872f880de3fc3a5bdc88a11b39c9710c3497a547cfa9320bc3c5e62fbf272e79  /tmp/wheels/pytest-8.4.2-py3-none-any.whl
+Python 3.11.18
+[(1, 'lo')]
+LibreOffice 25.2.3.2 520(Build:2)
+
+git version 2.47.3
+3a2850060c96b2f7eaeae613c8a402aa9486c079
+=== pytest del árbol recibido ===
+.........................................                                [100%]
+41 passed in 4.08s
+EXIT_PYTEST=0
+=== sonda de identidad por empresa ===
+A [('SALIDA', '3-1-L', 'MONTO', 10.0)]
+A+B [('SALIDA', '3-1-L', 'MONTO', 50.0)]
+EXIT_SONDA=0
+=== construcción estricta desde DBD ===
+P20  ui.bas: en NumPropuesta la variable 'num' tapa a un nombre del módulo o público
+lint_vba: 1 hallazgo(s)
+lint_vba.py falla (modo entrega)
+EXIT_BUILD=1
+=== regeneración independiente en modo diseño ===
+Sistema generado SOLO desde B: /tmp/frozen/kit/salida_b/Sistema_Costos.xlsx
+DBD_Documento (GENERADO, no versionado): /tmp/frozen/kit/salida_b/DBD_Documento.xlsx
+Base desde DBD_4: Relaciones a revisar: 0
+Seguridad de puertos: PUERTOS: 8 de 8 comprobaciones pasan
+Automatización desde el DBD: AUTOMATIZACIÓN: 5 de 5 comprobaciones pasan
+Historia de regresión (caso en espera, no bloquea): TOTAL: 392 pruebas · 392 PASA · 0 FALLA
+Coherencia del DBD: 0 error(es), 26 aviso(s)
+Informe: /tmp/frozen/kit/salida_b/informe_diseno.txt
+EXIT_DBD_DISENO=0
+=== informe de regeneración ===
+AVISO	IMPUESTO.IMP_RECUP	desvío DBD↔MCD: el concepto ES_RECUPERABLE no se forma con palabras del diccionario del MCD
+AVISO	RECURSO.REC_COMP	desvío DBD↔MCD: el concepto ES_COMPONENTE no se forma con palabras del diccionario del MCD
+AVISO	RECURSO.REC_ACTIVO	desvío DBD↔MCD: el concepto ACTIVO no se forma con palabras del diccionario del MCD
+AVISO	CENTRO.CEN_ORD	desvío DBD↔MCD: el concepto ORDEN no se forma con palabras del diccionario del MCD
+AVISO	CENTRO.CEN_IND_EVID	desvío DBD↔MCD: el concepto EVIDENCIA_INDUCTOR no se forma con palabras del diccionario del MCD
+AVISO	CENTRO.CEN_IND_RESP	desvío DBD↔MCD: el concepto RESPONSABLE_INDUCTOR no se forma con palabras del diccionario del MCD
+AVISO	CENTRO.CEN_ACTIVO	desvío DBD↔MCD: el concepto ACTIVO no se forma con palabras del diccionario del MCD
+AVISO	COMPONENTE.CMP_CAN_EST	desvío DBD↔MCD: el concepto CANTIDAD_RECETA no se forma con palabras del diccionario del MCD
+AVISO	COMPONENTE.CMP_MERMA	desvío DBD↔MCD: el concepto MERMA_ESPERADA no se forma con palabras del diccionario del MCD
+AVISO	EVENTO.EVE_USR	desvío DBD↔MCD: el concepto USUARIO no se forma con palabras del diccionario del MCD
+AVISO	EVENTO.EVE_PER_REF	desvío DBD↔MCD: el concepto PERIODO_REFERENCIA no se forma con palabras del diccionario del MCD
+AVISO	EVENTO.EVE_CPB	desvío DBD↔MCD: el concepto COMPROBANTE no se forma con palabras del diccionario del MCD
+AVISO	EVENTO.EVE_RUC	desvío DBD↔MCD: el concepto RUC no se forma con palabras del diccionario del MCD
+AVISO	TARIFA.TAR_INDICE	desvío DBD↔MCD: el concepto INDICE no se forma con palabras del diccionario del MCD
+AVISO	VENTA.VTA_ATR	desvío DBD↔MCD: el concepto DIAS_ATRASO no se forma con palabras del diccionario del MCD
+AVISO	VENTA.VTA_MAR	desvío DBD↔MCD: el concepto MARGEN no se forma con palabras del diccionario del MCD
+AVISO	VENTA.VTA_CANAL	desvío DBD↔MCD: el concepto CANAL no se forma con palabras del diccionario del MCD
+AVISO	VENTA.VTA_REGION	desvío DBD↔MCD: el concepto REGION no se forma con palabras del diccionario del MCD
+AVISO	DIFERENCIA.DIF_PSTD	desvío DBD↔MCD: el concepto PRECIO_ESTANDAR no se forma con palabras del diccionario del MCD
+AVISO	DIFERENCIA.DIF_PREAL	desvío DBD↔MCD: el concepto PRECIO_REAL no se forma con palabras del diccionario del MCD
+AVISO	DIFERENCIA.DIF_PRE	desvío DBD↔MCD: el concepto PRECIO no se forma con palabras del diccionario del MCD
+AVISO	DIFERENCIA.DIF_DED	desvío DBD↔MCD: el concepto DEDUCCION no se forma con palabras del diccionario del MCD
+AVISO	LOTE.LOT_PRODUCTOR	desvío DBD↔MCD: el concepto PRODUCTOR no se forma con palabras del diccionario del MCD
+AVISO	LOTE.LOT_COSECHA	desvío DBD↔MCD: el concepto COSECHA no se forma con palabras del diccionario del MCD
+AVISO	LOTE.LOT_CALIBRE	desvío DBD↔MCD: el concepto CALIBRE no se forma con palabras del diccionario del MCD
+AVISO	PERSONA.PRS_ACTIVO	desvío DBD↔MCD: el concepto ACTIVO no se forma con palabras del diccionario del MCD
+INFO	—	0 columnas en dudas (0.0 %)
+=== regresión histórica directa ===
+PASA   ESCENARIO   1  T14 2,000 cajas a USD 0.80 + IGV 18 % recuperable, TC 3.75                       esperado=OK obtenido=OK
+PASA   VALOR       1  LINEA.LIN_CU [LIN_EVE=1] Costo unitario = 0.80 × 3.75 (sin IGV)                  esperado=3 obtenido=3.0
+PASA   VALOR       1  LINEA.LIN_MTO [LIN_EVE=1] Monto del lote 1                                       esperado=6000 obtenido=6000.0
+PASA   VALOR       1  LINEA.LIN_IMP [LIN_EVE=1] IGV excluido del costo (NIC 2 §11)                     esperado=1080 obtenido=1080.0
+PASA   VALOR       1  LOG_TRX.LOG_EST [LOG_NUM=1] Registro log: la 1.ª transacción quedó actualizada   esperado=A obtenido=A
+PASA   ESCENARIO   2  T14 1,000 cajas a USD 0.85, TC 3.72 → promedio móvil                             esperado=OK obtenido=OK
+PASA   VALOR       2  LINEA.LIN_CU [LIN_EVE=2] 0.85 × 3.72                                             esperado=3.162 obtenido=3.162
+PASA   VALOR       2  EXISTENCIA.EXI_CPU [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Promedio móvil tras la 2.ª com esperado=3.054 obtenido=3.054
+PASA   ESCENARIO   3  T15 Permitido 10 t × 250 × 1.02 = 2,550; real 2,600 → 50 cajas a gasto           esperado=OK obtenido=OK
+PASA   VALOR       3  LINEA.LIN_EXC [LIN_EVE=3] Exceso sobre 2,550 permitidas                          esperado=50 obtenido=50.0
+PASA   VALOR       3  LINEA.LIN_MTO_GAS [LIN_EVE=3] Exceso valorizado al promedio                      esperado=152.7 obtenido=152.7
+PASA   ESCENARIO   4  T15 Ya se superó el permitido: las 100 cajas van a gasto (exceso acumulado)      esperado=OK obtenido=OK
+PASA   VALOR       4  LINEA.LIN_EXC [LIN_EVE=4] Exceso acumulado: todo el 2.º consumo                  esperado=100 obtenido=100.0
+PASA   ESCENARIO   5  T15 96 horas efectivas de línea para la orden                                    esperado=OK obtenido=OK
+PASA   VALOR       5  CTA_OBJ_PER.COP_MAT [COP_OBJ=OE-01;COP_PER=2026-04] Materiales de la orden: solo esperado=7787.7 obtenido=7787.7
+PASA   VALOR       5  CTA_OBJ_PER.COP_PERD [COP_OBJ=OE-01;COP_PER=2026-04] Pérdida anormal total       esperado=458.1 obtenido=458.09999999999997
+PASA   VALOR       5  CTA_GASTO.CGA_MTO [CGA_PER=2026-04;CGA_CEN=LINEA1;CGA_CON=PERDIDA_ANORMAL] Gasto esperado=458.1 obtenido=458.09999999999997
+PASA   VALOR       5  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Saldo de cajas                 esperado=300 obtenido=300.0
+PASA   VALOR       5  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Valor del saldo                esperado=916.2 obtenido=916.2000000000004
+PASA   VALOR       5  CONS_CAP.CCA_HORAS [CCA_OBJ=OE-01;CCA_CEN=LINEA1;CCA_PER=2026-04] Horas efectiva esperado=96 obtenido=96.0
+PASA   ESCENARIO   6  T15 Stock insuficiente (quedan 300): se rechaza y nada cambia                    esperado=ERROR: Stock insuficiente obtenido=ERROR: Stock insuficiente
+PASA   VALOR       6  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM1] El rechazo no cambia el saldo  esperado=300 obtenido=300.0
+PASA   VALOR       6  LOG_TRX.LOG_EST [LOG_NUM=6] La transacción rechazada queda en el log como aborta esperado=E obtenido=E
+PASA   ESCENARIO   7  T15 Política: un centro de ventas no consume para la orden                       esperado=ERROR: Política obtenido=ERROR: Política: el centro no es de producción
+PASA   VALOR       7  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM1] El rechazo por política no cam esperado=300 obtenido=300.0
+PASA   ESCENARIO   8  T23.2 Seguridad: el supervisor no puede ejecutar el cierre                       esperado=ERROR: Seguridad obtenido=ERROR: Seguridad: su perfil no está autorizado para esta transacción (SUPERV → T23.2)
+PASA   ESCENARIO   9  T17 Depreciación de la línea S/ 30,000                                           esperado=OK obtenido=OK
+PASA   ESCENARIO  10  T17 Energía USD 4,000 a TC 3.72 = S/ 14,880                                      esperado=OK obtenido=OK
+PASA   ESCENARIO  11  T23.2 TDABC: tasa = 44,880 ÷ 400 h                                               esperado=OK obtenido=OK
+PASA   VALOR      11  CTA_CENTRO.CCE_SUM [CCE_CEN=LINEA1;CCE_PER=2026-04] Costo suministrado           esperado=44880 obtenido=44880.0
+PASA   VALOR      11  CTA_CENTRO.CCE_TASA [CCE_CEN=LINEA1;CCE_PER=2026-04] Tasa por hora (capacidad pr esperado=112.2 obtenido=112.2
+PASA   VALOR      11  CTA_CENTRO.CCE_ASIG [CCE_CEN=LINEA1;CCE_PER=2026-04] Asignado a la orden: 96 h × esperado=10771.2 obtenido=10771.2
+PASA   VALOR      11  CTA_CENTRO.CCE_OCIO [CCE_CEN=LINEA1;CCE_PER=2026-04] Capacidad ociosa            esperado=34108.8 obtenido=34108.8
+PASA   VALOR      11  CTA_GASTO.CGA_MTO [CGA_PER=2026-04;CGA_CEN=LINEA1;CGA_CON=OCIO] El ocio va a gas esperado=34108.8 obtenido=34108.8
+PASA   VALOR      11  CTA_OBJ_PER.COP_IND [COP_OBJ=OE-01;COP_PER=2026-04] Indirectos de la orden       esperado=10771.2 obtenido=10771.2
+PASA   VALOR      11  CTA_OBJ_PER.COP_MAT [COP_OBJ=OE-01;COP_PER=2026-04] Los materiales no cambian co esperado=7787.7 obtenido=7787.7
+PASA   ESCENARIO  12  T14 Una guía con 2 líneas = 1 evento, 2 líneas                                   esperado=OK obtenido=OK
+PASA   VALOR      12  LINEA.LIN_CAN [LIN_EVE=8;LIN_NUM=1] Línea 1 del evento 8                         esperado=200 obtenido=200.0
+PASA   VALOR      12  LINEA.LIN_CU [LIN_EVE=8;LIN_NUM=2] Línea 2 del MISMO evento 8                    esperado=3.2 obtenido=3.2
+PASA   VALOR      12  EXISTENCIA.EXI_CPU [EXI_REC=CAJA4KG;EXI_ALM=ALM2] Promedio móvil tras las 2 líne esperado=3.1333 obtenido=3.1333
+PASA   ESCENARIO  13  T14 La 2.ª línea falla: se revierte el evento completo, incluida la 1.ª línea    esperado=ERROR: no es inventariable obtenido=ERROR: El recurso no es inventariable
+PASA   VALOR      13  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM2] La línea 1 del evento rechazad esperado=300 obtenido=300.0
+PASA   VALOR      13  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM2] El valor no cambió             esperado=940 obtenido=940.0
+PASA   ESCENARIO  14  T29 100 cajas de ALM1 a ALM2 al promedio del origen                              esperado=OK obtenido=OK
+PASA   VALOR      14  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Origen: 300 − 100              esperado=200 obtenido=200.0
+PASA   VALOR      14  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Origen: sale al promedio       esperado=610.8 obtenido=610.8000000000004
+PASA   VALOR      14  EXISTENCIA.EXI_CPU [EXI_REC=CAJA4KG;EXI_ALM=ALM2] Destino: nuevo promedio        esperado=3.1135 obtenido=3.1135
+PASA   ESCENARIO  15  T29 Control: origen = destino                                                    esperado=ERROR: distinto del de origen obtenido=ERROR: El almacén de destino debe ser distinto del de origen
+PASA   VALOR      15  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Rechazo: nada cambia           esperado=200 obtenido=200.0
+PASA   ESCENARIO  16  T16 Devuelve 20 cajas del consumo 4: reduce primero el exceso                    esperado=OK obtenido=OK
+PASA   VALOR      16  CTA_OBJ_PER.COP_PERD [COP_OBJ=OE-01;COP_PER=2026-04] La devolución reduce primer esperado=397.02 obtenido=397.02
+PASA   VALOR      16  CTA_OBJ_PER.COP_MAT [COP_OBJ=OE-01;COP_PER=2026-04] El costo de la orden no camb esperado=7787.7 obtenido=7787.7
+PASA   VALOR      16  CTA_GASTO.CGA_MTO [CGA_PER=2026-04;CGA_CEN=LINEA1;CGA_CON=PERDIDA_ANORMAL] Gasto esperado=397.02 obtenido=397.02
+PASA   VALOR      16  CTA_OBJ_REC.COR_CAN_REAL [COR_OBJ=OE-01;COR_REC=CAJA4KG;COR_PER=2026-04] Real: 2 esperado=2680 obtenido=2680.0
+PASA   VALOR      16  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Reingreso al costo de salida   esperado=671.88 obtenido=671.8800000000005
+PASA   ESCENARIO  17  T16 Control: no se devuelve más de lo consumido                                  esperado=ERROR: supera lo consumido obtenido=ERROR: La devolución supera lo consumido por el objeto
+PASA   VALOR      17  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Rechazo: nada cambia           esperado=220 obtenido=220.0
+PASA   ESCENARIO  18  T19 10 cajas mojadas, sin acta notarial: gasto no deducible                      esperado=OK obtenido=OK
+PASA   VALOR      18  CTA_GASTO.CGA_MTO [CGA_PER=2026-04;CGA_CEN=ALM1;CGA_CON=DESMEDRO] Desmedro: gast esperado=30.54 obtenido=30.54
+PASA   VALOR      18  CTA_GASTO.CGA_DED [CGA_PER=2026-04;CGA_CEN=ALM1;CGA_CON=DESMEDRO] Sin acta notar esperado=N obtenido=N
+PASA   VALOR      18  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM1] Existencia descargada          esperado=641.34 obtenido=641.3400000000005
+PASA   ESCENARIO  19  T18 La orden termina: 2,450 cajas de palta exportable                            esperado=OK obtenido=OK
+PASA   VALOR      19  SALIDA.SAL_CAN [SAL_OBJ=OE-01;SAL_PER=2026-04] Producto obtenido                 esperado=2450 obtenido=2450.0
+PASA   VALOR      19  OBJETO.OBJ_EST [OBJ_NUM=OE-01] Orden terminada                                   esperado=T obtenido=T
+PASA   ESCENARIO  20  T15 Control: no se consume en una orden terminada                                esperado=ERROR: no está abierto obtenido=ERROR: El objeto de costo no está abierto
+PASA   ESCENARIO  21  T23.3 Liquida OE-01: el costo pasa al producto terminado                         esperado=OK obtenido=OK
+PASA   VALOR      21  OBJETO.OBJ_CST_REAL [OBJ_NUM=OE-01] Materiales permitidos + indirectos           esperado=18558.9 obtenido=18558.9
+PASA   VALOR      21  OBJETO.OBJ_EST [OBJ_NUM=OE-01] Orden liquidada                                   esperado=L obtenido=L
+PASA   VALOR      21  EXISTENCIA.EXI_CPU [EXI_REC=CAJA_HASS;EXI_ALM=ALM1] Costo por caja de palta      esperado=7.5751 obtenido=7.5751
+PASA   ESCENARIO  22  T17 Fletes y comisiones de venta                                                 esperado=OK obtenido=OK
+PASA   VALOR      22  CTA_FUNCION.CFU_MTO [CFU_PER=2026-04;CFU_FUN=VTA] Función ventas                 esperado=6000 obtenido=6000.0
+PASA   ESCENARIO  23  T17 Gastos de administración                                                     esperado=OK obtenido=OK
+PASA   VALOR      23  CTA_FUNCION.CFU_MTO [CFU_PER=2026-04;CFU_FUN=ADM] Función administración         esperado=9000 obtenido=9000.0
+PASA   VALOR      23  CTA_FUNCION.CFU_MTO [CFU_PER=2026-04;CFU_FUN=PRD] Función producción             esperado=44880 obtenido=44880.0
+PASA   ESCENARIO  24  T20 Venta en USD con 2 líneas                                                    esperado=OK obtenido=OK
+PASA   VALOR      24  VENTA.VTA_CST [VTA_EVE=15;VTA_LIN=1] Costo de ventas línea 1                     esperado=11362.65 obtenido=11362.65
+PASA   VALOR      24  VENTA.VTA_ING [VTA_EVE=15;VTA_LIN=2] Ingreso línea 2 (USD × TC)                  esperado=23250 obtenido=23250.0
+PASA   ESCENARIO  25  T20 Segunda venta                                                                esperado=OK obtenido=OK
+PASA   VALOR      25  CTA_VTA_PER.VPE_ING [VPE_PER=2026-04] Ingreso del periodo                        esperado=104718 obtenido=104718.0
+PASA   VALOR      25  EXISTENCIA.EXI_CAN [EXI_REC=CAJA_HASS;EXI_ALM=ALM1] Quedan 150 cajas             esperado=150 obtenido=150.0
+PASA   ESCENARIO  26  T23.4 Gasto de ventas atribuido por ingreso                                      esperado=OK obtenido=OK
+PASA   VALOR      26  VENTA.VTA_ATR [VTA_EVE=15;VTA_LIN=1] Gasto de ventas atribuido                   esperado=3836.59 obtenido=3836.59
+PASA   VALOR      26  VENTA.VTA_ATR [VTA_EVE=16;VTA_LIN=1] Gasto atribuido a la 2.ª venta              esperado=831.26 obtenido=831.26
+PASA   VALOR      26  VENTA.VTA_MAR [VTA_EVE=16;VTA_LIN=1] Margen después de ventas                    esperado=11404.21 obtenido=11404.21
+PASA   ESCENARIO  27  T23.5 Precio cae a S/ 8 con S/ 1 para vender: rebaja al VNR                      esperado=OK obtenido=OK
+PASA   VALOR      27  AJUSTE_VNR.AVN_REB [AVN_REC=CAJA_HASS;AVN_ALM=ALM1] Rebaja = (costo − VNR) × 150 esperado=86.27 obtenido=86.27
+PASA   VALOR      27  EXISTENCIA.EXI_VAL [EXI_REC=CAJA_HASS;EXI_ALM=ALM1] Existencia al VNR            esperado=1049.9 obtenido=1049.9000000000015
+PASA   VALOR      27  CTA_GASTO.CGA_MTO [CGA_PER=2026-04;CGA_CEN=ALM1;CGA_CON=REBAJA_VNR] Gasto del pe esperado=86.27 obtenido=86.27
+PASA   ESCENARIO  28  T09 Cotizar 8 t: estructura × tarifa                                             esperado=OK obtenido=OK
+PASA   VALOR      28  ESTIMACION.EST_CST [EST_NUM=1] Costo estimado base                               esperado=15516.96 obtenido=15516.96
+PASA   VALOR      28  LIN_ESTIM.LES_CST [LES_EST=1;LES_REC=HORA_LINEA] Horas de línea                  esperado=8616.96 obtenido=8616.96
+PASA   ESCENARIO  30  T13 Gerencia decide la media del escenario ESC-0001 (Monte Carlo)                esperado=OK obtenido=OK
+PASA   VALOR      30  OBJETO.OBJ_PLAN_BASE [OBJ_NUM=OE-02] Referencia del escenario decidido           esperado=ESC-0001 obtenido=ESC-0001
+PASA   VALOR      30  ESTIMACION.EST_ESTADO [EST_NUM=1] Estimación aceptada                            esperado=ACEPTADA obtenido=ACEPTADA
+PASA   VALOR      30  OBJETO.OBJ_CST_PLAN [OBJ_NUM=OE-02] Planificado congelado = media Monte Carlo    esperado=16940.68 obtenido=16940.68
+PASA   VALOR      30  ESCENARIO_REF.ESR_ALG [ESR_REF=ESC-0001] La base guarda la ficha del escenario d esperado=montecarlo_triangular obtenido=montecarlo_triangular
+PASA   VALOR      30  ESCENARIO_REF.ESR_MONTO [ESR_REF=ESC-0001] Monto decidido                        esperado=16940.68 obtenido=16940.68
+PASA   ESCENARIO  31  T13 Control: una estimación se acepta una sola vez                               esperado=ERROR: no está pendiente obtenido=ERROR: La estimación no está pendiente
+PASA   ESCENARIO  32  T15 Parte de consumo con 2 líneas                                                esperado=OK obtenido=OK
+PASA   VALOR      32  CTA_OBJ_PER.COP_MAT [COP_OBJ=OE-02;COP_PER=2026-05] Materiales de OE-02          esperado=934.05 obtenido=934.05
+PASA   ESCENARIO  33  T17 Depreciación de mayo                                                         esperado=OK obtenido=OK
+PASA   ESCENARIO  34  T23.2 Cierre de capacidad de mayo                                                esperado=OK obtenido=OK
+PASA   VALOR      34  CTA_OBJ_PER.COP_IND [COP_OBJ=OE-02;COP_PER=2026-05] Indirectos de mayo           esperado=1500 obtenido=1500.0
+PASA   ESCENARIO  35  T18 Avance 15 %                                                                  esperado=OK obtenido=OK
+PASA   ESCENARIO  36  T23.7 Proyectado = real + planificado × (1 − avance)                             esperado=OK obtenido=OK
+PASA   VALOR      36  EST_OT.EOT_PROY [EOT_OBJ=OE-02;EOT_PER=2026-05] La proyección vive en ESTADÍSTIC esperado=16833.63 obtenido=16833.63
+PASA   VALOR      36  EST_OT.EOT_DIF [EOT_OBJ=OE-02;EOT_PER=2026-05] Diferencia contra lo planificado  esperado=-107.05 obtenido=-107.05
+PASA   VALOR      36  EST_OT.EOT_REAL [EOT_OBJ=OE-02;EOT_PER=2026-05] Real acumulado a la fecha        esperado=2434.05 obtenido=2434.05
+PASA   ESCENARIO  37  T15 8 horas-hombre a la tarifa real de mayo                                      esperado=OK obtenido=OK
+PASA   VALOR      37  CTA_OBJ_PER.COP_MOD [COP_OBJ=OE-02;COP_PER=2026-05] Mano de obra directa a tarif esperado=100 obtenido=100.0
+PASA   ESCENARIO  38  T23.6 OE-02 al 15 %: estándar del avance contra real                             esperado=OK obtenido=OK
+PASA   VALOR      38  DIFERENCIA.DIF_QSTD [DIF_OBJ=OE-02;DIF_REC=CAJA4KG;DIF_PER=2026-05] Estándar del esperado=306 obtenido=306.0
+PASA   VALOR      38  DIFERENCIA.DIF_CAN [DIF_OBJ=OE-02;DIF_REC=CAJA4KG;DIF_PER=2026-05] Diferencia de esperado=-18.6 obtenido=-18.6
+PASA   VALOR      38  DIFERENCIA.DIF_PRE [DIF_OBJ=OE-02;DIF_REC=CAJA4KG;DIF_PER=2026-05] Diferencia de esperado=4.05 obtenido=4.05
+PASA   VALOR      38  DIFERENCIA.DIF_MMER [DIF_OBJ=OE-02;DIF_REC=CAJA4KG;DIF_PER=2026-05] Merma normal esperado=18.68 obtenido=18.68
+PASA   VALOR      38  DIFERENCIA.DIF_TOT [DIF_OBJ=OE-02;DIF_REC=HORA_HOMBRE;DIF_PER=2026-05] Mano de o esperado=13.6 obtenido=13.6
+PASA   VALOR      38  DIFERENCIA.DIF_PRE [DIF_OBJ=OE-02;DIF_REC=HORA_HOMBRE;DIF_PER=2026-05] Tarifa 12 esperado=4 obtenido=4.0
+PASA   ESCENARIO  39  T23.6 OE-01 terminada: diferencias de abril                                      esperado=OK obtenido=OK
+PASA   VALOR      39  DIFERENCIA.DIF_CAN [DIF_OBJ=OE-01;DIF_REC=CAJA4KG;DIF_PER=2026-04] 130 cajas sob esperado=390 obtenido=390.0
+PASA   VALOR      39  DIFERENCIA.DIF_PRE [DIF_OBJ=OE-01;DIF_REC=CAJA4KG;DIF_PER=2026-04] Promedio 3.05 esperado=144.72 obtenido=144.72
+PASA   VALOR      39  DIFERENCIA.DIF_MMER [DIF_OBJ=OE-01;DIF_REC=CAJA4KG;DIF_PER=2026-04] Merma normal esperado=152.7 obtenido=152.7
+PASA   VALOR      39  DIFERENCIA.DIF_DED [DIF_OBJ=OE-01;DIF_REC=CAJA4KG;DIF_PER=2026-04] Deducible: ha esperado=S obtenido=S
+PASA   ESCENARIO  40  T23.6 Recalcular no duplica                                                      esperado=OK obtenido=OK
+PASA   VALOR      40  DIFERENCIA.DIF_TOT [DIF_OBJ=OE-01;DIF_REC=CAJA4KG;DIF_PER=2026-04] Recalcular de esperado=534.72 obtenido=534.72
+PASA   ESCENARIO  50  T23.3 Cierre de mayo: OE-02 sigue abierta → producción en proceso                esperado=OK obtenido=OK
+PASA   VALOR      50  INV_PROCESO.IPR_VAL [IPR_PER=2026-05;IPR_OBJ=OE-02] Producción en proceso de OE- esperado=2534.05 obtenido=2534.05
+PASA   ESCENARIO  41  T25.1 El repositorio calibró LINEA2 y la base lo recibe                          esperado=OK obtenido=OK
+PASA   VALOR      41  CALIBRACION.CAL_B0 [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA2] Costo fijo mensual estimado esperado=12118.466145 obtenido=12118.466145
+PASA   VALOR      41  CALIBRACION.CAL_B1 [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA2] Costo variable por hora     esperado=19.602948 obtenido=19.602948
+PASA   VALOR      41  CALIBRACION.CAL_R2 [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA2] Evidencia: R²               esperado=0.986643 obtenido=0.986643
+PASA   VALOR      41  CALIBRACION.CAL_ESTADO [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA2] Supera el umbral 0.70   esperado=VALIDO obtenido=VALIDO
+PASA   VALOR      41  CALIBRACION.CAL_FUENTE [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA2] La base guarda de qué e esperado=minimos_cuadrados 1.0 ESC-0002 obtenido=minimos_cuadrados 1.0 ESC-0002
+PASA   ESCENARIO 122  T25.1 Pesos del proveedor (regresión múltiple)                                   esperado=OK obtenido=OK
+PASA   VALOR     122  CALIBRACION.CAL_B1 [CAL_COD=PESOS_PROV;CAL_OBJ=TODOS] Peso del atraso            esperado=0.458857 obtenido=0.458857
+PASA   VALOR     122  CALIBRACION.CAL_B3 [CAL_COD=PESOS_PROV;CAL_OBJ=TODOS] Peso de la variación de pr esperado=0.5889676933765677 obtenido=0.5889676933765637
+PASA   ESCENARIO  42  T25.1 LINEA1: R² bajo → la base lo rechaza y mantiene lo vigente                 esperado=ERROR: R² mínimo obtenido=ERROR: La calibración no alcanza el R² mínimo: se mantiene la vigente
+PASA   VALOR      42  LOG_TRX.LOG_USR [LOG_TRX=T25.1;LOG_EST=E] El rechazo queda en el log             esperado=MODELO1 obtenido=MODELO1
+PASA   ESCENARIO  43  T17 Costo de LINEA2 en junio                                                     esperado=OK obtenido=OK
+PASA   ESCENARIO  44  T15 100 horas efectivas en LINEA2                                                esperado=OK obtenido=OK
+PASA   ESCENARIO  45  T23.2 RCA: proporcional completo + fijo por capacidad práctica                   esperado=OK obtenido=OK
+PASA   VALOR      45  CTA_CENTRO.CCE_TASA [CCE_CEN=LINEA2;CCE_PER=2026-06] Tasa RCA                    esperado=64.702223 obtenido=64.702223
+PASA   VALOR      45  CTA_CENTRO.CCE_OCIO [CCE_CEN=LINEA2;CCE_PER=2026-06] Ocio: solo de la parte fija esperado=13529.78 obtenido=13529.78
+PASA   VALOR      45  CTA_OBJ_PER.COP_IND [COP_OBJ=OE-02;COP_PER=2026-06] Indirectos de OE-02 en junio esperado=6470.22 obtenido=6470.22
+PASA   VALOR      45  CTA_CENTRO.CCE_FIJO [CCE_CEN=LINEA2;CCE_PER=2026-06] RCA: parte fija usada       esperado=18039.71 obtenido=18039.71
+PASA   VALOR      45  CTA_OBJ_PER.COP_IND_APL [COP_OBJ=OE-02;COP_PER=2026-06] 100 h × tasa predetermin esperado=8000 obtenido=8000.0
+PASA   ESCENARIO  46  T21 Entrega tardía con rechazo                                                   esperado=OK obtenido=OK
+PASA   ESCENARIO  47  T21 Segunda entrega                                                              esperado=OK obtenido=OK
+PASA   ESCENARIO  48  T21 Proveedor puntual                                                            esperado=OK obtenido=OK
+PASA   ESCENARIO  49  T23.8 Indicador con pesos calibrados y tipología por rangos                      esperado=OK obtenido=OK
+PASA   VALOR      49  CTA_ACTOR.CAC_IND [CAC_ACT=CARTONES_NORTE;CAC_PER=2026-05] Promedios 4 días, 3 % esperado=3.7679 obtenido=3.7679
+PASA   VALOR      49  CTA_ACTOR.CAC_TIP [CAC_ACT=CARTONES_NORTE;CAC_PER=2026-05] Tipología             esperado=VIGILAR obtenido=VIGILAR
+PASA   VALOR      49  CTA_ACTOR.CAC_TIP [CAC_ACT=EMPAQUES_SUR;CAC_PER=2026-05] Tipología               esperado=CONFIABLE obtenido=CONFIABLE
+PASA   ESCENARIO  51  T18 OE-02 termina con dos productos: exportación y descarte                      esperado=OK obtenido=OK
+PASA   ESCENARIO  52  T23.3 Liquida OE-02 (mayo + junio) y reparte por valor de venta en la separación esperado=OK obtenido=OK
+PASA   VALOR      52  OBJETO.OBJ_CST_REAL [OBJ_NUM=OE-02] Costo total de OE-02 (dos periodos)          esperado=9004.27 obtenido=9004.27
+PASA   VALOR      52  SALIDA.SAL_CST [SAL_OBJ=OE-02;SAL_PER=2026-06;SAL_REC=CAJA_HASS] Exportación: va esperado=7108.63 obtenido=7108.63
+PASA   VALOR      52  SALIDA.SAL_CST [SAL_OBJ=OE-02;SAL_PER=2026-06;SAL_REC=DESCARTE_HASS] Descarte: v esperado=473.91 obtenido=473.91
+PASA   VALOR      52  EXISTENCIA.EXI_CPU [EXI_REC=DESCARTE_HASS;EXI_ALM=ALM1] Costo por kg de descarte esperado=0.237 obtenido=0.237
+PASA   VALOR      52  EST_DECISION.EDE_PRED [EDE_OBJ=OE-02] Predicho (escenario)                       esperado=16940.68 obtenido=16940.68
+PASA   VALOR      52  EST_DECISION.EDE_REAL [EDE_OBJ=OE-02] Real liquidado                             esperado=9004.27 obtenido=9004.27
+PASA   VALOR      52  EST_DECISION.EDE_ERR [EDE_OBJ=OE-02] Error % del pronóstico                      esperado=-46.85 obtenido=-46.85
+PASA   ESCENARIO  53  T17 Costo de mantenimiento                                                       esperado=OK obtenido=OK
+PASA   ESCENARIO  54  T17 Costo de control de calidad                                                  esperado=OK obtenido=OK
+PASA   ESCENARIO  55  T17 Costo propio de LINEA1                                                       esperado=OK obtenido=OK
+PASA   ESCENARIO  56  T26 Horas de mantenimiento por centro                                            esperado=OK obtenido=OK
+PASA   ESCENARIO  57  T26 Inspecciones de calidad por centro                                           esperado=OK obtenido=OK
+PASA   ESCENARIO  58  T23.1 Reparto recíproco (30 pasadas)                                             esperado=OK obtenido=OK
+PASA   VALOR      58  CTA_CENTRO.CCE_RECIB [CCE_CEN=LINEA1;CCE_PER=2026-07] LINEA1 recibe de mantenimi esperado=6448.98 obtenido=6448.9795918367345
+PASA   VALOR      58  CTA_CENTRO.CCE_RECIB [CCE_CEN=LINEA2;CCE_PER=2026-07] LINEA2 recibe              esperado=3551.02 obtenido=3551.020408163264
+PASA   VALOR      58  CTA_CENTRO.CCE_SUM [CCE_CEN=LINEA1;CCE_PER=2026-07] Costo total de LINEA1 para e esperado=36448.98 obtenido=36448.97959183674
+PASA   VALOR      58  SRV_PEND.SPE_DIST [SPE_CEN=MANTTO;SPE_PER=2026-07] Mantenimiento redistribuido ( esperado=6530.61 obtenido=6530.612244897959
+PASA   VALOR      58  SRV_TRAZA.STZ_AMT [STZ_PER=2026-07;STZ_PAS=1;STZ_ORI=MANTTO;STZ_DES=LINEA1] Pasa esperado=3000 obtenido=3000.0
+PASA   VALOR      58  SRV_TRAZA.STZ_AMT [STZ_PER=2026-07;STZ_PAS=2;STZ_ORI=MANTTO;STZ_DES=LINEA1] Pasa esperado=260 obtenido=260.0
+PASA   ESCENARIO  59  T09 Cotización de 4 t (sin simulación)                                           esperado=OK obtenido=OK
+PASA   ESCENARIO  60  T13 Sin escenario: se congela el costo estimado                                  esperado=OK obtenido=OK
+PASA   VALOR      60  OBJETO.OBJ_CST_PLAN [OBJ_NUM=OE-03] Sin simulación: se congela PERT (= base)     esperado=7758.48 obtenido=7758.48
+PASA   VALOR      60  OBJETO.OBJ_PLAN_BASE [OBJ_NUM=OE-03] Sin escenario: se congela el estimado       esperado=ESTIMACION obtenido=ESTIMACION
+PASA   ESCENARIO  61  T15 40 h en LINEA3                                                               esperado=OK obtenido=OK
+PASA   ESCENARIO  62  T17 Costo de LINEA3                                                              esperado=OK obtenido=OK
+PASA   ESCENARIO  63  T23.2 LINEA3 con capacidad normal: tasa = 16,000 ÷ máx(320, 40)                  esperado=OK obtenido=OK
+PASA   VALOR      63  CTA_CENTRO.CCE_TASA [CCE_CEN=LINEA3;CCE_PER=2026-07] NIC 2: capacidad normal 320 esperado=50 obtenido=50.0
+PASA   VALOR      63  CTA_CENTRO.CCE_OCIO [CCE_CEN=LINEA3;CCE_PER=2026-07] Ocio a gasto                esperado=14000 obtenido=14000.0
+PASA   VALOR      63  CTA_OBJ_PER.COP_IND [COP_OBJ=OE-03;COP_PER=2026-07] Indirectos de OE-03          esperado=2000 obtenido=2000.0
+PASA   ESCENARIO  64  T14 Con TRAZA = S, cada fórmula deja su cálculo                                  esperado=OK obtenido=OK
+PASA   VALOR      64  TRAZA.TRZ_VAL [TRZ_MET=M-F-ING;TRZ_VAR=CU] La traza muestra el costo unitario: 1 esperado=3.72 obtenido=3.72
+PASA   ESCENARIO  65  T17 Empresa A (campo): costo de cosecha                                          esperado=OK obtenido=OK
+PASA   VALOR      65  CTA_FUNCION.CFU_MTO [CFU_PER=2026-07;CFU_FUN=PRD;CFU_EMP=A] Función producción d esperado=8000 obtenido=8000.0
+PASA   ESCENARIO  66  T17 Control: B no carga costos a un centro de A                                  esperado=ERROR: no pertenece a la empresa obtenido=ERROR: El centro u objeto no pertenece a la empresa indicada
+PASA   ESCENARIO  67  T23.2 Cierre de A: solo sus centros                                              esperado=OK obtenido=OK
+PASA   VALOR      67  CTA_CENTRO.CCE_OCIO [CCE_CEN=COSECHA;CCE_PER=2026-07] Cierre de A: sin horas, to esperado=8000 obtenido=8000.0
+PASA   VALOR      67  CTA_CENTRO.CCE_OCIO [CCE_CEN=LINEA3;CCE_PER=2026-07] El cierre de A no tocó los  esperado=14000 obtenido=14000.0
+PASA   ESCENARIO  68  T27 Contabilidad contra costos                                                   esperado=OK obtenido=OK
+PASA   VALOR      68  CONCILIACION.CON_COST [CON_PER=2026-04;CON_EMP=B;CON_CTA=EXISTENCIAS] Existencia esperado=11044.06 obtenido=11044.06
+PASA   VALOR      68  CONCILIACION.CON_DIF [CON_PER=2026-04;CON_EMP=B;CON_CTA=EXISTENCIAS] Diferencia  esperado=55.94 obtenido=55.94
+PASA   VALOR      68  CONCILIACION.CON_DIF [CON_PER=2026-04;CON_EMP=B;CON_CTA=COSTO_VENTAS] Costo de v esperado=0 obtenido=0.0
+PASA   VALOR      68  CONCILIACION.CON_COST [CON_PER=2026-04;CON_EMP=B;CON_CTA=GASTO_PERIODO] Pérdida  esperado=34622.63 obtenido=34622.63
+PASA   VALOR      68  CONCILIACION.CON_ESTADO [CON_PER=2026-04;CON_EMP=B;CON_CTA=COSTO_VENTAS] Sin dif esperado=CERRADA obtenido=CERRADA
+PASA   VALOR      68  CONCILIACION.CON_ESTADO [CON_PER=2026-04;CON_EMP=B;CON_CTA=EXISTENCIAS] Con dife esperado=ABIERTA obtenido=ABIERTA
+PASA   ESCENARIO  69  T09 Cotización de 2 t                                                            esperado=OK obtenido=OK
+PASA   ESCENARIO  70  T12 Nueva versión de la estimación 3                                             esperado=OK obtenido=OK
+PASA   VALOR      70  ESTIMACION.EST_VER [EST_NUM=4] Versión 2                                         esperado=2 obtenido=2.0
+PASA   VALOR      70  ESTIMACION.EST_ORIGEN [EST_NUM=4] Viene de la estimación 3                       esperado=3 obtenido=3.0
+PASA   VALOR      70  ESTIMACION.EST_CST [EST_NUM=4] Recalculada con las tarifas vigentes              esperado=3879.24 obtenido=3879.24
+PASA   VALOR      70  ESTIMACION.EST_ESTADO [EST_NUM=3] La anterior queda reemplazada                  esperado=REEMPLAZADA obtenido=REEMPLAZADA
+PASA   ESCENARIO  71  T13 Control: una versión reemplazada no se acepta                                esperado=ERROR: no está pendiente obtenido=ERROR: La estimación no está pendiente
+PASA   ESCENARIO 123  T23.2 Marzo: paso obligatorio 2                                                  esperado=OK obtenido=OK
+PASA   ESCENARIO 124  T23.3 Marzo: paso obligatorio 3                                                  esperado=OK obtenido=OK
+PASA   ESCENARIO 125  T23.5 Marzo: paso obligatorio 4 → recién se puede cerrar                         esperado=OK obtenido=OK
+PASA   VALOR     125  CIERRE_EJEC.CEJ_EST [CEJ_PER=2026-03;CEJ_TRX=T23.5] Checkpoint del paso 4        esperado=OK obtenido=OK
+PASA   ESCENARIO  72  T23.9 Cerrar marzo                                                               esperado=OK obtenido=OK
+PASA   VALOR      72  PERIODO.PER_EST [PER_COD=2026-03;PER_EMP=B] Marzo cerrado                        esperado=C obtenido=C
+PASA   VALOR      72  PERIODO.PER_EST [PER_COD=2026-03;PER_EMP=B] Con la cadena completa sí se cierra  esperado=C obtenido=C
+PASA   ESCENARIO  73  T14 Control: periodo cerrado                                                     esperado=ERROR: no está abierto obtenido=ERROR: El periodo no está abierto
+PASA   ESCENARIO  74  @CARGA Tres capturas automáticas: dos válidas y una con proveedor inexistente    esperado=OK obtenido=OK
+PASA   VALOR      74  CARGA.CAR_ESTADO [CAR_NUM=1] Captura 1 registrada                                esperado=OK obtenido=OK
+PASA   VALOR      74  CARGA.CAR_ESTADO [CAR_NUM=3] Proveedor inexistente: rechazada sin afectar a las  esperado=ERROR obtenido=ERROR
+PASA   VALOR      74  CTA_ACTOR.CAC_N [CAC_ACT=EMPAQUES_SUR;CAC_PER=2026-07] Dos hechos de julio por e esperado=2 obtenido=2.0
+PASA   VALOR      74  CARGA.CAR_ESTADO [CAR_NUM=4] Resultado de un modelo externo aceptado (R² 0.91 ≥  esperado=OK obtenido=OK
+PASA   VALOR      74  CALIBRACION.CAL_FUENTE [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA3] Queda trazada la fuente esperado=modelo_ext_v1 obtenido=modelo_ext_v1
+PASA   VALOR      74  CALIBRACION.CAL_B1 [CAL_COD=FIJO_VAR;CAL_OBJ=LINEA3] Se mantiene el aceptado     esperado=15 obtenido=15.0
+PASA   VALOR      74  CARGA.CAR_RES [CAR_NUM=5] R² 0.40: rechazado con el mensaje del catálogo         esperado=ERROR: La calibración no alcanza el R² mínimo: se mantiene la vigente obtenido=ERROR: La calibración no alcanza el R² mínimo: se mantiene la vigente
+PASA   ESCENARIO  79  @CARGA Reprocesar la carga no duplica las filas ya registradas                   esperado=OK obtenido=OK
+PASA   VALOR      79  CTA_ACTOR.CAC_N [CAC_ACT=EMPAQUES_SUR;CAC_PER=2026-07] Sigue en 2: la carga no d esperado=2 obtenido=2.0
+PASA   ESCENARIO  80  T27.1 La diferencia de existencias es de corte: se explica y se cierra           esperado=OK obtenido=OK
+PASA   VALOR      80  CONCILIACION.CON_ESTADO [CON_PER=2026-04;CON_EMP=B;CON_CTA=EXISTENCIAS] Diferenc esperado=CERRADA obtenido=CERRADA
+PASA   VALOR      80  CONC_AJUSTE.CAJ_MTO [CAJ_PER=2026-04;CAJ_CTA=EXISTENCIAS;CAJ_CAU=TIMING] El ajus esperado=55.94 obtenido=55.94
+PASA   ESCENARIO  81  T27.1 Se explica solo una parte: sigue ABIERTA                                   esperado=OK obtenido=OK
+PASA   VALOR      81  CONCILIACION.CON_RES [CON_PER=2026-04;CON_EMP=B;CON_CTA=GASTO_PERIODO] Queda −12 esperado=-12.63 obtenido=-12.63
+PASA   VALOR      81  CONCILIACION.CON_ESTADO [CON_PER=2026-04;CON_EMP=B;CON_CTA=GASTO_PERIODO] Sigue  esperado=ABIERTA obtenido=ABIERTA
+PASA   ESCENARIO  82  @PROPONER Costos propone un cambio: queda pendiente, no se aplica                esperado=OK obtenido=OK
+PASA   VALOR      82  PARAMETRO.PAR_VAL [PAR_COD=DEMO] Propuesto pero no aplicado                      esperado=1 obtenido=1
+PASA   VALOR      82  PARAM_CAMBIO.PCA_ESTADO [PCA_NUM=1] Pendiente                                    esperado=P obtenido=P
+PASA   ESCENARIO  83  @RESOLVER Control: quien propone no aprueba                                      esperado=ERROR: no puede aprobarlo obtenido=ERROR: Quien propone un cambio no puede aprobarlo (separación de funciones)
+PASA   ESCENARIO  84  @RESOLVER Control: el supervisor no aprueba parámetros                           esperado=ERROR: Seguridad obtenido=ERROR: Seguridad: su perfil no está autorizado para esta transacción (SUPERV → APRUEBA-PARM)
+PASA   ESCENARIO  85  @RESOLVER Gerencia aprueba: recién ahora se aplica                               esperado=OK obtenido=OK
+PASA   VALOR      85  PARAMETRO.PAR_VAL [PAR_COD=DEMO] Aprobado por otro perfil: aplicado              esperado=2 obtenido=2.0
+PASA   VALOR      85  PARAM_CAMBIO.PCA_RESUELVE [PCA_NUM=1] Quién aprobó                               esperado=GERENTE obtenido=GERENTE
+PASA   ESCENARIO  86  @PROPONER Se propone volver al valor original                                    esperado=OK obtenido=OK
+PASA   ESCENARIO  87  @RESOLVER Gerencia lo rechaza: no se aplica                                      esperado=OK obtenido=OK
+PASA   VALOR      87  PARAMETRO.PAR_VAL [PAR_COD=DEMO] Rechazado: no cambia                            esperado=2 obtenido=2.0
+PASA   VALOR      87  PARAM_CAMBIO.PCA_ESTADO [PCA_NUM=2] Rechazada                                    esperado=R obtenido=R
+PASA   ESCENARIO  88  @PROPONER Nueva propuesta                                                        esperado=OK obtenido=OK
+PASA   ESCENARIO  89  @RESOLVER Aprobada: el catálogo queda como estaba                                esperado=OK obtenido=OK
+PASA   VALOR      89  PARAMETRO.PAR_VAL [PAR_COD=DEMO] Restituido                                      esperado=1 obtenido=1.0
+PASA   ESCENARIO  90  T24.2 Margen por cliente, producto, canal y región                               esperado=OK obtenido=OK
+PASA   VALOR      90  RENTAB.RNT_MAR [RNT_PER=2026-04;RNT_DIM=CANAL;RNT_VAL=DIRECTO] Canal directo (Eu esperado=69891.06 obtenido=69891.06
+PASA   VALOR      90  RENTAB.RNT_ING [RNT_PER=2026-04;RNT_DIM=REGION;RNT_VAL=ASIA] Región Asia         esperado=14508 obtenido=14508.0
+PASA   VALOR      90  RENTAB.RNT_MAR [RNT_PER=2026-04;RNT_DIM=PRODUCTO;RNT_VAL=CAJA_HASS] Producto: su esperado=81295.27 obtenido=81295.26999999999
+PASA   ESCENARIO  92  T24.4 Margen, pérdida anormal, ocio y diferencias contra umbrales                esperado=OK obtenido=OK
+PASA   VALOR      92  ALERTA.ALE_VAL [ALE_PER=2026-04;ALE_TIPO=MARGEN;ALE_REF=15;ALE_REF2=1] Margen 77 esperado=77.3 obtenido=77.3
+PASA   VALOR      92  ALERTA.ALE_VAL [ALE_PER=2026-04;ALE_TIPO=PERDIDA;ALE_REF=OE-01] Pérdida anormal  esperado=5.1 obtenido=5.1
+PASA   VALOR      92  ALERTA.ALE_VAL [ALE_PER=2026-04;ALE_TIPO=OCIO;ALE_REF=LINEA1] Ocio 76 % > 50 %   esperado=76 obtenido=76.0
+PASA   VALOR      92  ALERTA.ALE_VAL [ALE_PER=2026-04;ALE_TIPO=DIFERENCIA;ALE_REF=OE-01;ALE_REF2=CAJA4 esperado=6.99 obtenido=6.99
+PASA   ESCENARIO  93  T24.4 Volver a correr no duplica alertas                                         esperado=OK obtenido=OK
+PASA   ESCENARIO  94  T14 JPEREZ registra como almacén                                                 esperado=OK obtenido=OK
+PASA   VALOR      94  EXISTENCIA.EXI_CAN [EXI_REC=CAJA_HASS;EXI_ALM=ALM3] JPEREZ registró con su perfi esperado=1 obtenido=1.0
+PASA   ESCENARIO  95  T26 …y como supervisor: dos perfiles, un usuario                                 esperado=OK obtenido=OK
+PASA   VALOR      95  USO_SERV.USV_CANT [USV_PER=2026-07;USV_ORI=MANTTO;USV_DES=LINEA3] …y con su perf esperado=1 obtenido=1.0
+PASA   ESCENARIO  96  T23.2 Ninguno de sus perfiles autoriza el cierre                                 esperado=ERROR: Seguridad obtenido=ERROR: Seguridad: su perfil no está autorizado para esta transacción (ALMACEN → T23.2)
+PASA   ESCENARIO  97  T14 Se aplica y queda 'listo para aplicar'                                       esperado=OK obtenido=OK
+PASA   ESCENARIO  98  @DESHACER El usuario se arrepiente: se revierte todo                             esperado=OK obtenido=OK
+PASA   VALOR      98  LOG_TRX.LOG_TRX [LOG_EST=R] La transacción deshecha queda en el log con estado R esperado=T14 obtenido=T14
+PASA   ESCENARIO  99  T14 De nuevo, listo para aplicar                                                 esperado=OK obtenido=OK
+PASA   ESCENARIO 100  @CONFIRMAR Ahora confirma: queda definitivo y en la bitácora                     esperado=OK obtenido=OK
+PASA   VALOR     100  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM3] Solo quedó la confirmada (si n esperado=10 obtenido=10.0
+PASA   VALOR     100  BITACORA.BIT_NUE [BIT_TABLA=EXISTENCIA;BIT_COL=EXI_CPU] Bitácora también en el e esperado=3 obtenido=3.0
+PASA   VALOR     100  BITACORA.BIT_TRX [BIT_TABLA=EXISTENCIA;BIT_COL=EXI_CAN;BIT_NUE=10] La confirmada esperado=T14 obtenido=T14
+PASA   ESCENARIO 101  T17 Mantenimiento                                                                esperado=OK obtenido=OK
+PASA   ESCENARIO 102  T17 Calidad                                                                      esperado=OK obtenido=OK
+PASA   ESCENARIO 103  T26 Usos de mantenimiento                                                        esperado=OK obtenido=OK
+PASA   ESCENARIO 104  T26 Usos de calidad                                                              esperado=OK obtenido=OK
+PASA   ESCENARIO 105  @PROPONER Proponer método ESCALONADO                                             esperado=OK obtenido=OK
+PASA   ESCENARIO 106  @RESOLVER Gerencia aprueba                                                       esperado=OK obtenido=OK
+PASA   ESCENARIO 107  T23.1 Reparto escalonado                                                         esperado=OK obtenido=OK
+PASA   VALOR     107  CTA_CENTRO.CCE_RECIB [CCE_CEN=LINEA1;CCE_PER=2026-08] Escalonado: mantenimiento  esperado=6466.67 obtenido=6466.666666666666
+PASA   VALOR     107  CTA_CENTRO.CCE_RECIB [CCE_CEN=LINEA2;CCE_PER=2026-08] Escalonado, LINEA2         esperado=3533.33 obtenido=3533.333333333333
+PASA   ESCENARIO 108  T17 Mantenimiento                                                                esperado=OK obtenido=OK
+PASA   ESCENARIO 109  T17 Calidad                                                                      esperado=OK obtenido=OK
+PASA   ESCENARIO 110  T26 Usos de mantenimiento                                                        esperado=OK obtenido=OK
+PASA   ESCENARIO 111  T26 Usos de calidad                                                              esperado=OK obtenido=OK
+PASA   ESCENARIO 112  @PROPONER Proponer método DIRECTO                                                esperado=OK obtenido=OK
+PASA   ESCENARIO 113  @RESOLVER Gerencia aprueba                                                       esperado=OK obtenido=OK
+PASA   ESCENARIO 114  T23.1 Reparto directo                                                            esperado=OK obtenido=OK
+PASA   VALOR     114  CTA_CENTRO.CCE_RECIB [CCE_CEN=LINEA1;CCE_PER=2026-09] Directo: se ignora el uso  esperado=6416.67 obtenido=6416.666666666666
+PASA   VALOR     114  CTA_CENTRO.CCE_RECIB [CCE_CEN=LINEA2;CCE_PER=2026-09] Directo, LINEA2            esperado=3583.33 obtenido=3583.333333333333
+PASA   ESCENARIO 115  @PROPONER Volver al recíproco                                                    esperado=OK obtenido=OK
+PASA   ESCENARIO 116  @RESOLVER Catálogo restituido                                                    esperado=OK obtenido=OK
+PASA   VALOR     116  PARAMETRO.PAR_VAL [PAR_COD=METODO_SRV] Catálogo restituido                       esperado=RECIPROCO obtenido=RECIPROCO
+PASA   ESCENARIO 117  T14 Queda listo para aplicar…                                                    esperado=OK obtenido=OK
+PASA   ESCENARIO 118  @REINICIAR …y se cierra Excel sin confirmar: al reabrir se revierte desde la bit esperado=OK obtenido=OK
+PASA   VALOR     118  LOG_TRX.LOG_TRX [LOG_EST=R;LOG_MSG=Revertida al reanudar: quedó sin confirmar] E esperado=T14 obtenido=T14
+PASA   VALOR     118  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM3] Las 5 cajas sin confirmar no q esperado=10 obtenido=10.0
+PASA   ESCENARIO 119  T14 Otro pendiente…                                                              esperado=OK obtenido=OK
+PASA   ESCENARIO 120  T14 …y otra transacción: el pendiente se revierte antes de aplicar la nueva      esperado=OK obtenido=OK
+PASA   VALOR     120  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM3] 10 + 3: las 7 pendientes se re esperado=13 obtenido=13.0
+PASA   ESCENARIO 121  T14 Con traza: la traza no entra a la bitácora                                   esperado=OK obtenido=OK
+PASA   VALOR     121  TRAZA.TRZ_TRX [TRZ_MET=M-F-ING;TRZ_VAR=CU;TRZ_VAL=2] Hay traza…                  esperado=T14 obtenido=T14
+PASA   VALOR     121  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM3] …y el ingreso se aplicó        esperado=14 obtenido=14.0
+PASA   ESCENARIO 126  T23.3 Agosto: no se liquida sin costear la capacidad                             esperado=ERROR: paso previo obtenido=ERROR: Falta ejecutar el paso previo de la cadena de cierre
+PASA   ESCENARIO 127  T23.9 Agosto: no se cierra con la cadena incompleta                              esperado=ERROR: falta un paso obligatorio obtenido=ERROR: No se puede cerrar: falta un paso obligatorio de la cadena de cierre
+PASA   ESCENARIO 128  T23.2 Junio: repetir un paso oficial duplicaría el costo                         esperado=ERROR: ya se ejecutó obtenido=ERROR: Este paso oficial ya se ejecutó en el periodo (no se repite: evita duplicar)
+PASA   VALOR     128  CTA_OBJ_PER.COP_IND [COP_OBJ=OE-02;COP_PER=2026-06] El intento de repetir no dup esperado=6470.22 obtenido=6470.22
+PASA   ESCENARIO 129  T14.1 Devolución de 4 cajas al proveedor                                         esperado=OK obtenido=OK
+PASA   VALOR     129  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM3] 14 − 4 devueltas               esperado=10 obtenido=10.0
+PASA   VALOR     129  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM3] Al promedio 2.00               esperado=20 obtenido=20.0
+PASA   VALOR     129  EVENTO.EVE_CPB [EVE_TRX=T14.1] El comprobante queda en el evento                 esperado=NC-F001-77 obtenido=NC-F001-77
+PASA   ESCENARIO 130  T29.1 Toma física: se contaron 9 (el sistema dice 10)                            esperado=OK obtenido=OK
+PASA   VALOR     130  EXISTENCIA.EXI_CAN [EXI_REC=CAJA4KG;EXI_ALM=ALM3] Queda lo contado               esperado=9 obtenido=9.0
+PASA   VALOR     130  EXISTENCIA.EXI_VAL [EXI_REC=CAJA4KG;EXI_ALM=ALM3] 10 × 2 − 1 × 2                 esperado=18 obtenido=18.0
+PASA   VALOR     130  CTA_GASTO.CGA_MTO [CGA_PER=2026-07;CGA_CEN=ALM3;CGA_CON=DIF_INVENTARIO] Faltante esperado=2 obtenido=2.0
+PASA   ESCENARIO 131  T20.1 El cliente devuelve 10 cajas de la venta 15                                esperado=OK obtenido=OK
+PASA   VALOR     131  VENTA.VTA_CST [VTA_PER=2026-07;VTA_REC=CAJA_HASS;VTA_CAN=-10] Costo de ventas re esperado=-75.75 obtenido=-75.75
+PASA   VALOR     131  VENTA.VTA_ING [VTA_PER=2026-07;VTA_REC=CAJA_HASS;VTA_CAN=-10] Ingreso revertido  esperado=-446.4 obtenido=-446.4
+PASA   ESCENARIO 132  T20.1 Control: no se devuelve más de lo vendido                                  esperado=ERROR: supera obtenido=ERROR: La devolución supera la cantidad de la venta original
+PASA   ESCENARIO 133  T18.1 3 cambios de formato en OE-03                                              esperado=OK obtenido=OK
+PASA   VALOR     133  CTA_OBJ_ACT.COA_CAN [COA_OBJ=OE-03;COA_ACT=CAMBIO_FORMATO;COA_PER=2026-07] Hecho esperado=3 obtenido=3.0
+PASA   ESCENARIO 134  T24.5 Fotos de mayo (preliminares)                                               esperado=OK obtenido=OK
+PASA   VALOR     134  EST_CENTRO.ECE_TASA [ECE_PER=2026-05;ECE_CEN=LINEA1] Foto de mayo                esperado=75 obtenido=75.0
+PASA   ESCENARIO 135  T24.5 Fotos de junio                                                             esperado=OK obtenido=OK
+PASA   VALOR     135  EST_CENTRO.ECE_TASA [ECE_PER=2026-06;ECE_CEN=LINEA2] Foto de junio (RCA)         esperado=64.702223 obtenido=64.702223
+PASA   VALOR     135  EST_CENTRO.ECE_OCIO [ECE_PER=2026-06;ECE_CEN=LINEA2] Ocio de junio               esperado=13529.78 obtenido=13529.78
+PASA   VALOR     135  EST_OT.EOT_IND_APL [EOT_OBJ=OE-02;EOT_PER=2026-06] CIF provisional en la foto    esperado=8000 obtenido=8000.0
+PASA   ESCENARIO 136  T24.5 Fotos de julio, con tendencia                                              esperado=OK obtenido=OK
+PASA   VALOR     136  EST_CENTRO.ECE_TASA [ECE_PER=2026-07;ECE_CEN=LINEA3] Foto de julio               esperado=50 obtenido=50.0
+PASA   VALOR     136  EST_CENTRO.ECE_MARCA [ECE_PER=2026-07;ECE_CEN=LINEA3] Periodo abierto: prelimina esperado=PRELIMINAR obtenido=PRELIMINAR
+PASA   VALOR     136  EST_COMPRA.ECO_ULT [ECO_PER=2026-07;ECO_REC=CAJA4KG] Último precio de compra (pa esperado=2 obtenido=2.0
+PASA   VALOR     136  EST_CENTRO.ECE_VAR [ECE_PER=2026-07;ECE_CEN=LINEA1] Tendencia: julio contra mayo esperado=21.5 obtenido=21.5
+PASA   VALOR     136  ALERTA.ALE_VAL [ALE_PER=2026-07;ALE_TIPO=TENDENCIA;ALE_REF=LINEA1] Alerta: la ta esperado=21.5 obtenido=21.5
+PASA   ESCENARIO 137  T24.5 Repetir no duplica                                                         esperado=OK obtenido=OK
+PASA   VALOR     137  EST_COMPRA.ECO_CAN [ECO_PER=2026-07;ECO_REC=CAJA4KG] 10 + 10 + 3 + 1 cajas confi esperado=24 obtenido=24.0
+PASA   VALOR     137  EST_COMPRA.ECO_MTO [ECO_PER=2026-07;ECO_REC=CAJA4KG] Repetir no duplica          esperado=65.2 obtenido=65.2
+PASA   ESCENARIO 138  @PROPONER R² mínimo debe estar entre 0.5 y 0.99                                  esperado=ERROR: fuera del rango obtenido=ERROR: El valor está fuera del rango permitido del parámetro
+PASA   ESCENARIO 139  @PROPONER Sin motivo no hay propuesta                                            esperado=ERROR: motivo obtenido=ERROR: Todo cambio de parámetro necesita su motivo
+PASA   ESCENARIO 140  @PROPONER El histórico no se edita: lo produce el cierre                         esperado=ERROR: solo lectura obtenido=ERROR: Esta tabla es de solo lectura (histórico, parque o lógica)
+PASA   ESCENARIO 141  @PROPONER Integridad al editar                                                   esperado=ERROR: no existe en la tabla de referencia obtenido=ERROR: El valor no existe en la tabla de referencia (REC_TRE = NO_EXISTE)
+PASA   ESCENARIO 142  @PROPONER Primer cambio del paquete                                              esperado=OK obtenido=OK
+PASA   ESCENARIO 143  @PROPONER Segundo cambio del paquete                                             esperado=OK obtenido=OK
+PASA   ESCENARIO 144  @RESOLVER Se aprueba el paquete completo                                         esperado=OK obtenido=OK
+PASA   VALOR     144  PARAMETRO.PAR_VAL [PAR_COD=DEMO] Paquete aprobado: primer cambio                 esperado=3 obtenido=3.0
+PASA   VALOR     144  PARAMETRO.PAR_VAL [PAR_COD=DEMO2] …y el segundo, juntos                          esperado=7 obtenido=7.0
+PASA   ESCENARIO 145  @PROPONER Baja lógica del almacén 2                                              esperado=OK obtenido=OK
+PASA   ESCENARIO 146  @RESOLVER Aprobada                                                               esperado=OK obtenido=OK
+PASA   VALOR     146  CENTRO.CEN_ACTIVO [CEN_COD=ALM2] Baja lógica (no se borra)                       esperado=N obtenido=N
+PASA   ESCENARIO 147  T18.1 Un centro dado de baja no admite movimientos                               esperado=ERROR: dado de baja obtenido=ERROR: Está dado de baja: no admite movimientos nuevos
+PASA   ESCENARIO 148  T18.1 Sin periodo ni empresa: se derivan de la fecha y del usuario               esperado=OK obtenido=OK
+PASA   VALOR     148  CTA_OBJ_ACT.COA_CAN [COA_OBJ=OE-03;COA_ACT=INSPECCION;COA_PER=2026-07] Periodo 2 esperado=2 obtenido=2.0
+PASA   ESCENARIO 149  T14 Compra con comprobante F001-233 (15.00)                                      esperado=OK obtenido=OK
+PASA   ESCENARIO 150  T14 Compra F001-240 registrada en agosto                                         esperado=OK obtenido=OK
+PASA   ESCENARIO 151  T27.2 Contabilidad envía su detalle de julio                                     esperado=OK obtenido=OK
+PASA   ESCENARIO 152  T27.3 Emparejar y proponer la causa de cada diferencia                           esperado=OK obtenido=OK
+PASA   VALOR     152  CONC_PROP.CPR_CAUSA [CPR_PER=2026-07;CPR_CPB=F001-233] Contabilidad 16 vs. costo esperado=ERROR_CARGA obtenido=ERROR_CARGA
+PASA   VALOR     152  CONC_PROP.CPR_CAUSA [CPR_PER=2026-07;CPR_CPB=NC-F001-77] Devolución al proveedor esperado=CUADRA obtenido=CUADRA
+PASA   VALOR     152  CONC_PROP.CPR_CAUSA [CPR_PER=2026-07;CPR_CPB=F001-240] Contabilidad en julio, co esperado=TIMING obtenido=TIMING
+PASA   VALOR     152  CONC_PROP.CPR_CAUSA [CPR_PER=2026-07;CPR_CPB=F001-999] No está en costos         esperado=DATO_FALTANTE obtenido=DATO_FALTANTE
+PASA   VALOR     152  CONC_PROP.CPR_CAUSA [CPR_PER=2026-07;CPR_CPB=NC-B001-5] Nota de crédito de la de esperado=DATO_FALTANTE obtenido=DATO_FALTANTE
+PASA   VALOR     152  CONC_PROP.CPR_LADO [CPR_PER=2026-07;CPR_CPB=NC-B001-5] Lado que falta            esperado=CONTABILIDAD obtenido=CONTABILIDAD
+PASA   ESCENARIO 153  R01 Kardex hasta fin de agosto                                                   esperado=OK obtenido=OK
+PASA   ESCENARIO 154  R01 Repetir no duplica                                                           esperado=OK obtenido=OK
+PASA   VALOR     154  KARDEX_SALDO.KSA_CAN [KSA_REC=CAJA4KG;KSA_ALM=ALM3] El kardex cuadra con la exis esperado=9 obtenido=9.0
+PASA   VALOR     154  KARDEX_SALDO.KSA_VAL [KSA_REC=CAJA4KG;KSA_ALM=ALM3] …y su valor (18.00)          esperado=18 obtenido=18.0
+PASA   ESCENARIO 155  R02 Diario de operaciones                                                        esperado=OK obtenido=OK
+PASA   VALOR     155  DIARIO.DIA_EST [DIA_LOG=6] El diario muestra la transacción rechazada            esperado=E obtenido=E
+PASA   VALOR     155  DIARIO.DIA_NCAMB [DIA_LOG=6] …sin cambios en la base                             esperado=0 obtenido=0
+PASA   ESCENARIO 160  T23.11 Sin solicitud no se aprueba                                               esperado=ERROR: No hay una solicitud obtenido=ERROR: No hay una solicitud de reapertura pendiente para este periodo
+PASA   ESCENARIO 161  T23.10 Abril sigue abierto                                                       esperado=ERROR: no está cerrado obtenido=ERROR: El periodo no está cerrado: no hay nada que reabrir
+PASA   ESCENARIO 162  T23.10 Sin motivo no se solicita                                                 esperado=ERROR: exige un motivo obtenido=ERROR: La reapertura exige un motivo
+PASA   ESCENARIO 163  T23.10 Costos solicita reabrir marzo                                             esperado=OK obtenido=OK
+PASA   VALOR     163  REAPERTURA.REA_EST [REA_PER=2026-03;REA_EMP=B] Solicitud registrada con motivo   esperado=SOLICITADA obtenido=SOLICITADA
+PASA   ESCENARIO 164  T23.11 Gerencia aprueba (otra persona)                                           esperado=OK obtenido=OK
+PASA   VALOR     164  PERIODO.PER_EST [PER_COD=2026-03;PER_EMP=B] Aprobada: marzo vuelve a abrirse     esperado=A obtenido=A
+PASA   VALOR     164  REAPERTURA.REA_APR [REA_PER=2026-03;REA_EMP=B] Queda quién aprobó (distinto de q esperado=GERENTE obtenido=GERENTE
+PASA   ESCENARIO 165  T23.2 Reabierto: el costeo oficial no se repite (no duplica)                     esperado=ERROR: ya se ejecutó obtenido=ERROR: Este paso oficial ya se ejecutó en el periodo (no se repite: evita duplicar)
+PASA   ESCENARIO 166  T23.9 Se vuelve a cerrar: estadísticas e histórico se regeneran sin duplicar     esperado=OK obtenido=OK
+PASA   VALOR     166  PERIODO.PER_EST [PER_COD=2026-03;PER_EMP=B] Marzo cerrado otra vez               esperado=C obtenido=C
+PASA   VALOR     166  REAPERTURA.REA_N [REA_PER=2026-03;REA_EMP=B] Una reapertura                      esperado=1 obtenido=1.0
+PASA   VALOR     166  HIST_CENTRO.HCE_HORAS [HCE_CEN=LINEA2;HCE_PER=2026-03] Volver a cerrar no altera esperado=270 obtenido=270
+PASA   ESCENARIO 170  T25.3 RR.HH. envía la planilla de julio por persona                              esperado=OK obtenido=OK
+PASA   VALOR     170  PLANILLA.PLA_COSTO [PLA_PER=2026-07;PLA_PERS=P01] Planilla de P01                esperado=3000 obtenido=3000.0
+PASA   VALOR     170  PLANILLA.PLA_HORAS [PLA_PER=2026-07;PLA_PERS=P02] Horas de P02                   esperado=160 obtenido=160.0
+PASA   ESCENARIO 171  T18.3 La planta registra los minutos de cada operario en OE-03                   esperado=OK obtenido=OK
+PASA   VALOR     171  CTA_PERS_OBJ.CPO_MIN [CPO_PER=2026-07;CPO_PERS=P01;CPO_OBJ=OE-03] Minutos de P01 esperado=5400 obtenido=5400.0
+PASA   ESCENARIO 172  T18.3 Persona inexistente                                                        esperado=ERROR: No existe en PERSONA obtenido=ERROR: No existe en PERSONA (M-LEE-PRS)
+PASA   ESCENARIO 173  T18.2 Horas de mantenimiento a cada centro                                       esperado=OK obtenido=OK
+PASA   VALOR     173  MEDIDA.MED_CAN [MED_PER=2026-07;MED_CRIT=HORAS_MANT;MED_DEST=LINEA3] Medida por  esperado=30 obtenido=30.0
+PASA   ESCENARIO 174  T18.2 Pruebas de calidad (también a mantenimiento: servicio recíproco)           esperado=OK obtenido=OK
+PASA   ESCENARIO 175  T18.2 Horas de LINEA3 usadas por OE-03                                           esperado=OK obtenido=OK
+PASA   VALOR     175  MEDIDA.MED_NIVEL [MED_PER=2026-07;MED_CRIT=HORAS_LINEA;MED_DEST=OE-03] Medida po esperado=OBJ obtenido=OBJ
+PASA   ESCENARIO 176  T18.2 kWh por centro                                                             esperado=OK obtenido=OK
+PASA   VALOR     176  MEDIDA.MED_CAN [MED_PER=2026-07;MED_CRIT=KWH;MED_DEST=MANTTO] kWh de mantenimien esperado=300 obtenido=300.0
+PASA   ESCENARIO 177  T18.2 Nivel inválido                                                             esperado=ERROR: CEN (centro) u OBJ obtenido=ERROR: El nivel debe ser CEN (centro) u OBJ (objeto)
+PASA   ESCENARIO 178  T17 Energía de toda la planta al centro común (se reparte por kWh)               esperado=OK obtenido=OK
+PASA   VALOR     178  CTA_CENTRO.CCE_SUM [CCE_CEN=GENERAL;CCE_PER=2026-07] El centro común acumula la  esperado=5000 obtenido=5000.0
+
+TOTAL: 392 pruebas · 392 PASA · 0 FALLA
+EXIT_HISTORIA=0
+=== oráculo ENVASE ===
+66 valores comparados; diferencia máxima 1.84E-12; INEF {}
+P-45: traza CIF OT1520 = 6909.964374 líneas 131
+EXIT_ORACULO=0
+=== LibreOffice/UNO usando el adaptador del repositorio ===
+Warning: failed to launch javaldx - java may not function correctly
+Hola hola
+Paso usr True COSTOS
+PruebaMant OK | ERROR: La primera columna (clave) es obligatoria | ERROR: Seguridad: su perfil no está autorizado para esta transacción (SUPERV -> MANT-PARM)
+ProbarLin c1:3 c2:3 f1:1/2 f2:1/2
+EXIT_LO=124

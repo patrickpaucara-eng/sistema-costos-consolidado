@@ -1,6 +1,6 @@
 # Plan maestro de consolidación
 
-Versión 1 · 18 de noviembre de 2026 · documento para revisión del dueño.
+Versión 2 · 18 de noviembre de 2026 · ejecución autorizada por el dueño.
 
 ## Resultado esperado
 
@@ -18,11 +18,11 @@ El trabajo se organiza en los tres niveles elegidos por el dueño. La Base conse
 | Tres niveles Base / Síntesis / Analítica | Dirección conceptual indicada por el dueño |
 | Modelo conceptual detallado y contratos entre niveles | En preparación, pendientes de validación |
 | Uso individual o varias personas simultáneas | Pendiente de decisión |
-| Stack, migración e implementación del producto | Pendientes de aprobación expresa |
+| Stack y ejecución del plan | Aprobados el 18-nov. SQLite local + Python como motor único + Excel/CSV + interfaz HTML. |
 | Repositorio histórico sistema-costos-reyna | Consulta y pruebas sobre copias |
 | 93 % de avance heredado | Declaración pendiente de validación |
 
-La creación del repositorio consolidado y el archivo de fuentes no aprueban automáticamente el stack ni la reforma. Cada aprobación posterior registra fecha, alcance, restricciones y evidencia.
+El dueño aprobó el stack y dio la instrucción «Procede con tu plan» el 18-nov. Se ejecutan las tareas dependientes al cerrar sus contratos y pruebas. Las decisiones materiales pendientes siguen registradas y se consultan cuando impiden avanzar.
 
 ## Punto de partida reproducible
 
@@ -41,7 +41,7 @@ Los resultados de pruebas expresan su versión y su caso. Para repetir una prueb
 
 Cada tarea tendrá un identificador, dependencia, responsable por función, entrada, salida y evidencia de aceptación. Los estados serán pendiente, en curso, bloqueada, en revisión y aceptada. El cierre requiere evidencia y revisión. Las fechas y estimaciones se asignan por lote una vez fijado su alcance.
 
-La secuencia principal será recuperación → método → modelo conceptual → pruebas de aceptación → decisión tecnológica → diseño → implementación por recorridos completos → validación de entrega.
+La secuencia principal será recuperación → método → modelo conceptual → pruebas de aceptación → validación del stack aprobado → diseño → implementación por recorridos completos → validación de entrega.
 
 Se podrá adelantar la reproducción de un fallo confirmado mientras se cotejan las fuentes. Una discrepancia se registra y se continúa con tareas independientes. Las decisiones materiales sobre finalidad de costos, autoridad de una regla, alcance de producto, stack y publicaciones requieren al dueño. Las elecciones operativas reversibles las resuelve el orquestador.
 
@@ -86,7 +86,7 @@ Un proceso común puede invocar distintos métodos y fórmulas. Contable puede e
 
 La autonomía podrá crecer con evidencia de desempeño y una política aprobada. Se definirán acciones permitidas, límites, vigencia, registro, suspensión y revisión. La IA generativa, si se incorpora, tendrá contrato y funcionamiento opcional acordados.
 
-## Fase 3 · Fijar casos y pruebas de aceptación
+## Fase 3 · Diseñar casos y pruebas de aceptación
 
 | Tarea | Dependencia | Acción y salida | Criterio de cierre |
 |---|---|---|---|
@@ -98,43 +98,44 @@ La autonomía podrá crecer con evidencia de desempeño y una política aprobada
 | A06 | C03, C06 | Variar un insumo, regla, cotización o dependencia de cálculo. | La identidad de corrida y su evidencia reflejan el cambio. El periodo anterior sigue reproducible. |
 | A07 | C07 | Evaluar propuesta válida, fuera de límites, degradada y suspendida. | Se cumplen permisos, vigencia, registro y reversión definidos. |
 | A08 | M04, M05 | Instalar, operar offline, respaldar, restaurar y medir con volumen representativo. | Umbrales acordados y resultados con equipo, filas, tiempo y memoria documentados. |
-| A09 | A01–A08 | Vincular requisitos a casos y revisar cobertura. | Matriz aprobada con estados aprobado, fallido, parcial y sin probar. |
+| A09 | A01–A08, A10 | Vincular requisitos a casos y revisar cobertura del diseño. | Cada caso define entradas, oráculo, tolerancia y prueba de aceptación. |
+| A10 | C01–C05 | Definir costo por proyectos mediante configuración y conservar el caso de órdenes. | Caso y oráculo para probar estabilidad de esquema, contratos y resultados históricos. |
+
+En esta fase se diseñan casos y oráculos. La implementación y la aceptación dinámica corresponden a fases 6–7. T01 puede usar los contratos de prueba sin exigir un producto terminado.
 
 A01 puede empezar como diagnóstico en copias sobre la implementación actual antes de cerrar C08. Sus resultados alimentarán el modelo. Los oráculos manuales se revisan de forma independiente del código que produce el resultado.
 
-## Fase 4 · Decidir tecnología y transición
+## Fase 4 · Validar la tecnología aprobada y la transición
 
 | Tarea | Dependencia | Acción y salida | Criterio de cierre |
 |---|---|---|---|
-| T01 | M05, C08, A09 | Comparar opciones de almacenamiento, motor e interfaz. | Matriz con offline, concurrencia, instalación, auditoría, recuperación, rendimiento y mantenimiento. |
+| T01 | M05, C08, A09 | Contrastar el stack aprobado con los requisitos del entorno. | Evidencia de offline, concurrencia, instalación, auditoría, recuperación, rendimiento y mantenimiento. |
 | T02 | T01 | Medir riesgos técnicos con prototipos acotados autorizados. | Evidencia sobre importación fiel, precisión, cierre recuperable y distribución. |
-| T03 | T01, T02 | Proponer stack con versiones, dependencias y costo de transición. | Documento de decisión revisable por el dueño. |
-| T04 | T03 | Resolver stack y alcance de implementación. | Aprobación expresa del dueño, con sus límites. |
+| T03 | T01, T02 | Fijar versiones, dependencias, distribución e intercambio del stack aprobado. | Documento técnico con pruebas y costo de transición. |
+| T04 | T03 | Comprobar la aprobación registrada y las condiciones para el primer lote. | Stack aprobado el 18-nov. Versiones y contratos listos para implementar. |
 
 ### Estado del stack
 
 El stack vigente del histórico usa Excel para almacenamiento, VBA para la operación e intérprete Python de apoyo, métodos y analítica. La versión auditada registra duplicación del intérprete y rutas con persistencia distinta.
 
-**Candidata para evaluar** — SQLite local, Python como implementación única de reglas y métodos, precisión monetaria definida, Excel/CSV para intercambio. La interfaz se elegirá después de validar el flujo del usuario. Un servidor local y el soporte concurrente se estudian si M05 los requiere.
+**Stack aprobado el 18-nov** — SQLite local para persistencia, Python como motor único, Excel/CSV para intercambio e interfaz HTML. El modelo externo del DBD de Tino guía captura, validación, consulta y presentación.
 
-Se evaluarán mantener Excel, conservarlo como interfaz sobre un motor único o distribuir una aplicación local independiente. SQLite admite un escritor simultáneo; el soporte de varias personas requiere comprobar concurrencia, despliegue y autoridad de escritura. La elección de SQLite no resuelve por sí sola las reglas de integridad o el alcance por empresa.
+Se verificarán versiones, instalación y operación sin Internet. El servicio de la interfaz HTML funcionará localmente; la forma de empaquetarlo se decide mediante T02. SQLite admite un escritor simultáneo. La cantidad de personas concurrentes y sus equipos sigue por precisar. Se toma como supuesto reversible del primer ensayo una operación local por proceso; M05 resolverá el alcance empresarial.
 
-El prototipo SQL del histórico deberá compararse con el modelo conceptual y los datos reales del caso. Sus tablas derivadas no acreditan una migración completa.
-
-No hay un stack aprobado al emitir este documento.
+El prototipo SQL del histórico se compara con el modelo conceptual antes de reutilizarlo. Su existencia no acredita una migración completa.
 
 ## Fase 5 · Diseño e importación de la base técnica
 
-Empieza después de T04 y de la autorización concreta del lote.
+Se ejecuta bajo la aprobación del plan y stack del 18-nov, después de verificar T04.
 
 | Tarea | Dependencia | Acción y salida | Criterio de cierre |
 |---|---|---|---|
 | D01 | T04 | Clasificar componentes por conservar, corregir, rediseñar o archivar. Seleccionar cambios de Ola 1 por alcance. | Manifiesto de origen por SHA y justificación por componente. |
 | D02 | D01 | Importar la revisión aprobada al consolidado en rama de trabajo. | Procedencia verificable y revisión de los archivos incluidos. |
-| D03 | D01, C08 | Diseñar modelo lógico/físico, claves, restricciones y evolución de esquema. | Cubre identidades, integridad por empresa, historial y resultados versionados. |
+| D03 | D01, C08, D06 | Diseñar modelo lógico/físico, claves, restricciones y evolución de esquema. | Cubre identidades, integridad por empresa, historial y resultados versionados. |
 | D04 | D03 | Diseñar límites de motor, almacenamiento, síntesis, analítica e interfaz. | Cada llamada declara entrada, salida, error y responsable de escritura. |
 | D05 | D03, D04 | Diseñar transacción de cierre, recuperación, reintentos y respaldo. | Puntos de fallo e invariantes trazados a A03–A06. |
-| D06 | D04 | Diseñar flujo del usuario con datos de ejemplo. | El operador puede cargar, corregir, cerrar, consultar y restaurar. |
+| D06 | C08, A09 | Diseñar el modelo externo y prototipo HTML con datos de ejemplo antes de fijar el esquema físico. | El operador puede cargar, corregir, cerrar, consultar y restaurar. |
 | D07 | D02–D06 | Diseñar migración y comparación con la referencia. | Ensayo reversible, inventario de excepciones y plan de retorno. |
 
 ## Fase 6 · Construcción incremental
@@ -147,7 +148,7 @@ Cada recorrido termina con datos guardados, consulta y prueba de reapertura. El 
 | I02 | I01 | Compra → ingreso → consumo → kardex → existencia. | A01 y casos de A02, incluida repetición de documento según identidad definida. |
 | I03 | I02 | Orden → horas/servicios → medidas → reparto. | Importe trazable y unidades conservadas en casos manuales. |
 | I04 | I03 | Liquidación → terminado/en proceso → costo de venta. | Casos de referencia y A03–A06. |
-| I05 | I04 | Solicitudes adicionales aprobadas de costo y conciliaciones. | Aceptación independiente por combinación de dimensiones y método. |
+| I05 | I04 | Solicitudes adicionales aprobadas de costo y conciliaciones. | A10 y aceptación independiente por combinación de dimensiones y método. |
 | I06 | I04, C07 | Hallazgos y escenarios → propuestas con evidencia. | Comparación reproducible y aislamiento del escenario. |
 | I07 | I06 | Aplicación supervisada y medición del efecto. | Permisos, vigencia y reversión aprobados en A07. |
 | I08 | I07 | Autonomía para acciones expresamente aprobadas. | Cumplimiento de límites, suspensión y desempeño en historia y casos nuevos. |
@@ -199,4 +200,4 @@ Se empieza con el orquestador y hasta tres especialistas cuando existan tareas i
 
 Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
 
-El siguiente lote ejecutable reúne P00–P03 y M01–M04. Producirá continuidad en Git, matriz metodológica, contraste de versiones y antecedentes. En paralelo puede reproducirse A01 de extremo a extremo en copias. Su cierre permitirá presentar M05–M06 y C01–C08 como una propuesta conceptual concreta para revisión. T03–T04 formalizarán la decisión del stack antes de implementar la reforma.
+El siguiente lote ejecutable reúne P00–P03 y M01–M04. Producirá continuidad en Git, matriz metodológica, contraste de versiones y antecedentes. En paralelo puede reproducirse A01 de extremo a extremo en copias. Su cierre permitirá presentar M05–M06 y C01–C08 como una propuesta conceptual concreta para revisión. T03–T04 concretarán versiones y condiciones del stack ya aprobado antes de construir el primer lote.

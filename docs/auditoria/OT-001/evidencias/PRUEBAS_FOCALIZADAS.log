@@ -1,0 +1,10 @@
+Looking in links: /tmp/wheels
+Processing ./wheels/openpyxl-3.1.5-py2.py3-none-any.whl
+Processing ./wheels/et_xmlfile-2.0.0-py3-none-any.whl (from openpyxl==3.1.5)
+Installing collected packages: et-xmlfile, openpyxl
+Successfully installed et-xmlfile-2.0.0 openpyxl-3.1.5
+A [('SALIDA', '3-1-L', 'MONTO', 10.0)]
+A+B [('SALIDA', '3-1-L', 'MONTO', 50.0)]
+A [('SALIDA', '3-1-L', 'MONTO', 10.0)]
+A+B [('SALIDA', '3-1-L', 'MONTO', 50.0)]
+COINCIDE
