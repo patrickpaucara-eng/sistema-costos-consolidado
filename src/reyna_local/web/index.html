@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sistema de Costos Reyna · Piloto local</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --canvas: #eef3f4;
+      --paper: #fff;
+      --ink: #142e34;
+      --soft: #52686e;
+      --rail: #112d33;
+      --rail-ink: #d9e7e8;
+      --line: #d8e3e5;
+      --accent: #116b61;
+      --accent-dark: #0d534b;
+      --accent-light: #e6f3ee;
+      --error: #8d352b;
+      --error-surface: #fff3ef;
+      --focus: #207f73;
+      --radius: 15px;
+      font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); line-height: 1.52; }
+    [hidden] { display: none !important; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(1.8rem, 4vw, 2.65rem); line-height: 1.15; letter-spacing: -.04em; }
+    h2 { font-size: 1.3rem; line-height: 1.25; letter-spacing: -.023em; }
+    h3 { font-size: 1rem; line-height: 1.33; }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    label { display: block; font-size: .91rem; font-weight: 650; }
+    input, select, textarea, button { font: inherit; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid #b9cbce;
+      border-radius: 8px;
+      padding: .68rem .75rem;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    input::placeholder, textarea::placeholder { color: #5f757a; }
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+      background: #f7fafb;
+    }
+    input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--error); }
+    button {
+      cursor: pointer;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: .61rem .92rem;
+      color: #fff;
+      background: var(--accent);
+      font-weight: 650;
+    }
+    button:hover:not(:disabled) { background: var(--accent-dark); }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    button.secondary { color: var(--ink); background: var(--paper); border-color: #b9cbce; }
+    button.secondary:hover:not(:disabled) { background: #e9f1f2; }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    fieldset:disabled { opacity: .7; }
+    .mono, textarea, pre, .cell-number {
+      font-family: "IBM Plex Mono", Consolas, monospace;
+      font-size: .87rem;
+    }
+    .skip {
+      position: absolute;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .skip:focus {
+      clip-path: none;
+      top: .5rem;
+      left: .5rem;
+      z-index: 2;
+      background: var(--paper);
+      padding: .5rem .75rem;
+    }
+
+    .layout { display: grid; grid-template-columns: 226px minmax(0, 1fr); min-height: 100vh; }
+    .rail { display: flex; flex-direction: column; gap: 2.2rem; padding: 1.65rem 1.15rem; color: var(--rail-ink); background: var(--rail); }
+    .brand { display: flex; align-items: center; gap: .75rem; font-weight: 680; line-height: 1.3; color: #fff; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      flex: 0 0 36px;
+      height: 36px;
+      border: 1px solid #72b9ab;
+      border-radius: 9px;
+      color: #bfebdf;
+      font-size: 1.15rem;
+    }
+    .rail nav { display: grid; gap: .3rem; }
+    .rail nav a { padding: .65rem .72rem; border-radius: 8px; text-decoration: none; font-size: .91rem; }
+    .rail nav a:hover, .rail nav a:focus-visible { background: #22454c; }
+    .rail p { margin-top: auto; border-top: 1px solid #426067; padding: .95rem .25rem 0; font-size: .79rem; color: #bbced0; }
+
+    main { width: min(100%, 1400px); margin-inline: auto; padding: clamp(1rem, 4vw, 3rem); }
+    .page-heading { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: flex-start; gap: 1.15rem; margin-bottom: 1.35rem; }
+    .page-heading p { margin-top: .56rem; color: var(--soft); }
+    .connection {
+      display: inline-flex;
+      gap: .55rem;
+      align-items: center;
+      padding: .48rem .72rem;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #f7fafb;
+      font-size: .81rem;
+      color: var(--soft);
+      white-space: nowrap;
+    }
+    .connection::before { content: ""; width: .53rem; height: .53rem; background: #66878b; border-radius: 50%; }
+    .connection[data-state="ready"]::before { background: #118067; }
+    .connection[data-state="error"]::before { background: #993c2f; }
+    .scope {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: .35rem 1rem;
+      background: #e1edeb;
+      border: 1px solid #c5dbd8;
+      border-radius: 10px;
+      padding: .75rem .95rem;
+      margin-bottom: 1.25rem;
+      font-size: .87rem;
+    }
+    .scope p { color: #36575a; }
+    .top-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; align-items: start; }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(.95rem, 2.5vw, 1.5rem);
+      background: var(--paper);
+      box-shadow: 0 3px 12px #1b323909;
+      scroll-margin-top: 1rem;
+    }
+    .stack { margin-top: 1rem; }
+    .panel-heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .6rem 1rem; align-items: flex-start; margin-bottom: 1rem; }
+    .panel-heading p, .helper { margin-top: .3rem; color: var(--soft); font-size: .87rem; }
+    .field { display: grid; gap: .32rem; min-width: 0; }
+    .fields { display: grid; gap: .9rem; }
+    .split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .actions { display: flex; align-items: center; flex-wrap: wrap; gap: .58rem; }
+    .workspace-list { list-style: none; display: grid; gap: .5rem; padding: 0; margin: 0; max-height: 235px; overflow: auto; }
+    .workspace-button {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+      gap: .65rem;
+      color: var(--ink);
+      background: #f7fafb;
+      border-color: var(--line);
+      font-size: .93rem;
+    }
+    .workspace-button:hover:not(:disabled) { background: #eaf3f3; }
+    .workspace-button[aria-pressed="true"] { color: var(--accent-dark); background: var(--accent-light); border-color: #91c6b8; }
+    .workspace-button span:first-child { overflow-wrap: anywhere; min-width: 0; }
+    .workspace-button span:last-child { font-size: .76rem; color: var(--soft); flex-shrink: 0; }
+    .empty {
+      padding: 1rem;
+      background: #f7fafb;
+      border: 1px dashed #c2d2d4;
+      border-radius: 8px;
+      color: var(--soft);
+      font-size: .9rem;
+    }
+    .notice:not(:empty) {
+      border-radius: 8px;
+      padding: .68rem .78rem;
+      margin-top: .7rem;
+      background: #eff5f6;
+      color: var(--soft);
+      font-size: .88rem;
+      overflow-wrap: anywhere;
+    }
+    .notice[data-tone="error"]:not(:empty) { background: var(--error-surface); color: var(--error); }
+    .notice[data-tone="success"]:not(:empty) { background: var(--accent-light); color: var(--accent-dark); }
+    .detail {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .6rem 1rem;
+      margin: 0 0 1.15rem;
+      padding: .75rem .9rem;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #f7fafb;
+    }
+    .detail dt { font-size: .78rem; color: var(--soft); }
+    .detail dd { margin: .12rem 0 0; font-size: .9rem; font-weight: 620; overflow-wrap: anywhere; }
+    .detail .wide { grid-column: 1 / -1; }
+    .detail .wide dd { font-weight: 400; }
+
+    #table-select { min-width: 13rem; }
+    .table-wrap { max-width: 100%; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: .85rem; }
+    th, td { padding: .53rem .75rem; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+    th { color: #38555b; background: #eef4f5; font-size: .79rem; font-weight: 700; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:nth-child(even) td { background: #f8fbfb; }
+    td { min-width: 6.7rem; max-width: 420px; vertical-align: top; white-space: pre-wrap; }
+    .table-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .55rem 1rem; margin-top: .7rem; color: var(--soft); font-size: .87rem; }
+
+    @media (max-width: 1000px) {
+      .layout { grid-template-columns: 178px minmax(0, 1fr); }
+      .rail { padding-inline: .8rem; }
+      .top-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .layout { display: block; }
+      .rail { padding: .75rem; gap: .65rem; }
+      .rail nav { display: flex; flex-wrap: wrap; gap: .1rem; }
+      .rail nav a { padding: .32rem .5rem; }
+      .rail p { display: none; }
+      .split, .detail { grid-template-columns: minmax(0, 1fr); }
+      #table-select { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#principal">Ir al contenido</a>
+  <div class="layout">
+    <aside class="rail">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>Sistema de Costos Reyna</span></div>
+      <nav aria-label="Secciones del piloto">
+        <a href="#importar">Importar libro</a>
+        <a href="#espacios">Espacios de trabajo</a>
+        <a href="#operar">Ejecutar transacción</a>
+        <a href="#consultar">Consultar tablas</a>
+      </nav>
+      <p>Servidor y datos locales</p>
+    </aside>
+    <main id="principal">
+      <header class="page-heading">
+        <div>
+          <h1>Piloto local de operaciones</h1>
+          <p>Importa un libro, registra un movimiento y consulta las filas guardadas.</p>
+        </div>
+        <span id="connection" class="connection" role="status">Conectando…</span>
+      </header>
+      <div class="scope">
+        <strong>Recuperación del motor de Claude</strong>
+        <p>Python opera sobre un libro Excel por espacio. El piloto es para un operador de confianza. Queda por demostrar el uso de dos empresas en un mismo libro.</p>
+      </div>
+
+      <div class="top-grid">
+        <section class="panel" id="importar" aria-labelledby="import-heading">
+          <div class="panel-heading">
+            <div><h2 id="import-heading">Importar libro</h2><p>Crea un espacio de trabajo a partir de un libro local.</p></div>
+          </div>
+          <form id="import-form" class="fields">
+            <div class="field">
+              <label for="workspace-name">Nombre del espacio</label>
+              <input id="workspace-name" name="name" type="text" autocomplete="off" required placeholder="Ej. Prueba de compras">
+            </div>
+            <div class="field">
+              <label for="workbook-path">Ruta del libro en el servidor local</label>
+              <input id="workbook-path" name="workbook_path" type="text" class="mono" autocomplete="off" spellcheck="false" required aria-describedby="path-help" placeholder="/ruta/local/Sistema_Costos.xlsx">
+              <p id="path-help" class="helper">Escribe la ruta completa de un libro accesible desde la máquina que ejecuta el servidor Python.</p>
+            </div>
+            <div class="actions"><button id="import-button" type="submit">Importar libro</button></div>
+          </form>
+          <div id="import-status" class="notice" role="status"></div>
+        </section>
+
+        <section class="panel" id="espacios" aria-labelledby="workspace-heading">
+          <div class="panel-heading">
+            <div><h2 id="workspace-heading">Espacios de trabajo</h2><p>Selecciona el espacio en el que vas a operar.</p></div>
+            <button id="reload-workspaces" class="secondary" type="button">Actualizar</button>
+          </div>
+          <p id="empty-workspaces" class="empty" hidden>Todavía no hay espacios. Importa un libro para comenzar.</p>
+          <ul id="workspace-list" class="workspace-list"></ul>
+          <div id="workspace-status" class="notice" role="status"></div>
+        </section>
+      </div>
+
+      <section class="panel stack" id="operar" aria-labelledby="execute-heading">
+        <div class="panel-heading"><div><h2 id="execute-heading">Ejecutar transacción</h2><p>Usa un código de usuario autorizado en el libro importado.</p></div></div>
+        <p id="no-detail" class="empty">Selecciona un espacio de trabajo para ver sus transacciones y tablas.</p>
+        <dl id="workspace-detail" class="detail" hidden>
+          <div><dt>Espacio activo</dt><dd id="detail-name"></dd></div>
+          <div><dt>Identificador</dt><dd id="detail-id" class="mono"></dd></div>
+          <div><dt>Versión del estado</dt><dd id="detail-version" class="mono"></dd></div>
+          <div class="wide" id="detail-file-row" hidden><dt>Libro de trabajo guardado</dt><dd id="detail-file" class="mono"></dd></div>
+          <div class="wide"><dt>Huella del libro importado</dt><dd id="detail-hash" class="mono"></dd></div>
+        </dl>
+        <form id="execute-form" hidden>
+          <fieldset id="execute-fields" class="fields">
+            <div class="fields split">
+              <div class="field">
+                <label for="transaction">Transacción</label>
+                <select id="transaction" name="transaction" required></select>
+              </div>
+              <div class="field">
+                <label for="operator">Usuario del libro</label>
+                <input id="operator" name="user" type="text" autocomplete="off" spellcheck="false" required placeholder="Código de usuario">
+              </div>
+            </div>
+            <details>
+              <summary>Ver la estructura del JSON</summary>
+              <p class="helper">La cabecera es un objeto, por ejemplo <code>{"FECHA": 20261118}</code>. Las líneas forman una lista de objetos, por ejemplo <code>[{"CANT": 1}]</code>. Completa la estructura con los campos y códigos que requiere tu libro.</p>
+            </details>
+            <div class="fields split">
+              <div class="field">
+                <label for="json-header">Cabecera en JSON</label>
+                <textarea id="json-header" name="header" spellcheck="false" required>{}</textarea>
+              </div>
+              <div class="field">
+                <label for="json-lines">Líneas en JSON</label>
+                <textarea id="json-lines" name="lines" spellcheck="false" required>[{}]</textarea>
+              </div>
+            </div>
+            <div class="field">
+              <label for="request-id">Identificador de solicitud</label>
+              <input id="request-id" name="request_id" class="mono" type="text" autocomplete="off" spellcheck="false" required aria-describedby="request-help">
+              <p id="request-help" class="helper">Si pierdes conexión, reintenta con los mismos datos y el mismo identificador. Genera otro para una nueva operación.</p>
+            </div>
+            <div class="actions">
+              <button type="submit">Ejecutar transacción</button>
+              <button id="new-request" class="secondary" type="button">Generar identificador</button>
+            </div>
+          </fieldset>
+        </form>
+        <div id="execute-status" class="notice" role="status"></div>
+      </section>
+
+      <section class="panel stack" id="consultar" aria-labelledby="table-heading">
+        <div class="panel-heading">
+          <div><h2 id="table-heading">Consultar tablas</h2><p>Elige una tabla habilitada en el espacio de trabajo.</p></div>
+          <div id="table-controls" class="field" hidden>
+            <label for="table-select">Tabla</label>
+            <select id="table-select"></select>
+          </div>
+        </div>
+        <p id="no-table" class="empty">Selecciona un espacio para consultar sus tablas.</p>
+        <div id="table-status" class="notice" role="status"></div>
+        <div id="table-wrap" class="table-wrap" role="region" aria-label="Filas de la tabla seleccionada" tabindex="0" hidden>
+          <table>
+            <caption id="table-caption" class="skip"></caption>
+            <thead><tr id="table-head"></tr></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div id="table-summary" class="table-summary" hidden>
+          <p id="table-count" aria-live="polite"></p>
+          <div class="actions">
+            <button id="table-prev" class="secondary" type="button">Página anterior</button>
+            <button id="table-next" class="secondary" type="button">Página siguiente</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    "use strict";
+
+    const byId = (id) => document.getElementById(id);
+    const connection = byId("connection");
+    const workspaceList = byId("workspace-list");
+    const workspaceStatus = byId("workspace-status");
+    const importForm = byId("import-form");
+    const importButton = byId("import-button");
+    const importStatus = byId("import-status");
+    const executeForm = byId("execute-form");
+    const executeFields = byId("execute-fields");
+    const executeStatus = byId("execute-status");
+    const transaction = byId("transaction");
+    const operator = byId("operator");
+    const headerInput = byId("json-header");
+    const linesInput = byId("json-lines");
+    const requestId = byId("request-id");
+    const tableSelect = byId("table-select");
+    const tableStatus = byId("table-status");
+    const tableWrap = byId("table-wrap");
+    const tableSummary = byId("table-summary");
+    const tablePrev = byId("table-prev");
+    const tableNext = byId("table-next");
+    const pageSize = 100;
+    const formDrafts = new Map();
+    const confirmedRequests = new Set();
+    let selectedWorkspace;
+    let workspaces = [];
+    let detailLoad = 0;
+    let loadingDetail = false;
+    let executing = false;
+    let tableLoad = 0;
+    let paging;
+
+    class ApiError extends Error {
+      constructor(message, status, payload) {
+        super(message);
+        this.status = status;
+        this.payload = payload;
+      }
+    }
+
+    function setConnection(state) {
+      connection.dataset.state = state;
+      connection.textContent = state === "ready" ? "Servidor conectado" : "Sin conexión con el servidor";
+    }
+
+    function notice(element, message = "", tone = "") {
+      element.textContent = message;
+      element.dataset.tone = tone;
+    }
+
+    async function api(path, payload) {
+      let response;
+      try {
+        response = await fetch(path, payload === undefined ? {} : {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch {
+        setConnection("error");
+        throw new ApiError("Comprueba que el servidor Python esté iniciado y vuelve a intentarlo.", 0);
+      }
+
+      const data = await response.json().catch(() => undefined);
+      if (!data || typeof data !== "object") {
+        setConnection("error");
+        throw new ApiError("La respuesta del servidor no tiene el formato esperado. Abre la pantalla desde el servidor local.", response.status);
+      }
+      setConnection("ready");
+      if (!response.ok) {
+        throw new ApiError(
+          typeof data.error === "string" ? data.error : `El servidor devolvió el error ${response.status}.`,
+          response.status,
+          data
+        );
+      }
+      return data;
+    }
+
+    function workspacePath(id) {
+      return `/api/workspaces/${encodeURIComponent(id)}`;
+    }
+
+    function shortVersion(version) {
+      return `Versión ${version}`;
+    }
+
+    function renderWorkspaceList() {
+      const buttons = workspaces.map((space) => {
+        const li = document.createElement("li");
+        const button = document.createElement("button");
+        const name = document.createElement("span");
+        const version = document.createElement("span");
+        button.type = "button";
+        button.className = "workspace-button";
+        button.setAttribute("aria-pressed", String(selectedWorkspace?.id === space.id));
+        button.dataset.workspaceId = space.id;
+        name.textContent = space.name;
+        version.textContent = shortVersion(space.version);
+        button.append(name, version);
+        button.addEventListener("click", async () => {
+          const restoreFocus = document.activeElement === button;
+          await selectWorkspace(space.id);
+          if (restoreFocus && document.activeElement === document.body) {
+            Array.from(workspaceList.querySelectorAll("button")).find(
+              (candidate) => candidate.dataset.workspaceId === space.id
+            )?.focus();
+          }
+        });
+        li.append(button);
+        return li;
+      });
+      workspaceList.replaceChildren(...buttons);
+      byId("empty-workspaces").hidden = Boolean(workspaces.length);
+    }
+
+    async function loadWorkspaces() {
+      byId("reload-workspaces").disabled = true;
+      notice(workspaceStatus, "Cargando espacios…");
+      try {
+        const data = await api("/api/workspaces");
+        workspaces = data.workspaces;
+        renderWorkspaceList();
+        notice(workspaceStatus);
+      } catch (error) {
+        notice(workspaceStatus, `No se pudieron cargar los espacios. ${error.message}`, "error");
+      } finally {
+        byId("reload-workspaces").disabled = false;
+      }
+    }
+
+    function makeOption(value, text = value) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = text;
+      return option;
+    }
+
+    function newRequestId() {
+      if (typeof globalThis.crypto.randomUUID === "function") {
+        return globalThis.crypto.randomUUID();
+      }
+      const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function saveDraft() {
+      if (!selectedWorkspace) return;
+      formDrafts.set(selectedWorkspace.id, {
+        transaction: transaction.value,
+        operator: operator.value,
+        header: headerInput.value,
+        lines: linesInput.value,
+        requestId: requestId.value
+      });
+    }
+
+    function restoreDraft(space) {
+      const draft = formDrafts.get(space.id);
+      const draftTransaction = draft?.transaction;
+      transaction.replaceChildren(makeOption("", "Selecciona una transacción"), ...space.transactions.map((entry) => makeOption(entry)));
+      transaction.value = space.transactions.includes(draftTransaction) ? draftTransaction : "";
+      operator.value = draft?.operator ?? "";
+      headerInput.value = draft?.header ?? "{}";
+      linesInput.value = draft?.lines ?? "[{}]";
+      requestId.value = draft?.requestId || newRequestId();
+      headerInput.removeAttribute("aria-invalid");
+      linesInput.removeAttribute("aria-invalid");
+    }
+
+    function displayWorkspace(space) {
+      byId("detail-name").textContent = space.name;
+      byId("detail-id").textContent = space.id;
+      byId("detail-version").textContent = space.version;
+      byId("detail-hash").textContent = space.workbook_sha256;
+      byId("detail-file").textContent = space.workbook_path ?? "";
+      byId("detail-file-row").hidden = !space.workbook_path;
+      byId("workspace-detail").hidden = false;
+      byId("no-detail").hidden = true;
+      executeForm.hidden = !space.transactions.length;
+    }
+
+    function updateExecuteState() {
+      executeFields.disabled = loadingDetail || executing;
+    }
+
+    async function selectWorkspace(id) {
+      const load = ++detailLoad;
+      loadingDetail = true;
+      updateExecuteState();
+      notice(workspaceStatus, "Cargando el espacio…");
+      try {
+        const detail = await api(workspacePath(id));
+        if (load !== detailLoad) return;
+        saveDraft();
+        selectedWorkspace = detail;
+        displayWorkspace(detail);
+        restoreDraft(detail);
+        renderWorkspaceList();
+        notice(workspaceStatus);
+        notice(executeStatus, detail.transactions.length ? "" : "Este espacio no tiene transacciones habilitadas.");
+        resetTable(detail);
+      } catch (error) {
+        if (load !== detailLoad) return;
+        notice(workspaceStatus, `No se pudo abrir el espacio. ${error.message}`, "error");
+      } finally {
+        if (load === detailLoad) {
+          loadingDetail = false;
+          updateExecuteState();
+        }
+      }
+    }
+
+    function resetTable(space) {
+      ++tableLoad;
+      const empty = byId("no-table");
+      empty.textContent = space.tables.length
+        ? "Selecciona una tabla para ver sus filas."
+        : "Este espacio no tiene tablas habilitadas para consulta.";
+      empty.hidden = false;
+      tableWrap.hidden = true;
+      tableSummary.hidden = true;
+      tableSelect.replaceChildren(makeOption("", "Selecciona una tabla"), ...space.tables.map((name) => makeOption(name)));
+      byId("table-controls").hidden = !space.tables.length;
+      notice(tableStatus);
+      paging = undefined;
+    }
+
+    function parseField(input, objectOnly) {
+      let data;
+      try {
+        data = JSON.parse(input.value);
+      } catch {
+        throw new Error(objectOnly
+          ? "La cabecera no es JSON válido. Revisa llaves, comillas y comas."
+          : "Las líneas no son JSON válido. Revisa corchetes, llaves, comillas y comas.");
+      }
+      const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+      if (objectOnly ? !isObject(data) : !Array.isArray(data) || data.some((line) => !isObject(line))) {
+        throw new Error(objectOnly ? "La cabecera debe ser un objeto JSON." : "Las líneas deben ser una lista de objetos JSON.");
+      }
+      return data;
+    }
+
+    function readExecution() {
+      const payload = {
+        transaction: transaction.value,
+        user: operator.value.trim(),
+        request_id: requestId.value.trim()
+      };
+      for (const [input, key] of [[headerInput, "header"], [linesInput, "lines"]]) {
+        try {
+          payload[key] = parseField(input, key === "header");
+          input.removeAttribute("aria-invalid");
+        } catch (error) {
+          input.setAttribute("aria-invalid", "true");
+          input.focus();
+          throw error;
+        }
+      }
+      if (!payload.user || !payload.request_id) {
+        throw new Error("Completa el usuario y el identificador de solicitud.");
+      }
+      return payload;
+    }
+
+    function updateVersion(id, version) {
+      workspaces = workspaces.map((space) => space.id === id ? { ...space, version: Math.max(space.version, version) } : space);
+      if (selectedWorkspace?.id === id) {
+        selectedWorkspace.version = Math.max(selectedWorkspace.version, version);
+        byId("detail-version").textContent = selectedWorkspace.version;
+      }
+      renderWorkspaceList();
+    }
+
+    function displayValue(value) {
+      if (value === null || value === undefined || value === "") return "—";
+      return typeof value === "object" ? JSON.stringify(value) : String(value);
+    }
+
+    function renderTable(data) {
+      const columns = data.columns.map((column) => {
+        const th = document.createElement("th");
+        th.scope = "col";
+        th.textContent = column;
+        return th;
+      });
+      const rows = data.rows.map((row) => {
+        const tr = document.createElement("tr");
+        tr.append(...row.map((value) => {
+          const td = document.createElement("td");
+          if (typeof value === "number") td.className = "cell-number";
+          td.textContent = displayValue(value);
+          return td;
+        }));
+        return tr;
+      });
+      if (!rows.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = Math.max(1, columns.length);
+        td.textContent = "No hay filas en esta página.";
+        tr.append(td);
+        rows.push(tr);
+      }
+      byId("table-caption").textContent = `Tabla ${data.table}`;
+      byId("table-head").replaceChildren(...columns);
+      byId("table-body").replaceChildren(...rows);
+      const range = data.rows.length ? `Filas ${data.offset + 1} a ${data.offset + data.rows.length} de ${data.total}` : `${data.total} filas en total`;
+      byId("table-count").textContent = `${range} · ${shortVersion(data.version)}`;
+      paging = data;
+      tablePrev.disabled = data.offset === 0;
+      tableNext.disabled = data.offset + data.limit >= data.total;
+      tableWrap.hidden = false;
+      tableSummary.hidden = false;
+    }
+
+    async function loadTable(offset = 0) {
+      if (!selectedWorkspace || !tableSelect.value) return;
+      const load = ++tableLoad;
+      const { id } = selectedWorkspace;
+      const name = tableSelect.value;
+      const query = new URLSearchParams({ offset, limit: pageSize });
+      byId("no-table").hidden = true;
+      tableWrap.hidden = true;
+      tableSummary.hidden = true;
+      notice(tableStatus, "Cargando filas…");
+      try {
+        const data = await api(`${workspacePath(id)}/tables/${encodeURIComponent(name)}?${query}`);
+        if (load !== tableLoad) return;
+        notice(tableStatus);
+        renderTable(data);
+      } catch (error) {
+        if (load !== tableLoad) return;
+        notice(tableStatus, `No se pudo consultar la tabla. ${error.message}`, "error");
+      }
+    }
+
+    byId("reload-workspaces").addEventListener("click", loadWorkspaces);
+    byId("new-request").addEventListener("click", () => {
+      requestId.value = newRequestId();
+      requestId.focus();
+    });
+    tableSelect.addEventListener("change", () => {
+      if (tableSelect.value) {
+        loadTable();
+      } else {
+        resetTable(selectedWorkspace);
+      }
+    });
+    tablePrev.addEventListener("click", () => loadTable(Math.max(0, paging.offset - paging.limit)));
+    tableNext.addEventListener("click", () => loadTable(paging.offset + paging.limit));
+    for (const input of [headerInput, linesInput]) {
+      input.addEventListener("input", () => input.removeAttribute("aria-invalid"));
+    }
+
+    importForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const name = byId("workspace-name").value.trim();
+      const workbookPath = byId("workbook-path").value.trim();
+      if (!name || !workbookPath) {
+        notice(importStatus, "Completa el nombre del espacio y la ruta del libro.", "error");
+        return;
+      }
+      importButton.disabled = true;
+      notice(importStatus, "Importando el libro…");
+      try {
+        const space = await api("/api/workspaces", { name, workbook_path: workbookPath });
+        workspaces = [...workspaces.filter((entry) => entry.id !== space.id), space];
+        renderWorkspaceList();
+        notice(importStatus, `Se importó «${space.name}».`, "success");
+        await selectWorkspace(space.id);
+      } catch (error) {
+        notice(importStatus, `No se pudo importar el libro. ${error.message} Revisa la ruta y que el servidor pueda leer el archivo.`, "error");
+      } finally {
+        importButton.disabled = false;
+      }
+    });
+
+    executeForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!selectedWorkspace || loadingDetail || executing) return;
+      let payload;
+      try {
+        payload = readExecution();
+      } catch (error) {
+        notice(executeStatus, error.message, "error");
+        return;
+      }
+
+      const { id } = selectedWorkspace;
+      const requestKey = JSON.stringify([id, payload.request_id]);
+      executing = true;
+      updateExecuteState();
+      notice(executeStatus, "Enviando la transacción…");
+      try {
+        const result = await api(`${workspacePath(id)}/execute`, payload);
+        const wasConfirmed = confirmedRequests.has(requestKey);
+        confirmedRequests.add(requestKey);
+        updateVersion(id, result.version);
+        if (selectedWorkspace?.id !== id) return;
+        const message = wasConfirmed
+          ? `La solicitud ya estaba registrada en la versión ${result.version}. No creó otro movimiento.`
+          : `Transacción ${result.transaction} confirmada. Versión ${result.version}.`;
+        notice(executeStatus, tableSelect.value ? message : `${message} Elige una tabla para consultar las filas.`, "success");
+        if (tableSelect.value) loadTable();
+      } catch (error) {
+        if (selectedWorkspace?.id !== id) return;
+        let nextStep = "Revisa los datos y vuelve a intentarlo.";
+        if (error.status === 0) {
+          nextStep = "Cuando vuelva la conexión, reintenta con el mismo identificador.";
+        } else if (error.status === 409) {
+          nextStep = "Conserva el identificador si estás reintentando la solicitud original. Genera otro solo para una nueva operación.";
+        } else if (error.status === 422 && error.payload?.request_id) {
+          nextStep = "Corrige los datos y genera otro identificador para enviar la transacción corregida.";
+        }
+        notice(executeStatus, `No se confirmó la transacción. ${error.message} ${nextStep}`, "error");
+      } finally {
+        executing = false;
+        updateExecuteState();
+      }
+    });
+
+    loadWorkspaces();
+  </script>
+</body>
+</html>

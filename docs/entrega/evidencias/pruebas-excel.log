@@ -1,0 +1,14 @@
+test_api_no_publica_credenciales_del_libro (test_capacidad_inicial.CapacidadInicial.test_api_no_publica_credenciales_del_libro) ... ok
+test_compra_consumo_saldo_y_reapertura (test_capacidad_inicial.CapacidadInicial.test_compra_consumo_saldo_y_reapertura) ... ok
+test_concurrencia_no_duplica_ni_pierde_compras (test_capacidad_inicial.CapacidadInicial.test_concurrencia_no_duplica_ni_pierde_compras) ... ok
+test_dos_espacios_aislados_con_la_misma_solicitud (test_capacidad_inicial.CapacidadInicial.test_dos_espacios_aislados_con_la_misma_solicitud) ... ok
+test_falla_en_segunda_linea_revierte_la_primera (test_capacidad_inicial.CapacidadInicial.test_falla_en_segunda_linea_revierte_la_primera) ... ok
+test_http_rechaza_origen_ajeno_y_host_ajeno (test_capacidad_inicial.CapacidadInicial.test_http_rechaza_origen_ajeno_y_host_ajeno) ... ok
+test_preserva_partes_ooxml_y_formula_fuera_del_parque (test_capacidad_inicial.CapacidadInicial.test_preserva_partes_ooxml_y_formula_fuera_del_parque) ... ok
+test_reemplazo_fallido_no_publica_filas_ni_recibo_y_respaldo_reabre (test_capacidad_inicial.CapacidadInicial.test_reemplazo_fallido_no_publica_filas_ni_recibo_y_respaldo_reabre) ... ok
+test_reintento_persiste_y_otro_payload_es_conflicto (test_capacidad_inicial.CapacidadInicial.test_reintento_persiste_y_otro_payload_es_conflicto) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 15.520s
+
+OK

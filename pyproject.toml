@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reyna-local"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["openpyxl==3.1.5", "defusedxml==0.7.1"]
+description = "Piloto local del sistema de costos Reyna"
+
+[project.scripts]
+reyna-local = "reyna_local.__main__:main"
+
+[tool.setuptools.package-data]
+reyna_local = ["web/*"]

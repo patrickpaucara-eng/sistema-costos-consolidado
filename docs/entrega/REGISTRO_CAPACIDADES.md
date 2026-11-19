@@ -1,24 +1,34 @@
 # Capacidades y evidencia de la entrega
 
-Rama desarrollo/capacidad-inicial. Estado del 18 de noviembre de 2026.
+Rama `desarrollo/capacidad-inicial`, piloto 0.1.0. Verificación del 18 de noviembre de 2026, hora de Lima.
 
-El ensayo SQLite queda pausado. Las capacidades siguientes documentan su alcance propuesto. El recorrido vigente se define en [PYTHON_EXCEL.md](../planificacion/PYTHON_EXCEL.md).
+El recorrido vigente es HTML local → Python → copia Excel → reapertura. SQLite está aplazado y no tiene implementación en esta entrega. El VBA histórico permanece congelado en `referencia/vba-congelado`.
 
-| ID | Operación | Dependencias | Estado | Alcance de aceptación |
-|---|---|---|---|---|
-| CAP-01 | Importar un libro de referencia en un espacio local | openpyxl, modelo heredado, SQLite | Ensayo pausado | Conteos/estado de tablas y copia identificada por hash. |
-| CAP-02 | Ejecutar compra o consumo mediante Python | CAP-01 | Ensayo pausado | Motor heredado por datos, resultado de negocio y persistencia. |
-| CAP-03 | Reabrir y consultar movimientos/saldos | CAP-02 | Ensayo pausado | Mismo estado después de cerrar proceso y reconectar. |
-| CAP-04 | Reintentar una operación sin duplicarla | CAP-02 | Ensayo pausado | Misma identidad y contenido devuelven el resultado anterior. Identidad con otro contenido produce conflicto. |
-| CAP-05 | Operar desde HTML local | CAP-01–CAP-04 | Ensayo pausado | Seleccionar espacio, ejecutar, ver error o éxito, consultar tabla permitida. |
-| CAP-06 | Cerrar y publicar costo por orden | CAP-01–CAP-05, contratos de Síntesis | Pendiente | Cuadre, aislamiento y evidencia completa al reabrir. |
-| CAP-07 | Conservar instancia histórica de costos | CAP-06 | Pendiente | Cambios posteriores no alteran lo publicado y la reproducción conserva sus insumos. |
-| CAP-08 | Analítica con aprendizaje y autonomía | CAP-06–CAP-07 | Pendiente | Efecto medido y política autorizada por capacidad. |
+| ID | Operación | Estado | Evidencia y límite |
+|---|---|---|---|
+| CAP-01 | Importar un libro compatible a un espacio local | Verificada en el piloto | Copia identificada por SHA-256; origen intacto. Fixture Ola 1. |
+| CAP-02 | Registrar compra T14 y consumo T15 con Python | Verificada en el piloto | Dos compras y un consumo dejan 400 unidades, S/ 3,054 por unidad y S/ 1.221,60. Rechazo multilínea conserva el estado de negocio. |
+| CAP-03 | Reabrir y consultar movimientos y saldos | Verificada en el piloto | Reinicio del proceso y lectura directa del XLSX confirman versión y saldo. |
+| CAP-04 | Reintentar sin duplicar | Verificada en el piloto | Misma identidad y contenido recuperan el recibo; otro contenido devuelve conflicto. También se probaron dos procesos cooperantes. |
+| CAP-05 | Operar desde HTML local | Verificada en Chromium | Importar, ejecutar, consultar, repetir y ver errores. Formulario técnico con JSON; operador local de confianza. |
+| CAP-06 | Cerrar y publicar costo por orden | Pendiente | Requiere validar método, cuadre, aislamiento y cierre recuperable completo. |
+| CAP-07 | Conservar instancia histórica de costos | Pendiente | Debe fijar insumos, reglas y resultados y demostrar reproducción por fecha. El recibo de un movimiento no acredita esta capacidad. |
+| CAP-08 | Analítica con aprendizaje y autonomía | Pendiente | Requiere medición del efecto, límites y políticas autorizadas por capacidad. |
 
-## Ámbitos del primer ensayo
+## Evidencia reproducible
 
-Los espacios separan las copias de libros. La prueba entre espacios no acredita el aislamiento de dos empresas dentro de un mismo libro. El motor heredado y sus transacciones conservan las limitaciones descubiertas en OT-001 hasta su corrección y verificación específica.
+- [Guía de instalación y caso manual](GUIA_PILOTO_EXCEL.md).
+- [Pruebas independientes](evidencias/REVISION_INDEPENDIENTE.md): 9 aprobadas, ninguna omitida. [Ejecución del coordinador](evidencias/pruebas-excel.log): 9 aprobadas en 15,520 segundos.
+- [Recorrido del navegador](evidencias/RECORRIDO_HTML.md).
+- [Notas del adaptador y recuperación](evidencias/ADAPTADOR_EXCEL.md).
+- [Medición de rendimiento](evidencias/rendimiento-excel.json): libro de 267.417 bytes, importación 0,391 s y operaciones de 0,448–0,554 s. Una corrida del adaptador en Linux; no establece capacidad empresarial ni incluye HTTP.
 
-La persistencia de tablas de estado en SQLite es un adaptador transitorio. El modelo físico definitivo y el aislamiento por empresa se validan con MCD/DBD y los casos de negocio.
+## Límites de aceptación
 
-El primer ensayo local presupone un operador confiable en su equipo. La presencia de un nombre de usuario de referencia no equivale a una sesión autenticada de distribución empresarial. La aceptación de permisos y autenticación se incluye al preparar el paquete y su alcance.
+Los espacios separan copias de libros. Falta resolver el aislamiento de dos empresas dentro del mismo libro, ya observado como riesgo en OT-001. El motor se recuperó exactamente de Ola 1; la coincidencia de bytes no acredita su equivalencia metodológica completa con ORIA.
+
+El usuario operativo es declarado al motor para aplicar sus permisos. No existe todavía una sesión autenticada empresarial. Los archivos contienen las tablas históricas privadas y deben custodiarse localmente.
+
+La escritura utiliza temporal, recibo, respaldo anterior y reemplazo atómico. Se probó una falla inyectada antes del reemplazo y recuperación en frío. El respaldo conserva una escritura y comparte disco. No se probó un corte físico ni Excel nativo en Windows. Reservar el libro gestionado al servicio: cerrar Office y consultar copias separadas. La edición externa entre operaciones puede alterar reglas y recibos sin incrementar la versión del piloto.
+
+No están aceptados aún el generador integral, cierre mensual, todas las transacciones heredadas, publicación histórica, BI autónomo ni distribución comercial.

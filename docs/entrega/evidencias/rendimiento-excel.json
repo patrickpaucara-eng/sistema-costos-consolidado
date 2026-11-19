@@ -1,0 +1,51 @@
+{
+  "scope": "Una copia del libro Ola1, dos compras y un consumo; medición directa del adaptador, sin interfaz HTTP. No representa volumen empresarial.",
+  "python": "3.12.14",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "fixture_bytes": 267417,
+  "fixture_sha256": "43c9170c04b23e678de7abf7bab39f43c4251ea14695b351d884639ea972be40",
+  "import_seconds": 0.391311,
+  "operations": [
+    {
+      "transaction": "T14",
+      "seconds": 0.447662
+    },
+    {
+      "transaction": "T14",
+      "seconds": 0.463087
+    },
+    {
+      "transaction": "T15",
+      "seconds": 0.553504
+    }
+  ],
+  "reopen_query_seconds": 0.065311,
+  "replay_seconds": 0.383427,
+  "working_book_bytes": 274088,
+  "peak_rss_kib": 46024,
+  "stock": {
+    "table": "EXISTENCIA",
+    "columns": [
+      "EXI_REC",
+      "EXI_ALM",
+      "EXI_CAN",
+      "EXI_VAL",
+      "EXI_CPU",
+      "EXI_EMP"
+    ],
+    "rows": [
+      [
+        "CAJA4KG",
+        "ALM1",
+        400.0,
+        1221.6000000000004,
+        3.054,
+        "B"
+      ]
+    ],
+    "total": 1,
+    "offset": 0,
+    "limit": 100,
+    "version": 3
+  }
+}

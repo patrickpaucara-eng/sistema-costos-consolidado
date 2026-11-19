@@ -44,17 +44,28 @@ details a{font-size:.875em}
 <body>
 <main>
 <div id="reyna-system-map">
-  <h2>Así funciona hoy el Sistema de Costos Reyna</h2>
-  <p class="baseline text-small text-muted">Funcionamiento histórico · a96ba79 · evidencias OT-001</p>
-  <details class="surface"><summary>Continuidad del consolidado · 18 de noviembre de 2026</summary><p>El dueño aprobó SQLite local, Python como motor único, Excel/CSV e interfaz HTML. La Base estable, las instancias históricas y la autonomía por capacidad están en definición metodológica. El grafo de esta página sigue describiendo el histórico auditado.</p><p><a href="https://github.com/patrickpaucara-eng/sistema-costos-consolidado/blob/docs/plan-maestro/docs/planificacion/ESTADO.md">Estado del trabajo en Git</a> · <a href="https://github.com/patrickpaucara-eng/sistema-costos-consolidado/blob/docs/plan-maestro/docs/modelo/CONTRATOS_DE_LOS_NIVELES.md">Contratos de los niveles</a></p></details>
+  <h2>Funcionamiento del Sistema de Costos Reyna</h2>
+  <section class="pilot-panel" aria-labelledby="consolidated-pilot">
+    <h3 id="consolidated-pilot">Piloto consolidado 0.1 · Python y Excel</h3>
+    <ol class="graph-chain" aria-label="Recorrido verificado del piloto">
+      <li><strong>HTML local</strong><span>Importa un libro y registra compra T14 o consumo T15.</span></li>
+      <li><strong>Motor Python</strong><span>Lee del libro las reglas y valida la transacción.</span></li>
+      <li><strong>Copia Excel</strong><span>Guarda movimientos, saldos y recibos en el espacio de trabajo.</span></li>
+      <li><strong>Reapertura</strong><span>El servidor recupera el saldo guardado y lo muestra en HTML.</span></li>
+    </ol>
+    <p class="text-small">Verificado en Linux y Chromium. Pendientes: validación en Windows, autenticación empresarial, dos empresas en un mismo libro y cierre con costo integral.</p>
+    <p class="text-small pilot-links"><a href="../entrega/GUIA_PILOTO_EXCEL.md">Guía del piloto</a><a href="../entrega/REGISTRO_CAPACIDADES.md">Registro de capacidades</a><a href="../entrega/evidencias/RECORRIDO_HTML.md">Evidencia del recorrido</a></p>
+  </section>
+  <h3>Mapa del sistema histórico</h3>
+  <p class="baseline text-small text-muted">Referencia auditada · a96ba79 · evidencias OT-001. Las vistas siguientes describen el sistema histórico.</p>
   <nav class="viz-row views" aria-label="Vistas del sistema">
-    <button type="button" class="btn" data-view="map" aria-pressed="true">Mapa actual</button>
+    <button type="button" class="btn" data-view="map" aria-pressed="true">Mapa histórico</button>
     <button type="button" class="btn" data-view="operation" aria-pressed="false">Sigue una orden</button>
     <button type="button" class="btn" data-view="design" aria-pressed="false">Diseño y soporte</button>
     <button type="button" class="btn" data-view="catalog" aria-pressed="false">Detalle técnico</button>
     <button type="button" class="btn" data-view="business" aria-pressed="false">Uso empresarial</button>
   </nav>
-  <section data-pane="map" aria-label="Mapa actual">
+  <section data-pane="map" aria-label="Mapa histórico">
     <div class="current-graph">
       <section class="lane base-lane" aria-labelledby="current-base">
         <div class="lane-heading"><p class="text-small text-muted">Nivel 1</p><h3 id="current-base">Base y registro de operaciones</h3></div>
@@ -155,6 +166,9 @@ details a{font-size:.875em}
 </div>
 <style>
   #reyna-system-map { color:var(--foreground); max-width:100%; }
+  #reyna-system-map .pilot-panel { margin:1rem 0 1.65rem; padding:1rem; background:var(--surface); border:1px solid var(--border); border-inline-start:3px solid var(--viz-series-1); border-radius:.55rem; }
+  #reyna-system-map .pilot-panel .graph-chain { font-size:.9rem; margin:.7rem 0; }
+  #reyna-system-map .pilot-links { display:flex; flex-wrap:wrap; gap:.35rem 1rem; margin-top:.5rem; }
   #reyna-system-map .baseline { margin-top:calc(var(--font-size-base) * .25); }
   #reyna-system-map .current-graph { display:grid; gap:.68em; }
   #reyna-system-map .lane { min-width:0; padding-inline-start:.8em; border-inline-start:2px solid var(--lane-color, var(--border)); }

@@ -1,52 +1,41 @@
 # Estado y reanudación
 
-Actualizado el 18 de noviembre de 2026. Rama de trabajo desarrollo/capacidad-inicial, derivada de docs/plan-maestro.
+Actualizado el 18 de noviembre de 2026, hora de Lima. Rama `desarrollo/capacidad-inicial`, derivada de `docs/plan-maestro`.
 
-## Mandatos vigentes
+## Mandato vigente
 
-El dueño aprobó SQLite local + Python como motor único + Excel/CSV + interfaz HTML y autorizó ejecutar el plan. MCD y DBD de Tino Reyna son las fuentes primarias para dudas de método y presentación.
+Python como único motor operativo, Excel como almacenamiento/intercambio e interfaz HTML local. SQLite se aplaza hasta demostrar estabilidad, sin desarrollo paralelo. El VBA se conserva congelado. El repositorio histórico se consulta en lectura; la implementación y sus hitos pertenecen al consolidado. El dueño autorizó ejecución autónoma, agentes estratégicos y entrega por capacidades activas. MCD y DBD de Tino son las fuentes primarias para resolver dudas de método y presentación.
 
-Se requiere Base estable ante nuevos costos, instancias históricas reproducibles, crecimiento mediante configuración, módulos, analítica que aprende y autonomía basada en madurez. La entrega se realiza por capacidades activas con recorrido y evidencia. Las formulaciones detalladas están en docs/modelo/CONTRATOS_DE_LOS_NIVELES.md.
+Se busca Base estable, cálculo modular por instancias históricas y ampliación por configuración. La autonomía de Analítica exige resultados medidos. Las propuestas conceptuales están en [CONTRATOS_DE_LOS_NIVELES.md](../modelo/CONTRATOS_DE_LOS_NIVELES.md). El 93 % histórico sigue sin validación global.
 
-## Trabajo realizado en este hito
+## Hitos conservados
 
-| Tarea | Estado | Evidencia |
-|---|---|---|
-| P00 | Verificada para este hito | Los seis adjuntos originales coinciden con SHA256SUMS.txt. Revisiones de origen fijadas en OT-001. |
-| P01 | Preservada en el hito documental, integridad verificada por manifiesto | docs/auditoria/OT-001 contiene 27 archivos cotejados con su manifiesto original. |
-| P02 | En curso | Plan, contratos, aprobaciones y fuentes históricas identificadas. Falta matriz completa de requisitos. |
-| P03 | Protocolo registrado | AGENTS.md, PLAN_MAESTRO.md y este archivo explican qué consultar y cómo actualizar el HTML. |
-| M01 | Lectura y extracción en curso | Libros completos disponibles y análisis de MCD/DBD con páginas. La matriz deberá revisarse por regla. |
-| M03 | Recuperación dirigida en curso | REQUISITOS.md, COMO_RETOMAR.md, ESPEC_ANALITICA2.md y expediente final consultados por SHA. |
-| C01–C07 | Contratos preliminares | Documento de niveles con criterios de aceptación. Falta cotejar y resolver ejemplos completos. |
+| Hito | Estado y evidencia |
+|---|---|
+| Fuentes | Seis originales con manifiesto; libros completos MCD/DBD disponibles en [índice](../fuentes/INDICE_FUENTES.md). |
+| Auditoría histórica OT-001 | Expediente de 27 archivos y manifiesto; 292 ramas inventariadas. Referencias y límites en su resumen. |
+| Método y conocimiento | Lecturas MCD/DBD con páginas, matriz inicial y recuperación dirigida de Markdown históricos. El cotejo por método continúa. |
+| Piloto Python/Excel 0.1.0 | CAP-01–CAP-05 verificadas en su alcance técnico. Compra, consumo, reapertura, reintento y HTML. [Registro y evidencias](../entrega/REGISTRO_CAPACIDADES.md). |
+| Conservación de VBA | ZIP exactos de `kit/vba` de main a96ba79 y Ola 1 cac2501, con hashes. |
+| Mapa HTML | Conserva mapa histórico a96ba79 y distingue el nuevo recorrido del piloto consolidado. |
 
-La aplicación consolidada todavía requiere diseño y construcción por lotes. El mapa HTML publicado corresponde al histórico main a96ba79, cuya referencia remota se confirmó al crear el mapa.
+El motor Python operativo es copia exacta de `kit/motor_espejo.py` de Ola 1 cac2501. El adaptador preserva las partes ajenas del XLSX, guarda recibo y estado juntos y conserva respaldo de la escritura anterior. Las nueve pruebas cubren disco/HTTP, concurrencia cooperativa, recuperación inyectada y preservación de formato y fórmula. El recorrido real de Chromium confirma la UI. Linux está probado; Windows/Excel nativo sigue pendiente.
 
 ## Siguiente tarea reanudable
 
-Completar la matriz metodológica con MCD y DBD y cerrar los conceptos para una orden, un proyecto y dos empresas. Preservar como caso la factura tardía para consultas por fecha y por conocimiento. Resolver cómo expresar datos y reglas del caso de proyectos antes de fijar el esquema.
+1. Leer [PYTHON_EXCEL.md](PYTHON_EXCEL.md), el registro de capacidades y su evidencia; comprobar rama, último commit, hashes del motor, fixture y VBA. No reanudar el ensayo SQLite, que permanece fuera de la entrega.
+2. Reproducir el caso de mezcla de empresas y seguir sus claves desde compra/consumo hasta valuación y reapertura. Definir el oráculo de igualdad entre operación conjunta y separada antes de modificar reglas.
+3. Inventariar las llamadas efectivas del generador/cierre Ola 1 y sus pendientes de Claude; enlazar cada regla con MCD/DBD y los casos ORIA. Conservar las discrepancias por SHA y página.
+4. Ampliar el recorrido hasta costo de una orden con conciliación y persistencia recuperable. No habilitar globalmente transacciones sin caso de aceptación.
+5. Sustituir captura JSON por campos de negocio al validar contratos; comprobar instalación y recuperación en el equipo de destino. Registrar el alcance entregable de cuatro días por capacidades, sin dar por terminado el conjunto.
 
-Los borradores C01–C07 avanzan en paralelo. Su cierre requiere M02, M04–M06 y la revisión C08. Se puede reproducir A01 sobre copias del histórico como diagnóstico. Para validar el consolidado, primero se diseñan sus casos de aceptación y se ejecutan durante los lotes de implementación. Las capacidades nuevas se registran con operación, ejemplo, evidencia y versión. El stack está aprobado. El número de usuarios simultáneos y el volumen esperado siguen pendientes para M05.
+## Incertidumbres y límites abiertos
 
-## Capacidades del consolidado
+- Dos empresas en el mismo libro: aislamiento de toda la cadena pendiente.
+- Excel/Windows nativo, interacción con Office y corte físico: pendientes. El servicio debe ser el único editor del libro gestionado.
+- Autenticación personal: pendiente; el piloto supone operador local de confianza.
+- Volumen, simultaneidad empresarial e industria inicial: no fijados. Las mediciones de un libro pequeño no representan producción.
+- Cierre completo, publicación histórica, equivalencia metodológica, cuentas, BI y aprendizaje autónomo: pendientes.
+- El antecedente Frenosa JSONL conserva texto y documentación; fórmulas/macros originales no son reconstruibles por el mero nombre de sus archivos.
 
-| Capacidad | Estado y recorrido | Evidencia |
-|---|---|---|
-| Consultar fuentes y procedencia | Documentación disponible en Git | Índice y seis originales con hashes. |
-| Consultar mapa del histórico | HTML local navegable | Mapa, catálogo DBD y enlaces por SHA. |
-| Registrar y cerrar costos en el consolidado | Pendiente de construcción | Se implementará después del modelo y casos aceptados. |
-| Adaptación autónoma del consolidado | Pendiente de diseño y entrenamiento | Requiere historial y evaluación de resultados. |
-
-Los estados de documentación y los de operación empresarial indican capacidades distintas. Cada tabla explicita el recorrido que acredita su estado.
-
-## Fuentes metodológicas de este hito
-
-LECTURA_MCD.md documenta las páginas físicas de MCD y LECTURA_DBD.md los pasajes de interfaz, historia y recuperación de DBD. MATRIZ_INICIAL.md relaciona quince requisitos con casos y estado. CONOCIMIENTO_Y_FORMA_DE_TRABAJO.md recupera decisiones Markdown históricas y matiza la integración de autonomía. La revisión independiente corrigió una dependencia circular entre diseñar pruebas y construir producto, ubicó el modelo externo antes del diseño físico y añadió A10 para la extensión por proyectos.
-
-## Ejecución priorizada en cuatro días
-
-PLAN_CUATRO_DIAS.md fija el nuevo orden de ejecución. La construcción de G1/CAP-01–CAP-05 está asignada a tres agentes con áreas separadas y un contrato API común. El orquestador integra y mide rendimiento. Las preguntas de alcance prioritario y equipo de destino se enviaron al dueño; hasta su respuesta se usa el supuesto reversible de un operador local.
-
-## Cambio de prioridad vigente
-
-El dueño indicó posteriormente quitar VBA, conservar Excel, completar los pendientes de Claude y verificar los métodos de costos contra los casos de ORIA. SQLite se aplaza. Los agentes recibieron instrucción de pausar su ensayo y conservarlo. G1 cambia a HTML → Python → archivo Excel → reapertura. Ver PYTHON_EXCEL.md. El intento SQLite conserva estado de ensayo y no se declara capacidad activa.
+La continuidad depende del hito guardado en Git, no de la persistencia del espacio temporal. Revisar el estado remoto antes de iniciar otra sesión. La guía permite repetir el caso en una copia del repositorio.

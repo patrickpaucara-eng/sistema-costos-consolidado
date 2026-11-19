@@ -2,6 +2,10 @@
 
 Versión 3 · 18 de noviembre de 2026 · prioridad actualizada a Python + Excel.
 
+## Decisión vigente al retomar
+
+El dueño confirmó conservar Excel como almacén y retirar VBA de la operación. SQLite se aplaza hasta demostrar estabilidad y no se desarrolla en paralelo. Se conservaron los módulos VBA de main y Ola 1 como ZIP de referencia inalterada. El primer lote usa adaptador Excel y motor Python con un contrato de lectura, ejecución y consulta independiente de la interfaz. La sustitución futura del adaptador requerirá equivalencia y pruebas, con alcance propio.
+
 ## Resultado esperado
 
 Un sistema universal de costos e inteligencia de decisiones con funcionamiento offline, cálculos reproducibles, trazabilidad de cada resultado, operación práctica y recuperación comprobable. El alcance comercial se demostrará mediante casos representativos y pruebas de instalación, operación, respaldo y restauración.
@@ -33,7 +37,7 @@ El dueño aprobó el stack y dio la instrucción «Procede con tu plan» el 18-n
 - En las tres revisiones, la historia Python dio 392/392 y ENVASE 66/66. Ola 1 corrigió 16 errores de coherencia y elevó automatización a 5/5.
 - Continúan abiertos el aislamiento por empresa de la cadena, P20 en la construcción estricta, recuperación de cierre completo, integridad de las huellas y conciliación de cuentas.
 - Los libros completos MCD y DBD llegaron después de OT-001 y están en el índice de fuentes. Su recepción habilita el cotejo metodológico pendiente.
-- El consolidado contiene fuentes y el HTML. La aplicación histórica aún no fue importada.
+- El consolidado contiene fuentes, HTML y el piloto 0.1.0. Su motor Python es copia exacta de Ola 1; un adaptador propio persiste T14/T15 en una copia Excel. El resto de la aplicación histórica no está habilitado. Ver el registro de capacidades y sus límites.
 
 Los resultados de pruebas expresan su versión y su caso. Para repetir una prueba se fijan también los datos y el entorno. La observación de mezcla entre empresas se reprodujo en el método con hechos mezclados y requiere verificar toda la ruta de operación.
 
@@ -202,7 +206,7 @@ Se empieza con el orquestador y hasta tres especialistas cuando existan tareas i
 
 Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
 
-El siguiente lote ejecutable reúne P00–P03 y M01–M04. Producirá continuidad en Git, matriz metodológica, contraste de versiones y antecedentes. En paralelo puede reproducirse A01 de extremo a extremo en copias. Su cierre permitirá presentar M05–M06 y C01–C08 como una propuesta conceptual concreta para revisión. T03–T04 concretarán versiones y condiciones del stack ya aprobado antes de construir el primer lote.
+El lote documental conservó P00–P03 y la primera extracción de M01–M04. El piloto 0.1.0 verificó CAP-01–CAP-05 en su alcance técnico, con Python y Excel. El siguiente lote trabaja A01 (aislamiento empresarial) y el recorrido I03–I04 con los casos y oráculos de MCD/DBD y ORIA. El estado detallado está en ESTADO.md; el resto de fases conserva sus puertas y no se da por cerrado por haber construido el piloto.
 
 ## Prioridad de entrega del 18-nov
 
