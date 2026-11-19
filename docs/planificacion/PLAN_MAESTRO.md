@@ -1,6 +1,6 @@
 # Plan maestro de consolidación
 
-Versión 2 · 18 de noviembre de 2026 · ejecución autorizada por el dueño.
+Versión 3 · 18 de noviembre de 2026 · prioridad actualizada a Python + Excel.
 
 ## Resultado esperado
 
@@ -18,7 +18,7 @@ El trabajo se organiza en los tres niveles elegidos por el dueño. La Base conse
 | Tres niveles Base / Síntesis / Analítica | Dirección conceptual indicada por el dueño |
 | Modelo conceptual detallado y contratos entre niveles | En preparación, pendientes de validación |
 | Uso individual o varias personas simultáneas | Pendiente de decisión |
-| Stack y ejecución del plan | Aprobados el 18-nov. SQLite local + Python como motor único + Excel/CSV + interfaz HTML. |
+| Stack y ejecución del plan | Instrucción posterior: Python único + Excel como almacenamiento e intercambio + HTML. SQLite aplazado. |
 | Repositorio histórico sistema-costos-reyna | Consulta y pruebas sobre copias |
 | 93 % de avance heredado | Declaración pendiente de validación |
 
@@ -116,6 +116,8 @@ A01 puede empezar como diagnóstico en copias sobre la implementación actual an
 
 ### Estado del stack
 
+La decisión posterior [PYTHON_EXCEL.md](PYTHON_EXCEL.md) sustituye SQLite por Excel para el primer paquete. Las referencias SQLite siguientes describen el plan de migración aplazado. La validación de guardado, recuperación e idempotencia se aplica ahora a archivos Excel.
+
 El stack vigente del histórico usa Excel para almacenamiento, VBA para la operación e intérprete Python de apoyo, métodos y analítica. La versión auditada registra duplicación del intérprete y rutas con persistencia distinta.
 
 **Stack aprobado el 18-nov** — SQLite local para persistencia, Python como motor único, Excel/CSV para intercambio e interfaz HTML. El modelo externo del DBD de Tino guía captura, validación, consulta y presentación.
@@ -201,3 +203,7 @@ Se empieza con el orquestador y hasta tres especialistas cuando existan tareas i
 Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
 
 El siguiente lote ejecutable reúne P00–P03 y M01–M04. Producirá continuidad en Git, matriz metodológica, contraste de versiones y antecedentes. En paralelo puede reproducirse A01 de extremo a extremo en copias. Su cierre permitirá presentar M05–M06 y C01–C08 como una propuesta conceptual concreta para revisión. T03–T04 concretarán versiones y condiciones del stack ya aprobado antes de construir el primer lote.
+
+## Prioridad de entrega del 18-nov
+
+El dueño fijó un plazo de cuatro días, pidió reutilizar el trabajo de Claude y autorizó adaptar la ejecución y desplegar el equipo estratégicamente. [PLAN_CUATRO_DIAS.md](../entrega/PLAN_CUATRO_DIAS.md) concreta el recorrido, las puertas y el primer ensayo. La instrucción posterior prioriza Python/Excel/HTML y aplaza SQLite. La primera prueba usa un adaptador transitorio del estado heredado para medir viabilidad. El cierre del modelo y sus contratos guía los lotes posteriores y los criterios de aceptación se conservan.

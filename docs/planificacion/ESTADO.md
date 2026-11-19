@@ -1,6 +1,6 @@
 # Estado y reanudación
 
-Actualizado el 18 de noviembre de 2026. Rama de trabajo docs/plan-maestro.
+Actualizado el 18 de noviembre de 2026. Rama de trabajo desarrollo/capacidad-inicial, derivada de docs/plan-maestro.
 
 ## Mandatos vigentes
 
@@ -42,3 +42,11 @@ Los estados de documentación y los de operación empresarial indican capacidade
 ## Fuentes metodológicas de este hito
 
 LECTURA_MCD.md documenta las páginas físicas de MCD y LECTURA_DBD.md los pasajes de interfaz, historia y recuperación de DBD. MATRIZ_INICIAL.md relaciona quince requisitos con casos y estado. CONOCIMIENTO_Y_FORMA_DE_TRABAJO.md recupera decisiones Markdown históricas y matiza la integración de autonomía. La revisión independiente corrigió una dependencia circular entre diseñar pruebas y construir producto, ubicó el modelo externo antes del diseño físico y añadió A10 para la extensión por proyectos.
+
+## Ejecución priorizada en cuatro días
+
+PLAN_CUATRO_DIAS.md fija el nuevo orden de ejecución. La construcción de G1/CAP-01–CAP-05 está asignada a tres agentes con áreas separadas y un contrato API común. El orquestador integra y mide rendimiento. Las preguntas de alcance prioritario y equipo de destino se enviaron al dueño; hasta su respuesta se usa el supuesto reversible de un operador local.
+
+## Cambio de prioridad vigente
+
+El dueño indicó posteriormente quitar VBA, conservar Excel, completar los pendientes de Claude y verificar los métodos de costos contra los casos de ORIA. SQLite se aplaza. Los agentes recibieron instrucción de pausar su ensayo y conservarlo. G1 cambia a HTML → Python → archivo Excel → reapertura. Ver PYTHON_EXCEL.md. El intento SQLite conserva estado de ensayo y no se declara capacidad activa.

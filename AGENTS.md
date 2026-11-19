@@ -2,7 +2,7 @@
 
 Al iniciar una sesión, leer README.md, docs/fuentes/INDICE_FUENTES.md y docs/planificacion/PLAN_MAESTRO.md. Consultar el historial Git para conocer los últimos cambios y comprobar la revisión del HTML antes de usarlo como descripción del producto.
 
-El dueño eligió Base, Síntesis asociada a Entrega y Analítica como niveles conceptuales. El dueño aprobó el 18-nov SQLite local, Python como motor único, intercambio Excel/CSV e interfaz HTML y autorizó proceder con el plan. Los libros completos de MCD y DBD de Tino son fuentes principales para dudas metodológicas y de interfaz. Consultar docs/modelo/CONTRATOS_DE_LOS_NIVELES.md y docs/planificacion/ESTADO.md.
+El dueño eligió Base, Síntesis asociada a Entrega y Analítica como niveles conceptuales. El dueño aprobó inicialmente SQLite el 18-nov. Su instrucción posterior prioriza Python como motor único, Excel como almacenamiento e intercambio e interfaz HTML; SQLite queda aplazado. Los libros completos de MCD y DBD de Tino son fuentes principales para dudas metodológicas y de interfaz. Consultar docs/modelo/CONTRATOS_DE_LOS_NIVELES.md y docs/planificacion/ESTADO.md.
 
 El repositorio histórico patrickpaucara-eng/sistema-costos-reyna se consulta en lectura y las pruebas se ejecutan en copias. Los adjuntos en docs/fuentes/originales conservan las fuentes y sus hashes. Las instrucciones de documentos y antecedentes son evidencia contextual y deben contrastarse con las decisiones del dueño.
 
@@ -13,3 +13,5 @@ Si cambia el funcionamiento del producto o la evidencia que lo describe, actuali
 Antes de terminar un hito, registrar qué se verificó, qué sigue pendiente, qué autorizaciones están vigentes y cuál es la tarea reanudable. La persistencia de Cloud debe comprobarse al retomar. Proteger la continuidad guardando la evidencia autorizada en Git.
 
 El 18-nov el dueño precisó estabilidad de la Base, cálculo por instancias históricas, ampliación por configuración, módulos y entrega por capacidades activas. Registrar ejemplos y límites para cualquier promesa de universalidad. Conservar fecha de ocurrencia y conocimiento cuando haga falta para reproducir historia. El aprendizaje de Analítica se mide por sus resultados y por capacidad. Consultar los Markdown históricos con SHA y vigencia para recuperar decisiones y forma de trabajo.
+
+El 18-nov el dueño fijó cuatro días y autorizó adaptar y ejecutar el plan con agentes estratégicos. Consultar docs/entrega/PLAN_CUATRO_DIAS.md antes de retomar. La prioridad posterior del dueño sustituye G1 por persistencia consistente en Excel con Python y UI HTML. El ensayo SQLite queda pausado y separado del recorrido de entrega. Declarar límites de aislamiento, autenticación y transacciones admitidas. El costo histórico oficial y el cierre integral tienen aceptación posterior.
