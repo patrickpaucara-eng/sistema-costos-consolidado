@@ -1,21 +1,21 @@
-# Prioridad vigente · Python y Excel
+# Decisión técnica · Python y Excel
 
-18 de noviembre de 2026, hora de Lima.
+Registrada el 18 de noviembre de 2026 y precisada después por el dueño. La ejecución vigente está en [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md).
 
 ## Mandato y alcance
 
-El dueño precisó quitar VBA, conservar Excel y completar el trabajo de Claude mediante capacidades verificadas. Primero se revisa el generador y los métodos de costos contra MCD/DBD y los casos de ORIA. Después se evalúa la practicidad de BI, robustez y adaptabilidad. La aprobación inicial de SQLite se aplaza para respetar la instrucción posterior.
+El dueño precisó quitar VBA del flujo nuevo, conservar Excel y completar el trabajo de Claude mediante capacidades verificadas. Su instrucción posterior congela el VBA histórico en vez de borrarlo. SQLite se aplaza. Primero se valida el motor en Excel; después se revisa el generador y los métodos de costos contra MCD/DBD y ORIA; luego se evalúa robustez, adaptabilidad y BI.
 
 ## Recorrido de entrega
 
-1. Fijar la revisión de referencia y recuperar los cambios de Ola 1 que correspondan.
-2. Convertir el motor espejo Python en el recorrido operativo de lectura, validación, cálculo y guardado Excel. Mantener las reglas y protocolos recuperables.
-3. Probar guardado con archivo temporal y reemplazo, respaldo recuperable y exclusión de escrituras concurrentes. Comprobar que Excel abierto o una ruta sin permiso provoquen un error accionable.
-4. Identificar el lote/documento y su contenido antes de aplicar una carga. Un reintento y una fila nueva con el mismo documento se evalúan según la identidad definida.
-5. Recorrer compra, consumo y costo de una orden desde HTML, cerrar el proceso y cotejar el libro reabierto.
-6. Verificar cada método con oráculo, procedencia y conciliación. Incorporar los casos ORIA sin transferir errores o supuestos sin examinar.
-7. Completar cierre, consulta, intercambio y caso de varios periodos. Presentar capacidades activas y pendientes en el HTML.
-8. Revisar BI y autonomía según los datos, resultados y límites demostrados. El plazo de cuatro días se controla por puertas y alcance de aceptación.
+1. Fijar la revisión de referencia y recuperar cambios de Ola 1 solo cuando correspondan.
+2. Operar con Python sobre copias Excel; conservar contrato para separar en el futuro el motor del adaptador de almacenamiento.
+3. Probar guardado temporal, reemplazo, respaldo, reintento, concurrencia cooperativa y cierres con inyección de fallo.
+4. Mantener identidad de solicitud, empresa y periodo para prevenir duplicación o contaminación.
+5. Completar compra, consumo y cierre técnico desde HTML. El costo oficial por orden y las cuentas requieren oráculos adicionales.
+6. Verificar métodos con MCD/DBD, casos ORIA y conciliación antes de modificarlos.
+7. Cerrar D9, flete/T14.2 y D14 por dependencias; después validar integración, Windows/Excel y varios periodos.
+8. Evaluar BI/autonomía solo con costos publicados, calidad medida y límites autorizados.
 
 ## Integración y retorno de Claude
 

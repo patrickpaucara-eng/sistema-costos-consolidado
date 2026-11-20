@@ -249,7 +249,7 @@
       </header>
       <div class="scope">
         <strong>Recuperación del motor de Claude</strong>
-        <p>Python opera sobre un libro Excel por espacio. El piloto es para un operador de confianza. Queda por demostrar el uso de dos empresas en un mismo libro.</p>
+        <p>Cada espacio queda vinculado a una sola empresa operativa. El piloto rechaza libros con usuarios que tienen permisos T14/T15 en varias empresas; así evita mezclar sus costos mientras se valida el aislamiento completo.</p>
       </div>
 
       <div class="top-grid">
@@ -290,6 +290,7 @@
           <div><dt>Espacio activo</dt><dd id="detail-name"></dd></div>
           <div><dt>Identificador</dt><dd id="detail-id" class="mono"></dd></div>
           <div><dt>Versión del estado</dt><dd id="detail-version" class="mono"></dd></div>
+          <div><dt>Empresa del espacio</dt><dd id="detail-company" class="mono"></dd></div>
           <div class="wide" id="detail-file-row" hidden><dt>Libro de trabajo guardado</dt><dd id="detail-file" class="mono"></dd></div>
           <div class="wide"><dt>Huella del libro importado</dt><dd id="detail-hash" class="mono"></dd></div>
         </dl>
@@ -331,6 +332,17 @@
           </fieldset>
         </form>
         <div id="execute-status" class="notice" role="status"></div>
+        <form id="close-form" class="fields stack" hidden>
+          <h3>Cerrar un periodo</h3>
+          <p class="helper"><strong>Solo para una copia de prueba:</strong> ejecuta los pasos OFICIAL o CIERRE del libro y marca el periodo cerrado. El MVP todavía no concilia las cuentas D9 ni valida el costo integral de la orden. La cadena se guarda como un solo reemplazo del archivo.</p>
+          <div class="fields split">
+            <div class="field"><label for="close-period">Periodo abierto</label><input id="close-period" required placeholder="2026-04"></div>
+            <div class="field"><label for="close-user">Usuario autorizado</label><input id="close-user" required placeholder="Código de usuario"></div>
+          </div>
+          <div class="field"><label for="close-request-id">Identificador del cierre</label><input id="close-request-id" class="mono" required autocomplete="off" spellcheck="false"></div>
+          <div class="actions"><button id="close-button" type="submit">Cerrar periodo</button><button id="new-close-request" class="secondary" type="button">Nuevo identificador</button></div>
+          <div id="close-status" class="notice" role="status"></div>
+        </form>
       </section>
 
       <section class="panel stack" id="consultar" aria-labelledby="table-heading">
@@ -373,6 +385,10 @@
     const executeForm = byId("execute-form");
     const executeFields = byId("execute-fields");
     const executeStatus = byId("execute-status");
+    const closeForm = byId("close-form");
+    const closeStatus = byId("close-status");
+    const closeButton = byId("close-button");
+    const closeRequestId = byId("close-request-id");
     const transaction = byId("transaction");
     const operator = byId("operator");
     const headerInput = byId("json-header");
@@ -537,16 +553,19 @@
       byId("detail-name").textContent = space.name;
       byId("detail-id").textContent = space.id;
       byId("detail-version").textContent = space.version;
+      byId("detail-company").textContent = space.company_code ?? "No definida";
       byId("detail-hash").textContent = space.workbook_sha256;
       byId("detail-file").textContent = space.workbook_path ?? "";
       byId("detail-file-row").hidden = !space.workbook_path;
       byId("workspace-detail").hidden = false;
       byId("no-detail").hidden = true;
       executeForm.hidden = !space.transactions.length;
+      closeForm.hidden = !space.close_month_enabled;
     }
 
     function updateExecuteState() {
       executeFields.disabled = loadingDetail || executing;
+      closeButton.disabled = loadingDetail || executing;
     }
 
     async function selectWorkspace(id) {
@@ -558,6 +577,11 @@
         const detail = await api(workspacePath(id));
         if (load !== detailLoad) return;
         saveDraft();
+        if (closeRequestId.dataset.workspaceId !== detail.id) {
+          closeRequestId.dataset.workspaceId = detail.id;
+          closeRequestId.value = newRequestId();
+          notice(closeStatus);
+        }
         selectedWorkspace = detail;
         displayWorkspace(detail);
         restoreDraft(detail);
@@ -706,6 +730,10 @@
       requestId.value = newRequestId();
       requestId.focus();
     });
+    byId("new-close-request").addEventListener("click", () => {
+      closeRequestId.value = newRequestId();
+      closeRequestId.focus();
+    });
     tableSelect.addEventListener("change", () => {
       if (tableSelect.value) {
         loadTable();
@@ -783,6 +811,37 @@
       } finally {
         executing = false;
         updateExecuteState();
+      }
+    });
+
+    closeForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!selectedWorkspace || loadingDetail || executing) return;
+      const id = selectedWorkspace.id;
+      const payload = {
+        period: byId("close-period").value.trim(),
+        user: byId("close-user").value.trim(),
+        request_id: closeRequestId.value.trim(),
+      };
+      executing = true;
+      closeButton.disabled = true;
+      notice(closeStatus, "Ejecutando el cierre en memoria y preparando un solo guardado…");
+      try {
+        const result = await api(`${workspacePath(id)}/close-month`, payload);
+        updateVersion(id, result.version);
+        if (selectedWorkspace?.id !== id) return;
+        const summary = result.steps.map((step) => `${step.step}: ${step.result}`).join(" · ");
+        notice(closeStatus, `Periodo ${result.period} cerrado. ${summary} Versión ${result.version}.`, "success");
+        if (tableSelect.value) loadTable();
+      } catch (error) {
+        if (selectedWorkspace?.id === id) {
+          const failed = error.payload?.steps?.filter((step) => step.result === "ERROR") ?? [];
+          const detail = failed.map((step) => `${step.step}: ${step.error}`).join(" · ");
+          notice(closeStatus, `No se confirmó el cierre. ${error.message} ${detail} No se aplicaron cambios de negocio; el intento quedó anotado. Reintenta con el mismo identificador.`, "error");
+        }
+      } finally {
+        executing = false;
+        closeButton.disabled = false;
       }
     });
 

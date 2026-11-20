@@ -146,6 +146,11 @@ class CapacidadInicial(unittest.TestCase):
         self.assertEqual(status, expected_status, result)
         return result
 
+    def close_month(self, workspace, body, expected_status=200, port=None):
+        status, result = self.request("POST", workspace + "/close-month", body, port=port)
+        self.assertEqual(status, expected_status, result)
+        return result
+
     def table(self, workspace, table):
         status, result = self.request("GET", f"{workspace}/tables/{table}")
         self.assertEqual(status, 200, result)
@@ -173,6 +178,9 @@ class CapacidadInicial(unittest.TestCase):
     def test_compra_consumo_saldo_y_reapertura(self):
         source_digest = hashlib.sha256(self.workbook.read_bytes()).hexdigest()
         workspace, version = self.import_workspace()
+        detail_status, detail = self.request("GET", workspace)
+        self.assertEqual(detail_status, 200, detail)
+        self.assertEqual(detail["company_code"], "B")
         self.assertEqual(self.stock(workspace), [])
         self.execute(workspace, self.compra("compra-uno"))
         self.execute(workspace, self.compra("compra-dos", second=True))
@@ -193,6 +201,95 @@ class CapacidadInicial(unittest.TestCase):
         self.assertEqual(rows[0], tuple(expected["columns"]))
         self.assertEqual(rows[1], tuple(expected["rows"][0]))
         self.assertEqual(hashlib.sha256(self.workbook.read_bytes()).hexdigest(), source_digest)
+
+    def test_importacion_rechaza_dos_empresas_operativas(self):
+        book = load_workbook(self.workbook)
+        try:
+            users = book["USUARIO"]
+            source = next(row for row in users.iter_rows(min_row=2, values_only=True) if row[0] == "ALMACEN1")
+            users.append(["ALMACENA", source[1], "ALMACEN", "A"])
+            book.save(self.workbook)
+        finally:
+            book.close()
+        status, result = self.request(
+            "POST", "/api/workspaces",
+            {"name": "Dos empresas", "workbook_path": str(self.workbook)},
+        )
+        self.assertEqual(status, 422, result)
+        self.assertIn("un solo ámbito empresarial", result["error"])
+        list_status, workspaces = self.request("GET", "/api/workspaces")
+        self.assertEqual(list_status, 200, workspaces)
+        self.assertEqual(workspaces["workspaces"], [])
+
+    def test_operador_no_puede_cambiar_empresa_del_espacio(self):
+        workspace, _ = self.import_workspace()
+        body = self.compra("empresa-distinta")
+        body["header"]["EMP"] = "A"
+        result = self.execute(workspace, body, expected_status=422)
+        self.assertIn("Usuario o empresa no autorizados", result["error"])
+        self.assertEqual(self.stock(workspace), [])
+
+    def test_cierre_oficial_guarda_una_vez_y_reintenta(self):
+        workspace, version = self.import_workspace()
+        self.execute(workspace, self.compra("cierre-compra-uno"))
+        self.execute(workspace, self.compra("cierre-compra-dos", second=True))
+        self.execute(workspace, self.consumo("cierre-consumo", 2600))
+        version += 3
+        status, detail = self.request("GET", workspace)
+        self.assertEqual(status, 200, detail)
+        self.assertTrue(detail["close_month_enabled"])
+        body = {"period": "2026-04", "user": "JCOSTOS", "request_id": "cierre-abril"}
+        result = self.close_month(workspace, body)
+        self.assertEqual(result["result"], "OK")
+        self.assertEqual([step["step"] for step in result["steps"]],
+                         ["T23.1", "T23.2", "T23.3", "T23.5", "T23.9"])
+        self.assertEqual(result["version"], version + 5)
+        carga = self.workbook_table(workspace, "CARGA")
+        self.assertEqual([row[4] for row in carga[-5:]], ["OK"] * 5)
+        self.stop_server(self.server)
+        self.start_server()
+        self.assertEqual(self.close_month(workspace, body), result)
+        self.assertEqual(len(self.workbook_table(workspace, "CARGA")[-5:]), 5)
+        period_table = self.table(workspace, "PERIODO")
+        period = [dict(zip(period_table["columns"], row)) for row in period_table["rows"]]
+        self.assertEqual(next(row["PER_EST"] for row in period
+                             if row["PER_COD"] == "2026-04" and row["PER_EMP"] == "B"), "C")
+        [(quantity, amount, unit_cost)] = self.stock(workspace)
+        self.assertEqual(quantity, 400)
+        self.assertAlmostEqual(amount, 1221.6, places=2)
+        self.assertAlmostEqual(unit_cost, 3.054, places=6)
+        changed = {**body, "period": "2026-05"}
+        self.close_month(workspace, changed, expected_status=409)
+
+    def test_cierre_fallido_no_persiste_pasos_parciales(self):
+        from src.reyna_local import store
+
+        local_store = store.Store(self.data_dir)
+        workspace = local_store.create({"name": "Cierre con fallo", "workbook_path": str(self.workbook)})
+        identifier = workspace["id"]
+        path = Path(workspace["workbook_path"])
+        before, _ = store.load_data(path.read_bytes())
+        original = store.Motor.ejecutar
+
+        def fail_at_liquidation(motor, transaction, header, user, lines=None):
+            if transaction == "T23.3":
+                raise RuntimeError("Fallo de liquidación inyectado.")
+            return original(motor, transaction, header, user, lines)
+
+        body = {"period": "2026-04", "user": "JCOSTOS", "request_id": "falla-cierre"}
+        with patch.object(store.Motor, "ejecutar", new=fail_at_liquidation):
+            status, response = local_store.close_month(identifier, body)
+        self.assertEqual(status, 422, response)
+        self.assertEqual(response["steps"][0]["error"],
+                         "La cadena de cierre no pudo completarse: RuntimeError.")
+        retry_status, retry = local_store.close_month(identifier, body)
+        self.assertEqual(retry_status, status)
+        self.assertEqual(retry, response)
+        after, _ = store.load_data(path.read_bytes())
+        for name in before:
+            if name not in (store.META, store.RECEIPTS):
+                self.assertEqual(after[name], before[name], f"El cierre fallido alteró {name}.")
+        self.assertEqual(store.metadata(after)["version"], workspace["version"])
 
     def test_reintento_persiste_y_otro_payload_es_conflicto(self):
         workspace, version = self.import_workspace()

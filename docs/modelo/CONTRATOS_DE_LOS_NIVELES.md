@@ -1,6 +1,6 @@
 # Contratos de Base, Síntesis y Analítica
 
-Borrador de diseño del 18 de noviembre de 2026. Recoge la dirección del dueño y explicita criterios para validarla con MCD/DBD. Stack aprobado — SQLite local, Python como motor único, Excel/CSV e interfaz HTML.
+Borrador de diseño del 18 de noviembre de 2026. Recoge la dirección del dueño y explicita criterios para validarla con MCD/DBD. La selección inicial de SQLite fue aplazada después: el stack operativo vigente es Python, Excel/CSV e interfaz HTML. La persistencia SQLite se reevaluará después de la puerta de estabilidad, sin desarrollo paralelo.
 
 ## Nivel 1 · Base estable
 

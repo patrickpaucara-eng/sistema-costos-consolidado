@@ -1,13 +1,24 @@
 # Sistema de Costos Consolidado
 
-Repositorio privado para la consolidación del Sistema de Costos Reyna. La base técnica identificada en la auditoría OT-001 es `main@a96ba794a6171a325836a5a56bf1c9392dbd8482` del repositorio histórico. [Revisión de referencia](https://github.com/patrickpaucara-eng/sistema-costos-reyna/commit/a96ba794a6171a325836a5a56bf1c9392dbd8482)
+Repositorio privado de trabajo para consolidar el Sistema de Costos Reyna. El punto histórico de referencia de la auditoría OT-001 es `main@a96ba794a6171a325836a5a56bf1c9392dbd8482` del [repositorio original](https://github.com/patrickpaucara-eng/sistema-costos-reyna/commit/a96ba794a6171a325836a5a56bf1c9392dbd8482), que se mantiene en solo lectura.
 
-El [índice de fuentes](docs/fuentes/INDICE_FUENTES.md) reúne los libros de MCD y DBD, los materiales de CLEIN y ORIA y el antecedente de Frenosa. La primera validación prevista contrasta los libros de Reyna con el sistema actual y documenta un caso reproducible de robustez con los antecedentes disponibles.
+## Decisiones vigentes
 
-El [plan maestro](docs/planificacion/PLAN_MAESTRO.md) organiza el trabajo desde la validación metodológica hasta la entrega y mantenimiento, con dependencias y criterios de aceptación. El [mapa HTML del funcionamiento actual](docs/diagramas/sistema-actual-reyna.html) se actualiza en cada lote que cambie el comportamiento o la evidencia mostrada. El plan incluye el estado de la decisión tecnológica y las tareas del siguiente lote.
+Python es el único motor operativo; Excel es el libro de trabajo e intercambio; la interfaz es HTML local. VBA se conserva congelado y SQLite se aplaza hasta demostrar estabilidad. Los libros completos MCD y DBD de Tino son la base metodológica. Los adjuntos y fuentes de Claude, ORIA y Frenosa se conservan con índices y hashes en [docs/fuentes](docs/fuentes/INDICE_FUENTES.md). El 93 % histórico no está validado como avance global.
 
-La [lectura MCD](docs/metodologia/LECTURA_MCD.md) y la [lectura DBD](docs/metodologia/LECTURA_DBD.md) documentan los fundamentos por página. Los [contratos de los niveles](docs/modelo/CONTRATOS_DE_LOS_NIVELES.md) expresan los criterios del dueño y las pruebas de aceptación. El [estado de reanudación](docs/planificacion/ESTADO.md) identifica lo realizado y la siguiente tarea. El [expediente OT-001](docs/auditoria/OT-001/RESUMEN_EJECUTIVO.md) conserva la auditoría histórica con su fecha de corte.
+## Estado de la entrega
 
-La prioridad actual es [Python y Excel](docs/planificacion/PYTHON_EXCEL.md). El piloto 0.1.0 registra compras T14 y consumos T15 desde HTML, persiste en una copia Excel y recupera el estado tras reiniciar. Nueve pruebas aprobaron guardado, reintento, concurrencia cooperativa, rechazo y recuperación; también se verificó el recorrido real en Chromium. La [guía del piloto Excel](docs/entrega/GUIA_PILOTO_EXCEL.md) permite instalarlo y repetir el caso. El [registro de capacidades](docs/entrega/REGISTRO_CAPACIDADES.md) distingue lo demostrado de los pendientes.
+La rama activa `desarrollo/mvp-ola3` prepara el candidato 0.2.0: completa en Linux el flujo de importación, compras T14, consumo T15, cierre de los pasos configurados y consulta en HTML. El libro se modifica en una sola sustitución por cadena de cierre; el reintento usa recibos. Cada espacio se limita a una empresa operativa.
 
-El motor operativo se recuperó de Ola 1 `cac2501`, con [procedencia y hash](referencia/ORIGEN_MOTOR.md). El VBA está congelado y SQLite aplazado, sin implementación paralela en este paquete. El piloto usa un operador local de confianza; faltan Windows/Excel nativo, aislamiento entre empresas dentro de un libro, cierre integral y validación del generador contra ORIA. El mapa histórico conserva su referencia `main@a96ba79` y añade el estado del piloto por separado.
+La suite actual usa `python -m unittest discover -s tests -v`. El recorrido real en Chromium validó compras, consumo y cierre en la fixture. Estas comprobaciones son técnicas; no validan todavía D9, el costo integral de orden contra ORIA, flete/T14.2 ni D14.
+
+## Plan y continuidad
+
+- [Plan de ejecución MVP y deuda restante](docs/entrega/PLAN_MVP_Y_PENDIENTES.md): puertas, dependencias, incertidumbres y trabajo desde D9 hasta la estabilidad.
+- [Registro de capacidades](docs/entrega/REGISTRO_CAPACIDADES.md) y [evidencia Ola 3](docs/entrega/evidencias/MVP_OLA3.md): qué está probado y sus límites.
+- [Guía para repetir el recorrido](docs/entrega/GUIA_PILOTO_EXCEL.md).
+- [Mapa HTML del sistema histórico y del MVP actual](docs/diagramas/sistema-actual-reyna.html).
+- [Estado de reanudación](docs/planificacion/ESTADO.md) y [contratos de los tres niveles](docs/modelo/CONTRATOS_DE_LOS_NIVELES.md).
+- [Lectura de MCD](docs/metodologia/LECTURA_MCD.md), [lectura de DBD](docs/metodologia/LECTURA_DBD.md) e [índice de fuentes](docs/fuentes/INDICE_FUENTES.md).
+
+La siguiente tarea crítica es inventariar escritores de cuentas y preparar un caso manual de cuadre para D9 antes de modificar los cálculos. Windows/Excel nativo, autenticación empresarial, rendimiento con datos reales, D9, flete/T14.2, D14, aislamiento integral, publicación histórica y analítica autónoma siguen pendientes.

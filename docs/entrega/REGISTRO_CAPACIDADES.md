@@ -1,34 +1,41 @@
-# Capacidades y evidencia de la entrega
+# Capacidades verificadas y pendientes
 
-Rama `desarrollo/capacidad-inicial`, piloto 0.1.0. Verificación del 18 de noviembre de 2026, hora de Lima.
+**Corte:** 19 de noviembre de 2026 (hora de Lima).
 
-El recorrido vigente es HTML local → Python → copia Excel → reapertura. SQLite está aplazado y no tiene implementación en esta entrega. El VBA histórico permanece congelado en `referencia/vba-congelado`.
+**Trabajo:** candidato 0.2.0 en `desarrollo/mvp-ola3`; motor Ola 1 conservado como referencia histórica.
 
-| ID | Operación | Estado | Evidencia y límite |
+**Alcance:** piloto técnico con fixture didáctica. No representa aprobación comercial ni validación de todos los métodos.
+
+El recorrido actual es HTML local → Python → copia del XLSX → reapertura. SQLite se aplaza. VBA histórico está congelado. El detalle de esta entrega, sus dependencias y las siguientes puertas están en [PLAN_MVP_Y_PENDIENTES.md](PLAN_MVP_Y_PENDIENTES.md).
+
+| ID | Capacidad | Estado | Evidencia y límite |
 |---|---|---|---|
-| CAP-01 | Importar un libro compatible a un espacio local | Verificada en el piloto | Copia identificada por SHA-256; origen intacto. Fixture Ola 1. |
-| CAP-02 | Registrar compra T14 y consumo T15 con Python | Verificada en el piloto | Dos compras y un consumo dejan 400 unidades, S/ 3,054 por unidad y S/ 1.221,60. Rechazo multilínea conserva el estado de negocio. |
-| CAP-03 | Reabrir y consultar movimientos y saldos | Verificada en el piloto | Reinicio del proceso y lectura directa del XLSX confirman versión y saldo. |
-| CAP-04 | Reintentar sin duplicar | Verificada en el piloto | Misma identidad y contenido recuperan el recibo; otro contenido devuelve conflicto. También se probaron dos procesos cooperantes. |
-| CAP-05 | Operar desde HTML local | Verificada en Chromium | Importar, ejecutar, consultar, repetir y ver errores. Formulario técnico con JSON; operador local de confianza. |
-| CAP-06 | Cerrar y publicar costo por orden | Pendiente | Requiere validar método, cuadre, aislamiento y cierre recuperable completo. |
-| CAP-07 | Conservar instancia histórica de costos | Pendiente | Debe fijar insumos, reglas y resultados y demostrar reproducción por fecha. El recibo de un movimiento no acredita esta capacidad. |
-| CAP-08 | Analítica con aprendizaje y autonomía | Pendiente | Requiere medición del efecto, límites y políticas autorizadas por capacidad. |
+| CAP-01 | Importar un libro compatible a un espacio local | Verificada | Copia identificada por SHA-256; origen intacto. Fixture Ola 1. |
+| CAP-02 | Registrar compra T14 y consumo T15 con Python | Verificada | Dos compras y un consumo dejan 400 unidades, S/ 3,054 por unidad y S/ 1.221,60. Rechazo multilínea conserva las tablas de negocio. |
+| CAP-03 | Reabrir y consultar movimientos y saldos | Verificada | Reinicio del proceso y lectura de XLSX confirman versión y saldo. |
+| CAP-04 | Reintentar sin duplicar | Verificada | Misma identidad y contenido recuperan el recibo; otro contenido produce conflicto. Se probaron dos procesos cooperantes. |
+| CAP-05 | Operar compra, consumo y consultas desde HTML | Verificada | Recorrido real en Chromium en Linux. Operador local de confianza y formulario JSON técnico. |
+| CAP-06 | Cerrar el periodo mediante la cadena configurada del libro | Verificada en alcance técnico | Cinco pasos se muestran desde HTML y se guardan con un reemplazo del XLSX. El fallo inyectado en T23.3 deja igual el estado de negocio y la versión; el rechazo queda anotado. No acredita D9, cuenta correcta ni método universal. |
+| CAP-07 | Aislar completamente varias empresas dentro de un libro | Pendiente; hay guardia | Se rechaza importar cuando usuarios con permisos para T14/T15 pertenecen a más de una empresa y ejecutar una operación con `EMP` distinta. No se probó equivalencia de costo entre libros separados y combinados; el MVP queda limitado a una empresa por espacio. |
+| CAP-08 | Reconciliar costo integral de orden, cuentas y ventas contra MCD/DBD/ORIA | Pendiente | Requiere oráculos independientes, D9, flete y D14. La fixture no verifica el costo de `OS-01` contra una fuente ORIA. |
+| CAP-09 | Conservar una instancia histórica de costo reproducible | Pendiente | Debe fijar entradas, fecha, reglas, revisión del motor y resultado. El recibo de un movimiento o cierre no representa una publicación inmutable del costo. |
+| CAP-10 | Analítica con aprendizaje y autonomía | Pendiente | Requiere resultados aprobados, medición de calidad, trazabilidad, controles, posibilidad de reversión y permisos por capacidad. |
 
-## Evidencia reproducible
+## Evidencia de este incremento
 
-- [Guía de instalación y caso manual](GUIA_PILOTO_EXCEL.md).
-- [Pruebas independientes](evidencias/REVISION_INDEPENDIENTE.md): 9 aprobadas, ninguna omitida. [Ejecución del coordinador](evidencias/pruebas-excel.log): 9 aprobadas en 15,520 segundos.
-- [Recorrido del navegador](evidencias/RECORRIDO_HTML.md).
+- [Pruebas y recorrido MVP Ola 3](evidencias/MVP_OLA3.md): suite completa, fallo inyectado, cierre desde HTML y resultados del caso.
+- [Guía de instalación y reproducción](GUIA_PILOTO_EXCEL.md).
+- [Pruebas del primer piloto](evidencias/REVISION_INDEPENDIENTE.md) y [ejecución original](evidencias/pruebas-excel.log): nueve pruebas del incremento CAP-01–CAP-05.
+- [Recorrido HTML de la primera entrega](evidencias/RECORRIDO_HTML.md).
 - [Notas del adaptador y recuperación](evidencias/ADAPTADOR_EXCEL.md).
-- [Medición de rendimiento](evidencias/rendimiento-excel.json): libro de 267.417 bytes, importación 0,391 s y operaciones de 0,448–0,554 s. Una corrida del adaptador en Linux; no establece capacidad empresarial ni incluye HTTP.
+- [Medición acotada de rendimiento](evidencias/rendimiento-excel.json): un libro de 267.417 bytes, importación 0,391 s y operaciones 0,448–0,554 s. No estima capacidad de producción.
 
-## Límites de aceptación
+## Límites actuales
 
-Los espacios separan copias de libros. Falta resolver el aislamiento de dos empresas dentro del mismo libro, ya observado como riesgo en OT-001. El motor se recuperó exactamente de Ola 1; la coincidencia de bytes no acredita su equivalencia metodológica completa con ORIA.
+Un espacio es una copia de un libro, no una base multiempresa. La guardia identifica una empresa activa por los operadores habilitados para T14/T15, pero el filtro de empresa no se ha demostrado en toda la cadena del motor. El usuario se declara en la solicitud; no existe sesión empresarial autenticada.
 
-El usuario operativo es declarado al motor para aplicar sus permisos. No existe todavía una sesión autenticada empresarial. Los archivos contienen las tablas históricas privadas y deben custodiarse localmente.
+El cierre ejecuta los pasos `OFICIAL` o `CIERRE` definidos en `CIERRE_PASO`. El test comprueba que el periodo `2026-04` de B termina cerrado y que el saldo del recurso permanece en 400 unidades a S/ 3,054. No concilia las tablas de cuentas D9 ni publica el costo de una orden. Si una cadena falla, las tablas de negocio y la versión no cambian; se escribe en `RECEIPTS` un rechazo idempotente.
 
-La escritura utiliza temporal, recibo, respaldo anterior y reemplazo atómico. Se probó una falla inyectada antes del reemplazo y recuperación en frío. El respaldo conserva una escritura y comparte disco. No se probó un corte físico ni Excel nativo en Windows. Reservar el libro gestionado al servicio: cerrar Office y consultar copias separadas. La edición externa entre operaciones puede alterar reglas y recibos sin incrementar la versión del piloto.
+La persistencia usa temporal, respaldo anterior y reemplazo atómico; el respaldo comparte disco. No se probó corte físico. Debe cerrar Office y reservar el XLSX gestionado al servicio. La prueba en Windows/Excel nativo y en el equipo del dueño sigue pendiente. Una versión anterior del espacio debe reimportarse para activar los metadatos de cierre y empresa de esta iteración.
 
-No están aceptados aún el generador integral, cierre mensual, todas las transacciones heredadas, publicación histórica, BI autónomo ni distribución comercial.
+El generador integral, D9, flete/T14.2, D14, devoluciones EVE_ORI, coproductos, costo financiero, múltiples empresas, autenticación, volúmenes reales, varios operadores y analítica autónoma siguen sin aceptación. El motor es copia exacta del espejo Python de Ola 1; esa paridad de origen no demuestra que sus reglas representen íntegramente el método ORIA.

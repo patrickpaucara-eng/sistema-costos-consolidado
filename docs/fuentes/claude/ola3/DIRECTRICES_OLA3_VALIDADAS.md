@@ -1,0 +1,30 @@
+# Directrices del dueño para la Ola 3 (16-nov 09:57) — validadas contra el sistema real
+
+[VERIFICADO] = comprobado hoy en el código/DBD. Para el siguiente agente: construir según la columna «Cómo construirlo», no según el texto original cuando difieren.
+
+| # | Directriz | Veredicto | Lo que YA existe [VERIFICADO] | Cómo construirlo |
+|---|---|---|---|---|
+| 1 | Flete como línea de **SERVICIO (SD)** en T14, prorrateado a los materiales | **Válida en el fondo, corregir el término** | T14 no tiene flete; «SD» en el sistema es *servicio directo a la OT*, no costo de adquisición | Línea de flete en la misma T14 (recurso tipo FLETE), **prorrateada por valor** a las líneas de material → sube el CPU del kardex (NIC 2: costo de adquisición). No llamarla SD. Si el flete lo hace un centro propio: gasto del centro vía reparto (ALG-04), como dice el dueño |
+| 1b | Flete facturado después: transacción de **ajuste de costo** «T14.1 o similar» | **Válida; código en conflicto** | **T14.1 ya es «Devolución a proveedor»** | Transacción nueva (p. ej. **T14.2 Ajuste de costo de compra**): sin cantidades; sube el valor del saldo y recalcula el CPU; la parte ya consumida va como variación de costo al resultado del mes actual; referencia al evento original (EVE_ORI) sin tocarlo |
+| 2 | D14: al cerrar, reexpresar el costo de venta con el costo real de la OT liquidada | **Válida** | El provisional se calcula con el plan (VALOR_ENTRADA_PRODUCCION = PLAN) y no se corrige en VENTA | En T23.3/T23.5: diferencia real − provisional de las unidades vendidas → ajuste al costo de ventas del periodo (registro con referencia a la venta; la fila original no se reescribe) |
+| 3 | Material por kardex, gastos de apoyo por reparto; «Frenosa los mezcló» | **Regla válida; la crítica a Frenosa no** | Nuestro motor ya separa: T15 consume material (kardex → OT); ALG-04 reparte gastos de centros | Mantener. **Corrección:** Frenosa NO repartía material: su CMD iba directo a la OT por kardex (AGENTS.md §7 «CMD → OT directamente»). Lo que Frenosa hacía distinto es la **MOD → actividad → OT** (con tiempos estándar), que es otra cosa |
+| 4 | Costeo normal como regla cuando no hay datos reales completos | **Válida; ya existe** | TARIFA EST, CIF aplicado = tasa × base real, ocio y variación en el cierre (T23.2): ver caso del mes (87.50/h × 300 h, 8,750 ocioso) | Solo hacerlo explícito: cuando falte el real del periodo, el cierre usa la tasa normal y registra la variación |
+| 5 | Cliente/Proveedor: PERSONA + CTA_CLIENTE / CTA_PROVEEDOR | **Aprobado** | Hoy CLIENTE y PROVEEDOR son tablas con empresa (I-5) | Es el D4 de la Ola 2 (ACTOR con rol), con las cuentas especializadas |
+| 6 | «Merma vs pérdida falta en el sistema» | **Inexacta: ya existe**; falta solo hacerla visible | Merma normal se absorbe en el CPU (caso del mes: 40.63 de merma normal, COP_PERD); **T19 «Pérdida declarada (desmedro, siniestro)»** va a resultado; CAUSA_INEF / R-21 para tiempo | No construir de nuevo. Agregar a la guía y a la consulta la etiqueta: merma (absorbida) / pérdida (gasto) / ineficiencia (tiempo) |
+| 7 | Cierre atómico (D9): si falla a la mitad, volver todo atrás | **Válida e importante** | Cada transacción es atómica (pendiente + RecuperarPendientes + bitácora); **la cadena de cierre completa no lo es**; no existe tabla CHECKPOINT | Antes de la cadena: foto de las tablas que el cierre escribe (o punto de restauración del libro); si un paso falla → restaurar y avisar. Probar forzando un error en T23.3 |
+| 8 | Errores de la pantalla OPERAR MES en español: «Error en fila X: motivo» | **Válida: es un hueco real** | `kit/vba/operar.bas` **no tiene `On Error`** | `On Error GoTo` en LeerPlantilla / Validar / Importar / Cerrar; mensaje «Error en la fila N de la hoja H: …»; cerrar el libro de la plantilla y restaurar ScreenUpdating si falla. **Hacerlo antes de que el dueño pruebe** |
+
+## Capas REAL / CONTABLE (mensaje de la otra IA)
+- [VERIFICADO] El sistema ya tiene el eje **objetivo = REAL | CONTABLE | ESTIMADO** por método (ficha de método) y un método `AJUSTES_NIC2` (objetivo CONTABLE). La regla «ninguna regla fiscal contamina los hechos» ya es el diseño: los hechos son únicos; el objetivo cambia el cálculo.
+- Coproductos: VVR (contable) ya existe (TARIFA VVS); unidades físicas como alternativa REAL es **método nuevo → requiere permiso**.
+- Devoluciones al costo original (EVE_ORI): T16 ya lleva EVE_ORI; verificar en la Ola 3 que el reingreso use el costo de la salida original (no el promedio del día) con un caso a mano.
+- Ocio: hoy va a la cuenta del centro (CCE_OCIO), **no** a la OT; en CONTABLE va a gasto del periodo. Mostrarlo en REAL es consulta, no cambio de cálculo.
+- Gastos financieros en «costo integral» REAL: **no construir sin permiso** (fuera del dominio de costo de producción; riesgo de mezclar).
+
+## Orden recomendado
+Primero #8 (antes de la prueba del dueño), luego Ola 3: #7 → D9 → #1/#1b → #2 (D14), cada uno con caso a mano, Excel del dueño y paridad.
+
+## Decisiones del dueño (16-nov 10:10, validadas con la cátedra) — LEY DEL SISTEMA
+1. **Coproductos:** REAL (gerencial) puede usar **unidades físicas** (kg/l) para KPI de eficiencia; CONTABLE (NIC 2) **obligatorio VVR**, prohibido unidades físicas. → Método nuevo **aprobado** (permiso dado), con `objetivo` en la ficha; el validador debe rechazar UNIDADES_FISICAS con objetivo CONTABLE.
+2. **Gastos financieros:** REAL puede incluirlos en el **costo unitario integral** (precio objetivo); CONTABLE **prohibido** que toquen el inventario → categoría Financiación del estado de resultados (NIIF 18). → aprobado; los hechos no cambian, solo la corrida según `objetivo`.
+3. Orden de construcción: (1) errores en español en OPERAR MES — **HECHO 16-nov 10:20** (`desarrollo/ola1`, PRUEBA_OLA1B.zip nuevo, pytest 521) · (2) cierre atómico (punto de restauración) · (3) D9 único escritor de cuentas · (4) flete en T14 y ajuste T14.2 · (5) D14 reexpresión del costo de venta. Luego coproductos y gastos financieros con la separación de capas.

@@ -1,6 +1,6 @@
 # Ejecución de la entrega en cuatro días
 
-**Prioridad actualizada.** El plan de persistencia SQLite descrito abajo queda aplazado por la instrucción posterior del dueño. [PYTHON_EXCEL.md](../planificacion/PYTHON_EXCEL.md) define la entrega vigente. Se conservan puertas de aceptación, responsabilidades y disciplina de medición.
+**Documento histórico del 18 de noviembre.** Su secuencia, tecnologías y estimaciones ya no son el plan operativo. El dueño fijó después Python como motor, Excel como almacenamiento/intercambio, HTML local, VBA congelado y SQLite aplazado. La ejecución vigente está en [PLAN_MVP_Y_PENDIENTES.md](PLAN_MVP_Y_PENDIENTES.md), actualizado el 19 de noviembre; sus resultados están en [REGISTRO_CAPACIDADES.md](REGISTRO_CAPACIDADES.md). Se conserva este archivo para rastrear cómo cambió la planificación.
 
 18 de noviembre de 2026. Complementa el plan maestro y cambia su prioridad de ejecución. El plazo es un objetivo con aceptación por capacidades. Cada día termina en una versión ejecutable y evidencia guardada. El alcance se revisa con los resultados del primer recorrido.
 

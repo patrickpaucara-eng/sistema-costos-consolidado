@@ -1,6 +1,6 @@
 # Plan maestro de consolidación
 
-Versión 3 · 18 de noviembre de 2026 · prioridad actualizada a Python + Excel.
+Versión 4 · actualizado el 19 de noviembre de 2026 · ejecución MVP Python + Excel.
 
 ## Decisión vigente al retomar
 
@@ -18,9 +18,9 @@ El trabajo se organiza en los tres niveles elegidos por el dueño. La Base conse
 |---|---|
 | Auditoría y pruebas seguras sobre copias | Autorizadas |
 | Conservación de fuentes y documentación en el repositorio consolidado | Autorizada |
-| Mapa HTML del funcionamiento actual | Publicado, vinculado a la revisión auditada |
+| Mapa HTML del funcionamiento actual | Actualizado con el MVP Ola 3; distingue el piloto de la referencia histórica |
 | Tres niveles Base / Síntesis / Analítica | Dirección conceptual indicada por el dueño |
-| Modelo conceptual detallado y contratos entre niveles | En preparación, pendientes de validación |
+| Modelo conceptual detallado y contratos entre niveles | Borrador conservado; cotejo metodológico y pruebas de aceptación pendientes |
 | Uso individual o varias personas simultáneas | Pendiente de decisión |
 | Stack y ejecución del plan | Instrucción posterior: Python único + Excel como almacenamiento e intercambio + HTML. SQLite aplazado. |
 | Repositorio histórico sistema-costos-reyna | Consulta y pruebas sobre copias |
@@ -35,9 +35,9 @@ El dueño aprobó el stack y dio la instrucción «Procede con tu plan» el 18-n
 - Demo de referencia — prototipo/v41-congelado 3a2850060c96b2f7eaeae613c8a402aa9486c079.
 - OT-001 inventarió 292 ramas, 290 puntas, 289 árboles y 819 commits alcanzables.
 - En las tres revisiones, la historia Python dio 392/392 y ENVASE 66/66. Ola 1 corrigió 16 errores de coherencia y elevó automatización a 5/5.
-- Continúan abiertos el aislamiento por empresa de la cadena, P20 en la construcción estricta, recuperación de cierre completo, integridad de las huellas y conciliación de cuentas.
+- Continúan abiertos el aislamiento integral de la cadena, P20 en la construcción estricta, corrección contable D9, flete/T14.2, D14, integridad de las huellas y conciliación metodológica.
 - Los libros completos MCD y DBD llegaron después de OT-001 y están en el índice de fuentes. Su recepción habilita el cotejo metodológico pendiente.
-- El consolidado contiene fuentes, HTML y el piloto 0.1.0. Su motor Python es copia exacta de Ola 1; un adaptador propio persiste T14/T15 en una copia Excel. El resto de la aplicación histórica no está habilitado. Ver el registro de capacidades y sus límites.
+- El consolidado contiene fuentes, HTML y el MVP técnico Ola 3. Su motor Python es copia exacta de Ola 1; el adaptador persiste T14/T15 y la cadena configurada de cierre en una copia Excel. El cálculo integral y las cuentas oficiales siguen sin habilitarse. Ver el registro de capacidades y sus límites.
 
 Los resultados de pruebas expresan su versión y su caso. Para repetir una prueba se fijan también los datos y el entorno. La observación de mezcla entre empresas se reprodujo en el método con hechos mezclados y requiere verificar toda la ruta de operación.
 
@@ -124,15 +124,15 @@ La decisión posterior [PYTHON_EXCEL.md](PYTHON_EXCEL.md) sustituye SQLite por E
 
 El stack vigente del histórico usa Excel para almacenamiento, VBA para la operación e intérprete Python de apoyo, métodos y analítica. La versión auditada registra duplicación del intérprete y rutas con persistencia distinta.
 
-**Stack aprobado el 18-nov** — SQLite local para persistencia, Python como motor único, Excel/CSV para intercambio e interfaz HTML. El modelo externo del DBD de Tino guía captura, validación, consulta y presentación.
+**Decisión histórica del 18-nov, revisada después por el dueño** — SQLite local fue aprobado inicialmente. La decisión vigente aplaza SQLite y mantiene Python como motor único, Excel como libro de trabajo/intercambio y HTML como interfaz. El modelo externo del DBD de Tino guía captura, validación, consulta y presentación.
 
-Se verificarán versiones, instalación y operación sin Internet. El servicio de la interfaz HTML funcionará localmente; la forma de empaquetarlo se decide mediante T02. SQLite admite un escritor simultáneo. La cantidad de personas concurrentes y sus equipos sigue por precisar. Se toma como supuesto reversible del primer ensayo una operación local por proceso; M05 resolverá el alcance empresarial.
+Se verificarán versiones, instalación y operación sin Internet. El servicio de la interfaz HTML funcionará localmente; la forma de empaquetarlo se decide mediante T02. La ruta actual escribe Excel con reemplazo atómico y limita cada libro a una empresa operativa. La cantidad de personas concurrentes y sus equipos sigue por precisar. El trabajo activo se rige por [el plan MVP](../entrega/PLAN_MVP_Y_PENDIENTES.md); no implementar la fase de persistencia SQLite hasta alcanzar su puerta de estabilidad.
 
 El prototipo SQL del histórico se compara con el modelo conceptual antes de reutilizarlo. Su existencia no acredita una migración completa.
 
 ## Fase 5 · Diseño e importación de la base técnica
 
-Se ejecuta bajo la aprobación del plan y stack del 18-nov, después de verificar T04.
+La fase se conserva como historial de planificación. La decisión vigente aplaza la implementación SQLite; cualquier futuro trabajo de esa fase depende de la puerta de estabilidad del plan MVP.
 
 | Tarea | Dependencia | Acción y salida | Criterio de cierre |
 |---|---|---|---|
@@ -206,8 +206,8 @@ Se empieza con el orquestador y hasta tres especialistas cuando existan tareas i
 
 Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
 
-El lote documental conservó P00–P03 y la primera extracción de M01–M04. El piloto 0.1.0 verificó CAP-01–CAP-05 en su alcance técnico, con Python y Excel. El siguiente lote trabaja A01 (aislamiento empresarial) y el recorrido I03–I04 con los casos y oráculos de MCD/DBD y ORIA. El estado detallado está en ESTADO.md; el resto de fases conserva sus puertas y no se da por cerrado por haber construido el piloto.
+El lote documental conservó P00–P03 y la primera extracción de M01–M04. El MVP Ola 3 añade una guardia de empresa por espacio y cierre técnico de la cadena configurada; el nuevo cierre requiere 13 pruebas automatizadas y un recorrido real en Chromium. No valida D9 ni el costo integral. La siguiente tarea es el inventario de escritores D9 y el caso de cuadre independiente; después siguen flete/T14.2 y D14. El estado detallado y las puertas están en [ESTADO.md](ESTADO.md) y [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md).
 
 ## Prioridad de entrega del 18-nov
 
-El dueño fijó un plazo de cuatro días, pidió reutilizar el trabajo de Claude y autorizó adaptar la ejecución y desplegar el equipo estratégicamente. [PLAN_CUATRO_DIAS.md](../entrega/PLAN_CUATRO_DIAS.md) concreta el recorrido, las puertas y el primer ensayo. La instrucción posterior prioriza Python/Excel/HTML y aplaza SQLite. La primera prueba usa un adaptador transitorio del estado heredado para medir viabilidad. El cierre del modelo y sus contratos guía los lotes posteriores y los criterios de aceptación se conservan.
+El dueño fijó un plazo de cuatro días y pidió reutilizar el trabajo de Claude. Su plan inicial se conserva como [documento histórico](../entrega/PLAN_CUATRO_DIAS.md). La secuencia operativa actual, ya ajustada al stack Python/Excel/HTML y SQLite aplazado, está en [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md). El cierre del modelo y sus contratos guía los lotes posteriores y los criterios de aceptación se conservan.

@@ -38,4 +38,4 @@ Consultar EXISTENCIA y KARDEX. Repetir la última solicitud con el mismo identif
 
 ## Alcance
 
-Compra y consumo por un operador local de confianza que usa códigos del libro de prueba. La interfaz permanece delimitada a operaciones del piloto. Siguen pendientes la verificación en Windows con Excel, la autenticación empresarial, el escenario de dos empresas dentro de un mismo libro y el cierre mensual con costo integral de orden. El [registro de capacidades](../REGISTRO_CAPACIDADES.md) conserva el alcance por incremento.
+Compra y consumo por un operador local de confianza que usa códigos del libro de prueba. Esta evidencia cubre la primera entrega; la rama MVP Ola 3 agrega cierre técnico configurado, con alcance y resultado separados en [MVP_OLA3.md](MVP_OLA3.md). Siguen pendientes la verificación en Windows/Excel nativo, la autenticación empresarial, el aislamiento integral entre empresas y la conciliación del costo de orden y sus cuentas. El [registro de capacidades](../REGISTRO_CAPACIDADES.md) conserva el alcance por incremento.

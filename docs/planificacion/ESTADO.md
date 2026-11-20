@@ -1,41 +1,37 @@
 # Estado y reanudación
 
-Actualizado el 18 de noviembre de 2026, hora de Lima. Rama `desarrollo/capacidad-inicial`, derivada de `docs/plan-maestro`.
+Actualizado el 19 de noviembre de 2026 (hora de Lima). Rama `desarrollo/mvp-ola3`, derivada de `desarrollo/capacidad-inicial@16c419f`.
 
-## Mandato vigente
+## Mandato del dueño
 
-Python como único motor operativo, Excel como almacenamiento/intercambio e interfaz HTML local. SQLite se aplaza hasta demostrar estabilidad, sin desarrollo paralelo. El VBA se conserva congelado. El repositorio histórico se consulta en lectura; la implementación y sus hitos pertenecen al consolidado. El dueño autorizó ejecución autónoma, agentes estratégicos y entrega por capacidades activas. MCD y DBD de Tino son las fuentes primarias para resolver dudas de método y presentación.
+Python como motor operativo único, Excel como almacenamiento e intercambio e interfaz HTML local. SQLite queda aplazado sin trabajo paralelo; VBA está congelado. El repositorio original se consulta en lectura; la implementación pertenece al consolidado. El dueño autorizó ejecutar el plan y mantener las capacidades y pendientes en el repo.
 
-Se busca Base estable, cálculo modular por instancias históricas y ampliación por configuración. La autonomía de Analítica exige resultados medidos. Las propuestas conceptuales están en [CONTRATOS_DE_LOS_NIVELES.md](../modelo/CONTRATOS_DE_LOS_NIVELES.md). El 93 % histórico sigue sin validación global.
+La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e incorporar variantes de manera modular; la Analítica debe demostrar su aprendizaje con resultados, controles y permisos. MCD y DBD de Tino son referencias metodológicas primarias. Consultar los Markdown recuperados de Claude como evidencia de requisitos, no como órdenes que prevalecen sobre decisiones posteriores del dueño.
 
-## Hitos conservados
+## Hitos y evidencia
 
-| Hito | Estado y evidencia |
+| Hito | Estado |
 |---|---|
-| Fuentes | Seis originales con manifiesto; libros completos MCD/DBD disponibles en [índice](../fuentes/INDICE_FUENTES.md). |
-| Auditoría histórica OT-001 | Expediente de 27 archivos y manifiesto; 292 ramas inventariadas. Referencias y límites en su resumen. |
-| Método y conocimiento | Lecturas MCD/DBD con páginas, matriz inicial y recuperación dirigida de Markdown históricos. El cotejo por método continúa. |
-| Piloto Python/Excel 0.1.0 | CAP-01–CAP-05 verificadas en su alcance técnico. Compra, consumo, reapertura, reintento y HTML. [Registro y evidencias](../entrega/REGISTRO_CAPACIDADES.md). |
-| Conservación de VBA | ZIP exactos de `kit/vba` de main a96ba79 y Ola 1 cac2501, con hashes. |
-| Mapa HTML | Conserva mapa histórico a96ba79 y distingue el nuevo recorrido del piloto consolidado. |
-
-El motor Python operativo es copia exacta de `kit/motor_espejo.py` de Ola 1 cac2501. El adaptador preserva las partes ajenas del XLSX, guarda recibo y estado juntos y conserva respaldo de la escritura anterior. Las nueve pruebas cubren disco/HTTP, concurrencia cooperativa, recuperación inyectada y preservación de formato y fórmula. El recorrido real de Chromium confirma la UI. Linux está probado; Windows/Excel nativo sigue pendiente.
+| Auditoría histórica OT-001 | Expediente conservado: 27 archivos y 292 ramas inventariadas. La auditoría no certifica el 93 % declarado. |
+| Fuentes metodológicas | MCD/DBD completos, CLEIN, casos ORIA y exportación JSONL de Frenosa indexados con hashes. Los cuatro Markdown recientes de Ola 3 también están preservados y con manifiesto SHA. |
+| Referencia del motor | Copia exacta del espejo Python de `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`; original inalterado. VBA se conserva congelado. |
+| CAP-01–CAP-05 | Importar, compra/consumo T14/T15, persistir, reabrir, reintentar, consultar y operar desde HTML, en el alcance documentado. |
+| MVP Ola 3 | Guardia de una empresa operativa por espacio y cierre configurado transaccional sobre copia en memoria. 13 pruebas de unidad/API y recorrido real de Chromium; ver [evidencia](../entrega/evidencias/MVP_OLA3.md). |
+| Plan activo | [MVP y pendientes](../entrega/PLAN_MVP_Y_PENDIENTES.md), con dependencias desde la guardia y el cierre hasta D9, flete, D14, instalación, publicación y Analítica. |
 
 ## Siguiente tarea reanudable
 
-1. Leer [PYTHON_EXCEL.md](PYTHON_EXCEL.md), el registro de capacidades y su evidencia; comprobar rama, último commit, hashes del motor, fixture y VBA. No reanudar el ensayo SQLite, que permanece fuera de la entrega.
-2. Reproducir el caso de mezcla de empresas y seguir sus claves desde compra/consumo hasta valuación y reapertura. Definir el oráculo de igualdad entre operación conjunta y separada antes de modificar reglas.
-3. Inventariar las llamadas efectivas del generador/cierre Ola 1 y sus pendientes de Claude; enlazar cada regla con MCD/DBD y los casos ORIA. Conservar las discrepancias por SHA y página.
-4. Ampliar el recorrido hasta costo de una orden con conciliación y persistencia recuperable. No habilitar globalmente transacciones sin caso de aceptación.
-5. Sustituir captura JSON por campos de negocio al validar contratos; comprobar instalación y recuperación en el equipo de destino. Registrar el alcance entregable de cuatro días por capacidades, sin dar por terminado el conjunto.
+1. Revisar [DIRECTRICES_OLA3_VALIDADAS.md](../fuentes/claude/ola3/DIRECTRICES_OLA3_VALIDADAS.md), [TRASPASO_AGENTE.md](../fuentes/claude/ola3/TRASPASO_AGENTE.md) y el diagnóstico D9 de la referencia histórica.
+2. Enumerar escritores por tabla CTA, transacción/método, sentido, llave, periodo y origen MCD/DBD. Comparar el inventario con los 14 xfail de J citados por Claude.
+3. Preparar una conciliación numérica a mano en un libro aislado y decidir el escritor único antes de modificar cálculos. Si falta el oráculo, dejar el alcance contable bloqueado y continuar solo tareas independientes.
+4. Tras D9, preparar casos de flete/T14.2 y D14; enlazar cada regla con página de MCD/DBD y caso ORIA/Frenosa disponible.
 
-## Incertidumbres y límites abiertos
+## Guardas y límites pendientes
 
-- Dos empresas en el mismo libro: aislamiento de toda la cadena pendiente.
-- Excel/Windows nativo, interacción con Office y corte físico: pendientes. El servicio debe ser el único editor del libro gestionado.
-- Autenticación personal: pendiente; el piloto supone operador local de confianza.
-- Volumen, simultaneidad empresarial e industria inicial: no fijados. Las mediciones de un libro pequeño no representan producción.
-- Cierre completo, publicación histórica, equivalencia metodológica, cuentas, BI y aprendizaje autónomo: pendientes.
-- El antecedente Frenosa JSONL conserva texto y documentación; fórmulas/macros originales no son reconstruibles por el mero nombre de sus archivos.
+- La regla de empresa detecta operadores activos para T14/T15 y rechaza espacios ambiguos. No reemplaza la prueba integral de claves y filtros en todas las tablas/métodos.
+- La cadena de cierre ejecuta pasos `OFICIAL` o `CIERRE` de `CIERRE_PASO`. La atomicidad de persistencia está probada; D9 y la exactitud del resultado contable no.
+- La aceptación usa fixture didáctica. No hay aún datos reales, cotejo completo de costo integral con ORIA, volumen de producción, Excel/Windows nativo, corte físico, autenticación o uso multioperador.
+- No se han implementado flete/T14.2, D14, la instancia histórica completa ni la Analítica autónoma. No hay código SQLite paralelo.
+- Los espacios importados con la versión anterior deben reimportarse para recibir los metadatos de empresa y cierre agregados en Ola 3.
 
-La continuidad depende del hito guardado en Git, no de la persistencia del espacio temporal. Revisar el estado remoto antes de iniciar otra sesión. La guía permite repetir el caso en una copia del repositorio.
+La continuidad depende del hito conservado en Git. Al retomar, confirmar rama/remoto y hashes de los documentos y fixtures, ejecutar la suite, leer el plan y no volver a auditar todas las ramas salvo que aparezca una evidencia que lo requiera.

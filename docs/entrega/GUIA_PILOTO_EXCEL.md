@@ -1,6 +1,6 @@
 # Primer recorrido Python y Excel
 
-La versión 0.1 es un ensayo técnico de compra y consumo usando el motor de Ola 1. Las reglas se leen de una copia del libro. Python ejecuta las operaciones desde HTML y guarda el estado en Excel. El costo integral de una orden y el cierre mensual corresponden a lotes posteriores.
+La primera entrega 0.1 demostró compra y consumo usando el motor de Ola 1. La rama MVP Ola 3 agrega una cadena de cierre configurada desde HTML, con un guardado único del XLSX. El libro de prueba permanece intacto. El costo integral de una orden y la corrección de sus cuentas siguen pendientes.
 
 ## Preparar el entorno
 
@@ -56,6 +56,14 @@ Usar un identificador distinto por operación y `[]` en líneas. Las reglas de c
 
 Consultar EXISTENCIA para CAJA4KG, ALM1, empresa B. La representación interna heredada usa coma flotante; el monto se verifica al céntimo. Detener y reiniciar el servidor con la misma carpeta de datos. Debe recuperar el mismo saldo.
 
+## Cerrar el periodo de prueba
+
+Después de registrar las dos compras y el consumo anterior, seleccionar **Cerrar un periodo**. Escribir `2026-04`, el usuario autorizado `JCOSTOS` y usar el identificador que la pantalla genera. Presionar **Cerrar periodo**. Para la fixture, la pantalla debe mostrar en orden T23.1, T23.2, T23.3, T23.5 y T23.9; la versión termina en 8 y el periodo B/2026-04 pasa a C. El saldo de CAJA4KG sigue en 400 unidades, S/ 3,054 por unidad y S/ 1.221,60.
+
+El servicio toma los pasos marcados `OFICIAL` o `CIERRE` de `CIERRE_PASO`; por eso la secuencia depende de la configuración del libro. El mismo identificador y contenido recuperan el resultado registrado. Si un paso falla, la versión y las tablas de negocio quedan sin cambios, pero se anota el intento en `RECEIPTS`; repite con el mismo identificador para consultar ese resultado. Para una operación nueva, genera uno nuevo.
+
+Este recorrido prueba el mecanismo de cierre y persistencia sobre la fixture. No valida la corrección de las cuentas D9, el costo integral de la orden, flete/T14.2 ni D14. No uses su resultado como costo oficial.
+
 ## Reintento y fallo
 
 Conservar el identificador y contenido de una solicitud y repetirla. Debe devolver el resultado registrado sin duplicar. Cambiar el contenido conservando el identificador debe generar conflicto.
@@ -64,9 +72,9 @@ Una operación rechazada conserva el estado de negocio anterior. Un rechazo de n
 
 ## Alcance actual
 
-El ensayo requiere un operador local de confianza y usuarios de referencia. El formulario avanzado solicita los campos en JSON. La captura empresarial con campos y listas de negocio se completa después.
+El ensayo requiere un operador local de confianza y usuarios de referencia. El formulario avanzado de transacciones solicita los campos en JSON. La captura empresarial con campos y listas de negocio se completa después. La cadena configurada de cierre ya se ejecuta desde HTML; la corrección contable y metodológica del cierre sigue pendiente.
 
-Los espacios aíslan copias de libros. Dos empresas dentro de un mismo libro necesitan su prueba y corrección. La recuperación del archivo debe validarse además en el equipo de destino, incluida una interrupción real del proceso y la interacción con Excel abierto.
+Los espacios aíslan copias de libros. El MVP limita cada espacio a una empresa operativa y rechaza los operadores detectados en otra empresa; la separación completa en cada tabla/método no se ha probado. Reimporta espacios creados antes de esta versión para habilitar los metadatos de empresa y cierre. La recuperación del archivo debe validarse además en el equipo de destino, incluida una interrupción real del proceso y la interacción con Excel abierto.
 
 El servicio debe ser el único editor del libro gestionado: cerrar Office y usar copias para inspección. El respaldo guarda una escritura anterior en el mismo disco. La [nota del adaptador](evidencias/ADAPTADOR_EXCEL.md) describe la recuperación en frío y sus límites. Conservar además respaldos separados para protegerse de pérdida del disco.
 
@@ -78,4 +86,4 @@ Para repetir la aceptación desde la raíz, con el entorno donde se instaló el 
 python -m unittest discover -s tests -v
 ```
 
-El test copia la fixture a directorios temporales. No necesita ejecutar VBA ni tener Excel instalado. La prueba de Excel nativo bajo Windows se realiza por separado y sigue pendiente.
+Los tests copian la fixture a directorios temporales. No necesitan ejecutar VBA ni tener Excel instalado. La prueba de Excel nativo bajo Windows se realiza por separado y sigue pendiente. La [evidencia MVP Ola 3](evidencias/MVP_OLA3.md) documenta el cierre y sus límites.

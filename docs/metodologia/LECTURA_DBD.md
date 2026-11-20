@@ -1,6 +1,6 @@
 # Del modelo externo al cierre reproducible
 
-**Fuente primaria.** Tino Reyna Monteverde, *Administración de bases de datos*, archivo suministrado `LIBRO COMPLETO DBD.pdf`, 238 páginas. La numeración impresa coincide con el índice del PDF, comenzando en 1. SHA-256 `d5dfe7e8bf564dd780148fa08fce47269b89433b67fe9d1c22b406465035568e`. Se cotejaron los pasajes que fundamentan este documento. Las opciones técnicas del proyecto son SQLite local, motor único en Python, interfaz HTML e intercambio Excel/CSV.
+**Fuente primaria.** Tino Reyna Monteverde, *Administración de bases de datos*, archivo suministrado `LIBRO COMPLETO DBD.pdf`, 238 páginas. La numeración impresa coincide con el índice del PDF, comenzando en 1. SHA-256 `d5dfe7e8bf564dd780148fa08fce47269b89433b67fe9d1c22b406465035568e`. Se cotejaron los pasajes que fundamentan este documento. El stack inicial considerado incluía SQLite local; el dueño aplazó esa decisión después. El sistema activo usa Python, Excel/CSV e interfaz HTML. Las referencias a un diseño SQLite en esta lectura orientan una posible fase futura, no la implementación vigente.
 
 ## Evidencia del libro
 

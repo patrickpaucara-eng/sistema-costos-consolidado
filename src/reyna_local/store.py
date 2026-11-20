@@ -167,6 +167,24 @@ def validate_model(tables):
                 raise Problem(422, f"El libro carece de la definición {txn} en {table}.")
 
 
+def operational_companies(tables):
+    """Empresas asignadas a usuarios con permiso para transacciones del piloto."""
+    companies = {str(row[0]) for row in tables["EMPRESA"]["r"] if row and row[0] not in (None, "")}
+    allowed = {(row[0], row[1]) for row in tables["PERFIL_TRX"]["r"] if len(row) > 1}
+    profiles = {}
+    for row in tables["USUARIO_PERFIL"]["r"]:
+        if len(row) > 1:
+            profiles.setdefault(row[0], []).append(row[1])
+    active = set()
+    for user in tables["USUARIO"]["r"]:
+        if len(user) < 4 or str(user[3]) not in companies:
+            continue
+        user_profiles = profiles.get(user[0]) or [user[2]]
+        if any((profile, txn) in allowed for profile in user_profiles for txn in TRANSACTIONS):
+            active.add(str(user[3]))
+    return sorted(active)
+
+
 def permitted_tables(tables):
     denied = set()
     for row in tables["PARAMETRO"]["r"]:
@@ -374,7 +392,9 @@ def metadata(tables):
 
 def summary(tables, path):
     info = metadata(tables)
-    return {**info, "tables": permitted_tables(tables), "transactions": list(TRANSACTIONS),
+    return {**info, "company_code": info.get("company_code"),
+            "close_month_enabled": bool(info.get("close_month_enabled", 0)),
+            "tables": permitted_tables(tables), "transactions": list(TRANSACTIONS),
             "workbook_path": str(path)}
 
 
@@ -423,10 +443,15 @@ class Store:
         raw = content_bytes(source)
         tables, _ = load_data(raw)
         validate_model(tables)
+        companies = operational_companies(tables)
+        if len(companies) != 1:
+            raise Problem(422, "El piloto requiere un solo ámbito empresarial operativo por espacio. "
+                               f"Empresas operativas detectadas: {', '.join(companies) or 'ninguna'}.")
         identifier = uuid4().hex
         info = {"id": identifier, "name": name, "version": 0, "created_at": now(),
                 "workbook_sha256": sha256(raw).hexdigest(), "engine_sha256": ENGINE_SHA256,
-                "engine_revision": SOURCE_REVISION}
+                "engine_revision": SOURCE_REVISION, "company_code": companies[0],
+                "close_month_enabled": int("CIERRE_PASO" in tables)}
         directory = self.root / identifier
         directory.mkdir(mode=0o700)
         path = directory / "libro.xlsx"
@@ -482,6 +507,12 @@ class Store:
             info = metadata(tables)
             if info["id"] != identifier or info["engine_sha256"] != ENGINE_SHA256:
                 raise Problem(409, "La identidad o versión del motor del espacio es incompatible.")
+            company = info.get("company_code")
+            if company is None:
+                companies = operational_companies(tables)
+                if len(companies) != 1:
+                    raise Problem(409, "El espacio no tiene un único ámbito empresarial verificable. Reimpórtelo.")
+                company = companies[0]
             for record in tables[RECEIPTS]["r"]:
                 if record[0] == key:
                     if record[1] != digest:
@@ -502,7 +533,8 @@ class Store:
             motor.usr = motor.perfil = ""
             motor.pend = None
             owner = next((r for r in tables["USUARIO"]["r"] if r[0] == user), None)
-            if owner is None or ("EMP" in header and header["EMP"] != owner[3]):
+            if (owner is None or len(owner) < 4 or str(owner[3]) != company
+                    or ("EMP" in header and str(header["EMP"]) != company)):
                 outcome = "ERROR: Usuario o empresa no autorizados."
             else:
                 try:
@@ -515,6 +547,102 @@ class Store:
             response = {"result": "OK" if ok else "ERROR", "transaction": txn, "request_id": key, "version": version}
             if not ok:
                 response["error"] = outcome
+            edits = motor_changes(tables, motor, positions) if ok else {}
+            if ok:
+                version_row = next(n for n, row in zip(positions[META], tables[META]["r"]) if row[0] == "version")
+                edits[META] = [(version_row, 2, version)]
+            nr = (positions[RECEIPTS][-1] if positions[RECEIPTS] else 1) + 1
+            record = (key, digest, status, encode(response), command, now())
+            edits[RECEIPTS] = [(nr, j, val) for j, val in enumerate(record, 1)]
+            with ZipFile(BytesIO(raw)) as z:
+                parts = sheet_parts(z)
+                patches = {parts[n]: patch_cells(z.read(parts[n]), cells) for n, cells in edits.items()}
+            with temporary(path.parent) as temp, temporary(path.parent) as backup:
+                write_archive(temp, raw, patches)
+                with backup.open("wb") as f:
+                    f.write(raw)
+                    f.flush()
+                    os.fsync(f.fileno())
+                same_workbook(path, raw)
+                os.replace(backup, path.parent / "respaldo.xlsx")
+                sync_dir(path.parent)
+                same_workbook(path, raw)
+                os.replace(temp, path)
+                sync_dir(path.parent)
+            return status, response
+
+    def close_month(self, identifier, body):
+        """Ejecuta la cadena oficial en memoria y persiste una sola versión del libro."""
+        user = text_field(body, "user", 100)
+        key = text_field(body, "request_id", 160)
+        period = text_field(body, "period", 40)
+        command = encode({"operation": "close_month", "user": user, "period": period})
+        digest = sha256(command.encode()).hexdigest()
+        path = self.path(identifier)
+        with writer_lock(path.parent):
+            raw = content_bytes(path)
+            tables, positions = load_data(raw)
+            info = metadata(tables)
+            if info["id"] != identifier or info["engine_sha256"] != ENGINE_SHA256:
+                raise Problem(409, "La identidad o versión del motor del espacio es incompatible.")
+            company = info.get("company_code")
+            if company is None or not info.get("close_month_enabled"):
+                raise Problem(422, "Este libro no tiene una cadena de cierre habilitada.")
+            for record in tables[RECEIPTS]["r"]:
+                if record[0] == key:
+                    if record[1] != digest:
+                        raise Problem(409, "El identificador ya corresponde a otra operación.")
+                    return record[2], json.loads(record[3])
+            same_workbook(path, raw)
+            if len(command) > 30000:
+                raise Problem(413, "La solicitud supera el espacio del recibo en Excel.")
+            if not all(name in tables for name in ("CIERRE_PASO", "PERIODO", "CARGA")):
+                raise Problem(422, "Faltan tablas para ejecutar el cierre de periodo.")
+            periods = [r for r in tables["PERIODO"]["r"]
+                       if str(r[0]) == period and str(r[1]) == company]
+            if len(periods) != 1 or periods[0][4] != "A":
+                raise Problem(422, "El periodo de la empresa no existe de forma única o no está abierto.")
+            steps = sorted((r[0] for r in tables["CIERRE_PASO"]["r"]
+                            if len(r) > 4 and r[4] in ("OFICIAL", "CIERRE")),
+                           key=lambda code: next(float(r[1]) for r in tables["CIERRE_PASO"]["r"] if r[0] == code))
+            if not steps:
+                raise Problem(422, "La configuración no declara pasos oficiales de cierre.")
+            motor = Motor.__new__(Motor)
+            motor.T = {n: {"h": s["h"], "r": [list(r) for r in s["r"]]}
+                       for n, s in tables.items() if n not in (META, RECEIPTS)}
+            motor.usr = motor.perfil = ""
+            motor.pend = None
+            owner = next((r for r in tables["USUARIO"]["r"] if r[0] == user), None)
+            outcomes = []
+            if owner is None or len(owner) < 4 or str(owner[3]) != company:
+                outcomes.append({"step": "validación", "result": "ERROR",
+                                 "error": "El usuario no pertenece a la empresa del espacio."})
+            else:
+                carga = motor.T["CARGA"]
+                start = len(carga["r"])
+                for offset, step in enumerate(steps, 1):
+                    row = [None] * len(carga["h"])
+                    row[0] = start + offset
+                    row[1] = step
+                    row[2] = user
+                    row[3] = f"PER={period};EMP={company}"
+                    carga["r"].append(row)
+                try:
+                    motor.procesar_carga()
+                    outcomes = [{"step": row[1], "result": "OK" if row[4] == "OK" and row[5] == "OK" else "ERROR",
+                                 **({} if row[4] == "OK" and row[5] == "OK" else {"error": str(row[5])})}
+                                for row in carga["r"][start:]]
+                except Exception as error:
+                    outcomes = [{"step": "cierre", "result": "ERROR",
+                                 "error": f"La cadena de cierre no pudo completarse: {type(error).__name__}."}]
+            ok = bool(outcomes) and all(item["result"] == "OK" for item in outcomes)
+            version = info["version"] + (len(outcomes) if ok else 0)
+            response = {"result": "OK" if ok else "ERROR", "operation": "close_month",
+                        "period": period, "company_code": company, "request_id": key,
+                        "version": version, "steps": outcomes,
+                        "message": ("Cierre aplicado en una sola escritura del libro." if ok else
+                                    "No se aplicaron cambios de negocio; el intento quedó registrado.")}
+            status = 200 if ok else 422
             edits = motor_changes(tables, motor, positions) if ok else {}
             if ok:
                 version_row = next(n for n, row in zip(positions[META], tables[META]["r"]) if row[0] == "version")

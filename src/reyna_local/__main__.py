@@ -148,6 +148,9 @@ class ReynaHandler(BaseHTTPRequestHandler):
         elif len(parts) == 5 and method == "POST" and parts[3] and parts[4] == "execute":
             status, payload = store.execute(unquote(parts[3]), self._body())
             self._json(status, payload)
+        elif len(parts) == 5 and method == "POST" and parts[3] and parts[4] == "close-month":
+            status, payload = store.close_month(unquote(parts[3]), self._body())
+            self._json(status, payload)
         elif len(parts) == 6 and method == "GET" and parts[3] and parts[4] == "tables" and parts[5]:
             offset, limit = self._pagination(target.query)
             self._json(HTTPStatus.OK, store.table(unquote(parts[3]), unquote(parts[5]), offset, limit))
