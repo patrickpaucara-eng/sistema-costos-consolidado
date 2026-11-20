@@ -37,12 +37,12 @@ Las pruebas nuevas en `tests/test_d9_event_accounts.py` usan copias temporales d
 3. Excepción inyectada después de escribir `CTA_OBJ_REC`: la transacción revierte las siete cuentas y las tablas de movimiento/inventario del evento.
 4. Prueba de `m_ACTUALIZAR` con dos empresas y una clave DBD que omite empresa: solo cambia el saldo de B.
 
-Los importes comprobados en este fixture (`CTA_OBJ_PER`, `CTA_OBJ_REC`, `CTA_GASTO`) son valores de regresión del recorrido configurado. **No son un oráculo independiente ni una aceptación contable.** El detalle de la línea base histórica O-1 sigue en [D9_MATRIZ_Y_CASO.md](D9_MATRIZ_Y_CASO.md) y [D9_CONTROL_O1.csv](D9_CONTROL_O1.csv).
+El caso `D9-T15-2026-04-B-OS01` ahora compara las filas persistidas de `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` contra un esperado decimal calculado por separado desde precios, tipos de cambio, estándar de consumo y merma normal. Las entradas, fórmulas y esperado están versionados en [caso_t15_eventos.json](../../../tests/fixtures/d9/caso_t15_eventos.json); el resultado y sus límites están en [D9_CUADRE_T15.md](D9_CUADRE_T15.md). Es una conciliación independiente parcial de tres cuentas en T15; **no** constituye aceptación comercial, resultado `RESULTADO_METODO` integral ni validación de las otras cuentas. El detalle histórico O-1 sigue en [D9_MATRIZ_Y_CASO.md](D9_MATRIZ_Y_CASO.md) y [D9_CONTROL_O1.csv](D9_CONTROL_O1.csv).
 
 ## Pendiente para declarar D9 conciliado
 
-- Crear un caso persistido que contenga hechos, las cuentas afectadas y el resultado de método en el mismo libro, con esperado independiente de la implementación que se prueba.
-- Definir por campo fuente del importe/cantidad, signo, clave completa, periodo, moneda, redondeo, reversión y tratamiento de correcciones.
+- Extender el caso T15 parcial a los demás dominios CTA y guardar también `RESULTADO_METODO` en el mismo libro con un esperado independiente por clave y total.
+- Completar el contrato por campo para fuentes, signo, clave única, periodo, moneda, precisión, reversa y correcciones; resolver las lagunas recogidas en [D9_CONTRATO_DE_DATOS.md](D9_CONTRATO_DE_DATOS.md).
 - Obtener las dimensiones fuente necesarias para conciliar `CTA_GASTO`, `CTA_FUNCION` y `CTA_OBJ_REC`; no distribuir totales de O-1 ni inventar claves.
 - Verificar duplicados de clave dentro de una empresa, causalidad entre BITACORA, evento, línea y servicio DBD, y recuperación/reapertura a través del cierre.
 - Mantener bloqueado el resultado contable oficial hasta completar la conciliación independiente.

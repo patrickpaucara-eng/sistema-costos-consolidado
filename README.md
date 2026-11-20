@@ -10,7 +10,7 @@ Python es el único motor operativo; Excel es el libro de trabajo e intercambio;
 
 La rama activa `desarrollo/mvp-ola3` prepara el candidato 0.2.0: completa en Linux el flujo de importación, compras T14, consumo T15, cierre de los pasos configurados y consulta en HTML. El libro se modifica en una sola sustitución por cadena de cierre; el reintento usa recibos. Cada espacio se limita a una empresa operativa.
 
-La suite actual usa `python -m unittest discover -s tests -v`. El recorrido real en Chromium validó compras, consumo y cierre en la fixture. Las regresiones D9 verifican que las escrituras de cuenta T15 respeten la empresa del evento, sean idempotentes y se reviertan ante un fallo. Estas comprobaciones son técnicas: aún no concilian D9 con un esperado independiente ni validan el costo integral de orden contra ORIA, flete/T14.2 o D14.
+La suite actual usa `python -m unittest discover -s tests -v`. El recorrido real en Chromium validó compras, consumo y cierre en la fixture. Las regresiones D9 verifican aislamiento por empresa, idempotencia y rollback; un caso T15 contrasta tres saldos persistidos con un esperado decimal independiente. Esto es un cuadre parcial: aún no concilia D9 integral ni valida el costo de la orden contra ORIA, flete/T14.2 o D14.
 
 ## Plan y continuidad
 
@@ -21,4 +21,4 @@ La suite actual usa `python -m unittest discover -s tests -v`. El recorrido real
 - [Estado de reanudación](docs/planificacion/ESTADO.md) y [contratos de los tres niveles](docs/modelo/CONTRATOS_DE_LOS_NIVELES.md).
 - [Lectura de MCD](docs/metodologia/LECTURA_MCD.md), [lectura de DBD](docs/metodologia/LECTURA_DBD.md) e [índice de fuentes](docs/fuentes/INDICE_FUENTES.md).
 
-La siguiente tarea crítica es completar el contrato de datos D9 por campo y preparar un caso persistido con esperado independiente para conciliar cuentas. La decisión semántica MCD y las pruebas de ámbito están documentadas en [evidencia D9](docs/entrega/evidencias/D9_DECISION_SEMANTICA.md). Windows/Excel nativo, autenticación empresarial, rendimiento con datos reales, conciliación D9, flete/T14.2, D14, aislamiento integral, publicación histórica y analítica autónoma siguen pendientes.
+La siguiente tarea crítica es resolver las brechas del contrato D9 (incluida la deducibilidad de pérdidas), ampliar el caso T15 independiente a los demás dominios CTA y conciliar un `RESULTADO_METODO` persistido. El caso parcial y su contrato están en [evidencia D9](docs/entrega/evidencias/D9_CONTRATO_DE_DATOS.md). Windows/Excel nativo, autenticación empresarial, rendimiento con datos reales, conciliación D9 integral, flete/T14.2, D14, aislamiento integral, publicación histórica y analítica autónoma siguen pendientes.

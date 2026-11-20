@@ -1,0 +1,103 @@
+{
+  "case_id": "D9-T15-2026-04-B-OS01",
+  "title": "Dos compras y un consumo con merma normal y exceso anormal",
+  "classification": "Regresión de conciliación parcial; no es aceptación comercial",
+  "source_fixture": {
+    "path": "tests/fixtures/ola1/Sistema_Costos.xlsx",
+    "sha256": "43c9170c04b23e678de7abf7bab39f43c4251ea14695b351d884639ea972be40",
+    "tables": ["TIPO_CAMBIO", "EMPRESA", "RECURSO", "IMPUESTO", "COMPONENTE", "OBJETO", "CTA_OBJ_PER", "CTA_OBJ_REC", "CTA_GASTO"]
+  },
+  "scenario": {
+    "company": "B",
+    "functional_currency": "PEN",
+    "period": "2026-04",
+    "resource": "CAJA4KG",
+    "object": "OS-01",
+    "center": "LINEA1",
+    "output_units": "10",
+    "standard_resource_per_output": "250",
+    "normal_loss_percent": "2",
+    "purchase_lots": [
+      {
+        "request_id": "d9-compra-1",
+        "date": 20260310,
+        "period": "2026-03",
+        "quantity": "2000",
+        "document_unit_price": "0.80",
+        "document_currency": "USD",
+        "exchange_rate_effective_date": 20260301,
+        "functional_currency_per_document_currency": "3.75"
+      },
+      {
+        "request_id": "d9-compra-2",
+        "date": 20260405,
+        "period": "2026-04",
+        "quantity": "1000",
+        "document_unit_price": "0.85",
+        "document_currency": "USD",
+        "exchange_rate_effective_date": 20260405,
+        "functional_currency_per_document_currency": "3.72"
+      }
+    ],
+    "consumption": {
+      "request_id": "d9-consumo",
+      "date": 20260410,
+      "period": "2026-04",
+      "quantity": "2600"
+    },
+    "tax_code": "IGV",
+    "tax_recoverable": true
+  },
+  "independent_calculation": {
+    "rounding_from_configured_formulas": {
+      "converted_unit_cost_places": 4,
+      "line_amount_places": 2,
+      "allowed_quantity_places": 4,
+      "loss_amount_places": 2
+    },
+    "formulas": {
+      "receipt_amounts": ["2000*0.80*3.75=6000.00", "1000*0.85*3.72=3162.00"],
+      "weighted_average_unit_cost": "9162.00/3000",
+      "allowed_quantity": "10*250*(1+2/100)",
+      "abnormal_excess_quantity": "2600-2550",
+      "actual_consumption_value": "2600*3.0540",
+      "allowed_object_material_cost": "2550*3.0540",
+      "abnormal_loss_cost": "50*3.0540",
+      "ending_inventory_quantity": "3000-2600",
+      "ending_inventory_value": "400*3.0540",
+      "conservation_checks": ["7787.70+152.70=7940.40", "7940.40+1221.60=9162.00"]
+    },
+    "results": {
+      "receipt_quantity": "3000",
+      "receipt_value": "9162.00",
+      "weighted_average_unit_cost": "3.0540",
+      "allowed_quantity": "2550.0000",
+      "actual_quantity": "2600",
+      "abnormal_excess_quantity": "50.0000",
+      "actual_consumption_value": "7940.40",
+      "allowed_object_material_cost": "7787.70",
+      "abnormal_loss_cost": "152.70",
+      "ending_inventory_quantity": "400",
+      "ending_inventory_value": "1221.60"
+    }
+  },
+  "expected_account_rows": {
+    "CTA_OBJ_PER": {
+      "key": {"COP_OBJ": "OS-01", "COP_PER": "2026-04", "COP_EMP": "B"},
+      "values": {"COP_MAT": "7787.70", "COP_PERD": "152.70"}
+    },
+    "CTA_OBJ_REC": {
+      "key": {"COR_OBJ": "OS-01", "COR_REC": "CAJA4KG", "COR_PER": "2026-04", "COR_EMP": "B"},
+      "values": {"COR_CAN_PERM": "2550.0000", "COR_CAN_REAL": "2600", "COR_MTO": "7940.40"}
+    },
+    "CTA_GASTO": {
+      "key": {"CGA_PER": "2026-04", "CGA_CEN": "LINEA1", "CGA_CON": "PERDIDA_ANORMAL", "CGA_EMP": "B"},
+      "values": {"CGA_MTO": "152.70", "CGA_DED": null}
+    }
+  },
+  "known_gaps": [
+    "M-ACU-CGA-PERD no asigna CGA_DED; no se interpreta null como una decisión de deducibilidad.",
+    "La cuenta CTA_GASTO no incorpora CGA_DED a la clave configurada, aunque el campo describe una dimensión del saldo.",
+    "El caso verifica importes y cantidades de tres cuentas para T15; no valida las otras cuentas ni un cierre completo."
+  ]
+}

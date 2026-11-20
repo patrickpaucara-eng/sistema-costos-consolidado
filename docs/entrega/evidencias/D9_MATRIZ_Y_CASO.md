@@ -8,7 +8,7 @@
 
 La deuda D9 es real: en el DBD de la rama histórica, las siete tablas `CTA_*` reciben escrituras desde entre uno y siete servicios y el cierre que publica `RESULTADO_METODO` no las escribe. La hoja O-1 tampoco contiene estas siete cuentas. Las 14 pruebas históricas `xfail(strict=True)` describen ese incumplimiento, pero las siete pruebas de cuadre se detienen al detectar la hoja faltante; no comparan valores guardados en las cuentas.
 
-La semántica ya no está pendiente: por instrucción del propietario y conforme al MCD, las cuentas operativas conservan los impactos de los eventos; el cierre las valida y concilia. No corresponde reemplazarlas por una reconstrucción agregada al cierre. La decisión y el límite de la evidencia están desarrollados en [D9_DECISION_SEMANTICA.md](D9_DECISION_SEMANTICA.md). El piloto también corrige el cruce entre empresas cuando la clave configurada en DBD omite `*_EMP`, y prueba aislamiento, reintento y reversión. Esto no concilia aún O-1 ni habilita resultados oficiales.
+La semántica ya no está pendiente: por instrucción del propietario y conforme al MCD, las cuentas operativas conservan los impactos de los eventos; el cierre las valida y concilia. No corresponde reemplazarlas por una reconstrucción agregada al cierre. La decisión y el límite de la evidencia están desarrollados en [D9_DECISION_SEMANTICA.md](D9_DECISION_SEMANTICA.md). El piloto también corrige el cruce entre empresas cuando la clave configurada en DBD omite `*_EMP`, y prueba aislamiento, reintento y reversión. Se añadió el [caso T15 con esperado decimal independiente](D9_CUADRE_T15.md), que concilia parcialmente tres cuentas por evento. Esto no concilia O-1, las otras cuentas o el cierre integral; no habilita resultados oficiales.
 
 | Tabla | Servicios escritores DBD_4c | Transacciones raíz reportadas |
 |---|---:|---|
@@ -38,7 +38,7 @@ Tres propuestas de mapeo no tienen grano suficiente en la salida calculada: `CTA
 
 El cálculo de referencia llamó `informes/DEUDA/escritores.py` y su `correr_o1()` en una copia temporal de solo lectura. Esa función calcula los métodos en memoria. No se integró ni se ejecutó código en el repositorio original, no se cambió la fixture ni se escribió `RESULTADO_METODO` en ella. La regeneración de esta línea base desde un checkout limpio todavía no está automatizada; el CSV conserva los resultados observados y la huella de la fixture.
 
-El manifiesto [D9_SHA256SUMS](D9_SHA256SUMS) verifica esta matriz, la decisión semántica y el CSV. El manifiesto de [insumos D9](../../fuentes/claude/ola3/d9/insumos/SHA256SUMS) verifica las copias del DBD y la fixture.
+El manifiesto [D9_SHA256SUMS](D9_SHA256SUMS) verifica esta matriz, la decisión semántica, el contrato, el caso T15, el JSON de esperado y el CSV. El manifiesto de [insumos D9](../../fuentes/claude/ola3/d9/insumos/SHA256SUMS) verifica las copias del DBD y la fixture.
 
 ## Esquema, grano y mapeo candidato
 

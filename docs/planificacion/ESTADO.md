@@ -17,15 +17,15 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 | Referencia del motor | Espejo Python de `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`, con guarda de empresa para mutaciones `CTA_*` en el consolidado; original inalterado. VBA se conserva congelado. |
 | CAP-01–CAP-05 | Importar, compra/consumo T14/T15, persistir, reabrir, reintentar, consultar y operar desde HTML, en el alcance documentado. |
 | MVP Ola 3 | Guardia de una empresa operativa por espacio y cierre configurado transaccional sobre copia en memoria. 16 pruebas de unidad/API y recorrido real de Chromium; ver [evidencia](../entrega/evidencias/MVP_OLA3.md). |
-| D9 · cuentas CTA | El propietario decidió seguir la semántica MCD: eventos actualizan los saldos afectados; el cierre valida y concilia. Se limita la escritura genérica `CTA_*` a la empresa del evento. Pruebas temporales cubren cruce A/B, reintento y rollback. La conciliación sigue pendiente: O-1 no tiene hojas CTA ni `RESULTADO_METODO` persistido, y falta un oráculo independiente. Ver [decisión](../entrega/evidencias/D9_DECISION_SEMANTICA.md), [matriz](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
+| D9 · cuentas CTA | Semántica MCD decidida; mutaciones `CTA_*` limitadas a empresa del evento. Caso T15 persistido con esperado decimal independiente para `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO`; también se cubren cruce A/B, repetición, `m_ACTUALIZAR` y rollback. D9 integral pendiente: faltan claves/dimensiones y deducibilidad, otros dominios CTA y `RESULTADO_METODO` conciliable. Ver [decisión](../entrega/evidencias/D9_DECISION_SEMANTICA.md), [contrato](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md), [caso T15](../entrega/evidencias/D9_CUADRE_T15.md), [matriz O-1](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
 | Plan activo | [MVP y pendientes](../entrega/PLAN_MVP_Y_PENDIENTES.md), con dependencias desde la guardia y el cierre hasta D9, flete, D14, instalación, publicación y Analítica. |
 
 ## Siguiente tarea reanudable
 
-1. Completar el contrato de datos de las cuentas por campo: fuente, signo, clave, periodo, agregación, moneda, redondeo y reversión.
-2. Completar con fuentes los atributos que requiere la conciliación de `CTA_GASTO`, `CTA_FUNCION` y `CTA_OBJ_REC`; no inventar dimensiones.
-3. Persistir cuentas y resultado de método para un caso con esperado independiente; conciliar por clave y total y probar repetición del cierre, fallo, reversión y recuperación.
-4. Reforzar trazabilidad entre evento/línea, método DBD y cambio de cuenta; detectar duplicados de clave dentro de la empresa.
+1. Resolver `CGA_DED`, las claves empresariales y las demás brechas del [contrato D9](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md).
+2. Añadir casos independientes para centros/funciones, gasto y ventas/costo; persistir cuentas y `RESULTADO_METODO` para conciliar por clave y total.
+3. Probar repetición del cierre, reversa, recuperación, reapertura y fallos intermedios con las cuentas presentes.
+4. Reforzar trazabilidad entre evento/línea, método DBD y cambio de cuenta; detectar claves duplicadas dentro de la empresa.
 5. Continuar con flete/T14.2 y D14 enlazando cada regla con MCD/DBD y casos ORIA/Frenosa.
 
 ## Guardas y límites pendientes
