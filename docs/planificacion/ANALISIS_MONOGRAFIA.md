@@ -8,7 +8,7 @@
 
 La dirección técnica actual coincide con varios requisitos explícitos: trabajo local sin Internet, Python como motor, Excel para entrada/almacenamiento, salida HTML local, métodos repetibles y una entrega EXE prevista. Esta es una base útil para continuar Ola 3.
 
-La implementación actual sigue siendo un piloto acotado, no una solución que cumpla la monografía. Opera una empresa por espacio, presenta un formulario JSON y no demuestra ABC integral, análisis de cuatro tipos, previsión de seis meses, escenarios estocásticos, reportes ejecutivos ni entrega completa. El caso nuevo T23.3/T23.5 ayuda a comprobar una ruta del costo de una orden; no cubre ese salto de alcance. Por tanto, la arquitectura va en una dirección compatible con la tarea, pero el trabajo restante es grande y debe medirse contra los entregables y la rúbrica, no contra el avance de ramas ni el 93 % histórico.
+El consolidado actual es un piloto acotado. Opera una empresa por espacio y su formulario principal es técnico; aquí no se demuestra ABC integral, análisis de cuatro tipos, previsión de seis meses, escenarios estocásticos, reportes ejecutivos ni entrega completa. El caso T18/T23.3/T23.5 comprueba una ruta de orden. **Este diagnóstico describe la evidencia del consolidado; no afirma que esas capacidades falten en todo el trabajo histórico de Claude.** Después de las seis olas se revisarán sus ramas, código, documentos y pruebas para decidir qué se puede aceptar, adaptar o completar. No se presupone una reescritura.
 
 ## Requisitos funcionales frente al candidato
 
@@ -60,3 +60,19 @@ Secuencia recomendada con 19 días calendario:
 5. Mantener desde hoy un registro de horas y preparar el informe técnico, la presentación ejecutiva, el ZIP final y sus hashes.
 
 El alcance universal, el aprendizaje autónomo y la aceptación integral MCD/DBD/ORIA son objetivos de producto mayores que esta entrega académica. Para la monografía hay que elegir y documentar un caso acotado demostrable, explicar qué está probado y no afirmar cobertura universal que el sistema aún no tiene.
+
+## Revisión diferida después de las seis olas
+
+La lista siguiente es una **matriz de verificación del consolidado**. El esfuerzo real se estima al cotejarla con los módulos y ramas que Claude entregue. Si una capacidad ya está implementada y probada, se registra evidencia y se evita duplicarla.
+
+| Tema a cotejar | Evidencia actual del consolidado | Tamaño potencial si Claude ya lo dejó hecho | Aceptación al revisar sus olas |
+|---|---|---|---|
+| Ejecutable offline | Workflow preparado; no hubo runner ni artefacto Windows | Bajo en código si la receta funciona; depende del acceso al runner o a un Windows x64 | ZIP con hash, arranque sin Internet, importación, resultado, cierre y reapertura |
+| Modelos ABC configurables por organización | No hay aceptación en este piloto | Medio si ya existe un modelo de parámetros; alto si falta contrato, configuración y casos | Crear, seleccionar y reproducir más de un modelo con entradas identificadas |
+| Costeo ABC integral: producción, administración, ventas y financiero | Hay rutas parciales y un caso controlado de producción | Alto: depende de integrar reglas, dimensiones, tasas y oráculos MCD/DBD/ORIA | Conciliar componentes y total por clave, periodo y empresa con un cálculo independiente |
+| Cuatro análisis: descriptivo, diagnóstico, predictivo y prescriptivo | No hay aceptación en este piloto | Medio si los módulos y fuentes existen; alto si también faltan señales, modelos y evaluación | Mostrar entradas, supuestos, resultado y medida de error o utilidad por análisis |
+| Serie de seis meses y escenarios determinísticos/estocásticos | No hay evidencia reproducible | Medio/alto según el código y los datos ya existentes | Reproducir la serie, supuestos, semilla o distribución y alternativas comparables |
+| Interfaz y reportes | Hay HTML local y flujos técnicos; varios entregables están parciales | Bajo/medio si el resultado ya existe; medio si hay que diseñar flujos de usuario | Un usuario completa el caso sin JSON y obtiene los archivos exigidos desde la misma corrida |
+| Prueba integral y documentación de monografía | Parcial; no hay paquete final completo | Bajo/medio una vez aceptado un caso y el EXE | Reproducir desde una revisión fija y entregar los trece productos con sus fuentes |
+
+Para cada fila, registrar `presente en Claude`, `SHA/ruta`, `prueba reproducida`, `brecha`, `reutilizar/adaptar/implementar` y `decisión`. La revisión de ola a ola y el alcance del análisis posterior están en [ESTRATEGIA_CIERRE_OLAS.md](ESTRATEGIA_CIERRE_OLAS.md).

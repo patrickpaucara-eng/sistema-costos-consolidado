@@ -27,4 +27,6 @@ El empaquetador y su smoke aislado sí pasaron en Linux con Python y PyInstaller
 3. Reejecutar el workflow y verificar que publique `ReynaCostos-Windows-x64.zip`.
 4. Descargarlo, guardar SHA-256 y ejecutar el EXE en Windows x64 sin Internet.
 
+Desde este entorno se pudo consultar y reintentar el workflow, pero no leer su anotación ni la configuración administrativa de Actions; además, el entorno de ejecución disponible es Linux. El dueño o Claude con acceso a GitHub debe obtener el mensaje y revisar los permisos/límites señalados. La prueba con Excel y Windows nativo requiere un equipo Windows x64. El procedimiento completo está en [ESTRATEGIA_CIERRE_OLAS.md](../../planificacion/ESTRATEGIA_CIERRE_OLAS.md).
+
 Hasta completar esos pasos, el ejecutable está pendiente y la aceptación offline para la monografía no está demostrada.
