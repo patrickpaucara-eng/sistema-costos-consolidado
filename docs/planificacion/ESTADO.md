@@ -17,14 +17,15 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 | Referencia del motor | Copia exacta del espejo Python de `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`; original inalterado. VBA se conserva congelado. |
 | CAP-01–CAP-05 | Importar, compra/consumo T14/T15, persistir, reabrir, reintentar, consultar y operar desde HTML, en el alcance documentado. |
 | MVP Ola 3 | Guardia de una empresa operativa por espacio y cierre configurado transaccional sobre copia en memoria. 13 pruebas de unidad/API y recorrido real de Chromium; ver [evidencia](../entrega/evidencias/MVP_OLA3.md). |
+| D9 · cuentas CTA | Avance parcial: inventario histórico cotejado, matriz MCD/DBD y 119 valores de O-1 conservados. El caso no tiene hojas CTA ni un resultado persistido para conciliar; faltan semántica autorizada, dimensiones y oráculo independiente. Ver [matriz](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
 | Plan activo | [MVP y pendientes](../entrega/PLAN_MVP_Y_PENDIENTES.md), con dependencias desde la guardia y el cierre hasta D9, flete, D14, instalación, publicación y Analítica. |
 
 ## Siguiente tarea reanudable
 
-1. Revisar [DIRECTRICES_OLA3_VALIDADAS.md](../fuentes/claude/ola3/DIRECTRICES_OLA3_VALIDADAS.md), [TRASPASO_AGENTE.md](../fuentes/claude/ola3/TRASPASO_AGENTE.md) y el diagnóstico D9 de la referencia histórica.
-2. Enumerar escritores por tabla CTA, transacción/método, sentido, llave, periodo y origen MCD/DBD. Comparar el inventario con los 14 xfail de J citados por Claude.
-3. Preparar una conciliación numérica a mano en un libro aislado y decidir el escritor único antes de modificar cálculos. Si falta el oráculo, dejar el alcance contable bloqueado y continuar solo tareas independientes.
-4. Tras D9, preparar casos de flete/T14.2 y D14; enlazar cada regla con página de MCD/DBD y caso ORIA/Frenosa disponible.
+1. Fijar si las tablas `CTA_*` son cuentas MCD impactadas por eventos o proyecciones derivadas al cierre. La [evidencia D9](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) documenta el contraste.
+2. Completar las dimensiones fuente que faltan para `CTA_GASTO`, `CTA_FUNCION` y `CTA_OBJ_REC`, o mantener sus campos fuera de la salida oficial.
+3. Crear un caso persistido con un oráculo independiente y conciliar por clave y total; después implementar la ruta de escritura y verificar repetición, fallo, reversión y recuperación.
+4. Continuar con los casos de flete/T14.2 y D14, enlazando cada regla con MCD/DBD y el caso ORIA/Frenosa disponible.
 
 ## Guardas y límites pendientes
 

@@ -20,3 +20,7 @@ La propuesta histórica D-I0b-1 dispone cuentas físicas suplementarias, escrita
 El cierre técnico que se implementó en el consolidado ejecuta los pasos marcados `OFICIAL` o `CIERRE` en `CIERRE_PASO` y persiste la cadena como una unidad. El libro de prueba define T23.1, T23.2, T23.3, T23.5 y T23.9. No incorpora el escritor suplementario D9. Por ello, el cierre visible **no** se presenta como cierre contable conciliado ni como costo integral oficial.
 
 El requisito D9 queda como siguiente tarea crítica del [plan de ejecución](../../../../entrega/PLAN_MVP_Y_PENDIENTES.md). No copiar las pruebas con marcas `xfail` al conjunto aceptado: sirven como contrato histórico y deben convertirse en casos que pasan después de especificar el diseño.
+
+La matriz de claves, los mapeos candidatos, el cálculo de referencia O-1 y sus límites están en [D9_MATRIZ_Y_CASO.md](../../../../entrega/evidencias/D9_MATRIZ_Y_CASO.md), con el detalle numérico en [D9_CONTROL_O1.csv](../../../../entrega/evidencias/D9_CONTROL_O1.csv). Ese CSV es una línea base del cálculo histórico en memoria, no un cuadre independiente ni una cuenta oficial.
+
+Las copias verificadas del libro `DBD_Fuente.xlsx` y la fixture O-1 están en [insumos](insumos/README.md); sus SHA-256 se cotejan con los blobs del commit histórico.

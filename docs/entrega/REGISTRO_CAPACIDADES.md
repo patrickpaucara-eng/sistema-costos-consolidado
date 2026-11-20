@@ -24,6 +24,7 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 ## Evidencia de este incremento
 
 - [Pruebas y recorrido MVP Ola 3](evidencias/MVP_OLA3.md): suite completa, fallo inyectado, cierre desde HTML y resultados del caso.
+- [Matriz y caso D9](evidencias/D9_MATRIZ_Y_CASO.md) y [línea base CSV O-1](evidencias/D9_CONTROL_O1.csv): 119 valores calculados en memoria; no acreditan un cuadre de cuenta ni habilitan resultados oficiales.
 - [Guía de instalación y reproducción](GUIA_PILOTO_EXCEL.md).
 - [Pruebas del primer piloto](evidencias/REVISION_INDEPENDIENTE.md) y [ejecución original](evidencias/pruebas-excel.log): nueve pruebas del incremento CAP-01–CAP-05.
 - [Recorrido HTML de la primera entrega](evidencias/RECORRIDO_HTML.md).

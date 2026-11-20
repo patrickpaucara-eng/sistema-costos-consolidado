@@ -21,7 +21,7 @@ Se inyectó una excepción `RuntimeError` durante T23.3. La respuesta fue 422, e
 
 Esto demuestra persistencia de la cadena de pasos como unidad técnica; **no** demuestra que todos los pasos produzcan cuentas correctas. D9 (un solo escritor por cuenta), conciliación contable, costo integral ORIA, flete/T14.2 y reexpresión D14 están pendientes.
 
-El diagnóstico recuperado de `desarrollo/deuda@0b8f63c` precisa D9: enumera siete `CTA_*`, detecta de uno a siete servicios escritores por tabla y constata que el cierre que publica `RESULTADO_METODO` no escribe esas cuentas. Sus 14 pruebas estrictas documentan escritor único y cuadre por cada tabla. Se preservaron fuente, informe y pruebas en [d9](../../fuentes/claude/ola3/d9/README.md); su código no se ejecutó ni se integró.
+El diagnóstico recuperado de `desarrollo/deuda@0b8f63c` precisa D9: enumera siete `CTA_*`, detecta de uno a siete servicios escritores por tabla y constata que el cierre que publica `RESULTADO_METODO` no escribe esas cuentas. Sus 14 pruebas estrictas documentan escritor único y cuadre por cada tabla. La función histórica `correr_o1()` se ejecutó en una copia temporal de solo lectura para exportar 119 valores calculados en memoria; no se escribieron cuentas en el XLSX ni se comparó una tabla `RESULTADO_METODO` persistida, porque O-1 no trae las hojas CTA. La evidencia, claves, sumas, diferencias de grano y límites están en [matriz y caso D9](D9_MATRIZ_Y_CASO.md) y [CSV de referencia](D9_CONTROL_O1.csv). El código de escritores y las pruebas recuperadas se conservaron, pero no se integraron; las 14 pruebas no se ejecutaron en este incremento.
 
 ## Aislamiento empresarial del piloto
 
