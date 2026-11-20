@@ -16,7 +16,7 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 | Fuentes metodológicas | MCD/DBD completos, CLEIN, casos ORIA y exportación JSONL de Frenosa indexados con hashes. Los cuatro Markdown recientes de Ola 3 también están preservados y con manifiesto SHA. |
 | Referencia del motor | Espejo Python de `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`, con guarda de empresa para mutaciones `CTA_*` en el consolidado; original inalterado. VBA se conserva congelado. |
 | CAP-01–CAP-05 | Importar, compra/consumo T14/T15, persistir, reabrir, reintentar, consultar y operar desde HTML, en el alcance documentado. |
-| MVP Ola 3 | Guardia de una empresa por espacio, cierre transaccional y caso controlado T18/T23.3/T23.5. 22 pruebas combinadas aprobadas; recorrido real previo de Chromium. Ver [evidencia](../entrega/evidencias/MVP_OLA3.md). Workflow Windows listo; primera ejecución de Actions y prueba nativa pendientes. |
+| MVP Ola 3 | Guardia de una empresa por espacio, cierre transaccional y caso controlado T18/T23.3/T23.5. 22 pruebas combinadas aprobadas; recorrido real previo de Chromium. Ver [evidencia](../entrega/evidencias/MVP_OLA3.md). Empaquetado y smoke local completados; el workflow Windows falló dos veces antes de asignar runner. No hay EXE ni prueba nativa; ver [registro](../entrega/evidencias/WINDOWS_ACTIONS_2026-11-20.md). |
 | D9 · cuentas CTA | Semántica MCD decidida; mutaciones `CTA_*` limitadas a empresa del evento. T15/T17/T19/T20 y un caso base sintético T18/T23.3/T23.5 contrastan saldos seleccionados con aritmética independiente. D9 integral pendiente: ruta externa T25.4/huella, `RESULTADO_METODO` conciliable, claves/dimensiones, deducibilidad faltante en pérdidas/ocio y revisión independiente. Ver [decisión](../entrega/evidencias/D9_DECISION_SEMANTICA.md), [contrato](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md), [caso T15](../entrega/evidencias/D9_CUADRE_T15.md), [casos T17/T19/T20](../entrega/evidencias/D9_CUADRE_EVENTOS.md), [caso T18/T23.3/T23.5](../entrega/evidencias/D9_CUADRE_T23_3_T23_5.md), [matriz O-1](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
 | Plan activo | Visión en seis olas preservada como referencia; el [plan maestro](PLAN_MAESTRO.md) establece fases y correspondencia, y el [plan MVP](../entrega/PLAN_MVP_Y_PENDIENTES.md) gobierna las próximas puertas. |
 
@@ -27,6 +27,8 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 3. Probar repetición del cierre, reversa, recuperación, reapertura y fallos intermedios con las cuentas presentes.
 4. Reforzar trazabilidad entre evento/línea, método DBD y cambio de cuenta; detectar claves duplicadas dentro de la empresa.
 5. Continuar con flete/T14.2 y D14 enlazando cada regla con MCD/DBD y casos ORIA/Frenosa.
+
+Antes de afirmar aceptación offline en Windows, resolver por qué GitHub Actions no asignó runner al job `windows-2022`; la evidencia disponible no atribuye el fallo al código de compilación.
 
 ## Coordinación multiagente de Ola 3
 

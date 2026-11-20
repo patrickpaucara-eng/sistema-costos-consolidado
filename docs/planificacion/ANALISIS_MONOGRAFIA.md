@@ -26,7 +26,7 @@ La implementación actual sigue siendo un piloto acotado, no una solución que c
 | Interfaz flexible, simple y profesional | Hay HTML local, pero el formulario operativo es técnico/JSON | Parcial con riesgo alto para el 20 % de usabilidad |
 | Informe técnico, propuestas y efecto económico | No hay el informe final requerido | Pendiente |
 | Presentación ejecutiva | No hay la presentación final requerida | Pendiente |
-| Ejecutable EXE | Hay una receta reproducible y workflow Windows; aún no se ha obtenido un artefacto de Actions | Pendiente de compilación y aceptación nativa |
+| Ejecutable EXE | La receta y el workflow están preparados; las dos ejecuciones de Actions terminaron antes de asignar un runner y no generaron artefactos | Bloqueado: resolver disponibilidad/asignación del runner, después compilar y aceptar en Windows x64 |
 | Archivo HTML offline | Se incluye el HTML; el código llama a `/api/...` del servidor local | Parcial: sirve desde el EXE/servidor local; abrir el archivo por doble clic no es una operación aceptada y debe aclararse/probarse |
 
 ## Los 13 entregables
@@ -49,7 +49,7 @@ La implementación actual sigue siendo un piloto acotado, no una solución que c
 
 ## Rúbrica y prioridades
 
-La rúbrica asigna 10 % a asistencia, 10 % a los entregables, 20 % a flexibilidad/facilidad de uso, 40 % al nivel técnico y 20 % a la presentación e informe. La instrucción indica que, si el EXE no funciona, la calificación se limita a asistencia. Por eso la primera puerta académica es generar y probar el EXE en Windows; la prueba de un Linux equivalente no sustituye esta aceptación.
+La rúbrica asigna 10 % a asistencia, 10 % a los entregables, 20 % a flexibilidad/facilidad de uso, 40 % al nivel técnico y 20 % a la presentación e informe. La instrucción indica que, si el EXE no funciona, la calificación se limita a asistencia. Por eso la primera puerta académica es generar y probar el EXE en Windows; la prueba de un Linux equivalente no sustituye esta aceptación. El run `44823532080` terminó en fallo tras dos intentos de dos segundos, con `runner_id=0`, nombre de runner vacío y cero pasos. No hay ZIP. La causa exacta no está expuesta por la lectura disponible de GitHub; no debe atribuirse al empaquetador sin el mensaje de la anotación o del registro. Ver [registro de Actions](../entrega/evidencias/WINDOWS_ACTIONS_2026-11-20.md).
 
 Secuencia recomendada con 19 días calendario:
 
