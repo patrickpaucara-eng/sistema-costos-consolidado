@@ -1,0 +1,80 @@
+{
+  "case_id": "D9-T23.3-T23.5-2026-04-B-OS-01",
+  "title": "Liquidación de orden y rebaja al valor neto realizable",
+  "classification": "Control independiente de la ruta base del cierre con tramas sintéticas y configuración fuente",
+  "source_fixture": {
+    "path": "tests/fixtures/ola1/Sistema_Costos.xlsx",
+    "sha256": "43c9170c04b23e678de7abf7bab39f43c4251ea14695b351d884639ea972be40",
+    "configuration": [
+      {"table": "OBJETO", "key": {"OBJ_NUM": "OS-01", "OBJ_EMP": "B"}, "field": "OBJ_CAN", "value": 10},
+      {"table": "PRODUCTO_PT", "key": {"PPT_REC": "CAJA_SINT", "PPT_PRO": "EMPAQUE_SINT", "PPT_EMP": "B"}, "field": "PPT_UPT", "value": 250},
+      {"table": "COMPONENTE", "key": {"CMP_PRO": "EMPAQUE_SINT", "CMP_REC": "CAJA4KG", "CMP_EMP": "B"}, "fields": {"CMP_CAN_EST": 250, "CMP_MERMA": 2}},
+      {"table": "TARIFA", "key": {"TAR_REC": "CAJA_SINT", "TAR_TIPO": "VNR", "TAR_PER": "2026-04", "TAR_EMP": "B"}, "fields": {"TAR_VAL": 8, "TAR_GAS": 1}},
+      {"table": "METODO_REGISTRADO", "key": {"MRG_COD": "BASE_LIQUIDACION", "MRG_VER": "1.0", "MRG_EJE": "LIQUIDACION_OBJETO"}, "field": "MRG_EST", "value": "APROBADO"},
+      {"table": "METODO_REGISTRADO", "key": {"MRG_COD": "BASE_AJUSTES_NIC2", "MRG_VER": "1.0", "MRG_EJE": "COSTO_CONTABLE"}, "field": "MRG_EST", "value": "APROBADO"}
+    ]
+  },
+  "test_setup": {
+    "description": "Las tramas de compra, consumo y producción se construyen para este control; el precio y las cantidades de movimiento son sintéticos. La estructura fuente expresa 10 t y 250 cajas por t.",
+    "calculation_inputs": {
+      "planned_order_tons": 10,
+      "finished_boxes_per_ton": 250,
+      "standard_cartons_per_ton": 250,
+      "normal_loss_percent": 2,
+      "carton_unit_cost_pen": "10.00",
+      "vnr_price_pen_per_box": "8.00",
+      "selling_expense_pen_per_box": "1.00"
+    },
+    "events": [
+      {
+        "transaction": "T14",
+        "user": "ALMACEN1",
+        "request_id": "d9-t235-purchase",
+        "header": {"FECHA": 20260401, "PER": "2026-04", "EMP": "B", "ALM": "ALM1", "MON": "PEN", "IMP": "IGV"},
+        "lines": [{"REC": "CAJA4KG", "CANT": 2550, "CU_DOC": 10}]
+      },
+      {
+        "transaction": "T15",
+        "user": "SUPERV1",
+        "request_id": "d9-t235-consumption",
+        "header": {"FECHA": 20260402, "PER": "2026-04", "EMP": "B", "OBJ": "OS-01", "CEN": "LINEA1", "ALM": "ALM1", "REC": "CAJA4KG", "CANT": 2550},
+        "lines": []
+      },
+      {
+        "transaction": "T18",
+        "user": "SUPERV1",
+        "request_id": "d9-t235-completion",
+        "header": {"FECHA": 20260430, "PER": "2026-04", "EMP": "B", "OBJ": "OS-01", "ALM": "ALM1", "AVA": 100},
+        "lines": [{"REC": "CAJA_SINT", "CANT": 2500}]
+      }
+    ],
+    "close_request": {"period": "2026-04", "user": "JCOSTOS", "request_id": "d9-t235-close"}
+  },
+  "independent_calculation": {
+    "finished_quantity": "10 t × 250 cajas/t = 2500 cajas",
+    "allowed_material_quantity": "10 t × 250 cajas/t × (1 + 2/100) = 2550 cajas de cartón",
+    "actual_material_quantity": "2550 cajas de cartón",
+    "order_real_cost_pen": "2550 × 10.00 = 25500.00",
+    "finished_unit_cost_pen": "25500.00 / 2500 = 10.20",
+    "vnr_unit_pen": "8.00 − 1.00 = 7.00",
+    "vnr_total_pen": "2500 × 7.00 = 17500.00",
+    "vnr_write_down_pen": "2500 × (10.20 − 7.00) = 8000.00",
+    "ending_inventory": "2500 cajas, PEN 17500.00 total, PEN 7.00 por caja"
+  },
+  "expected_persisted": {
+    "OBJETO": {"key": {"OBJ_NUM": "OS-01", "OBJ_EMP": "B"}, "values": {"OBJ_EST": "L", "OBJ_CST_REAL": "25500.00"}},
+    "SALIDA": {"key": {"SAL_OBJ": "OS-01", "SAL_PER": "2026-04", "SAL_REC": "CAJA_SINT", "SAL_ALM": "ALM1", "SAL_EMP": "B"}, "values": {"SAL_CAN": "2500", "SAL_CST": "25500.00"}},
+    "CTA_OBJ_PER": {"key": {"COP_OBJ": "OS-01", "COP_PER": "2026-04", "COP_EMP": "B"}, "values": {"COP_MAT": "25500.00", "COP_TRF": "25500.00"}},
+    "CTA_OBJ_REC": {"key": {"COR_OBJ": "OS-01", "COR_REC": "CAJA4KG", "COR_PER": "2026-04", "COR_EMP": "B"}, "values": {"COR_CAN_PERM": "2550", "COR_CAN_REAL": "2550", "COR_MTO": "25500.00"}},
+    "AJUSTE_VNR": {"key": {"AVN_REC": "CAJA_SINT", "AVN_ALM": "ALM1", "AVN_PER": "2026-04", "AVN_EMP": "B"}, "values": {"AVN_CPU": "10.20", "AVN_VNR": "7.00", "AVN_CAN": "2500", "AVN_REB": "8000.00"}},
+    "CTA_GASTO": {"key": {"CGA_PER": "2026-04", "CGA_CEN": "ALM1", "CGA_CON": "REBAJA_VNR", "CGA_EMP": "B"}, "values": {"CGA_MTO": "8000.00", "CGA_DED": "N"}},
+    "EXISTENCIA": {"key": {"EXI_REC": "CAJA_SINT", "EXI_ALM": "ALM1", "EXI_EMP": "B"}, "values": {"EXI_CAN": "2500", "EXI_VAL": "17500.00", "EXI_CPU": "7.00"}}
+  },
+  "limitations": [
+    "Las tramas de compra, consumo y producción usan datos sintéticos; las unidades, el rendimiento, el BOM, la tarifa VNR y los métodos base se cotejan contra la fixture cuyo SHA se verifica.",
+    "La prueba coteja configuración en el XLSX de fuente verificado y ejecuta las tramas en una copia temporal del libro.",
+    "Este caso verifica la ruta BASE_LIQUIDACION y BASE_AJUSTES_NIC2, no el puerto externo T25.4 ni la selección por huella de una corrida externa.",
+    "La fixture no persiste filas en RESULTADO_METODO; la conciliación integral de esa salida y de las cuentas sigue pendiente.",
+    "No incluye ventas previas a la liquidación, D14, flete tardío, reversa ni una aceptación contable/tributaria general."
+  ]
+}

@@ -206,7 +206,7 @@ class CapacidadInicial(unittest.TestCase):
         workspace, _ = self.import_workspace("Costo de centro por API")
         status, detail = self.request("GET", workspace)
         self.assertEqual(status, 200, detail)
-        self.assertEqual(detail["transactions"], ["T14", "T15", "T17", "T19", "T20"])
+        self.assertEqual(detail["transactions"], ["T14", "T15", "T17", "T18", "T19", "T20"])
         result = self.execute(workspace, {
             "transaction": "T17", "user": "CONTAB1", "request_id": "api-t17",
             "header": {"FECHA": 20260430, "PER": "2026-04", "EMP": "B", "CEN": "LINEA1", "MON": "PEN"},

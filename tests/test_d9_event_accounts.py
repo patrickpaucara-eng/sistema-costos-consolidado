@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/ola1/Sistema_Costos.xlsx"
 CASE_FILE = ROOT / "tests/fixtures/d9/caso_t15_eventos.json"
 EVENT_CASE_FILE = ROOT / "tests/fixtures/d9/caso_t17_t19_t20_eventos.json"
+CLOSE_CASE_FILE = ROOT / "tests/fixtures/d9/caso_t23_3_t23_5_cierre.json"
 ACCOUNT_TABLES = (
     "CTA_ACTOR", "CTA_CENTRO", "CTA_GASTO", "CTA_OBJ_PER",
     "CTA_OBJ_REC", "CTA_FUNCION", "CTA_VTA_PER",
@@ -34,12 +35,16 @@ class D9EventAccounts(unittest.TestCase):
         shutil.copyfile(FIXTURE, self.workbook)
         self.case = json.loads(CASE_FILE.read_text(encoding="utf-8"))
         self.event_case = json.loads(EVENT_CASE_FILE.read_text(encoding="utf-8"))
+        self.close_case = json.loads(CLOSE_CASE_FILE.read_text(encoding="utf-8"))
         self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(),
                          self.case["source_fixture"]["sha256"])
         self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(),
                          self.event_case["source_fixture"]["sha256"])
+        self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(),
+                         self.close_case["source_fixture"]["sha256"])
         self.verify_case_inputs_against_fixture()
         self.verify_source_scenarios(self.event_case)
+        self.verify_close_case_inputs_against_fixture()
         self.seed_foreign_company_accounts()
         self.local_store = store.Store(self.directory / "workspaces")
         self.workspace = self.local_store.create({
@@ -78,12 +83,16 @@ class D9EventAccounts(unittest.TestCase):
                     "CGA_PER": "2026-04", "CGA_CEN": "ALM1", "CGA_CON": "DESMEDRO",
                     "CGA_MTO": 66, "CGA_DED": "S", "CGA_EMP": "A",
                 },
+                "CTA_GASTO_VNR": {
+                    "CGA_PER": "2026-04", "CGA_CEN": "ALM1", "CGA_CON": "REBAJA_VNR",
+                    "CGA_MTO": 77, "CGA_DED": "S", "CGA_EMP": "A",
+                },
                 "CTA_VTA_PER": {
                     "VPE_PER": "2026-04", "VPE_ING": 700, "VPE_CST": 400, "VPE_EMP": "A",
                 },
             }
             for name, values in rows.items():
-                sheet = book["CTA_GASTO" if name == "CTA_GASTO_DESMEDRO" else name]
+                sheet = book["CTA_GASTO" if name.startswith("CTA_GASTO_") else name]
                 columns = [cell.value for cell in sheet[1]]
                 sheet.append([values.get(column) for column in columns])
         finally:
@@ -116,6 +125,40 @@ class D9EventAccounts(unittest.TestCase):
             return matches[0]
         finally:
             book.close()
+
+    def verify_close_case_inputs_against_fixture(self):
+        for configured in self.close_case["source_fixture"]["configuration"]:
+            row = self.source_row(configured["table"], configured["key"])
+            expected = configured.get("fields", {})
+            if "field" in configured:
+                expected[configured["field"]] = configured["value"]
+            for field, value in expected.items():
+                actual = row[field]
+                if isinstance(value, (int, float)):
+                    self.assertEqual(Decimal(str(actual)), Decimal(str(value)),
+                                     f"Fuente {configured['table']}.{field}")
+                else:
+                    self.assertEqual(actual, value, f"Fuente {configured['table']}.{field}")
+
+    def run_close_case_events(self):
+        for event in self.close_case["test_setup"]["events"]:
+            status, result = self.execute(event)
+            self.assertEqual(status, 200, result)
+
+    def assert_close_case_expected_rows(self, tables):
+        for table_name, expected in self.close_case["expected_persisted"].items():
+            columns = tables[table_name]["h"]
+            matches = [dict(zip(columns, row)) for row in tables[table_name]["r"]
+                       if all(str(dict(zip(columns, row)).get(column)) == str(value)
+                              for column, value in expected["key"].items())]
+            self.assertEqual(len(matches), 1, f"Clave única en {table_name}: {expected['key']}")
+            actual = matches[0]
+            for field, expected_value in expected["values"].items():
+                if isinstance(expected_value, str) and not expected_value.replace(".", "", 1).isdigit():
+                    self.assertEqual(str(actual[field]), expected_value, f"{table_name}.{field}")
+                else:
+                    self.assertEqual(Decimal(str(actual[field])), Decimal(expected_value),
+                                     f"{table_name}.{field}")
 
     def purchase(self, lot):
         scenario = self.case["scenario"]
@@ -471,6 +514,94 @@ class D9EventAccounts(unittest.TestCase):
         self.assertEqual(replay_status, status)
         self.assertEqual(replay, result)
         self.assertEqual(self.load_tables(), before)
+
+    def test_cierre_t23_3_t23_5_cuadra_orden_y_vnr_con_calculo_independiente(self):
+        case = self.close_case
+        inputs = case["test_setup"]["calculation_inputs"]
+        events = case["test_setup"]["events"]
+        planned_tons = Decimal(str(inputs["planned_order_tons"]))
+        finished_per_ton = Decimal(str(inputs["finished_boxes_per_ton"]))
+        standard_per_ton = Decimal(str(inputs["standard_cartons_per_ton"]))
+        loss_percent = Decimal(str(inputs["normal_loss_percent"]))
+        allowed_material = planned_tons * standard_per_ton * (Decimal(1) + loss_percent / Decimal(100))
+        finished_quantity = planned_tons * finished_per_ton
+        purchase_quantity = Decimal(str(events[0]["lines"][0]["CANT"]))
+        consumption_quantity = Decimal(str(events[1]["header"]["CANT"]))
+        production_quantity = Decimal(str(events[2]["lines"][0]["CANT"]))
+        self.assertEqual(purchase_quantity, allowed_material)
+        self.assertEqual(consumption_quantity, allowed_material)
+        self.assertEqual(production_quantity, finished_quantity)
+
+        unit_cost = (allowed_material * Decimal(str(inputs["carton_unit_cost_pen"]))) / finished_quantity
+        vnr_unit = (Decimal(str(inputs["vnr_price_pen_per_box"]))
+                    - Decimal(str(inputs["selling_expense_pen_per_box"])))
+        vnr_total = finished_quantity * vnr_unit
+        write_down = finished_quantity * (unit_cost - vnr_unit)
+        expected_rows = case["expected_persisted"]
+        self.assertEqual(allowed_material, Decimal(expected_rows["CTA_OBJ_REC"]["values"]["COR_CAN_PERM"]))
+        self.assertEqual(allowed_material * Decimal(str(inputs["carton_unit_cost_pen"])),
+                         Decimal(expected_rows["OBJETO"]["values"]["OBJ_CST_REAL"]))
+        self.assertEqual(unit_cost, Decimal(expected_rows["AJUSTE_VNR"]["values"]["AVN_CPU"]))
+        self.assertEqual(vnr_unit, Decimal(expected_rows["AJUSTE_VNR"]["values"]["AVN_VNR"]))
+        self.assertEqual(vnr_total, Decimal(expected_rows["EXISTENCIA"]["values"]["EXI_VAL"]))
+        self.assertEqual(write_down, Decimal(expected_rows["AJUSTE_VNR"]["values"]["AVN_REB"]))
+
+        self.run_close_case_events()
+        close_request = case["test_setup"]["close_request"]
+        status, result = self.local_store.close_month(self.workspace, close_request)
+        self.assertEqual(status, 200, result)
+        self.assertEqual(result["result"], "OK")
+        self.assertEqual([step["step"] for step in result["steps"]],
+                         ["T23.1", "T23.2", "T23.3", "T23.5", "T23.9"])
+
+        tables = self.load_tables()
+        self.assert_close_case_expected_rows(tables)
+        self.assertEqual(self.persisted_row(tables, "CTA_GASTO", {
+            "CGA_PER": "2026-04", "CGA_CEN": "ALM1", "CGA_CON": "REBAJA_VNR", "CGA_EMP": "A",
+        })["CGA_MTO"], 77)
+        self.assertEqual(self.persisted_row(tables, "CTA_GASTO", {
+            "CGA_PER": "2026-04", "CGA_CEN": "ALM1", "CGA_CON": "REBAJA_VNR", "CGA_EMP": "A",
+        })["CGA_DED"], "S")
+        self.assertEqual(tables["RESULTADO_METODO"]["r"], [])
+        self.assertEqual(self.persisted_row(tables, "PERIODO", {
+            "PER_COD": "2026-04", "PER_EMP": "B",
+        })["PER_EST"], "C")
+
+        snapshot = {name: (tables[name]["h"], [list(row) for row in tables[name]["r"]])
+                    for name in tables if name not in (store.META, store.RECEIPTS)}
+        replay_status, replay = self.local_store.close_month(self.workspace, close_request)
+        self.assertEqual(replay_status, status)
+        self.assertEqual(replay, result)
+        replay_tables = self.load_tables()
+        for name, previous in snapshot.items():
+            self.assertEqual((replay_tables[name]["h"], replay_tables[name]["r"]), previous, name)
+
+    def test_fallo_en_t23_5_revierte_t23_3_y_todo_el_cierre(self):
+        self.run_close_case_events()
+        before, _ = store.load_data(store.content_bytes(self.local_store.path(self.workspace)))
+        previous = {name: (value["h"], [list(row) for row in value["r"]])
+                    for name, value in before.items() if name not in (store.META, store.RECEIPTS)}
+        original = store.Motor.ejecutar
+
+        def fail_at_vnr(motor, transaction, header, user, lines=None):
+            if transaction == "T23.5":
+                raise RuntimeError("Fallo inyectado en rebaja VNR.")
+            return original(motor, transaction, header, user, lines)
+
+        close_request = dict(self.close_case["test_setup"]["close_request"])
+        with patch.object(store.Motor, "ejecutar", new=fail_at_vnr):
+            status, result = self.local_store.close_month(self.workspace, close_request)
+        self.assertEqual(status, 422, result)
+        self.assertIn("RuntimeError", result["steps"][-1]["error"])
+        after, _ = store.load_data(store.content_bytes(self.local_store.path(self.workspace)))
+        for name, expected in previous.items():
+            self.assertEqual((after[name]["h"], after[name]["r"]), expected, name)
+
+        close_request["request_id"] += "-reintento"
+        retry_status, retry = self.local_store.close_month(self.workspace, close_request)
+        self.assertEqual(retry_status, 200, retry)
+        self.assertEqual(retry["result"], "OK")
+        self.assert_close_case_expected_rows(self.load_tables())
 
     def test_actualizar_filtra_por_empresa_aunque_la_clave_dbd_la_omita(self):
         motor = store.Motor.__new__(store.Motor)

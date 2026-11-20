@@ -86,6 +86,6 @@ En conjunto, los cuatro recorridos concilian saldos parciales guardados con arit
 
 1. Resolver `CGA_DED` para pérdida anormal y ocio, y decidir si la deducibilidad forma parte del grano de gasto. El caso T19 solo prueba la clasificación recibida desde su regla fuente.
 2. Completar prueba de clave única dentro de empresa y alinear `CLAVE_COMPUESTA` con las identidades empresariales de `CTA_GASTO` y `CTA_OBJ_REC`.
-3. Extender T19 a T23.5 (`CTA_GASTO`) y T20 a T23.3 (`CTA_VTA_PER`), con producto terminado generado por una orden; los casos de T17/T19/T20 existentes solo cubren eventos parciales.
+3. Ampliar el caso base T18/T23.3/T23.5 documentado en [D9_CUADRE_T23_3_T23_5.md](D9_CUADRE_T23_3_T23_5.md) al puerto externo T25.4 y a `RESULTADO_METODO`, seleccionando una corrida por huella y conciliando el mismo alcance. Después agregar venta previa a liquidación para probar `CTA_VTA_PER` y D14.
 4. Relacionar cada cambio de cuenta con evento, línea y servicio DBD; verificar reversa, fallo, repetición, reapertura y cierre con las siete cuentas presentes.
 5. Conciliar un caso integral con `RESULTADO_METODO` y esperado independiente por clave y total. Hasta entonces, no publicar las cuentas como salida contable oficial.

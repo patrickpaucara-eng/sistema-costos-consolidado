@@ -29,7 +29,7 @@ SOURCE_REVISION = "cac2501d9f712655dda466d216dc5bff2dd446a5"
 ENGINE_SHA256 = "8c962583170cbb200c564bef8edfd95ae931602b82fa2f89f2bb48bcd9ce2a11"
 # Explicit API capability boundary. The engine has more configured transactions,
 # but these are the event operations currently covered by the active MVP scope.
-TRANSACTIONS = ("T14", "T15", "T17", "T19", "T20")
+TRANSACTIONS = ("T14", "T15", "T17", "T18", "T19", "T20")
 PUBLIC = ("EVENTO", "LINEA", "EXISTENCIA", "KARDEX", "RECURSO", "PERIODO", "OBJETO", "CENTRO")
 REQUIRED = {
     "USUARIO", "USUARIO_PERFIL", "PERFIL_TRX", "LOG_TRX", "BITACORA", "EMPRESA",

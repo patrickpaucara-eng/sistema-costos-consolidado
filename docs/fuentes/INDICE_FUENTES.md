@@ -1,6 +1,6 @@
 # Fuentes para la consolidación
 
-Se conservaron los seis adjuntos recibidos el 18 de noviembre de 2026. Ocupan 52.957.601 bytes. El [manifiesto SHA-256](SHA256SUMS.txt) permite verificar que los originales coinciden con los archivos recibidos.
+Se conservaron los seis adjuntos metodológicos recibidos el 18 de noviembre de 2026. La [Monografía Individual 01](originales/MN%2001%20GE704W%202026%2002.pdf), recibida el 20 de noviembre, se agregó como fuente académica adicional. El [manifiesto SHA-256](SHA256SUMS.txt) permite verificar que los archivos conservados coinciden con los recibidos.
 
 | Fuente | Original | Material de consulta |
 |---|---|---|
@@ -13,6 +13,7 @@ Se conservaron los seis adjuntos recibidos el 18 de noviembre de 2026. Ocupan 52
 | CLAUDE-TRANSFERENCIA | [Ficha de transferencia](claude/README.md) | Archivo íntegro recibido el 19 de noviembre; SHA separado. Contiene contexto histórico cuya autorización inicial fue modificada por mensajes posteriores del dueño. |
 | CLAUDE-OLA3 | [Transferencias y directrices finales](claude/ola3/README.md) | Se preservaron `SISTEMA_ACTUAL`, `TRASPASO_AGENTE`, `DIRECTRICES_OLA3_VALIDADAS` y `COMPARACION_PROYECTO_FRENOSA`, con manifiesto SHA-256. Duplicados idénticos se guardaron una sola vez. |
 | CLAUDE-D9-HISTORICO | [Expediente D9](claude/ola3/d9/README.md) | Inventario histórico de cuentas y pruebas, más copias verificadas del DBD y fixture O-1. Ver también la [matriz y línea base](../entrega/evidencias/D9_MATRIZ_Y_CASO.md). |
+| MONOGRAFIA-GE704W-2026 | [Monografía Individual 01](originales/MN%2001%20GE704W%202026%2002.pdf) | Requisitos funcionales, 13 entregables, rúbrica académica y plazo del 9 de diciembre a las 18:00. Su contraste con el candidato está en [ANALISIS_MONOGRAFIA.md](../planificacion/ANALISIS_MONOGRAFIA.md). |
 
 El [directorio de las sesiones 2 y 3](rar-directorios.json) identifica los archivos dentro de cada RAR. El [directorio del antecedente de Frenosa](antecedente-directorio.json) registra el nombre, el tipo y el número de línea de cada entrada. La exportación sirve para recuperar documentación y datos representados. Para verificar fórmulas, macros o componentes ejecutables se necesitarán los archivos originales correspondientes.
 

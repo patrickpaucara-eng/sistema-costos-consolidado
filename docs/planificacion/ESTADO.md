@@ -16,17 +16,23 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 | Fuentes metodológicas | MCD/DBD completos, CLEIN, casos ORIA y exportación JSONL de Frenosa indexados con hashes. Los cuatro Markdown recientes de Ola 3 también están preservados y con manifiesto SHA. |
 | Referencia del motor | Espejo Python de `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`, con guarda de empresa para mutaciones `CTA_*` en el consolidado; original inalterado. VBA se conserva congelado. |
 | CAP-01–CAP-05 | Importar, compra/consumo T14/T15, persistir, reabrir, reintentar, consultar y operar desde HTML, en el alcance documentado. |
-| MVP Ola 3 | Guardia de una empresa operativa por espacio y cierre configurado transaccional sobre copia en memoria. 20 pruebas de unidad/API aprobadas; recorrido real previo de Chromium y nueva cobertura API para T17/T19/T20; ver [evidencia](../entrega/evidencias/MVP_OLA3.md). |
-| D9 · cuentas CTA | Semántica MCD decidida; mutaciones `CTA_*` limitadas a empresa del evento. Casos T15/T17/T19/T20 contrastan saldos persistidos con aritmética independiente; T20 usa stock sintético. D9 integral pendiente: T23.5/T23.3, claves/dimensiones, deducibilidad faltante en pérdidas/ocio y `RESULTADO_METODO` conciliable. Ver [decisión](../entrega/evidencias/D9_DECISION_SEMANTICA.md), [contrato](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md), [caso T15](../entrega/evidencias/D9_CUADRE_T15.md), [casos T17/T19/T20](../entrega/evidencias/D9_CUADRE_EVENTOS.md), [matriz O-1](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
+| MVP Ola 3 | Guardia de una empresa por espacio, cierre transaccional y caso controlado T18/T23.3/T23.5. 22 pruebas combinadas aprobadas; recorrido real previo de Chromium. Ver [evidencia](../entrega/evidencias/MVP_OLA3.md). Workflow Windows listo; primera ejecución de Actions y prueba nativa pendientes. |
+| D9 · cuentas CTA | Semántica MCD decidida; mutaciones `CTA_*` limitadas a empresa del evento. T15/T17/T19/T20 y un caso base sintético T18/T23.3/T23.5 contrastan saldos seleccionados con aritmética independiente. D9 integral pendiente: ruta externa T25.4/huella, `RESULTADO_METODO` conciliable, claves/dimensiones, deducibilidad faltante en pérdidas/ocio y revisión independiente. Ver [decisión](../entrega/evidencias/D9_DECISION_SEMANTICA.md), [contrato](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md), [caso T15](../entrega/evidencias/D9_CUADRE_T15.md), [casos T17/T19/T20](../entrega/evidencias/D9_CUADRE_EVENTOS.md), [caso T18/T23.3/T23.5](../entrega/evidencias/D9_CUADRE_T23_3_T23_5.md), [matriz O-1](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
 | Plan activo | Visión en seis olas preservada como referencia; el [plan maestro](PLAN_MAESTRO.md) establece fases y correspondencia, y el [plan MVP](../entrega/PLAN_MVP_Y_PENDIENTES.md) gobierna las próximas puertas. |
 
 ## Siguiente tarea reanudable
 
 1. Resolver `CGA_DED` para pérdida anormal y ocio, las claves empresariales y las demás brechas del [contrato D9](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md).
-2. Completar casos T23.5 y T23.3/venta con un saldo de producto generado por una orden real; persistir cuentas y `RESULTADO_METODO` para conciliar por clave y total.
+2. Extender el caso base T18/T23.3/T23.5 al puerto T25.4, fijar selección por huella, persistir `RESULTADO_METODO` y conciliar por clave y total.
 3. Probar repetición del cierre, reversa, recuperación, reapertura y fallos intermedios con las cuentas presentes.
 4. Reforzar trazabilidad entre evento/línea, método DBD y cambio de cuenta; detectar claves duplicadas dentro de la empresa.
 5. Continuar con flete/T14.2 y D14 enlazando cada regla con MCD/DBD y casos ORIA/Frenosa.
+
+## Coordinación multiagente de Ola 3
+
+El coordinador concentra decisiones de metodología, arquitectura, dependencias y aceptación. Para este lote se usaron: un revisor D9 de solo lectura que encontró y delimitó los problemas de unidades y clave de `SALIDA`; un auditor de empaquetado de solo lectura; y un implementador Windows con modelo Sol en razonamiento medio, limitado a launcher, build, smoke y workflow. El coordinador integró el caso, ajustó la evidencia, ejecutó pruebas y conserva la aceptación independiente.
+
+Para optimizar contexto, los especialistas reciben únicamente fuentes y rutas de su tarea; el inventario con SHA y este estado evitan volver a leer las 292 ramas o el repositorio completo. En la siguiente ola, reservar esfuerzo alto para decisiones MCD/DBD, cálculo y seguridad de datos; nivel medio para cambios acotados con aceptación definida; nivel bajo para búsqueda, formato y actualización rutinaria de documentos. Mantener como máximo tres especialistas concurrentes y asignar revisión independiente a cambios que afecten cálculo o persistencia.
 
 ## Guardas y límites pendientes
 
@@ -36,4 +42,4 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 - No se han implementado flete/T14.2, D14, la instancia histórica completa ni la Analítica autónoma. No hay código SQLite paralelo.
 - Los espacios importados con la versión anterior deben reimportarse para recibir los metadatos de empresa y cierre agregados en Ola 3.
 
-La continuidad depende del hito conservado en Git. Al retomar, confirmar rama/remoto y hashes de los documentos y fixtures, ejecutar la suite, leer el plan y no volver a auditar todas las ramas salvo que aparezca una evidencia que lo requiera.
+El inventario remoto del 20-nov confirmó 292 ramas y 290 puntas únicas; los nombres y SHA están en [INVENTARIO_BRANCHES_2026-11-20.csv](../auditoria/INVENTARIO_BRANCHES_2026-11-20.csv), con recomendación de integración selectiva en [ESTRATEGIA_INTEGRACION_BRANCHES.md](../auditoria/ESTRATEGIA_INTEGRACION_BRANCHES.md). Las seis olas siguen como mapa estratégico; el trabajo operativo lo gobiernan fases 0–8 y M0–M8. La monografía se analiza en [ANALISIS_MONOGRAFIA.md](ANALISIS_MONOGRAFIA.md). Al retomar, confirmar rama/remoto y hashes, ejecutar la suite y no fusionar ramas en bloque.

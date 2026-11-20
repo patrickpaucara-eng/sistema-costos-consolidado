@@ -41,7 +41,7 @@ El caso `D9-T15-2026-04-B-OS01` compara filas persistidas de `CTA_OBJ_PER`, `CTA
 
 ## Pendiente para declarar D9 conciliado
 
-- Extender los casos T15/T17/T19/T20 a T23.5/T23.3 y demás dominios CTA, y guardar también `RESULTADO_METODO` en el mismo libro con un esperado independiente por clave y total.
+- Extender los casos T15/T17/T19/T20 y el caso base T18/T23.3/T23.5 a los demás dominios CTA; probar T25.4 con selección de corrida por huella y guardar `RESULTADO_METODO` en el mismo libro con un esperado independiente por clave y total.
 - Completar el contrato por campo para fuentes, signo, clave única, periodo, moneda, precisión, reversa y correcciones; resolver las lagunas recogidas en [D9_CONTRATO_DE_DATOS.md](D9_CONTRATO_DE_DATOS.md).
 - Obtener las dimensiones fuente necesarias para conciliar `CTA_GASTO`, `CTA_FUNCION` y `CTA_OBJ_REC`; no distribuir totales de O-1 ni inventar claves.
 - Verificar duplicados de clave dentro de una empresa, causalidad entre BITACORA, evento, línea y servicio DBD, y recuperación/reapertura a través del cierre.

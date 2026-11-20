@@ -10,6 +10,7 @@ import signal
 import sys
 import traceback
 from urllib.parse import parse_qs, unquote, urlsplit
+import webbrowser
 
 from .store import Problem, Store
 
@@ -192,6 +193,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="Inicia el piloto Excel/Python en la máquina local.")
     parser.add_argument("--data-dir", type=Path, required=True, help="Carpeta de trabajo donde se guardan los espacios.")
     parser.add_argument("--port", type=int, default=8765, help="Puerto HTTP local. Usa 0 para elegir un puerto libre.")
+    parser.add_argument("--open-browser", action="store_true", help="Abre la dirección local en el navegador predeterminado.")
     args = parser.parse_args(argv)
     if not 0 <= args.port <= 65535:
         parser.error("--port debe estar entre 0 y 65535.")
@@ -203,7 +205,15 @@ def main(argv=None):
     quit_handler = signal.signal(signal.SIGTERM, _stop)
     try:
         with server:
-            print(f"Piloto local disponible en http://127.0.0.1:{server.server_port}", flush=True)
+            url = f"http://127.0.0.1:{server.server_port}"
+            print(f"Piloto local disponible en {url}", flush=True)
+            if args.open_browser:
+                try:
+                    opened = webbrowser.open(url)
+                except (OSError, webbrowser.Error):
+                    opened = False
+                if not opened:
+                    print("Abre la dirección indicada en tu navegador.", flush=True)
             server.serve_forever()
     except KeyboardInterrupt:
         return 0

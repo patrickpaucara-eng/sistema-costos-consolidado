@@ -8,18 +8,20 @@ Python es el único motor operativo; Excel es el libro de trabajo e intercambio;
 
 ## Estado de la entrega
 
-La rama activa `desarrollo/mvp-ola3` prepara el candidato 0.2.0: completa en Linux importación, eventos T14/T15/T17/T19/T20 desde el formulario JSON, cierre de los pasos configurados y consulta en HTML. Las pruebas de D9 para T17/T19/T20 usan casos fuente o saldos sintéticos marcados; no habilitan salidas contables oficiales. El libro se modifica en una sola sustitución por cadena de cierre; el reintento usa recibos. Cada espacio se limita a una empresa operativa.
+La rama activa `desarrollo/mvp-ola3` prepara el candidato 0.2.0: permite en Linux importar libros, registrar T14/T15/T17/T18/T19/T20 desde el formulario JSON, cerrar los pasos configurados y consultar en HTML. Los casos D9 de eventos T15/T17/T19/T20 y el caso controlado T18/T23.3/T23.5 comparan saldos seleccionados con cálculos independientes; hay tramas o saldos sintéticos identificados y no habilitan cifras oficiales. El libro se modifica en una sola sustitución por cadena de cierre; el reintento usa recibos. Cada espacio se limita a una empresa operativa.
 
-La suite actual usa `python -m unittest discover -s tests -v`. El recorrido real en Chromium validó compras, consumo y cierre en la fixture. Las pruebas D9 comparan cuentas persistidas de T15, T17, T19 y T20 con esperados separados; el saldo inicial del caso T20 es sintético. Esto es evidencia parcial: aún no concilia D9 integral ni valida el costo de la orden contra ORIA, flete/T14.2 o D14.
+La suite actual usa `python -m unittest discover -s tests -v`. El recorrido real en Chromium validó compras, consumo y cierre en la fixture. El caso T23.3/T23.5 usa inputs sintéticos y la configuración de la fixture; `RESULTADO_METODO` permanece vacío. Es evidencia parcial: no concilia D9 integral ni valida el costo de la orden contra ORIA, flete/T14.2 o D14.
 
 ## Plan y continuidad
 
 - [Plan de ejecución MVP y deuda restante](docs/entrega/PLAN_MVP_Y_PENDIENTES.md): puertas, dependencias, incertidumbres y trabajo desde D9 hasta la estabilidad.
 - [Plan maestro y correspondencia con las seis olas](docs/planificacion/PLAN_MAESTRO.md): visión estratégica y orden operativo vigente.
+- [Análisis frente a la Monografía 01](docs/planificacion/ANALISIS_MONOGRAFIA.md): requisitos, entregables, rúbrica y prioridades hasta el 9 de diciembre.
+- [Inventario y estrategia de integración de las ramas](docs/auditoria/ESTRATEGIA_INTEGRACION_BRANCHES.md): censo remoto de solo lectura y criterio de selección; no propone fusionarlas en bloque.
 - [Registro de capacidades](docs/entrega/REGISTRO_CAPACIDADES.md) y [evidencia Ola 3](docs/entrega/evidencias/MVP_OLA3.md): qué está probado y sus límites.
 - [Guía para repetir el recorrido](docs/entrega/GUIA_PILOTO_EXCEL.md).
 - [Mapa HTML del sistema histórico y del MVP actual](docs/diagramas/sistema-actual-reyna.html).
 - [Estado de reanudación](docs/planificacion/ESTADO.md) y [contratos de los tres niveles](docs/modelo/CONTRATOS_DE_LOS_NIVELES.md).
 - [Lectura de MCD](docs/metodologia/LECTURA_MCD.md), [lectura de DBD](docs/metodologia/LECTURA_DBD.md) e [índice de fuentes](docs/fuentes/INDICE_FUENTES.md).
 
-La siguiente tarea crítica es ampliar los casos D9 hacia T23.5/T23.3, resolver las brechas de clave y deducibilidad por fuente, y conciliar con `RESULTADO_METODO` persistido. El contrato y los casos parciales están en [evidencia D9](docs/entrega/evidencias/D9_CONTRATO_DE_DATOS.md). Windows/Excel nativo, autenticación empresarial, rendimiento con datos reales, conciliación D9 integral, flete/T14.2, D14, aislamiento integral, publicación histórica y analítica autónoma siguen pendientes.
+La siguiente tarea crítica es cerrar las brechas D9 restantes: resultado externo T25.4 con selección por huella, persistencia/conciliación de `RESULTADO_METODO`, claves y deducibilidad por fuente, y revisión independiente. El caso base T18/T23.3/T23.5 está documentado en [evidencia D9](docs/entrega/evidencias/D9_CUADRE_T23_3_T23_5.md). Windows/Excel nativo, aceptación del EXE, autenticación empresarial, rendimiento con datos reales, conciliación D9 integral, flete/T14.2, D14, aislamiento integral, publicación histórica y analítica autónoma siguen pendientes.

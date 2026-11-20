@@ -1,0 +1,19 @@
+Sistema de Costos Reyna — Piloto local para Windows x64
+
+1. Extrae el ZIP a una carpeta y abre ReynaCostos.exe con doble clic.
+2. Mantén abierta la consola mientras trabajas. El navegador se abre en la
+   pantalla del piloto. Si no se abre, copia la dirección http://127.0.0.1
+   completa que aparece en la consola y pégala en el navegador.
+3. En «Importar libro», indica la ruta completa de un XLSX de configuración
+   guardado en tu equipo. El piloto crea una copia operativa en
+   %LOCALAPPDATA%\ReynaCostos\datos. Esa carpeta conserva los espacios al
+   cerrar o mover el ejecutable.
+4. Cuando terminen las operaciones, presiona Ctrl+C en la consola para cerrar
+   el servidor. Para respaldar el trabajo, copia la carpeta de datos con el
+   servidor cerrado.
+
+El ejecutable incluye Python y funciona sin conexión a Internet. El archivo
+index.html adjunto es una copia de la interfaz para consulta. Para operar, usa
+la dirección del servidor que abre el ejecutable.
+
+SHA256SUMS.txt contiene las huellas SHA-256 de los archivos distribuidos.

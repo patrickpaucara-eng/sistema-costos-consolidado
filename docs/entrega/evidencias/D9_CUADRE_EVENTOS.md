@@ -8,7 +8,7 @@
 
 Los eventos T17, T19 y T20 usan los escenarios 9, 10, 18 y 24 del libro `tests/fixtures/ola1/Sistema_Costos.xlsx`, SHA-256 `43c9170c04b23e678de7abf7bab39f43c4251ea14695b351d884639ea972be40`. Las pruebas verifican el SHA y el texto fuente de cada escenario antes de construir la solicitud. DBD declara T17/T19/T20 como transacciones en línea y configura sus operaciones en `TOP`, `OME`, `MET`, `MCA` y `FRM` del mismo libro. MCD §6.2.1 y DBD p.75 fundamentan verificar las cuentas como saldos afectados por eventos.
 
-El servicio del consolidado habilita explícitamente T14, T15, T17, T19 y T20. El motor aún aplica el perfil por transacción del libro; T16 y las operaciones por lotes no se habilitan desde el formulario de eventos. Las pruebas usan espacios temporales y vuelven a leer el XLSX guardado.
+El servicio del consolidado habilita explícitamente T14, T15, T17, T18, T19 y T20. El motor aún aplica el perfil por transacción del libro; T16 y las operaciones por lotes no se habilitan desde el formulario de eventos. Las pruebas usan espacios temporales y vuelven a leer el XLSX guardado.
 
 ## T17 · costo suministrado por centro y función
 
@@ -46,7 +46,7 @@ La prueba compara las dos filas `VENTA`, la existencia final y `CTA_VTA_PER` (`V
 - El saldo sintético hace que T20 pruebe el registro de la venta y su cuenta; **no** demuestra la producción de producto terminado desde una orden.
 - T17/T19/T20 comparan eventos con esperados independientes, pero no con una fila `RESULTADO_METODO` persistida en la misma corrida.
 - La fixture clasifica T23.0 como `ESTADISTICA`, por lo que el cierre del servicio no la ejecuta. No se cambia esa clasificación ni se interpreta su salida como reporte oficial.
-- Faltan casos independientes de T23.5 y T23.3, junto con producto terminado generado, vínculo causal evento/línea/método y pruebas de reversa y reapertura.
+- El caso base T18/T23.3/T23.5 tiene su [evidencia propia](D9_CUADRE_T23_3_T23_5.md). Siguen pendientes el resultado externo T25.4 por huella, el vínculo causal evento/línea/método para las cuentas, la reversa/reapertura y el cuadre de `RESULTADO_METODO`.
 - La clave física de `CTA_GASTO` omite `CGA_DED`. Los casos no aprueban una política contable ni corrigen esa clave.
 
 El insumo y esperado están versionados en [caso_t17_t19_t20_eventos.json](../../../tests/fixtures/d9/caso_t17_t19_t20_eventos.json); el caso T15 y las siete cuentas están en [D9_CUADRE_T15.md](D9_CUADRE_T15.md) y [D9_CONTRATO_DE_DATOS.md](D9_CONTRATO_DE_DATOS.md).
