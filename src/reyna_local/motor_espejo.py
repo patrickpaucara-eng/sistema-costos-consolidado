@@ -515,6 +515,24 @@ class Motor:
     def coincide(self, tabla, mca):
         """D12 (Ola 1): primero las filas exactas; si no hay ninguna, una clave *_EMP acepta la fila común «*»."""
         return self._coincide(tabla, mca, False) or self._coincide(tabla, mca, True)
+    def _empresa_cuenta(self, tabla):
+        """Resuelve el atributo de ámbito de las cuentas desde su esquema, sin enumerar tablas."""
+        if not str(tabla).startswith("CTA_"): return None
+        columnas = [c for c in self.T[tabla]["h"] if c.endswith("_EMP")]
+        if len(columnas) != 1:
+            raise Error(f"La cuenta {tabla} debe declarar una sola columna de empresa.")
+        empresa = self.tr.get("EMP")
+        if empresa in (None, ""):
+            raise Error(f"La operación que modifica {tabla} no identifica empresa.")
+        return columnas[0], empresa
+    def _coincide_cuenta(self, tabla, mca):
+        """Limita una escritura de cuenta a la empresa del evento, aunque el DBD omita EMP en alguna clave."""
+        cuenta = self._empresa_cuenta(tabla)
+        filas = self.coincide(tabla, mca)
+        if cuenta is None: return filas
+        columna, empresa = cuenta
+        i = self.col(tabla, columna)
+        return [r for r in filas if norm(r[i]) == norm(empresa)]
     def _coincide(self, tabla, mca, comodin):
         res = []
         for row in self.T[tabla]["r"]:
@@ -569,7 +587,7 @@ class Motor:
                 nv = max([num(r[i]) for r in self.T[tabla]["r"] if r is not row] + [0]) + 1; row[i] = nv; self.tr[x[2]] = nv
             else: row[i] = self.val(x[5], x[6])
     def m_ACTUALIZAR(self, cod, tabla, sub, obl, orden, mca):
-        rs = self.coincide(tabla, mca)
+        rs = self._coincide_cuenta(tabla, mca)
         if not rs:
             if obl == "S": raise Error(f"No existe la fila a actualizar en {tabla} ({cod})")
             return
@@ -578,7 +596,7 @@ class Motor:
         """OT-056: operador COMPUESTO configurado, una sola entrada: LEER (no obligatorio, R1) → FÓRMULA (valor nuevo =
         viejo ± dato; ASIGNA reemplaza sin convertir, R5; viejo = 0 si no hay fila) → CREAR (claves; sumas en 0) y ACTUALIZAR
         con los valores ya calculados (R2). Variables locales con prefijo propio (R6): la trama no se toca."""
-        acu_fila = next(iter(self.coincide(tabla, mca)), None)                   # LEER interno
+        acu_fila = next(iter(self._coincide_cuenta(tabla, mca)), None)           # LEER interno; cuenta restringida a EMP del evento
         acu_hallada = acu_fila is not None
         acu_val = {}                                                             # FÓRMULA: columna → valor nuevo, secuencial
         for x in mca:
@@ -594,6 +612,22 @@ class Motor:
                 c = self.plantilla(x[2]); i = self.col(tabla, c)
                 if x[3] == "K": acu_fila[i] = self.val(x[5], x[6])
                 elif x[4] in ("SUMA", "RESTA"): acu_fila[i] = 0
+            cuenta = self._empresa_cuenta(tabla)
+            if cuenta is not None:
+                col_empresa, empresa = cuenta
+                i_empresa = self.col(tabla, col_empresa)
+                asignacion = next((x for x in mca if self.plantilla(x[2]) == col_empresa), None)
+                if asignacion is None:
+                    acu_fila[i_empresa] = empresa
+                elif asignacion[3] == "K":
+                    if norm(acu_fila[i_empresa]) != norm(empresa):
+                        raise Error(f"La clave de {tabla} no corresponde a la empresa de la operación.")
+                elif asignacion[3] == "V" and asignacion[4] == "ASIGNA":
+                    valor_empresa = self.val(asignacion[5], asignacion[6])
+                    if norm(valor_empresa) != norm(empresa):
+                        raise Error(f"La cuenta {tabla} intenta registrar otra empresa.")
+                else:
+                    raise Error(f"La columna de empresa de {tabla} debe ser clave o asignarse al crear la cuenta.")
             self.T[tabla]["r"].append(acu_fila); self.creados.append((tabla, acu_fila))
         for c, v in acu_val.items(): self.setc(tabla, acu_fila, c, v)           # ACTUALIZAR con los valores ya calculados
     def trazar(self, met, var, v, det):

@@ -1,6 +1,6 @@
 # Plan maestro de consolidación
 
-Versión 4 · actualizado el 19 de noviembre de 2026 · ejecución MVP Python + Excel.
+Versión 5 · actualizado el 20 de noviembre de 2026 · ejecución MVP Python + Excel.
 
 ## Decisión vigente al retomar
 
@@ -22,6 +22,7 @@ El trabajo se organiza en los tres niveles elegidos por el dueño. La Base conse
 | Tres niveles Base / Síntesis / Analítica | Dirección conceptual indicada por el dueño |
 | Modelo conceptual detallado y contratos entre niveles | Borrador conservado; cotejo metodológico y pruebas de aceptación pendientes |
 | Uso individual o varias personas simultáneas | Pendiente de decisión |
+| Semántica de cuentas D9 | Decisión posterior del dueño conforme a MCD: los eventos actualizan saldos afectados y el cierre valida/conciliará; una proyección derivada debe mantenerse aparte. |
 | Stack y ejecución del plan | Instrucción posterior: Python único + Excel como almacenamiento e intercambio + HTML. SQLite aplazado. |
 | Repositorio histórico sistema-costos-reyna | Consulta y pruebas sobre copias |
 | 93 % de avance heredado | Declaración pendiente de validación |
@@ -37,7 +38,7 @@ El dueño aprobó el stack y dio la instrucción «Procede con tu plan» el 18-n
 - En las tres revisiones, la historia Python dio 392/392 y ENVASE 66/66. Ola 1 corrigió 16 errores de coherencia y elevó automatización a 5/5.
 - Continúan abiertos el aislamiento integral de la cadena, P20 en la construcción estricta, corrección contable D9, flete/T14.2, D14, integridad de las huellas y conciliación metodológica.
 - Los libros completos MCD y DBD llegaron después de OT-001 y están en el índice de fuentes. Su recepción habilita el cotejo metodológico pendiente.
-- El consolidado contiene fuentes, HTML y el MVP técnico Ola 3. Su motor Python es copia exacta de Ola 1; el adaptador persiste T14/T15 y la cadena configurada de cierre en una copia Excel. El cálculo integral y las cuentas oficiales siguen sin habilitarse. Ver el registro de capacidades y sus límites.
+- El consolidado contiene fuentes, HTML y el MVP técnico Ola 3. Su motor Python parte del espejo de Ola 1 y añade una guarda de empresa para las mutaciones `CTA_*`; el adaptador persiste T14/T15 y la cadena configurada de cierre en una copia Excel. Las escrituras de cuenta por evento pasan pruebas de ámbito e idempotencia, pero la conciliación independiente D9, el cálculo integral y las cuentas oficiales siguen sin habilitarse. Ver el registro de capacidades y sus límites.
 
 Los resultados de pruebas expresan su versión y su caso. Para repetir una prueba se fijan también los datos y el entorno. La observación de mezcla entre empresas se reprodujo en el método con hechos mezclados y requiere verificar toda la ruta de operación.
 
@@ -206,7 +207,7 @@ Se empieza con el orquestador y hasta tres especialistas cuando existan tareas i
 
 Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
 
-El lote documental conservó P00–P03 y la primera extracción de M01–M04. El MVP Ola 3 añade una guardia de empresa por espacio y cierre técnico de la cadena configurada; el nuevo cierre requiere 13 pruebas automatizadas y un recorrido real en Chromium. No valida D9 ni el costo integral. La siguiente tarea es el inventario de escritores D9 y el caso de cuadre independiente; después siguen flete/T14.2 y D14. El estado detallado y las puertas están en [ESTADO.md](ESTADO.md) y [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md).
+El lote documental conservó P00–P03 y la primera extracción de M01–M04. El MVP Ola 3 añade una guardia de empresa por espacio y cierre técnico de la cadena configurada. La suite tiene 16 pruebas automatizadas y el recorrido real en Chromium está documentado. El incremento D9 fija la semántica MCD y prueba aislamiento, repetición y reversión de las cuentas en la fixture; todavía no valida el costo integral ni concilia con un oráculo independiente. La siguiente tarea es completar el contrato de datos y preparar el caso persistido de cuadre D9; después siguen flete/T14.2 y D14. El estado detallado y las puertas están en [ESTADO.md](ESTADO.md) y [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md).
 
 ## Prioridad de entrega del 18-nov
 

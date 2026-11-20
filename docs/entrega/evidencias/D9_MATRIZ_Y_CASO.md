@@ -1,12 +1,14 @@
 # D9 · matriz de cuentas y caso O-1
 
-- **Fecha:** 19 de noviembre de 2026 (hora de Lima).
+- **Fecha:** 20 de noviembre de 2026 (hora de Lima).
 - **Rama de trabajo:** `desarrollo/mvp-ola3`, candidato `0.2.0`.
-- **Resultado:** inventario y línea base numérica parcial; no es aceptación contable ni autorización para materializar cuentas.
+- **Resultado:** semántica de cuentas resuelta por el propietario conforme al MCD; aislamiento empresarial de escrituras CTA probado en el piloto. La línea base O-1 sigue siendo parcial y no es aceptación contable.
 
 ## Conclusión ejecutiva
 
 La deuda D9 es real: en el DBD de la rama histórica, las siete tablas `CTA_*` reciben escrituras desde entre uno y siete servicios y el cierre que publica `RESULTADO_METODO` no las escribe. La hoja O-1 tampoco contiene estas siete cuentas. Las 14 pruebas históricas `xfail(strict=True)` describen ese incumplimiento, pero las siete pruebas de cuadre se detienen al detectar la hoja faltante; no comparan valores guardados en las cuentas.
+
+La semántica ya no está pendiente: por instrucción del propietario y conforme al MCD, las cuentas operativas conservan los impactos de los eventos; el cierre las valida y concilia. No corresponde reemplazarlas por una reconstrucción agregada al cierre. La decisión y el límite de la evidencia están desarrollados en [D9_DECISION_SEMANTICA.md](D9_DECISION_SEMANTICA.md). El piloto también corrige el cruce entre empresas cuando la clave configurada en DBD omite `*_EMP`, y prueba aislamiento, reintento y reversión. Esto no concilia aún O-1 ni habilita resultados oficiales.
 
 | Tabla | Servicios escritores DBD_4c | Transacciones raíz reportadas |
 |---|---:|---|
@@ -36,7 +38,7 @@ Tres propuestas de mapeo no tienen grano suficiente en la salida calculada: `CTA
 
 El cálculo de referencia llamó `informes/DEUDA/escritores.py` y su `correr_o1()` en una copia temporal de solo lectura. Esa función calcula los métodos en memoria. No se integró ni se ejecutó código en el repositorio original, no se cambió la fixture ni se escribió `RESULTADO_METODO` en ella. La regeneración de esta línea base desde un checkout limpio todavía no está automatizada; el CSV conserva los resultados observados y la huella de la fixture.
 
-El manifiesto [D9_SHA256SUMS](D9_SHA256SUMS) verifica el reporte y el CSV. El manifiesto de [insumos D9](../../fuentes/claude/ola3/d9/insumos/SHA256SUMS) verifica las copias del DBD y la fixture.
+El manifiesto [D9_SHA256SUMS](D9_SHA256SUMS) verifica esta matriz, la decisión semántica y el CSV. El manifiesto de [insumos D9](../../fuentes/claude/ola3/d9/insumos/SHA256SUMS) verifica las copias del DBD y la fixture.
 
 ## Esquema, grano y mapeo candidato
 
@@ -86,18 +88,18 @@ El asterisco en `CTA_GASTO.CGA_MTO` señala la suma aritmética de dos conceptos
 - *Administración de Bases de Datos*, pp. 44–45, admite tablas suplementarias para consultas críticas sin perder los datos originales y exige controlar la redundancia.
 - El mismo libro, p. 171, indica que una vista no tiene datos propios y puede responder más lento.
 
-Esto sustenta separar hechos/cuentas autoritativos de proyecciones derivadas. No demuestra que las siete `CTA_*` actuales sean tablas suplementarias. La regla histórica D-I0b-1 pide que el cierre escriba las cuentas junto con `RESULTADO_METODO`; el MCD describe cuentas impactadas por eventos. Antes de cambiar el escritor se debe fijar cuál de estas dos semánticas tienen las tablas actuales:
+Esto sustenta separar hechos/cuentas operativas de proyecciones derivadas. La clasificación histórica D-I0b-1 decía que las siete tablas eran suplementarias y debían escribirse en el cierre; esa instrucción se conserva como evidencia, pero el propietario resolvió la semántica posterior a favor de MCD para las cuentas operativas actuales:
 
-1. **Cuenta MCD autoritativa:** los eventos la afectan por un servicio central de escritura; el cierre la valida y concilia, sin reemplazar los hechos acumulados.
-2. **Proyección suplementaria de cierre:** es derivada y reconstruible desde los hechos conservados y salidas aprobadas; debe identificarse como proyección para no confundirla con la cuenta autoritativa.
+1. **Cuenta MCD operativa:** los eventos la afectan transaccionalmente por servicios configurados en DBD, ejecutados por las operaciones genéricas del motor; el cierre la valida y concilia, sin reemplazar los hechos acumulados.
+2. **Proyección suplementaria eventual:** puede derivarse de hechos conservados y reglas aprobadas para una consulta concreta, pero debe tener identidad y reconstrucción propias y no confundirse con la cuenta operativa.
 
-No recomiendo implementar el escritor de cierre sobre las tablas actuales hasta resolver esa distinción y los tres desajustes de grano anteriores.
+No se agrega un escritor de cierre para reconstruir estas mismas cuentas. La implementación genérica conserva la definición de servicios DBD y añade el ámbito de empresa del evento. La conciliación por grano y los tres mapeos incompletos siguen pendientes.
 
 ## Criterios para cerrar D9
 
-1. Acordar la semántica de `CTA_*` frente a eventos y resultado de cierre, y separar explícitamente `CTA_ACTOR` del costo.
+1. **Resuelto:** aplicar semántica MCD a las cuentas operativas impactadas por eventos; mantener `CTA_ACTOR` fuera del costo. Véase [decisión D9](D9_DECISION_SEMANTICA.md).
 2. Para cada campo, especificar fuente, signo, clave completa, periodo efectivo, agregación, moneda, redondeo, reversión y tratamiento de vacíos.
 3. Resolver las dimensiones faltantes de `CTA_GASTO`, `CTA_FUNCION` y `CTA_OBJ_REC` con hechos fuente; si no existen, mantener esos campos fuera del resultado oficial.
 4. Construir un caso con cuentas y `RESULTADO_METODO` persistidos en el mismo libro, y un esperado independiente del código que se valida.
-5. Conciliar por clave y total; probar cierre repetido, fallo intermedio, reversión/reapertura y que no haya doble acumulación.
-6. Recién entonces implementar una única ruta de escritura coherente con la semántica acordada y registrar evidencia reproducible.
+5. Conciliar por clave y total; probar repetición del cierre, fallo intermedio, reversión/reapertura y que no haya doble acumulación. La regresión piloto ya cubre aislamiento de empresa, reintento de solicitud y reversión de T15.
+6. Mantener la escritura de saldo en las transacciones que originan los eventos, con el mecanismo genérico configurado por DBD, y registrar evidencia reproducible. El cierre verifica/conciliará; no regenerará esas mismas cuentas.

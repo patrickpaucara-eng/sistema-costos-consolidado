@@ -1,6 +1,6 @@
 # Capacidades verificadas y pendientes
 
-**Corte:** 19 de noviembre de 2026 (hora de Lima).
+**Corte:** 20 de noviembre de 2026 (hora de Lima).
 
 **Trabajo:** candidato 0.2.0 en `desarrollo/mvp-ola3`; motor Ola 1 conservado como referencia histórica.
 
@@ -23,8 +23,8 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 
 ## Evidencia de este incremento
 
-- [Pruebas y recorrido MVP Ola 3](evidencias/MVP_OLA3.md): suite completa, fallo inyectado, cierre desde HTML y resultados del caso.
-- [Matriz y caso D9](evidencias/D9_MATRIZ_Y_CASO.md) y [línea base CSV O-1](evidencias/D9_CONTROL_O1.csv): 119 valores calculados en memoria; no acreditan un cuadre de cuenta ni habilitan resultados oficiales.
+- [Pruebas y recorrido MVP Ola 3](evidencias/MVP_OLA3.md): suite completa, pruebas nuevas de aislamiento/rollback D9, fallo inyectado, cierre desde HTML y límites del caso.
+- [Decisión D9](evidencias/D9_DECISION_SEMANTICA.md), [matriz y caso](evidencias/D9_MATRIZ_Y_CASO.md) y [línea base CSV O-1](evidencias/D9_CONTROL_O1.csv): las cuentas se actualizan por los eventos según MCD y las escrituras del piloto aíslan la empresa. Los 119 valores O-1 siguen sin conciliación independiente ni aceptación oficial.
 - [Guía de instalación y reproducción](GUIA_PILOTO_EXCEL.md).
 - [Pruebas del primer piloto](evidencias/REVISION_INDEPENDIENTE.md) y [ejecución original](evidencias/pruebas-excel.log): nueve pruebas del incremento CAP-01–CAP-05.
 - [Recorrido HTML de la primera entrega](evidencias/RECORRIDO_HTML.md).
@@ -35,8 +35,8 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 
 Un espacio es una copia de un libro, no una base multiempresa. La guardia identifica una empresa activa por los operadores habilitados para T14/T15, pero el filtro de empresa no se ha demostrado en toda la cadena del motor. El usuario se declara en la solicitud; no existe sesión empresarial autenticada.
 
-El cierre ejecuta los pasos `OFICIAL` o `CIERRE` definidos en `CIERRE_PASO`. El test comprueba que el periodo `2026-04` de B termina cerrado y que el saldo del recurso permanece en 400 unidades a S/ 3,054. No concilia las tablas de cuentas D9 ni publica el costo de una orden. Si una cadena falla, las tablas de negocio y la versión no cambian; se escribe en `RECEIPTS` un rechazo idempotente.
+El cierre ejecuta los pasos `OFICIAL` o `CIERRE` definidos en `CIERRE_PASO`. El test comprueba que el periodo `2026-04` de B termina cerrado y que el saldo del recurso permanece en 400 unidades a S/ 3,054. Las regresiones D9 prueban que los eventos T15 afectan cuentas configuradas sin cruzar empresa, que el reintento no duplica y que el fallo revierte el evento; no concilian las cuentas ni publican el costo de una orden. Si una cadena falla, las tablas de negocio y la versión no cambian; se escribe en `RECEIPTS` un rechazo idempotente.
 
 La persistencia usa temporal, respaldo anterior y reemplazo atómico; el respaldo comparte disco. No se probó corte físico. Debe cerrar Office y reservar el XLSX gestionado al servicio. La prueba en Windows/Excel nativo y en el equipo del dueño sigue pendiente. Una versión anterior del espacio debe reimportarse para activar los metadatos de cierre y empresa de esta iteración.
 
-El generador integral, D9, flete/T14.2, D14, devoluciones EVE_ORI, coproductos, costo financiero, múltiples empresas, autenticación, volúmenes reales, varios operadores y analítica autónoma siguen sin aceptación. El motor es copia exacta del espejo Python de Ola 1; esa paridad de origen no demuestra que sus reglas representen íntegramente el método ORIA.
+El generador integral, la conciliación D9 contra un oráculo independiente, flete/T14.2, D14, devoluciones EVE_ORI, coproductos, costo financiero, operación de varias empresas, autenticación, volúmenes reales, varios operadores y analítica autónoma siguen sin aceptación. Se limita por empresa las mutaciones de tablas `CTA_*` identificando su columna `*_EMP` desde el esquema; esto no demuestra aislamiento para todas las tablas y métodos. El motor es copia exacta del espejo Python de Ola 1 salvo la guarda de ámbito D9; la paridad de origen no demuestra que sus reglas representen íntegramente el método ORIA.

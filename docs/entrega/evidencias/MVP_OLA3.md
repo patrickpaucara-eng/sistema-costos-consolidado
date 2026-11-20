@@ -1,6 +1,6 @@
 # Evidencia de aceptación técnica · MVP Ola 3
 
-**Fecha:** 19 de noviembre de 2026 (hora de Lima).
+**Fecha:** 20 de noviembre de 2026 (hora de Lima).
 
 **Rama:** `desarrollo/mvp-ola3`; base `desarrollo/capacidad-inicial@16c419f`.
 
@@ -19,9 +19,17 @@ La cadena configurada se procesa sobre tablas copiadas en memoria. La fixture cl
 
 Se inyectó una excepción `RuntimeError` durante T23.3. La respuesta fue 422, el intento quedó registrado y el reintento devolvió el mismo 422. Se compararon todas las tablas del libro salvo `META` y `RECEIPTS`; ninguna tabla de negocio cambió. La versión quedó igual.
 
-Esto demuestra persistencia de la cadena de pasos como unidad técnica; **no** demuestra que todos los pasos produzcan cuentas correctas. D9 (un solo escritor por cuenta), conciliación contable, costo integral ORIA, flete/T14.2 y reexpresión D14 están pendientes.
+Esto demuestra persistencia de la cadena de pasos como unidad técnica; **no** demuestra que todos los pasos produzcan cuentas correctas. La validación del contrato de escritura por evento y la conciliación contable D9, el costo integral ORIA, el flete/T14.2 y la reexpresión D14 siguen pendientes.
 
 El diagnóstico recuperado de `desarrollo/deuda@0b8f63c` precisa D9: enumera siete `CTA_*`, detecta de uno a siete servicios escritores por tabla y constata que el cierre que publica `RESULTADO_METODO` no escribe esas cuentas. Sus 14 pruebas estrictas documentan escritor único y cuadre por cada tabla. La función histórica `correr_o1()` se ejecutó en una copia temporal de solo lectura para exportar 119 valores calculados en memoria; no se escribieron cuentas en el XLSX ni se comparó una tabla `RESULTADO_METODO` persistida, porque O-1 no trae las hojas CTA. La evidencia, claves, sumas, diferencias de grano y límites están en [matriz y caso D9](D9_MATRIZ_Y_CASO.md) y [CSV de referencia](D9_CONTROL_O1.csv). El código de escritores y las pruebas recuperadas se conservaron, pero no se integraron; las 14 pruebas no se ejecutaron en este incremento.
+
+### D9 · semántica MCD y regresión de ámbito
+
+El propietario resolvió seguir el MCD: los eventos actualizan transaccionalmente los saldos de cuenta que afectan; el cierre los valida y concilia, sin regenerar las mismas cuentas a partir de un agregado. Se conserva la diferencia histórica: D-I0b-1 había clasificado esas tablas como suplementarias de cierre. La decisión, su fundamento y sus límites están en [D9_DECISION_SEMANTICA.md](D9_DECISION_SEMANTICA.md).
+
+En el motor Python, los métodos DBD ya se ejecutan por operaciones genéricas. Se hizo que las mutaciones `CTA_*` identifiquen la columna `*_EMP` desde el esquema y solo reutilicen/actualicen filas de la empresa del evento; las filas nuevas reciben esa empresa aunque la MCA omita la empresa de la clave. La prueba carga filas A y B con claves de negocio iguales, verifica los valores observados de T15 y confirma que A no se altera. Repite el mismo `request_id` y compara las siete cuentas. Otra prueba inyecta un fallo tras la escritura de `CTA_OBJ_REC` y confirma que las cuentas y el inventario/evento se revierten. Una prueba directa de `m_ACTUALIZAR` verifica que solo cambia B aunque la clave DBD omita empresa. El reintento del cierre también compara las siete hojas CTA antes y después.
+
+Estas son regresiones del comportamiento técnico del piloto, no un oráculo independiente de MCD/ORIA ni conciliación monetaria. D9 sigue bloqueado como salida oficial hasta persistir un caso conciliable con esperado independiente, completar dimensiones fuente y revisar causalidad por clave.
 
 ## Aislamiento empresarial del piloto
 
@@ -31,13 +39,13 @@ La importación rechaza un libro cuando detecta usuarios con permisos T14/T15 en
 
 | Verificación | Resultado |
 |---|---|
-| `python -m unittest discover -s tests -v` con Python 3.12 | 13 pruebas aprobadas en 36,799 s; incluye cierre exitoso, reintento, fallo inyectado, guardia empresarial, concurrencia y preservación del XLSX. |
+| `/workspace/reyna-env/bin/python -m unittest discover -s tests -v` con Python 3.12 | 16 pruebas aprobadas en 52,184 s; incluye cierre y reintento, fallo inyectado, aislamiento CTA A/B en acumulación y actualización, concurrencia y preservación del XLSX. |
 | Ejecución real desde Chromium usando el wheel instalado | Importación, T14 × 2, T15, aviso de uso exclusivo con copia de prueba, cierre con cinco pasos correctos y cero errores de página. El servidor se ejecutó fuera del checkout. |
 | `node --check` sobre el script de `src/reyna_local/web/index.html` | Sintaxis JavaScript aprobada. |
 | Empaquetado e instalación aislada | Candidato `reyna_local-0.2.0-py3-none-any.whl` construido; SHA-256 `2c01a1f447d54d6631c9920c279b496db22a36d68cba106851449fd5d9b46054`. Instalado fuera del checkout y `python -m reyna_local --help` respondió; el HTML vino dentro del wheel y el recorrido completo pasó desde ese paquete. Las dependencias ya estaban disponibles. |
 | Manifiesto de fuentes de Ola 3 | Los cuatro Markdown conservados verifican con `sha256sum -c`. |
 
-Las pruebas usan copias temporales de la fixture; no escriben en el repositorio original ni requieren Excel/VBA. Los 13 tests cubren más que la cadena de cierre; no deben leerse como 13 pruebas metodológicas independientes.
+Las pruebas usan copias temporales de la fixture; no escriben en el repositorio original ni requieren Excel/VBA. Los 16 tests cubren más que la cadena de cierre; no deben leerse como 16 pruebas metodológicas independientes.
 
 ## Reproducción automatizada
 
@@ -47,7 +55,7 @@ Desde la raíz del repositorio, con dependencias instaladas:
 python -m unittest discover -s tests -v
 ```
 
-El test `test_cierre_oficial_guarda_una_vez_y_reintenta` ejercita el cierre por API y `test_cierre_fallido_no_persiste_pasos_parciales` inyecta la excepción en T23.3. La ruta HTML fue recorrida con Chromium en un directorio temporal, usando la misma fixture. El [manifiesto de los documentos de Claude](../../fuentes/claude/ola3/SHA256SUMS) se verifica desde la raíz mediante:
+`test_d9_event_accounts.py` comprueba aislamiento, repetición y reversión. El test `test_cierre_oficial_guarda_una_vez_y_reintenta` ejercita el cierre por API y `test_cierre_fallido_no_persiste_pasos_parciales` inyecta la excepción en T23.3. La ruta HTML fue recorrida con Chromium en un directorio temporal, usando la misma fixture. El [manifiesto de los documentos de Claude](../../fuentes/claude/ola3/SHA256SUMS) se verifica desde la raíz mediante:
 
 ```sh
 sha256sum -c docs/fuentes/claude/ola3/SHA256SUMS

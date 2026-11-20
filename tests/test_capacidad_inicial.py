@@ -246,10 +246,16 @@ class CapacidadInicial(unittest.TestCase):
         self.assertEqual(result["version"], version + 5)
         carga = self.workbook_table(workspace, "CARGA")
         self.assertEqual([row[4] for row in carga[-5:]], ["OK"] * 5)
+        cuentas = ("CTA_ACTOR", "CTA_CENTRO", "CTA_GASTO", "CTA_OBJ_PER",
+                   "CTA_OBJ_REC", "CTA_FUNCION", "CTA_VTA_PER")
+        cuentas_tras_cierre = {name: self.workbook_table(workspace, name) for name in cuentas}
         self.stop_server(self.server)
         self.start_server()
         self.assertEqual(self.close_month(workspace, body), result)
         self.assertEqual(len(self.workbook_table(workspace, "CARGA")[-5:]), 5)
+        for name, previous in cuentas_tras_cierre.items():
+            self.assertEqual(self.workbook_table(workspace, name), previous,
+                             f"El reintento del cierre alteró {name}.")
         period_table = self.table(workspace, "PERIODO")
         period = [dict(zip(period_table["columns"], row)) for row in period_table["rows"]]
         self.assertEqual(next(row["PER_EST"] for row in period
