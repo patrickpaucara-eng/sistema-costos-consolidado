@@ -1,0 +1,82 @@
+{
+  "case_id": "D9-EVENTOS-T17-T19-T20-2026-04-B",
+  "title": "Costos de centro, pérdida declarada y venta contra saldos por evento",
+  "classification": "Pruebas parciales independientes de transacciones en línea; no son aceptación integral de D9",
+  "source_fixture": {
+    "path": "tests/fixtures/ola1/Sistema_Costos.xlsx",
+    "sha256": "43c9170c04b23e678de7abf7bab39f43c4251ea14695b351d884639ea972be40",
+    "source_scenarios": [
+      {"id": 9, "transaction": "T17", "trama": "FECHA=20260430;PER=2026-04;EMP=B;CEN=LINEA1;REC=DEP_LINEA;MTO_DOC=30000;MON=PEN"},
+      {"id": 10, "transaction": "T17", "trama": "FECHA=20260430;PER=2026-04;EMP=B;CEN=LINEA1;REC=ENE_CAMARA;MTO_DOC=4000;MON=USD"},
+      {"id": 18, "transaction": "T19", "trama": "FECHA=20260424;PER=2026-04;EMP=B;ALM=ALM1;CEN=ALM1;MOT=DESMEDRO_SIN_ACTA|REC=CAJA4KG;CANT=10"},
+      {"id": 24, "transaction": "T20", "trama": "FECHA=20260429;PER=2026-04;EMP=B;ALM=ALM1;CLI=EUROFRUT;MON=USD|REC=CAJA_SINT;CANT=1500;PVU=12|REC=CAJA_SINT;CANT=500;PVU=12.5"}
+    ]
+  },
+  "t17": {
+    "inputs": [
+      {"request_id": "d9-t17-1", "date": 20260430, "period": "2026-04", "company": "B", "center": "LINEA1", "currency": "PEN", "resource": "DEP_LINEA", "document_amount": "30000", "rate": "1"},
+      {"request_id": "d9-t17-2", "date": 20260430, "period": "2026-04", "company": "B", "center": "LINEA1", "currency": "USD", "resource": "ENE_CAMARA", "document_amount": "4000", "rate": "3.72"}
+    ],
+    "formula": "sum(document amount × exchange rate), rounded to 2 decimal places",
+    "expected": {
+      "functional_cost_total": "44880.00",
+      "center_row": {"key": {"CCE_CEN": "LINEA1", "CCE_PER": "2026-04", "CCE_EMP": "B"}, "values": {"CCE_SUM": "44880.00", "CCE_FUN": "PRD"}},
+      "function_row": {"key": {"CFU_PER": "2026-04", "CFU_FUN": "PRD", "CFU_EMP": "B"}, "values": {"CFU_MTO": "44880.00"}}
+    }
+  },
+  "t19": {
+    "request_id": "d9-t19-loss",
+    "date": 20260424,
+    "period": "2026-04",
+    "company": "B",
+    "warehouse": "ALM1",
+    "center": "ALM1",
+    "reason": "DESMEDRO_SIN_ACTA",
+    "resource": "CAJA4KG",
+    "quantity": "10",
+    "unit_cost_from_t15_independent_case": "3.0540",
+    "expected": {
+      "amount": "30.54",
+      "concept_from_rule": "DESMEDRO",
+      "deductibility_from_rule": "N",
+      "expense_row": {"key": {"CGA_PER": "2026-04", "CGA_CEN": "ALM1", "CGA_CON": "DESMEDRO", "CGA_EMP": "B"}, "values": {"CGA_MTO": "30.54", "CGA_DED": "N"}},
+      "ending_stock": {"EXI_CAN": "390", "EXI_VAL": "1191.06"}
+    }
+  },
+  "t20": {
+    "request_id": "d9-t20-sale",
+    "date": 20260429,
+    "period": "2026-04",
+    "company": "B",
+    "warehouse": "ALM1",
+    "client": "EUROFRUT",
+    "currency": "USD",
+    "exchange_rate": "3.72",
+    "product": "CAJA_SINT",
+    "opening_balance_test_setup": {"quantity": "2500", "unit_cost": "5.00", "value": "12500.00", "note": "Saldo sintético controlado para aislar T20; no se presenta como existencia de la fixture ni como corrida comercial."},
+    "lines": [
+      {"quantity": "1500", "document_unit_price": "12.00"},
+      {"quantity": "500", "document_unit_price": "12.50"}
+    ],
+    "formulas": {
+      "line_revenue_1": "1500 × 12.00 × 3.72 = 66960.00",
+      "line_revenue_2": "500 × 12.50 × 3.72 = 23250.00",
+      "revenue_total": "90210.00",
+      "cost_of_sales": "(1500 + 500) × 5.00 = 10000.00",
+      "ending_stock": "2500 - 2000 = 500 units; 12500.00 - 10000.00 = 2500.00"
+    },
+    "expected": {
+      "revenue_total": "90210.00",
+      "cost_of_sales": "10000.00",
+      "margin": "80210.00",
+      "ending_stock": {"EXI_CAN": "500", "EXI_VAL": "2500.00"},
+      "account_row": {"key": {"VPE_PER": "2026-04", "VPE_EMP": "B"}, "values": {"VPE_ING": "90210.00", "VPE_CST": "10000.00"}}
+    }
+  },
+  "limitations": [
+    "T17 y T19 usan los datos de escenario del XLSX y esperados aritméticos separados; sus saldos no se cotejan contra RESULTADO_METODO.",
+    "T20 usa un saldo de producto terminado sintético y explícito en el test; no demuestra que una orden real produzca y publique ese saldo.",
+    "T23.0 está clasificada ESTADISTICA en la fixture y no corre en el cierre del servicio; RESULTADO_METODO queda fuera de estos casos.",
+    "T16, devoluciones y reapertura completa siguen fuera del conjunto de transacciones habilitadas del servicio."
+  ]
+}

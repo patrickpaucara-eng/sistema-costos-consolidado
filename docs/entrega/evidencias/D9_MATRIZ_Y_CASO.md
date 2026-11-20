@@ -24,6 +24,8 @@ El conteo corresponde a servicios DBD, ejecutados por el motor genérico; un mis
 
 Se calculó una línea base de **119 filas y 15 agregaciones propuestas** sobre O-1, periodo `2021-01`, empresa `ENV`. Los totales coinciden con las salidas calculadas en memoria por el motor histórico. Eso no prueba que las cuentas estén conciliadas: O-1 no tiene las hojas CTA y `correr_o1()` no persiste una tabla `RESULTADO_METODO`. El detalle está en [D9_CONTROL_O1.csv](D9_CONTROL_O1.csv).
 
+La evidencia nueva concilia parcialmente saldos persistidos de T15, T17, T19 y T20 con cálculos independientes por evento. El caso T20 usa un saldo inicial sintético; no es la salida de una orden liquidada. Los casos no prueban el grano de las 119 propuestas de O-1 ni concilian `RESULTADO_METODO`. Ver [D9_CUADRE_T15.md](D9_CUADRE_T15.md) y [D9_CUADRE_EVENTOS.md](D9_CUADRE_EVENTOS.md).
+
 Tres propuestas de mapeo no tienen grano suficiente en la salida calculada: `CTA_GASTO` requiere centro, concepto y deducibilidad; `CTA_FUNCION` requiere función; `CTA_OBJ_REC` requiere recurso y cantidad además del objeto. No se deben completar esas dimensiones con valores inventados ni publicar esas cuentas como oficiales.
 
 ## Evidencia y procedencia
@@ -38,7 +40,7 @@ Tres propuestas de mapeo no tienen grano suficiente en la salida calculada: `CTA
 
 El cálculo de referencia llamó `informes/DEUDA/escritores.py` y su `correr_o1()` en una copia temporal de solo lectura. Esa función calcula los métodos en memoria. No se integró ni se ejecutó código en el repositorio original, no se cambió la fixture ni se escribió `RESULTADO_METODO` en ella. La regeneración de esta línea base desde un checkout limpio todavía no está automatizada; el CSV conserva los resultados observados y la huella de la fixture.
 
-El manifiesto [D9_SHA256SUMS](D9_SHA256SUMS) verifica esta matriz, la decisión semántica, el contrato, el caso T15, el JSON de esperado y el CSV. El manifiesto de [insumos D9](../../fuentes/claude/ola3/d9/insumos/SHA256SUMS) verifica las copias del DBD y la fixture.
+El manifiesto [D9_SHA256SUMS](D9_SHA256SUMS) verifica esta matriz, la decisión semántica, el contrato, los casos T15/T17/T19/T20, sus JSON de esperado y el CSV. El manifiesto de [insumos D9](../../fuentes/claude/ola3/d9/insumos/SHA256SUMS) verifica las copias del DBD y la fixture.
 
 ## Esquema, grano y mapeo candidato
 

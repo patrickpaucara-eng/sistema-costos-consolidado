@@ -202,6 +202,24 @@ class CapacidadInicial(unittest.TestCase):
         self.assertEqual(rows[1], tuple(expected["rows"][0]))
         self.assertEqual(hashlib.sha256(self.workbook.read_bytes()).hexdigest(), source_digest)
 
+    def test_transaccion_t17_y_limite_de_t16_desde_api(self):
+        workspace, _ = self.import_workspace("Costo de centro por API")
+        status, detail = self.request("GET", workspace)
+        self.assertEqual(status, 200, detail)
+        self.assertEqual(detail["transactions"], ["T14", "T15", "T17", "T19", "T20"])
+        result = self.execute(workspace, {
+            "transaction": "T17", "user": "CONTAB1", "request_id": "api-t17",
+            "header": {"FECHA": 20260430, "PER": "2026-04", "EMP": "B", "CEN": "LINEA1", "MON": "PEN"},
+            "lines": [{"REC": "DEP_LINEA", "MTO_DOC": 30000}],
+        })
+        self.assertEqual(result["result"], "OK")
+        status, result = self.request("POST", workspace + "/execute", {
+            "transaction": "T16", "user": "SUPERV1", "request_id": "api-t16",
+            "header": {"FECHA": 20260430, "PER": "2026-04", "EMP": "B"}, "lines": [],
+        })
+        self.assertEqual(status, 400, result)
+        self.assertIn("no está habilitada", result["error"])
+
     def test_importacion_rechaza_dos_empresas_operativas(self):
         book = load_workbook(self.workbook)
         try:

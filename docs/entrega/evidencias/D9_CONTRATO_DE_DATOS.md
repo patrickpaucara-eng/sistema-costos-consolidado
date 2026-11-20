@@ -74,16 +74,18 @@ El MCD §6.2.1 describe el saldo de cuenta como resultado neto de eventos (p. 19
 - **Moneda/signo:** importes en moneda funcional. `DIF_VEN` es una variación con signo y debe agregarse sin convertir una reducción en incremento.
 - **Reversa:** el inventario declara un ajuste posterior, pero no una reversa equivalente para todo ingreso de T20. Mantener el evento de venta y formalizar devoluciones/anulaciones antes de cerrar el contrato.
 
-## Caso numérico independiente disponible
+## Casos numéricos independientes disponibles
 
 [D9_CUADRE_T15.md](D9_CUADRE_T15.md) conserva el caso `D9-T15-2026-04-B-OS01`: dos compras, un consumo, cálculo decimal por fuera del motor y lectura de las cuentas desde el XLSX persistido en un directorio temporal. El esperado y los insumos están en [caso_t15_eventos.json](../../../tests/fixtures/d9/caso_t15_eventos.json); la prueba confirma importes/cantidades en tres cuentas y conserva una fila de otra empresa con las mismas claves de negocio.
 
-El caso reconcilia una ruta parcial de T15; `CGA_DED` queda explícitamente sin clasificar, y no incluye `RESULTADO_METODO` ni las otras cuentas. No cierra D9.
+Los casos de [T17, T19 y T20](D9_CUADRE_EVENTOS.md) cotejan, respectivamente, `CTA_CENTRO`/`CTA_FUNCION`, `CTA_GASTO` y `CTA_VTA_PER`. T19 prueba la clasificación que devuelve `REGLA` para el motivo `DESMEDRO_SIN_ACTA`; esto no resuelve `CGA_DED` para la pérdida anormal T15 ni para ocio T23.2. T20 usa un saldo inicial sintético, no producido por una orden.
+
+En conjunto, los cuatro recorridos concilian saldos parciales guardados con aritmética independiente; no incluyen `RESULTADO_METODO`, cobertura integral de las otras cuentas ni la conciliación por clave de O-1. No cierran D9.
 
 ## Puertas restantes
 
-1. Resolver `CGA_DED` para pérdida anormal y ocio, y decidir si la deducibilidad forma parte del grano de gasto.
+1. Resolver `CGA_DED` para pérdida anormal y ocio, y decidir si la deducibilidad forma parte del grano de gasto. El caso T19 solo prueba la clasificación recibida desde su regla fuente.
 2. Completar prueba de clave única dentro de empresa y alinear `CLAVE_COMPUESTA` con las identidades empresariales de `CTA_GASTO` y `CTA_OBJ_REC`.
-3. Añadir casos independientes para T17 (`CTA_CENTRO`/`CTA_FUNCION`), T19/T23.5 (`CTA_GASTO`) y T20/T23.3 (`CTA_VTA_PER`), usando datos fuente que contengan sus dimensiones.
+3. Extender T19 a T23.5 (`CTA_GASTO`) y T20 a T23.3 (`CTA_VTA_PER`), con producto terminado generado por una orden; los casos de T17/T19/T20 existentes solo cubren eventos parciales.
 4. Relacionar cada cambio de cuenta con evento, línea y servicio DBD; verificar reversa, fallo, repetición, reapertura y cierre con las siete cuentas presentes.
 5. Conciliar un caso integral con `RESULTADO_METODO` y esperado independiente por clave y total. Hasta entonces, no publicar las cuentas como salida contable oficial.

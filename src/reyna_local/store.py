@@ -27,7 +27,9 @@ from .motor_espejo import Motor
 
 SOURCE_REVISION = "cac2501d9f712655dda466d216dc5bff2dd446a5"
 ENGINE_SHA256 = "8c962583170cbb200c564bef8edfd95ae931602b82fa2f89f2bb48bcd9ce2a11"
-TRANSACTIONS = ("T14", "T15")
+# Explicit API capability boundary. The engine has more configured transactions,
+# but these are the event operations currently covered by the active MVP scope.
+TRANSACTIONS = ("T14", "T15", "T17", "T19", "T20")
 PUBLIC = ("EVENTO", "LINEA", "EXISTENCIA", "KARDEX", "RECURSO", "PERIODO", "OBJETO", "CENTRO")
 REQUIRED = {
     "USUARIO", "USUARIO_PERFIL", "PERFIL_TRX", "LOG_TRX", "BITACORA", "EMPRESA",
@@ -62,7 +64,7 @@ def text_field(obj, key, limit):
 def validate_execution(body):
     txn = text_field(body, "transaction", 8)
     if txn not in TRANSACTIONS:
-        raise Problem(400, "El piloto admite T14 y T15.")
+        raise Problem(400, "La transacción no está habilitada en el piloto.")
     user = text_field(body, "user", 100)
     key = text_field(body, "request_id", 160)
     header = body.get("header")
@@ -156,7 +158,7 @@ def load_data(raw, required=None):
 
 def validate_model(tables):
     if REQUIRED.difference(tables):
-        raise Problem(422, "Faltan tablas operativas del modelo T14/T15.")
+        raise Problem(422, "Faltan tablas requeridas para el piloto.")
     if any(name.casefold() in (META.casefold(), RECEIPTS.casefold()) for name in tables):
         raise Problem(422, "El origen ya contiene hojas reservadas del piloto.")
     if tables["USUARIO"]["h"][:4] != ["USU_COD", "USU_CLAVE", "USU_PERFIL", "USU_EMP"]:

@@ -72,7 +72,7 @@ Una operación rechazada conserva el estado de negocio anterior. Un rechazo de n
 
 ## Alcance actual
 
-El ensayo requiere un operador local de confianza y usuarios de referencia. El formulario avanzado de transacciones solicita los campos en JSON. La captura empresarial con campos y listas de negocio se completa después. La cadena configurada de cierre ya se ejecuta desde HTML; la corrección contable y metodológica del cierre sigue pendiente.
+El ensayo requiere un operador local de confianza y usuarios de referencia. El formulario avanzado permite seleccionar T14, T15, T17, T19 y T20; solicita los campos en JSON y el motor valida el perfil y los campos declarados en DBD. La captura empresarial guiada con listas de negocio se completa después. Los casos independientes de T17/T19/T20 y sus límites están en [D9_CUADRE_EVENTOS.md](evidencias/D9_CUADRE_EVENTOS.md). En particular, su saldo inicial sintético de producto terminado sirve para probar T20, no como ejemplo de una orden producida. La cadena configurada de cierre ya se ejecuta desde HTML; la corrección contable y metodológica del cierre sigue pendiente.
 
 Los espacios aíslan copias de libros. El MVP limita cada espacio a una empresa operativa y rechaza los operadores detectados en otra empresa; la separación completa en cada tabla/método no se ha probado. Reimporta espacios creados antes de esta versión para habilitar los metadatos de empresa y cierre. La recuperación del archivo debe validarse además en el equipo de destino, incluida una interrupción real del proceso y la interacción con Excel abierto.
 

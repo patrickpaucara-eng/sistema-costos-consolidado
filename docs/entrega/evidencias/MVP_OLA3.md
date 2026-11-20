@@ -29,23 +29,25 @@ El propietario resolvió seguir el MCD: los eventos actualizan transaccionalment
 
 En el motor Python, los métodos DBD ya se ejecutan por operaciones genéricas. Se hizo que las mutaciones `CTA_*` identifiquen la columna `*_EMP` desde el esquema y solo reutilicen/actualicen filas de la empresa del evento; las filas nuevas reciben esa empresa aunque la MCA omita la empresa de la clave. La prueba carga filas A y B con claves de negocio iguales y confirma que A no se altera. El mismo caso T15 compara las filas persistidas de tres cuentas contra un esperado decimal independiente en [caso_t15_eventos.json](../../../tests/fixtures/d9/caso_t15_eventos.json), repite el `request_id` y compara las siete cuentas. Otra prueba inyecta un fallo tras la escritura de `CTA_OBJ_REC` y confirma que las cuentas y el inventario/evento se revierten. Una prueba directa de `m_ACTUALIZAR` verifica que solo cambia B aunque la clave DBD omita empresa. El reintento del cierre también compara las siete hojas CTA antes y después.
 
-El caso T15 concilia parcialmente `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` por evento con aritmética separada. No es un oráculo de ORIA ni un caso integral con `RESULTADO_METODO`. D9 sigue bloqueado como salida oficial hasta resolver dimensiones fuente, cubrir las otras cuentas y revisar causalidad por clave.
+El caso T15 concilia parcialmente `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` por evento con aritmética separada. Se añadieron casos independientes para T17 (`CTA_CENTRO`/`CTA_FUNCION`), T19 (`CTA_GASTO`) y T20 (`CTA_VTA_PER`), con esperados y filas persistidas. T20 usa un saldo inicial sintético; ninguno de estos casos concilia una fila `RESULTADO_METODO` de la misma corrida ni es un oráculo ORIA. D9 sigue bloqueado como salida oficial hasta resolver las dimensiones fuente, los casos de cierre T23.5/T23.3 y la conciliación integral.
+
+El servicio y el formulario JSON habilitan explícitamente T14, T15, T17, T19 y T20. T16 y las operaciones por lotes siguen fuera del piloto. La fuente, los cálculos independientes y las limitaciones de los tres nuevos casos constan en [D9_CUADRE_EVENTOS.md](D9_CUADRE_EVENTOS.md).
 
 ## Aislamiento empresarial del piloto
 
-La importación rechaza un libro cuando detecta usuarios con permisos T14/T15 en más de una empresa. Una operación que declare `EMP` distinta de la empresa del espacio se rechaza antes de modificar el negocio. Son controles preventivos de alcance; no equivalen a una prueba completa de aislamiento interno para todas las tablas y métodos.
+La importación rechaza un libro cuando detecta usuarios con permisos para cualquiera de las transacciones habilitadas del piloto (T14/T15/T17/T19/T20) en más de una empresa. Una operación que declare `EMP` distinta de la empresa del espacio se rechaza antes de modificar el negocio. Son controles preventivos de alcance; no equivalen a una prueba completa de aislamiento interno para todas las tablas y métodos.
 
 ## Verificaciones ejecutadas
 
 | Verificación | Resultado |
 |---|---|
-| `/workspace/reyna-env/bin/python -m unittest discover -s tests -v` con Python 3.12 | 16 pruebas aprobadas en 49,343 s; incluye cierre y reintento, fallo inyectado, aislamiento CTA A/B en acumulación y actualización, concurrencia y preservación del XLSX. |
+| `/workspace/reyna-env/bin/python -m unittest discover -s tests -v` con Python 3.12 | 20 pruebas aprobadas en 68,423 s; incluye cierre y reintento, fallo inyectado, aislamiento CTA A/B en acumulación y actualización, casos independientes T15/T17/T19/T20, concurrencia y preservación del XLSX. |
 | Ejecución real desde Chromium usando el wheel instalado | Importación, T14 × 2, T15, aviso de uso exclusivo con copia de prueba, cierre con cinco pasos correctos y cero errores de página. El servidor se ejecutó fuera del checkout. |
 | `node --check` sobre el script de `src/reyna_local/web/index.html` | Sintaxis JavaScript aprobada. |
 | Empaquetado e instalación aislada | Candidato `reyna_local-0.2.0-py3-none-any.whl` construido; SHA-256 `2c01a1f447d54d6631c9920c279b496db22a36d68cba106851449fd5d9b46054`. Instalado fuera del checkout y `python -m reyna_local --help` respondió; el HTML vino dentro del wheel y el recorrido completo pasó desde ese paquete. Las dependencias ya estaban disponibles. |
 | Manifiesto de fuentes de Ola 3 | Los cuatro Markdown conservados verifican con `sha256sum -c`. |
 
-Las pruebas usan copias temporales de la fixture; no escriben en el repositorio original ni requieren Excel/VBA. Los 16 tests cubren más que la cadena de cierre; no deben leerse como 16 pruebas metodológicas independientes.
+Las pruebas usan copias temporales de la fixture; no escriben en el repositorio original ni requieren Excel/VBA. Los 20 tests cubren más que la cadena de cierre; no deben leerse como 20 pruebas metodológicas independientes.
 
 ## Reproducción automatizada
 
@@ -55,7 +57,7 @@ Desde la raíz del repositorio, con dependencias instaladas:
 python -m unittest discover -s tests -v
 ```
 
-`test_d9_event_accounts.py` comprueba aislamiento, repetición y reversión. El test `test_cierre_oficial_guarda_una_vez_y_reintenta` ejercita el cierre por API y `test_cierre_fallido_no_persiste_pasos_parciales` inyecta la excepción en T23.3. La ruta HTML fue recorrida con Chromium en un directorio temporal, usando la misma fixture. El [manifiesto de los documentos de Claude](../../fuentes/claude/ola3/SHA256SUMS) se verifica desde la raíz mediante:
+`test_d9_event_accounts.py` comprueba aislamiento, repetición, reversión y casos T15/T17/T19/T20 con esperados independientes. El test `test_cierre_oficial_guarda_una_vez_y_reintenta` ejercita el cierre por API y `test_cierre_fallido_no_persiste_pasos_parciales` inyecta la excepción en T23.3. La ruta HTML fue recorrida con Chromium en un directorio temporal, usando la misma fixture; esa evidencia visual anterior cubrió T14/T15 y el cierre, mientras la nueva prueba API verifica el límite T17/T19/T20 y el rechazo de T16. El [manifiesto de los documentos de Claude](../../fuentes/claude/ola3/SHA256SUMS) se verifica desde la raíz mediante:
 
 ```sh
 sha256sum -c docs/fuentes/claude/ola3/SHA256SUMS

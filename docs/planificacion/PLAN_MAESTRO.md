@@ -38,7 +38,7 @@ El dueño aprobó el stack y dio la instrucción «Procede con tu plan» el 18-n
 - En las tres revisiones, la historia Python dio 392/392 y ENVASE 66/66. Ola 1 corrigió 16 errores de coherencia y elevó automatización a 5/5.
 - Continúan abiertos el aislamiento integral de la cadena, P20 en la construcción estricta, corrección contable D9, flete/T14.2, D14, integridad de las huellas y conciliación metodológica.
 - Los libros completos MCD y DBD llegaron después de OT-001 y están en el índice de fuentes. Su recepción habilita el cotejo metodológico pendiente.
-- El consolidado contiene fuentes, HTML y el MVP técnico Ola 3. Su motor Python parte del espejo de Ola 1 y añade una guarda de empresa para las mutaciones `CTA_*`; el adaptador persiste T14/T15 y la cadena configurada de cierre en una copia Excel. Las escrituras de cuenta por evento pasan pruebas de ámbito e idempotencia, pero la conciliación independiente D9, el cálculo integral y las cuentas oficiales siguen sin habilitarse. Ver el registro de capacidades y sus límites.
+- El consolidado contiene fuentes, HTML y el MVP técnico Ola 3. Su motor Python parte del espejo de Ola 1 y añade una guarda de empresa para las mutaciones `CTA_*`; el adaptador permite T14/T15/T17/T19/T20 y la cadena configurada de cierre en una copia Excel. Las escrituras de cuenta por evento pasan pruebas de ámbito e idempotencia, pero la conciliación independiente D9, el cálculo integral y las cuentas oficiales siguen sin habilitarse. Ver el registro de capacidades y sus límites.
 
 Los resultados de pruebas expresan su versión y su caso. Para repetir una prueba se fijan también los datos y el entorno. La observación de mezcla entre empresas se reprodujo en el método con hechos mezclados y requiere verificar toda la ruta de operación.
 
@@ -207,7 +207,22 @@ Se empieza con el orquestador y hasta tres especialistas cuando existan tareas i
 
 Se reportarán tareas aceptadas y requisitos verificados con su denominador. Antes de estimar avance global hay que aprobar alcance, prioridades y criterios. Los estados del plan se actualizarán por evidencia y por hito.
 
-El lote documental conservó P00–P03 y la primera extracción de M01–M04. El MVP Ola 3 añade una guardia de empresa por espacio y cierre técnico de la cadena configurada. La suite tiene 16 pruebas automatizadas y el recorrido real en Chromium está documentado. D9 ahora incluye un contrato de datos en borrador para las siete cuentas y un caso T15 que compara tres saldos persistidos con un esperado decimal independiente; esto sigue siendo parcial y no valida el costo integral ni `RESULTADO_METODO`. La siguiente tarea es cerrar las brechas de claves y dimensiones, ampliar los casos por dominio y conciliar la salida persistida; después siguen flete/T14.2 y D14. El estado detallado y las puertas están en [ESTADO.md](ESTADO.md) y [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md).
+El lote documental conservó P00–P03 y la primera extracción de M01–M04. El MVP Ola 3 añade una guardia de empresa por espacio y cierre técnico de la cadena configurada. La suite tiene 20 pruebas automatizadas y el recorrido real en Chromium está documentado. D9 incluye un contrato de datos en borrador para las siete cuentas y casos T15/T17/T19/T20 que comparan saldos persistidos con esperados independientes; el caso T20 usa saldo sintético. Esta evidencia sigue siendo parcial y no valida el costo integral ni `RESULTADO_METODO`. La siguiente tarea es cerrar las brechas de claves/dimensiones, ampliar a T23.5/T23.3 y conciliar la salida persistida; después siguen flete/T14.2 y D14. El estado detallado y las puertas están en [ESTADO.md](ESTADO.md) y [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md).
+
+## Relación con las seis olas de Claude
+
+Las seis olas se conservan como la secuencia estratégica histórica, documentada en [SISTEMA_ACTUAL.md](../fuentes/claude/ola3/SISTEMA_ACTUAL.md) y [TRASPASO_AGENTE.md](../fuentes/claude/ola3/TRASPASO_AGENTE.md). La ejecución vigente usa las puertas de este plan y [PLAN_MVP_Y_PENDIENTES.md](../entrega/PLAN_MVP_Y_PENDIENTES.md), porque el dueño modificó después el stack, congeló VBA y aplazó SQLite. El orden puede ajustarse para cumplir dependencias y validar por capacidades; no se infiere avance del 93 % histórico.
+
+| Ola estratégica histórica | Contenido recuperado de Claude | Encaje en la ejecución vigente |
+|---|---|---|
+| 1 · base inicial | Cerrar Ola 1/1b, operar compras y consumo, soporte de uso | MVP M0–M2 y M7; prueba del dueño en Windows/Excel nativo sigue pendiente. |
+| 2 · estructura | D2 diario/log, D3 kardex y D4 actor | Los artefactos y reglas se preservan como fuente; cualquier incorporación pasa primero por fases 1–3 del plan maestro y su aceptación. No implica implementar SQLite. |
+| 3 · credibilidad de costos | D9, flete, pérdidas, D14 y otros métodos | Trabajo activo M3–M6; D9 tiene casos parciales y permanece bloqueado como resultado oficial. |
+| 4 · integridad | Huella de resultados y retiro de UMBRAL | Pendiente de diseñar y priorizar tras contratos y aceptación de costos; no se declara cubierto por los recibos técnicos actuales. |
+| 5 · analítica y decisión | Predicción, simulación en copia y consulta guiada | M8, después de publicar resultados reproducibles y definir medición, permisos y límites. |
+| 6 · prueba global | Seis meses, dos empresas y versión 5.0 | Fases 7–8 del plan maestro, una vez habilitados los recorridos requeridos; el piloto actual es de una empresa por espacio. |
+
+Así, **sí se mantiene la visión de seis olas**, pero el control diario de tareas se hace con fases 0–8 del plan maestro y M0–M8 del plan MVP, con criterios explícitos y evidencia. Las olas antiguas no son el checklist operativo actualizado.
 
 ## Prioridad de entrega del 18-nov
 

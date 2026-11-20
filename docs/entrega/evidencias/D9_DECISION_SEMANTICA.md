@@ -37,11 +37,11 @@ Las pruebas nuevas en `tests/test_d9_event_accounts.py` usan copias temporales d
 3. Excepción inyectada después de escribir `CTA_OBJ_REC`: la transacción revierte las siete cuentas y las tablas de movimiento/inventario del evento.
 4. Prueba de `m_ACTUALIZAR` con dos empresas y una clave DBD que omite empresa: solo cambia el saldo de B.
 
-El caso `D9-T15-2026-04-B-OS01` ahora compara las filas persistidas de `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` contra un esperado decimal calculado por separado desde precios, tipos de cambio, estándar de consumo y merma normal. Las entradas, fórmulas y esperado están versionados en [caso_t15_eventos.json](../../../tests/fixtures/d9/caso_t15_eventos.json); el resultado y sus límites están en [D9_CUADRE_T15.md](D9_CUADRE_T15.md). Es una conciliación independiente parcial de tres cuentas en T15; **no** constituye aceptación comercial, resultado `RESULTADO_METODO` integral ni validación de las otras cuentas. El detalle histórico O-1 sigue en [D9_MATRIZ_Y_CASO.md](D9_MATRIZ_Y_CASO.md) y [D9_CONTROL_O1.csv](D9_CONTROL_O1.csv).
+El caso `D9-T15-2026-04-B-OS01` compara filas persistidas de `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` con un esperado decimal independiente. Se añadieron casos de T17 para `CTA_CENTRO`/`CTA_FUNCION`, T19 para `CTA_GASTO` y T20 para `CTA_VTA_PER`; los tres y sus límites están en [D9_CUADRE_EVENTOS.md](D9_CUADRE_EVENTOS.md), y sus datos/esperados están versionados en [caso_t17_t19_t20_eventos.json](../../../tests/fixtures/d9/caso_t17_t19_t20_eventos.json). Son conciliaciones parciales por evento, no aceptación comercial ni un resultado `RESULTADO_METODO` integral. T20 usa un saldo de producto terminado sintético. El detalle histórico O-1 sigue en [D9_MATRIZ_Y_CASO.md](D9_MATRIZ_Y_CASO.md) y [D9_CONTROL_O1.csv](D9_CONTROL_O1.csv).
 
 ## Pendiente para declarar D9 conciliado
 
-- Extender el caso T15 parcial a los demás dominios CTA y guardar también `RESULTADO_METODO` en el mismo libro con un esperado independiente por clave y total.
+- Extender los casos T15/T17/T19/T20 a T23.5/T23.3 y demás dominios CTA, y guardar también `RESULTADO_METODO` en el mismo libro con un esperado independiente por clave y total.
 - Completar el contrato por campo para fuentes, signo, clave única, periodo, moneda, precisión, reversa y correcciones; resolver las lagunas recogidas en [D9_CONTRATO_DE_DATOS.md](D9_CONTRATO_DE_DATOS.md).
 - Obtener las dimensiones fuente necesarias para conciliar `CTA_GASTO`, `CTA_FUNCION` y `CTA_OBJ_REC`; no distribuir totales de O-1 ni inventar claves.
 - Verificar duplicados de clave dentro de una empresa, causalidad entre BITACORA, evento, línea y servicio DBD, y recuperación/reapertura a través del cierre.
