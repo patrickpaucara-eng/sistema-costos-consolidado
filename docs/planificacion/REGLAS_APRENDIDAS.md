@@ -14,3 +14,4 @@
 | RA-09 | Banda estocástica con errores de dos series desalineados (métodos distintos) → banda inflada | La incertidumbre se mide sobre la variable que se reporta (margen), con sus propios errores | `test_proyeccion_reproducible_y_banda_creciente` |
 | RA-10 | Propuesta contra el mejor mes histórico → impacto inflado por un atípico | Brechas contra el promedio de la ventana del diagnóstico | `src/reyna_local/analisis.py` (propuestas) |
 | RA-11 | Una prueba usaba un periodo "sin datos" (2010-08) para probar el ejemplo de respaldo; al publicar datos reales dejó de ser ausente | Las pruebas de "dato ausente" usan un periodo fuera del rango del caso (2011-xx) | `tests/test_api_resultados.py` |
+| RA-12 | El CSV de supuestos quedó fuera del repo (`datos/` ignorado) y la compuerta pasaba solo en mi copia local | `.gitignore` con excepciones para insumos; antes de cada push correr la compuerta en un clon limpio | `.gitignore`, clon limpio |

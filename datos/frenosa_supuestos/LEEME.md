@@ -1,0 +1,3 @@
+# Supuestos declarados (no son datos del caso)
+
+`Gastos_Operativos_SUPUESTOS.csv` (esta carpeta): el caso no publica gastos de administración, ventas ni financieros; se agregan **supuestos académicos explícitos** por mes: administración fija (S/ 39,500), comisiones 3 % y fletes de despacho 1.5 % de las ventas del mes, intereses de capital de trabajo S/ 12,000. Inductores ABC: kg producidos (administración), ventas netas (comisiones), kg vendidos (fletes), kg de material consumido (financieros). Ninguno es capitalizable en la síntesis CONTABLE (NIC 2 §16); categorías NIIF 18: Operación y Financiación.

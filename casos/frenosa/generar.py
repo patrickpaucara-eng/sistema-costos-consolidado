@@ -116,7 +116,7 @@ DESTINO_CENTRO = {"ADM01": "ADM_FRE", "ADM02": "ADM_FRE", "VTA01": "VTA_COM", "V
 
 def _gastos_integrales(wb, pers, ot, codot, evento, lin, rec, rr, cri, med):
     """ABC integral (mono, D-9): gastos de administración, ventas y financieros → centros ADM/VTA/FIN (P4A) → órdenes (P5/P6/P7)
-    con su inductor. Supuestos declarados en datos/frenosa/Gastos_Operativos_SUPUESTOS.csv. La síntesis decide qué es costo."""
+    con su inductor. Supuestos declarados en datos/frenosa_supuestos/Gastos_Operativos_SUPUESTOS.csv. La síntesis decide qué es costo."""
     g = list(csv.DictReader(open(os.path.join(DIR, "..", "frenosa_supuestos", "Gastos_Operativos_SUPUESTOS.csv"), encoding="utf-8")))
     for c, tipo, nom, ind in CENTROS_GASTO:
         wb["CENTRO"].append([c, EMP, tipo, 0, 0, 0, ind, None, None, "S", tipo])

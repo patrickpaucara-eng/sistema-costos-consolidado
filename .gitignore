@@ -4,4 +4,8 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-datos/
+datos/*
+# Insumos versionados (RA-12): todo lo que el cálculo lee debe viajar con el repo
+!datos/frenosa/
+!datos/frenosa_supuestos/
+!datos/resultados/
