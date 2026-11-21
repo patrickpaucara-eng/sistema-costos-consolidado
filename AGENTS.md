@@ -39,4 +39,4 @@ Rama de trabajo: `desarrollo/mono` (Claude). Codex trabaja en ramas `codex/<orde
 3. No editar pruebas para que pasen. No tocar `motor_espejo.py` ni el cálculo (eso es de Claude).
 4. Material por kardex, gastos por reparto. CONTABLE nunca capitaliza financieros ni no atribuibles. ESTIMADO = estimación estadística (no estándar).
 5. Cada error encontrado agrega una fila a `docs/planificacion/REGLAS_APRENDIDAS.md` y una prueba.
-6. Registrar en `docs/entrega/REGISTRO_TIEMPOS.xlsx` cada sesión de trabajo (fecha, inicio, término, actividad) — es el entregable 13.
+6. Registrar cada sesión en **tu propio CSV** `docs/entrega/tiempos/<agente>.csv` (fecha,inicio,termino,actividad,etapa,responsable,resultado). **No editar el .xlsx** (es binario y choca); `python tools/consolidar_tiempos.py` lo arma. Es el entregable 13.

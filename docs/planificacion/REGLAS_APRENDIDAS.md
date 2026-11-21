@@ -9,3 +9,4 @@
 | RA-05 | Una cifra de la hoja de defensa («1.2 s/mes») no medía lo que decía | Toda cifra pública sale de una medición registrada | Evidencia en `docs/entrega/evidencias/` |
 | RA-06 | Mezclar capas (fiscal en real) destruye la trazabilidad | CONTABLE nunca capitaliza financieros ni no atribuibles | `tests/test_contrato.py` |
 | RA-07 | Una hoja de entrada vacía no se exportó por generar archivos solo al encontrar filas | Crear un CSV con cabecera para toda hoja declarada, incluso sin filas | `tests/test_frenosa_fuentes.py` |
+| RA-07 | Codex y Claude editaron el mismo .xlsx de tiempos → conflicto binario | Cada agente registra en su CSV; un script arma el .xlsx | `tools/consolidar_tiempos.py` |
