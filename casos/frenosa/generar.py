@@ -105,7 +105,40 @@ def generar(plantilla, salida, periodos=None):
             agg = defaultdict(float)
             for r in [r for r in leer(hoja) if r["periodo"] == p]: agg[codot[(p, r["ot_id"])]] = num(r["porcentaje_inductor"])
             for o, v in agg.items(): med.append([p, EMP, k, "OBJ", o, v])
+    _gastos_integrales(wb, pers, ot, codot, evento, lin, rec, rr, cri, med)
     wb.save(salida); return salida, saldos
+
+
+CENTROS_GASTO = [("ADM_FRE", "ADM", "Administración", "KG_PRODUCIDOS"), ("VTA_COM", "VTA", "Ventas: comisiones", "VENTAS_NETAS"),
+                 ("VTA_FLE", "VTA", "Ventas: despacho", "KG_VENDIDOS"), ("FIN_FRE", "FIN", "Financiamiento", "KG_MATERIAL")]
+DESTINO_CENTRO = {"ADM01": "ADM_FRE", "ADM02": "ADM_FRE", "VTA01": "VTA_COM", "VTA02": "VTA_FLE", "FIN01": "FIN_FRE"}
+
+
+def _gastos_integrales(wb, pers, ot, codot, evento, lin, rec, rr, cri, med):
+    """ABC integral (mono, D-9): gastos de administración, ventas y financieros → centros ADM/VTA/FIN (P4A) → órdenes (P5/P6/P7)
+    con su inductor. Supuestos declarados en datos/frenosa/Gastos_Operativos_SUPUESTOS.csv. La síntesis decide qué es costo."""
+    g = list(csv.DictReader(open(os.path.join(DIR, "..", "frenosa_supuestos", "Gastos_Operativos_SUPUESTOS.csv"), encoding="utf-8")))
+    for c, tipo, nom, ind in CENTROS_GASTO:
+        wb["CENTRO"].append([c, EMP, tipo, 0, 0, 0, ind, None, None, "S", tipo])
+        cri.append(["DIR_" + c, "Directo a " + nom, "", "S"]); cri.append([ind, ind, "", "S"])
+        rr.append([{"ADM": "P5", "VTA": "P6", "FIN": "P7"}[tipo], c, ind, 19000101, "Inductor ABC del gasto"])
+    for r in {x["recurso"]: x for x in g}.values():
+        rec.append([r["recurso"], r["nombre"], "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", r["recurso"], "DIR_" + DESTINO_CENTRO[r["recurso"]], 19000101, "Gasto a su centro"])
+    ventas = {(r["periodo"], r["ot_id"]): r for r in leer("Ventas.csv")}
+    consumo = defaultdict(float)
+    for r in leer("Compras.csv"):
+        if r["tipo_movimiento"] == "Consumo": consumo[(r["periodo"], r["destino"])] += num(r["cantidad"])
+    for p in pers:
+        for c, *_ in CENTROS_GASTO: med.append([p, EMP, "DIR_" + c, "CEN", c, 1])
+        for r in [x for x in g if x["periodo"] == p]:
+            e = evento("T17", p, int(p.replace("-", "") + "28")); imp = num(r["importe_soles"])
+            lin.append([e, 1, r["recurso"], 1, imp, None, None, imp, None, None])
+        for r in [x for x in ot if x["periodo"] == p]:
+            o = r["codigo_ot"]; v = ventas.get((p, r["ot_id"]), {})
+            med.append([p, EMP, "KG_PRODUCIDOS", "OBJ", o, num(r["cantidad_producida"])])
+            med.append([p, EMP, "VENTAS_NETAS", "OBJ", o, num(v.get("ventas_netas_soles", 0))])
+            med.append([p, EMP, "KG_VENDIDOS", "OBJ", o, num(v.get("cantidad_vendida", 0))])
+            med.append([p, EMP, "KG_MATERIAL", "OBJ", o, consumo[(p, o)]])
 
 
 if __name__ == "__main__":

@@ -22,3 +22,4 @@ Julio recoge datos del caso PUCP según la fuente; compras/kardex y cantidades v
 | 2010-12 | 32 | frenosa_datos_entrada_abc_2010_12.xlsx | `807257ad2b51fd5cdac75eb3025c26846c001a79dd7fad131ea48e696692b8ca` |
 
 El archivo de julio representado por `frenosa_datos_entrada_abc.xlsx` aparece dos veces con contenido distinto (líneas 11 y 34); no se mezcla con la versión mensual 2010-07 sin comparar las fuentes.
+

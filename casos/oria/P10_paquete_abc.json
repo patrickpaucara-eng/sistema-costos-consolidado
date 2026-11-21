@@ -1,0 +1,85 @@
+{
+ "paquete": "P10-ABC",
+ "nivel": 2,
+ "motivo": "H-04: costeo ABC frente a tradicional (Oria SEM07 P10)",
+ "filas": [
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4A|R_PREPMAQU",
+   "col": "RRE_CRIT",
+   "anterior": "DIR_PLANTA",
+   "nuevo": "DIR_ACT_PREPMAQU"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4C|ACT_PREPMAQU",
+   "col": "(NUEVA)",
+   "nuevo": "P4C|ACT_PREPMAQU|IND_HRSPREPAR|19000101|Inductor ABC (Oria P10)"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4A|R_MANEMATE",
+   "col": "RRE_CRIT",
+   "anterior": "DIR_PLANTA",
+   "nuevo": "DIR_ACT_MANEMATE"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4C|ACT_MANEMATE",
+   "col": "(NUEVA)",
+   "nuevo": "P4C|ACT_MANEMATE|IND_MOVIMIENT|19000101|Inductor ABC (Oria P10)"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4A|R_PROGPROD",
+   "col": "RRE_CRIT",
+   "anterior": "DIR_PLANTA",
+   "nuevo": "DIR_ACT_PROGPROD"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4C|ACT_PROGPROD",
+   "col": "(NUEVA)",
+   "nuevo": "P4C|ACT_PROGPROD|IND_HRSPROGRAM|19000101|Inductor ABC (Oria P10)"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4A|R_REALINGE",
+   "col": "RRE_CRIT",
+   "anterior": "DIR_PLANTA",
+   "nuevo": "DIR_ACT_REALINGE"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4C|ACT_REALINGE",
+   "col": "(NUEVA)",
+   "nuevo": "P4C|ACT_REALINGE|IND_CAMBIOSING|19000101|Inductor ABC (Oria P10)"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4A|R_REALMANT",
+   "col": "RRE_CRIT",
+   "anterior": "DIR_PLANTA",
+   "nuevo": "DIR_ACT_REALMANT"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4C|ACT_REALMANT",
+   "col": "(NUEVA)",
+   "nuevo": "P4C|ACT_REALMANT|IND_CAMBIOSING|19000101|Inductor ABC (Oria P10)"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4A|R_CONSEE",
+   "col": "RRE_CRIT",
+   "anterior": "DIR_PLANTA",
+   "nuevo": "DIR_ACT_CONSEE"
+  },
+  {
+   "tabla": "REGLA_REPARTO",
+   "clave": "P4C|ACT_CONSEE",
+   "col": "(NUEVA)",
+   "nuevo": "P4C|ACT_CONSEE|IND_KV|19000101|Inductor ABC (Oria P10)"
+  }
+ ]
+}

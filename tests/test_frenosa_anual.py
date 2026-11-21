@@ -48,3 +48,17 @@ def test_contrato_real_valido(caso):
     r = resultados.construir(caso[0], ventas_csv=str(RAIZ / "datos/frenosa/Ventas.csv"), periodo="2010-07")
     assert contrato.validar(r) == []
     assert len(r["serie"]) == 12 and r["kpi"]["ventas"] == 888730.0      # Cuadro 18: 324,479 + 453,602 + 110,649
+
+
+def test_sintesis_real_y_contable(caso):
+    """D-9: REAL = costo integral (incluye adm, ventas y financieros); CONTABLE = solo producción (NIC 2). Mismo resultado operativo."""
+    L, _, por = caso; v = str(RAIZ / "datos/frenosa/Ventas.csv")
+    real = resultados.construir(L, ventas_csv=v, periodo="2010-07", sintesis="REAL", _cache=(por, None) if False else None)
+    cont = resultados.construir(L, ventas_csv=v, periodo="2010-07", sintesis="CONTABLE")
+    assert contrato.validar(real) == [] and contrato.validar(cont) == []
+    assert all(o["financiero"] == 0 and o["admin"] == 0 for o in cont["objetos"])
+    gastos = 39500 + round(0.045 * 888730, 2) + 12000                     # supuestos declarados de julio
+    assert abs(real["kpi"]["costo_total"] - cont["kpi"]["costo_total"] - gastos) < 0.05
+    assert real["kpi"]["margen_operativo"] == cont["kpi"]["margen_operativo"]  # la síntesis cambia el costo del objeto, no el resultado
+    fra = {o["codigo"]: o for o in real["objetos"]}["OT-FRENOSA-FRE9000-2010-07"]
+    assert abs(fra["admin"] - 39500 * 44039 / 98020) < 0.01                  # a mano: administración por kg producidos

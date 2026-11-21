@@ -32,12 +32,12 @@ CONSUME = {
 }
 DEPENDE_DE = {"VALUACION_PROMEDIO": [("SALIDA", "MONTO")]}
 PARAMETROS = [dict(id="PER", etq="Periodo", tipo="texto"), dict(id="EMP", etq="Empresa", tipo="texto")]
-ENTREGA = {"OBJETO": ["MD", "PD", "SD", "CIF", "GAD", "GVT"],
+ENTREGA = {"OBJETO": ["MD", "PD", "SD", "CIF", "GAD", "GVT", "GFI"],
            "CENTRO": ["COSTO_PROPIO", "RECIBIDO", "CIF_RECIBIDO", "DISTRIBUIDO", "OCIO"], "ACTIVIDAD": ["COSTO"],
            "ORIGEN": ["ELEMENTO", "MONTO", "MEDIDA_TOTAL", "CRITERIO", "CPU_CIERRE", "PRECIO_ULTIMA_COMPRA"], "ARISTA": ["ELEMENTO", "MEDIDA", "MONTO"],
            "RECURSO": ["INEF"]}
 
-ETAPAS = ["P1", "P2", "P3", "P4A", "P4B", "P4C", "P5", "P6"]
+ETAPAS = ["P1", "P2", "P3", "P4A", "P4B", "P4C", "P5", "P6", "P7"]   # P7 FIN → OBJETO (mono, D-9: financieros por capa)
 ELEM = {"MD": "MD", "MAT": "MD", "PD": "PD", "MOD": "PD", "SD": "SD", "IND": "IND"}
 ELEM_ETAPA = {"MD": "P1", "PD": "P2", "SD": "P3", "IND": "P4A"}
 CENTS = D("0.01")
@@ -120,13 +120,14 @@ def _origenes(hechos, previos, ele, eventos):
 
 
 NIVELES = {"P1": {"OBJ", "ACT"}, "P2": {"OBJ", "ACT"}, "P3": {"OBJ", "ACT"}, "P4A": {"CEN", "ACT"}, "P4B": {"CEN"},
-           "P4C": {"OBJ"}, "P5": {"OBJ"}, "P6": {"OBJ"}}
+           "P4C": {"OBJ"}, "P5": {"OBJ"}, "P6": {"OBJ"}, "P7": {"OBJ"}}
 
 
 def _elemento_llegada(etapa, elemento, nivel, dest, cen):
     if etapa == "P4A":
         if nivel == "CEN" and cen.get(dest) == "ADM": return "GAD"
         if nivel == "CEN" and cen.get(dest) == "VTA": return "GVT"
+        if nivel == "CEN" and cen.get(dest) == "FIN": return "GFI"      # gastos financieros (D-9): la síntesis decide si van al costo
         return "CIF"
     return elemento
 
@@ -156,8 +157,10 @@ def correr(hechos, parametros, previos):
             nodos = [n for n in saldo if (n[0] == "CEN" and cen.get(n[1]) == "PRO") or n[0] == "ACT"]
         elif et == "P5":
             nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "ADM"]
-        else:
+        elif et == "P6":
             nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "VTA"]
+        else:
+            nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "FIN"]
         antes = sum(sum(v.values()) for v in saldo.values())
         for n in sorted(nodos, key=lambda n: (n[0], n[1])):
             tot_n = sum(saldo[n].values())
