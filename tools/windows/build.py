@@ -57,9 +57,20 @@ def build(work):
     subprocess.run([python, "-m", "pip", "check"], cwd=work, env=env, check=True)
 
     output = work / "bin"
+    assets = []
+    for name in ("src", "casos", "fuente", "datos", "tools"):
+        assets.extend(["--add-data", f"{ROOT / name}{os.pathsep}{name}"])
+    for name in ("metodos", "analitica", "analitica2", "casos"):
+        assets.extend(["--add-data", f"{ROOT / "src" / name}{os.pathsep}{name}"])
+    hidden = []
+    for module in ("reyna_local.resultados", "reyna_local.analisis", "puerto_lectura", "integra_env", "rutas", "metodos.reparto_etapas", "reyna_local.calculo_local"):
+        # C04 añade calculo_local; se incorpora al integrar esa orden.
+        if module == "reyna_local.calculo_local" and not (SOURCE / "calculo_local.py").exists():
+            continue
+        hidden.extend(["--hidden-import", module])
     subprocess.run([
         python, "-m", "PyInstaller", "--noconfirm", "--clean", "--onefile", "--console", "--noupx",
-        "--name", "ReynaCostos", "--collect-data", "reyna_local", "--distpath", output,
+        "--name", "ReynaCostos", "--collect-data", "reyna_local", "--paths", ROOT / "src", *assets, *hidden, "--distpath", output,
         "--workpath", work / "pyinstaller", "--specpath", work, launcher,
     ], cwd=work, env=env, check=True)
     return output / "ReynaCostos.exe"
