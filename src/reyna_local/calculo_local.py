@@ -11,7 +11,7 @@ from threading import Lock
 from .contrato import validar
 from . import libro_dbd as B
 
-RAIZ = Path(__file__).resolve().parents[2]
+from .raiz import RAIZ
 _lock = Lock()
 _cache = {}
 

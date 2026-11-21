@@ -194,15 +194,17 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 from .calculo_local import calcular
                 resultado = calcular(store.root, periodo, sintesis, empresa)
             except ValueError as exc:
+                import traceback; traceback.print_exc()
                 raise Problem(422, f"No se pudo calcular el periodo: {exc}") from None
             except (OSError, KeyError, ImportError):
+                import traceback; traceback.print_exc()          # queda en la consola del programa para diagnóstico
                 raise Problem(422, "No se pudo calcular el periodo. Revisa que el periodo exista en el libro de la empresa.") from None
             self._json(HTTPStatus.OK, resultado)
             return
         if target.path == "/api/descargar" and method == "GET":
             params = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
             nombre = params.get("archivo", [""])[0]
-            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo|entrada)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
+            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo|entrada|sistema)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
                 raise Problem(400, "Elige un reporte válido.")
             try:
                 contenido = (store.root / "exportaciones" / nombre).read_bytes()

@@ -29,8 +29,11 @@ def test_armar_entregables(tmp_path, monkeypatch):
         ws = load_workbook(salida / f'06_resultados_{s}.xlsx', read_only=True)['Objetos']
         filas = list(ws.iter_rows(values_only=True)); col = filas[0].index('costo_total')
         assert abs(sum(f[col] for f in filas[1:]) - r['kpi']['costo_total']) < 0.05
-        html = (salida / f'12_sistema_sin_conexion_{s}.html').read_text(encoding='utf-8')
+        html = (salida / f'12b_informe_{s}.html').read_text(encoding='utf-8')
         assert 'http://' not in html and 'https://' not in html                 # sin conexión de verdad
+    sistema = (salida / '12_sistema_sin_conexion.html').read_text(encoding='utf-8')
+    assert 'window.__DATOS=' in sistema and 'frenosa_2010-12_ESTIMADO' in sistema
+    assert 'src="http' not in sistema and 'href="http' not in sistema          # ningún recurso externo
     entrada = load_workbook(salida / '05_datos_entrada.xlsx', read_only=True)          # el libro DBD con que se calcula
     assert entrada.sheetnames[0] == 'LEEME' and {'EMPRESA', 'KARDEX', 'REGLA_REPARTO', 'VENTA'} <= set(entrada.sheetnames)
     fuentes = load_workbook(salida / '05b_fuentes_erp_adaptador.xlsx', read_only=True)  # lo que el adaptador convierte

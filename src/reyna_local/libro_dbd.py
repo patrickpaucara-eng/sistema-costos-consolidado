@@ -6,7 +6,7 @@ from pathlib import Path
 
 from openpyxl import load_workbook
 
-RAIZ = Path(__file__).resolve().parents[2]
+from .raiz import RAIZ
 PLANTILLA = RAIZ / "casos" / "plantilla_caso.xlsx"
 VERSION = "1.0-MN01"
 

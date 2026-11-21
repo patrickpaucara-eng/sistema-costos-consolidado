@@ -8,9 +8,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from .contrato import validar
 
-TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'entrada': '.xlsx'}
+TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'entrada': '.xlsx', 'sistema': '.html'}
 SIN_RESULTADOS = ('codigo', 'entrada')          # se generan desde el repositorio, no desde un contrato
-RAIZ = Path(__file__).resolve().parents[2]
+from .raiz import RAIZ
 SECCIONES = {
     'resultados': [('Objetos', 'objetos'), ('Actividades', 'actividades'), ('Estado NIIF 18', 'estado_resultados'),
                    ('Kardex', 'kardex'), ('Calidad y cuadre', 'control')],
@@ -296,6 +296,8 @@ def exportar(resultados, tipo, carpeta):
             _libro(resultados, tipo, destino)
         elif tipo == 'html':
             _html(resultados, destino)
+        elif tipo == 'sistema':
+            _sistema_desde_carpeta(resultados, destino)
         elif tipo == 'entrada':
             _entrada(destino, resultados if isinstance(resultados, dict) else None)
         else:
@@ -305,3 +307,60 @@ def exportar(resultados, tipo, carpeta):
         destino.unlink(missing_ok=True)
         raise
     return destino
+
+
+SHIM_OFFLINE = """<script>
+(function(){
+  const D = window.__DATOS; if (!D) return;
+  const resp = (o, st) => Promise.resolve(new Response(JSON.stringify(o), {status: st || 200, headers: {'Content-Type': 'application/json'}}));
+  window.fetch = (url, opt) => {
+    opt = opt || {}; const u = new URL(url, 'http://local'), q = u.searchParams;
+    if (u.pathname === '/api/resultados') {
+      const k = (q.get('empresa') || D.libro.id) + '_' + q.get('periodo') + '_' + q.get('sintesis');
+      return D.resultados[k] ? resp(D.resultados[k]) : resp({error: 'Ese periodo no está incluido en este archivo.'}, 404);
+    }
+    if (u.pathname === '/api/libros' && (opt.method || 'GET') === 'GET') return resp({libros: [D.libro]});
+    if (u.pathname === '/api/sello') return resp({estado: 'SIN_VERIFICAR_OFFLINE'});
+    return resp({error: 'Esta función necesita el programa (ReynaCostos.exe). El HTML sin conexión consulta resultados ya calculados.'}, 503);
+  };
+  const css = document.createElement('style');
+  css.textContent = '#result-calcular,#cargar-libro,#importar,#espacios,#operar,#consultar,#close-form,.page-heading,.scope,.nav-erp,[data-exportar]{display:none!important}';
+  document.head.appendChild(css);
+  document.addEventListener('DOMContentLoaded', () => {
+    const b = document.createElement('p'); b.className = 'data-badge';
+    b.textContent = 'Versión HTML sin conexión: ' + D.libro.nombre + ', ' + D.libro.periodos.length + ' meses × 3 síntesis ya calculados (' + D.generado + '). Para calcular o cargar otra empresa usa ReynaCostos.exe.';
+    const m = document.getElementById('principal'); if (m) m.prepend(b);
+  });
+})();
+</script>"""
+
+
+def sistema_html(resultados_por_clave, libro, destino):
+    """Entregable 12: el MISMO sistema (pantallas de gestión) en un solo archivo HTML que funciona sin servidor ni internet,
+    con los resultados ya calculados incrustados. Calcular y cargar empresas quedan en el EXE."""
+    from datetime import date
+    pagina = (Path(__file__).parent / 'web' / 'index.html').read_text(encoding='utf-8')
+    datos = json.dumps(dict(libro=libro, resultados=resultados_por_clave, generado=date.today().isoformat()), ensure_ascii=False, separators=(',', ':'))
+    datos = datos.replace('</', '<\\/')
+    pagina = pagina.replace('<script>', '<script>window.__DATOS=' + datos + ';</script>' + SHIM_OFFLINE + '<script>', 1)
+    Path(destino).write_text(pagina, encoding='utf-8')
+    return Path(destino)
+
+
+def _sistema_desde_carpeta(resultados, destino):
+    """Reúne todos los resultados calculados de la empresa (del usuario y publicados) y arma el HTML interactivo."""
+    from .calculo_local import catalogo
+    base = destino.parent.parent
+    emp = Path((resultados.get('sello') or {}).get('libro', 'frenosa.xlsx')).stem
+    lib = next((l for l in catalogo(base) if l['id'] == emp), None) or dict(id=emp, nombre=resultados['empresa']['nombre'], periodos=[])
+    todos = {}
+    for carpeta in (RAIZ / 'datos' / 'resultados', base / 'resultados'):
+        for f in sorted(carpeta.glob(f'{emp}_*.json')) if carpeta.is_dir() else []:
+            try:
+                r = json.loads(f.read_text(encoding='utf-8'))
+                if not validar(r): todos[f.stem] = r
+            except (OSError, ValueError):
+                continue
+    todos[f"{emp}_{resultados['periodo_actual']}_{resultados['sintesis']}"] = resultados
+    lib['periodos'] = sorted({k.split('_')[-2] for k in todos})
+    sistema_html(todos, lib, destino)

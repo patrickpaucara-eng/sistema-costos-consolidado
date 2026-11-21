@@ -22,7 +22,7 @@ INDICE = [
     ('09', 'Manual descriptivo (Word)', '09_manual_descriptivo.docx'),
     ('10', 'Manual de usuario (Word)', '10_manual_usuario.docx'),
     ('11', 'Ejecutable Windows (EXE)', 'ReynaCostos.exe — se agrega al compilar en Windows (tools/windows/LEEME.md)'),
-    ('12', 'Sistema HTML sin conexión', '12_sistema_sin_conexion_{s}.html'),
+    ('12', 'Sistema HTML sin conexión (pantallas interactivas, 12 meses × 3 síntesis) e informes HTML por síntesis', '12_sistema_sin_conexion.html, 12b_informe_{s}.html'),
     ('13', 'Registro de actividades y tiempos (Excel)', '13_registro_tiempos.xlsx'),
 ]
 
@@ -76,15 +76,24 @@ def armar(periodo, salida, junit=None):
     for s in SINTESIS:
         r = cargar(periodo, s)
         for tipo, nombre in (('resultados', '06_resultados_{s}.xlsx'), ('analitica', '07_analitica_{s}.xlsx'),
-                             ('proyeccion', '08_proyeccion_propuestas_{s}.xlsx'), ('html', '12_sistema_sin_conexion_{s}.html')):
+                             ('proyeccion', '08_proyeccion_propuestas_{s}.xlsx'), ('html', '12b_informe_{s}.html')):
             hechos.append(mover(exportar(r, tipo, tmp), salida / nombre.format(s=s)))
+    from reyna_local.exportar import sistema_html
+    from reyna_local.calculo_local import catalogo
+    lib = next(l for l in catalogo(tmp) if l['id'] == 'frenosa')
+    todos = {}
+    for per in lib['periodos']:
+        for s in SINTESIS:
+            try: todos[f"frenosa_{per}_{s}"] = cargar(per, s)
+            except SystemExit: pass
+    hechos.append(sistema_html(todos, lib, salida / '12_sistema_sin_conexion.html'))
     subprocess.run([sys.executable, str(ROOT / 'tools/consolidar_tiempos.py')], check=True, cwd=ROOT)
     hechos.append(Path(shutil.copy(ROOT / 'docs/entrega/REGISTRO_TIEMPOS.xlsx', salida / '13_registro_tiempos.xlsx')))
     shutil.rmtree(tmp, ignore_errors=True)
     lineas = [f'MONOGRAFÍA MN_01 · Sistema de Costos Reyna · Caso Frenosa · periodo {periodo}', '',
               'Síntesis: REAL (costo integral), CONTABLE (NIC 2 / NIIF 18), ESTIMADO (estadístico fuera de muestra).', '']
     for n, desc, arch in INDICE:
-        lineas.append(f'{n}. {desc}: ' + (', '.join(arch.format(s=s) for s in SINTESIS) if '{s}' in arch else arch))
+        lineas.append(f'{n}. {desc}: ' + ', '.join(dict.fromkeys(a.format(s=s) for s in SINTESIS for a in arch.split(', '))))
     (salida / 'LEEME.txt').write_text('\n'.join(lineas) + '\n', encoding='utf-8')
     return hechos
 
