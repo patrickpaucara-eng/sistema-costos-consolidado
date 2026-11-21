@@ -1,3 +1,6 @@
 fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,12:03,12:10,OT-C02 exportadores y pruebas,Monografía,Codex,71 pruebas y 26 subpruebas; compuerta verde
 2026-11-21,12:03,12:11,OT-C01 pantallas y dashboard,Monografía,Codex,Implementación revisión visual y compuerta verde
+2026-11-21,13:20,13:23,OT-C04 diagnóstico de insumos y compuerta,Monografía,Codex,Bloqueado: archivo de supuestos no versionado; compuerta roja
+2026-11-21,13:52,14:00,OT-C04 cálculo exportación y pruebas,Monografía,Codex,Conexión de cálculo y descarga; verificación documentada
+2026-11-21,14:02,14:09,OT-C07 pantallas y HTML de analítica,Monografía,Codex,Tres síntesis y recorrido con navegador verificados

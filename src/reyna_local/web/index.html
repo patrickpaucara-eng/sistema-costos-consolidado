@@ -242,14 +242,14 @@
       </nav>
       <p>Servidor y datos locales</p>
     </aside>
-    <main id="principal"><div id="inicio" class="selector-global"><div class="field"><label for="result-sintesis">Síntesis</label><select id="result-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></div><div class="field"><label for="result-periodo">Periodo</label><input id="result-periodo" type="month" value="2010-07"></div><button id="result-cargar" type="button">Consultar resultados</button><span id="result-status" role="status"></span></div>
-      <section id="dashboard" class="panel stack section-link"><h2>Dashboard</h2><p id="result-origin" class="data-badge">Cargando resultados…</p><div id="result-kpis" class="kpi-grid"></div><h3>Evolución del margen</h3><p class="legend">Histórico y actual · proyección determinística · banda P05–P95 cuando está disponible</p><div id="result-line"></div><h3>Composición de costos por objeto</h3><div id="result-bars"></div><p class="legend">Material directo · mano de obra · CIF · administración · ventas · financiero</p><h3>Relevancia</h3><p class="legend">Barras: importe; línea: proporción acumulada; * indica crítico.</p><div id="result-pareto"></div><h3>Hallazgos</h3><div id="result-hallazgos" class="result-table"></div></section>
-      <section id="costos" class="panel stack section-link"><h2>Costos por objeto</h2><div id="result-objetos" class="result-table"></div></section>
+    <main id="principal"><div id="inicio" class="selector-global"><div class="field"><label for="result-sintesis">Síntesis</label><select id="result-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></div><div class="field"><label for="result-periodo">Periodo</label><input id="result-periodo" type="month" value="2010-07"></div><button id="result-cargar" type="button">Consultar resultados</button><button id="result-calcular" type="button">Calcular</button><span id="result-status" role="status"></span></div>
+      <section id="dashboard" class="panel stack section-link"><h2>Dashboard</h2><p id="result-origin" class="data-badge">Cargando resultados…</p><div id="result-kpis" class="kpi-grid"></div><h3>Evolución de ventas, costos y margen</h3><p id="result-method"></p><p id="result-short"></p><p class="legend">Ventas azul · costos naranja · margen verde. Histórico sólido · determinístico punteado · banda estocástica P05–P95 y línea P50</p><div id="result-line"></div><h3>Composición de costos por objeto</h3><div id="result-bars"></div><p class="legend">Material directo · mano de obra · CIF · administración · ventas · financiero</p><h3>Relevancia</h3><p class="legend">Barras: importe; línea: proporción acumulada; * indica crítico.</p><div id="result-pareto"></div><h3>Hallazgos</h3><div id="result-hallazgos" class="result-table"></div></section>
+      <section id="costos" class="panel stack section-link"><h2>Costos por objeto</h2><p id="result-sintesis-nota"></p><div id="result-estimacion"></div><div id="result-objetos" class="result-table"></div></section>
       <section id="analisis" class="panel stack section-link"><h2>Análisis y relevancia</h2><div id="result-relevancia" class="result-table"></div></section>
       <section id="proyeccion" class="panel stack section-link"><h2>Proyección</h2><div id="result-proyeccion" class="result-table"></div></section>
-      <section id="simulacion" class="panel stack section-link"><h2>Simulación y escenarios</h2><div id="result-escenarios" class="result-table"></div></section>
-      <section id="propuestas" class="panel stack section-link"><h2>Propuestas</h2><div id="result-propuestas" class="result-table"></div></section>
-      <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Los reportes descargables se incorporarán en una entrega posterior. Consulta los datos disponibles en las secciones anteriores.</p></section>
+      <section id="simulacion" class="panel stack section-link"><h2>Simulación y escenarios</h2><div id="result-rangos"></div><div id="result-escenarios" class="result-table"></div></section>
+      <section id="propuestas" class="panel stack section-link"><h2>Propuestas</h2><div id="result-propuestas" class="result-table"></div><p id="result-propuestas-total"></p></section>
+      <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Descarga los resultados seleccionados.</p><div class="actions"><button type="button" data-exportar="resultados">Excel resultados</button><button type="button" data-exportar="analitica">Excel analítica</button><button type="button" data-exportar="proyeccion">Excel proyección</button><button type="button" data-exportar="html">HTML sin conexión</button><button type="button" data-exportar="codigo">Word código</button></div><p id="export-status" role="status"></p></section>
       <header class="page-heading">
         <div>
           <h1>Piloto local de operaciones</h1>
@@ -878,30 +878,57 @@
   const svg = (tag, attrs, parent) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v)); parent.appendChild(e); return e; };
   function graph(id, list, draw) { const root=$(id); root.replaceChildren(); if (!list.length) { cell(root,'p','Información aún no disponible para esta selección.'); return; } const s=svg('svg',{viewBox:'0 0 800 240',class:'chart',role:'img','aria-label':'Gráfico de resultados'},root); draw(s); }
   function lineChart(series, currentPeriod) {
-    const usable=series.filter(x => (x.tipo !== 'HISTORICO' || x.periodo <= currentPeriod) && (typeof x.margen === 'number' || (typeof x.p05 === 'number' && typeof x.p95 === 'number')));
-    graph('result-line',usable,s=>{
-      const periods=[...new Set(usable.map(x=>x.periodo))].sort(); const vals=usable.flatMap(x=>[x.margen,x.p05,x.p95]).filter(x=>typeof x==='number' && Number.isFinite(x));
-      const min=Math.min(0,...vals), max=Math.max(1,...vals); const span=max-min || 1; const x=p=>55+periods.indexOf(p)*700/Math.max(1,periods.length-1); const y=v=>205-(v-min)*165/span;
-      const bands=usable.filter(a=>a.tipo==='PROYECTADO_EST' && typeof a.p05==='number' && typeof a.p95==='number').sort((a,b)=>a.periodo.localeCompare(b.periodo));
-      if (bands.length) svg('polygon',{points:[...bands.map(a=>`${x(a.periodo)},${y(a.p95)}`),...bands.slice().reverse().map(a=>`${x(a.periodo)},${y(a.p05)}`)].join(' '),fill:'#c1e4db'},s);
-      ['HISTORICO','ACTUAL','PROYECTADO_DET'].forEach((kind,i)=>{const points=usable.filter(a=>(a.tipo===kind || (kind==='HISTORICO' && a.tipo==='ACTUAL') || (kind==='PROYECTADO_DET' && a.tipo==='ACTUAL'))&&typeof a.margen==='number').sort((a,b)=>a.periodo.localeCompare(b.periodo)); points.forEach(a=>{svg('circle',{cx:x(a.periodo),cy:y(a.margen),r:4,fill:['#315d6f','#118067','#ce8334'][i]},s);}); if(points.length>1)svg('polyline',{points:points.map(a=>`${x(a.periodo)},${y(a.margen)}`).join(' '),fill:'none',stroke:['#315d6f','#118067','#ce8334'][i],'stroke-width':3},s);});
-      periods.forEach((p,i)=>{if(periods.length<=12 || i%2===0){const t=svg('text',{x:x(p),y:227,'text-anchor':'middle'},s);t.textContent=p;}}); const t=svg('text',{x:5,y:20},s);t.textContent='S/ '+number(max);
+    const usable=series.filter(x=>x.tipo!=='HISTORICO'||x.periodo<=currentPeriod);
+    graph('result-line',usable,svgRoot=>{
+      const periods=[...new Set(usable.map(x=>x.periodo))].sort();
+      const values=usable.flatMap(x=>[x.ventas,x.costo_total,x.margen,x.p05,x.p50,x.p95]).filter(x=>typeof x==='number'&&Number.isFinite(x));
+      const lo=Math.min(0,...values), hi=Math.max(1,...values), span=hi-lo||1;
+      const px=p=>55+periods.indexOf(p)*700/Math.max(1,periods.length-1), py=v=>205-(v-lo)*165/span;
+      const band=usable.filter(x=>x.tipo==='PROYECTADO_EST'&&typeof x.p05==='number'&&typeof x.p95==='number').sort((a,b)=>a.periodo.localeCompare(b.periodo));
+      if(band.length) svg('polygon',{points:[...band.map(x=>`${px(x.periodo)},${py(x.p95)}`),...band.slice().reverse().map(x=>`${px(x.periodo)},${py(x.p05)}`)].join(' '),fill:'#c1e4db','data-banda':'p05-p95'},svgRoot);
+      const median=band.filter(x=>typeof x.p50==='number'); if(median.length) svg('polyline',{points:median.map(x=>`${px(x.periodo)},${py(x.p50)}`).join(' '),fill:'none',stroke:'#118067','stroke-dasharray':'3 3'},svgRoot);
+      [['ventas','#315d6f'],['costo_total','#ce8334'],['margen','#118067']].forEach(([key,color])=>{
+        ['HISTORICO','PROYECTADO_DET'].forEach(kind=>{const points=usable.filter(x=>(x.tipo===kind||x.tipo==='ACTUAL')&&typeof x[key]==='number').sort((a,b)=>a.periodo.localeCompare(b.periodo)); if(points.length)svg('polyline',{points:points.map(x=>`${px(x.periodo)},${py(x[key])}`).join(' '),fill:'none',stroke:color,'stroke-width':2,'stroke-dasharray':kind==='PROYECTADO_DET'?'5 5':'none'},svgRoot);});
+        usable.filter(x=>x.tipo==='ACTUAL'&&typeof x[key]==='number').forEach(x=>svg('circle',{cx:px(x.periodo),cy:py(x[key]),r:5,fill:color},svgRoot));
+      });
+      periods.forEach((p,i)=>{if(periods.length<=12||i%2===0){const t=svg('text',{x:px(p),y:227,'text-anchor':'middle'},svgRoot);t.textContent=p;}});
     });
   }
   function stacked(items) { graph('result-bars',items,s=>{const keys=['md','mod','cif','admin','gasto_venta','financiero'], colors=['#116b61','#47988b','#82bdb1','#d0a35c','#dc7650','#845a78']; const max=Math.max(1,...items.map(a=>Number(a.costo_total)||0)); const w=650/items.length; items.forEach((a,i)=>{let current=205; keys.forEach((k,j)=>{const h=(Number(a[k])||0)*165/max;current-=h;svg('rect',{x:85+i*w,y:current,width:Math.max(10,w*.65),height:Math.max(0,h),fill:colors[j]},s);});const t=svg('text',{x:85+i*w,y:225},s);t.textContent=String(a.codigo).slice(0,20);});}); }
   function pareto(items) { graph('result-pareto',items,s=>{const max=Math.max(1,...items.map(a=>Number(a.importe)||0));const w=650/items.length;const points=[];items.forEach((a,i)=>{const h=(Number(a.importe)||0)*155/max;const x=85+i*w;svg('rect',{x,y:205-h,width:Math.max(10,w*.6),height:Math.max(0,h),fill:a.critico?'#b85142':'#47988b'},s);if(typeof a.acumulado==='number'){const y=205-a.acumulado*155;points.push(`${x+w*.3},${y}`);svg('circle',{cx:x+w*.3,cy:y,r:4,fill:'#243f80'},s);}const t=svg('text',{x,y:225},s);t.textContent=String(a.elemento).slice(0,18)+(a.critico?' *':'');});if(points.length>1)svg('polyline',{points:points.join(' '),fill:'none',stroke:'#243f80','stroke-width':2},s);}); }
+  let resultadoActual = null;
+  function rangos(items) { graph('result-rangos',items,root=>{ const vals=items.flatMap(x=>[x.margen_p05,x.margen_p50,x.margen_p95]).filter(x=>typeof x==='number'); if(!vals.length)return; const low=Math.min(0,...vals),high=Math.max(1,...vals),scale=v=>120+(v-low)*600/(high-low); items.forEach((row,i)=>{const y=30+i*170/Math.max(1,items.length); if([row.margen_p05,row.margen_p50,row.margen_p95].every(v=>typeof v==='number')){svg('line',{x1:scale(row.margen_p05),x2:scale(row.margen_p95),y1:y,y2:y,stroke:'#118067','stroke-width':5},root);svg('circle',{cx:scale(row.margen_p50),cy:y,r:5,fill:'#243f80'},root);} const t=svg('text',{x:5,y:y+4},root);t.textContent=row.nombre;}); }); }
   function render(r) {
+    resultadoActual = r;
+    $('result-sintesis-nota').textContent = r.sintesis === 'CONTABLE' ? 'Financieros fuera del inventario (NIC 2 / NIIF 18)' : r.sintesis === 'ESTIMADO' ? 'Estimación estadística fuera de muestra (no es un estándar)' : '';
+    const estimados = Object.entries(r.estimacion || {}).map(([producto, datos]) => ({producto, ...datos}));
+    table('result-estimacion', estimados, [['producto','Producto'],['cu_total','Costo unitario'],['p05','P05'],['p95','P95'],['metodo','Método'],['mase','MASE']]);
+    $('result-method').textContent = r.proyeccion_info ? Object.entries(r.proyeccion_info).map(([k,v])=>`${k}: ${value(v)}`).join(' · ') : '';
+    $('result-short').textContent = r.serie.some(x=>x.tipo.startsWith('PROYECTADO')) ? '' : 'Se necesitan más de 6 meses para proyectar';
+    $('result-propuestas-total').textContent = 'Impacto anual total: S/ ' + number(r.propuestas.reduce((a,x)=>a+(Number(x.impacto_anual)||0),0));
     $('result-origin').textContent = r._nota ? `${r._nota} · ${r.periodo_actual} · ${r.sintesis}` : `${r.empresa.nombre} · ${r.periodo_actual} · ${r.sintesis}. Caso académico: compras y cantidades vendidas simuladas; resultados sujetos a validación.`;
     const k=$('result-kpis');k.replaceChildren(); [['ventas','Ventas'],['costo_total','Costo total'],['margen_operativo','Margen operativo'],['rentabilidad','Rentabilidad'],['costo_unitario_prom','Costo unitario promedio']].forEach(([key,label])=>{const e=cell(k,'div','');e.className='kpi';cell(e,'span',label);cell(e,'b',key==='rentabilidad'?number(r.kpi[key]*100)+' %':'S/ '+number(r.kpi[key]));});
-    lineChart(r.serie, r.periodo_actual);stacked(r.objetos);pareto(r.relevancia);
+    lineChart(r.serie, r.periodo_actual);stacked(r.objetos);pareto(r.relevancia);rangos(r.escenarios);
     table('result-objetos',r.objetos,[['codigo','Orden'],['producto','Producto'],['cantidad','Cantidad'],['costo_total','Costo total S/'],['costo_unitario','Costo unitario S/'],['ingreso','Ingreso S/'],['margen','Margen S/']]);
-    table('result-hallazgos',r.hallazgos,[['tipo','Tipo'],['referencia','Referencia'],['mensaje','Hallazgo'],['impacto','Impacto S/']]);
+    const hallazgos=$('result-hallazgos'); hallazgos.replaceChildren(); if(!r.hallazgos.length) cell(hallazgos,'p','Información aún no disponible para esta selección.');
+    r.hallazgos.forEach(h=>{const card=cell(hallazgos,'article',''); card.className='panel'; cell(card,'p',h.mensaje);cell(card,'p','Impacto: S/ '+number(h.impacto)+' · Causa: '+value(h.causa)+' · Variación: '+(typeof h.variacion==='number'?number(h.variacion*100)+' %':'—'));});
     table('result-relevancia',r.relevancia,[['elemento','Elemento'],['importe','Importe S/'],['porcentaje','Proporción'],['acumulado','Acumulado'],['critico','Crítico']]);
     table('result-proyeccion',r.serie.filter(x=>x.tipo.startsWith('PROYECTADO')),[['periodo','Periodo'],['tipo','Tipo'],['margen','Margen'],['p05','P05'],['p50','P50'],['p95','P95']]);
-    table('result-escenarios',r.escenarios,[['nombre','Escenario'],['supuestos','Supuestos'],['margen_p50','Margen P50'],['prob_perdida','Probabilidad de pérdida']]);
+    table('result-escenarios',r.escenarios.map(x=>({...x,prob_perdida: typeof x.prob_perdida==='number' ? number(x.prob_perdida*100)+' %' : '—'})),[['nombre','Escenario'],['margen_p05','P05'],['margen_p50','P50'],['margen_p95','P95'],['prob_perdida','Probabilidad de pérdida']]);
+    document.querySelectorAll('#result-escenarios tbody tr').forEach((row,i)=>{ if(r.escenarios[i].prob_perdida > .10) row.lastElementChild.style.color='#b00020'; });
     table('result-propuestas',r.propuestas,[['codigo','Código'],['descripcion','Propuesta'],['impacto_anual','Impacto anual S/'],['plazo','Plazo'],['responsable','Responsable']]);
   }
   async function load() { $('result-status').textContent='Consultando…'; try { const p=new URLSearchParams({sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/resultados?'+p); if(!response.ok) throw Error(); const r=await response.json();render(r);$('result-status').textContent='Resultados actualizados.'; } catch { $('result-status').textContent='No se pudieron consultar los resultados. Revisa el periodo y vuelve a intentar.'; } }
+  $('result-calcular').addEventListener('click', async () => {
+    const button=$('result-calcular'); button.disabled=true; $('result-status').textContent='Calculando…';
+    try { const p=new URLSearchParams({sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/calcular?'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); if(!response.ok) throw Error(); render(await response.json()); $('result-status').textContent='Cálculo completado.'; }
+    catch { $('result-status').textContent='No se pudo calcular. Revisa el periodo y los datos.'; } finally { button.disabled=false; }
+  });
+  document.querySelectorAll('[data-exportar]').forEach(button=>button.addEventListener('click',async()=>{
+    $('export-status').textContent='Preparando reporte…'; button.disabled=true;
+    try { if(button.dataset.exportar!=='codigo' && (!resultadoActual || resultadoActual.periodo_actual!==$('result-periodo').value || resultadoActual.sintesis!==$('result-sintesis').value)) throw Error(); const r=await fetch('/api/exportar?tipo='+button.dataset.exportar,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:resultadoActual})}); if(!r.ok)throw Error(); const data=await r.json(); const archivo=data.ruta.split(/[\\/]/).pop(); const download=await fetch('/api/descargar?archivo='+encodeURIComponent(archivo)); if(!download.ok)throw Error(); const url=URL.createObjectURL(await download.blob()); const a=document.createElement('a');a.href=url;a.download=archivo;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000); $('export-status').textContent='Reporte descargado.'; }
+    catch { $('export-status').textContent='No se pudo descargar el reporte.'; } finally {button.disabled=false;}
+  }));
   $('result-cargar').addEventListener('click',load); load();
 })();
 
