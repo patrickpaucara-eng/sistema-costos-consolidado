@@ -14,7 +14,10 @@ def test_pantallas_analitica_y_proyeccion(tmp_path):
     try:
         with sync.sync_playwright() as playwright:
             try:
-                browser = playwright.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+                try:  # [ARQ] solo entorno: primero el Chromium propio de Playwright, luego el del sistema; las aserciones no cambian
+                    browser = playwright.chromium.launch(args=['--no-sandbox'])
+                except Exception:
+                    browser = playwright.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
             except Exception as exc:
                 pytest.skip(f'Chromium no disponible: {exc}')
             page = browser.new_page()
