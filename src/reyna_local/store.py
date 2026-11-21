@@ -23,7 +23,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter, column_index_from_string, range_boundaries
 from openpyxl.utils.exceptions import InvalidFileException
 
-from .motor_espejo import Motor
+from .motor_espejo import Motor, norm
 
 SOURCE_REVISION = "cac2501d9f712655dda466d216dc5bff2dd446a5"
 ENGINE_SHA256 = "8c962583170cbb200c564bef8edfd95ae931602b82fa2f89f2bb48bcd9ce2a11"
@@ -63,7 +63,7 @@ def text_field(obj, key, limit):
 
 def validate_execution(body):
     txn = text_field(body, "transaction", 8)
-    if txn not in TRANSACTIONS:
+    if txn not in (*TRANSACTIONS, "T25.4"):
         raise Problem(400, "La transacción no está habilitada en el piloto.")
     user = text_field(body, "user", 100)
     key = text_field(body, "request_id", 160)
@@ -167,6 +167,181 @@ def validate_model(tables):
         for table in ("TRX_CAMPO", "TOP"):
             if not any(r[0] == txn for r in tables[table]["r"]):
                 raise Problem(422, f"El libro carece de la definición {txn} en {table}.")
+
+
+def result_port_enabled(tables):
+    required = ("CORRIDA_METODO", "RESULTADO_METODO", "METODO_REGISTRADO", "EJE", "TOP", "TRX_CAMPO")
+    if not all(name in tables for name in required):
+        return False
+    top = [row for row in tables["TOP"]["r"] if row and row[0] == "T25.4"]
+    required_steps = (("OP-COND-PER", "L"), ("OP-PRS-CAB", "U"), ("OP-PRS-LIN", "L"))
+    if any(sum(1 for row in top if len(row) > 3 and (row[2], row[3]) == step) != 1
+           for step in required_steps):
+        return False
+    if not {"COR_METODO", "COR_VER", "COR_PER", "COR_EMP", "COR_HUELLA",
+            "COR_USR", "COR_EST", "COR_N"}.issubset(tables["CORRIDA_METODO"]["h"]):
+        return False
+    if not {"RES_METODO", "RES_VER", "RES_PER", "RES_EMP", "RES_HUELLA",
+            "RES_TIPO", "RES_CLAVE", "RES_CONC", "RES_VALOR"}.issubset(tables["RESULTADO_METODO"]["h"]):
+        return False
+    fields = [row[2] for row in tables["TRX_CAMPO"]["r"]
+              if len(row) > 2 and row[0] == "T25.4"]
+    required_fields = {"PER", "EMP", "PRS_METODO", "PRS_VER", "PRS_HUELLA",
+                       "PRS_TIPO", "PRS_CLAVE", "PRS_CONC", "PRS_VALOR"}
+    return required_fields.issubset(fields) and len(fields) == len(set(fields))
+
+
+def validate_vnr_delivery(tables, head, lines):
+    if not result_port_enabled(tables):
+        raise Problem(422, "Este libro no declara el puerto T25.4.")
+    for field in ("PER", "EMP", "PRS_METODO", "PRS_VER", "PRS_HUELLA"):
+        if head.get(field) != text_field(head, field, 20):
+            raise Problem(400, f"El campo {field} requiere texto exacto.")
+    methods = tables["METODO_REGISTRADO"]
+    records = [dict(zip(methods["h"], row)) for row in methods["r"]]
+    matching = [r for r in records if r.get("MRG_COD") == head["PRS_METODO"]
+                and r.get("MRG_VER") == head["PRS_VER"]]
+    axes = tables["EJE"]
+    if any(axes["h"].count(c) != 1 for c in ("EJE_COD", "EJE_BASE")):
+        raise Problem(422, "El libro no define de forma única las columnas del eje VNR.")
+    bases = [r[axes["h"].index("EJE_BASE")] for r in axes["r"]
+             if r[axes["h"].index("EJE_COD")] == "COSTO_CONTABLE"]
+    if (len(matching) != 1 or norm(matching[0].get("MRG_EST")) != "APROBADO"
+            or norm(matching[0].get("MRG_EJE")) != "COSTO_CONTABLE"
+            or len(bases) != 1 or norm(head["PRS_METODO"]) == norm(bases[0])):
+        raise Problem(422, "El puerto VNR requiere un método externo único y APROBADO de COSTO_CONTABLE.")
+    periods = tables["PERIODO"]
+    periods = [dict(zip(periods["h"], r)) for r in periods["r"]]
+    starts = [r.get("PER_INI") for r in periods
+              if r.get("PER_COD") == head["PER"] and r.get("PER_EMP") == head["EMP"]]
+    if len(starts) != 1:
+        raise Problem(422, "Se requiere un periodo único de la empresa para recibir la corrida.")
+    try:
+        effective = datetime.strptime(str(matching[0]["MRG_DESDE"]), "%Y%m%d").date()
+        period_start = datetime.strptime(str(starts[0]), "%Y%m%d").date()
+    except (KeyError, ValueError) as exc:
+        raise Problem(422, "El inicio del periodo o la vigencia del método VNR es inválido.") from exc
+    if effective > period_start:
+        raise Problem(422, "El método VNR todavía no es efectivo al inicio del periodo.")
+    if not lines:
+        raise Problem(400, "Se requiere al menos una línea de rebaja.")
+    keys = set()
+    for line in lines:
+        key = text_field(line, "PRS_CLAVE", 30)
+        amount = line.get("PRS_VALOR")
+        if (key != line["PRS_CLAVE"] or key.count("|") != 1 or not all(key.split("|"))
+                or line.get("PRS_TIPO") != "EXISTENCIA" or line.get("PRS_CONC") != "REBAJA"
+                or isinstance(amount, bool) or not isinstance(amount, (int, float))
+                or not math.isfinite(amount) or amount < 0 or key in keys):
+            raise Problem(400, "La entrega VNR requiere rebajas válidas con claves distintas recurso|almacén.")
+        keys.add(key)
+
+
+def verify_vnr_result_delivery(before, after, head, user, lines):
+    corridas = after["CORRIDA_METODO"]
+    ix = {name: corridas["h"].index(name) for name in
+          ("COR_METODO", "COR_VER", "COR_PER", "COR_EMP", "COR_HUELLA")}
+    identidad_corrida = (("COR_METODO", head["PRS_METODO"]), ("COR_VER", head["PRS_VER"]),
+                         ("COR_PER", head["PER"]), ("COR_EMP", head["EMP"]),
+                         ("COR_HUELLA", head["PRS_HUELLA"]))
+    cabeceras = [dict(zip(corridas["h"], row)) for row in corridas["r"]
+                 if all(row[ix[field]] == value for field, value in identidad_corrida)]
+    if len(cabeceras) != 1 or cabeceras[0].get("COR_EST") != "RECIBIDO" or cabeceras[0].get("COR_USR") != user:
+        raise Problem(422, "La cabecera persistida no coincide con el comando T25.4.")
+    prev_c = before["CORRIDA_METODO"]
+    prev_ix = {name: prev_c["h"].index(name) for name, _ in identidad_corrida}
+    anteriores = [dict(zip(prev_c["h"], row)) for row in prev_c["r"]
+                  if all(row[prev_ix[field]] == value for field, value in identidad_corrida)]
+    if len(anteriores) > 1:
+        raise Problem(422, "La corrida anterior tiene una cabecera duplicada.")
+    try:
+        count = float(cabeceras[0].get("COR_N") or 0)
+        prev_count = float(anteriores[0].get("COR_N") or 0) if anteriores else 0
+    except (TypeError, ValueError) as exc:
+        raise Problem(422, "La cantidad de líneas de la corrida recibida es inválida.") from exc
+    if (not math.isfinite(count) or not math.isfinite(prev_count)
+            or not math.isclose(count, prev_count + 1, abs_tol=1e-9, rel_tol=1e-15)):
+        raise Problem(422, "El contador de cabeceras recibidas no avanzó en una unidad.")
+    resultados = after["RESULTADO_METODO"]
+    ix = {name: resultados["h"].index(name) for name in
+          ("RES_METODO", "RES_VER", "RES_PER", "RES_EMP", "RES_HUELLA")}
+    identidad_resultado = (("RES_METODO", head["PRS_METODO"]), ("RES_VER", head["PRS_VER"]),
+                           ("RES_PER", head["PER"]), ("RES_EMP", head["EMP"]),
+                           ("RES_HUELLA", head["PRS_HUELLA"]))
+
+    def detalles(tabla):
+        indices = {name: tabla["h"].index(name) for name, _ in identidad_resultado}
+        items = [dict(zip(tabla["h"], row)) for row in tabla["r"]
+                 if all(row[indices[field]] == value for field, value in identidad_resultado)]
+        salida = {}
+        for item in items:
+            key = item["RES_TIPO"], item["RES_CLAVE"], item["RES_CONC"]
+            if key in salida:
+                raise Problem(422, "El detalle de la corrida contiene claves duplicadas.")
+            salida[key] = item["RES_VALOR"]
+        return salida
+
+    previo = detalles(before["RESULTADO_METODO"])
+    actual = detalles(resultados)
+    if previo and not anteriores:
+        raise Problem(422, "Hay resultados de la corrida sin una cabecera registrada.")
+    esperado = dict(previo)
+    for line in lines:
+        esperado[(line["PRS_TIPO"], line["PRS_CLAVE"], line["PRS_CONC"])] = line["PRS_VALOR"]
+
+    def mismo_importe(a, b):
+        if isinstance(a, bool) or not isinstance(a, (int, float)) or not math.isfinite(a):
+            return False
+        try:
+            esperado_num = float(b)
+        except (TypeError, ValueError):
+            return False
+        return math.isfinite(esperado_num) and math.isclose(
+            float(a), esperado_num, abs_tol=1e-9, rel_tol=1e-15)
+
+    if esperado.keys() != actual.keys() or any(
+            not mismo_importe(actual[key], value) for key, value in esperado.items()):
+        raise Problem(422, "Los valores persistidos de T25.4 no coinciden con la entrega acumulada por huella.")
+
+
+def effective_cost_accounting_method(tables, company, period):
+    try:
+        periods = tables["PERIODO"]
+        period_ix = periods["h"].index("PER_COD")
+        company_ix = periods["h"].index("PER_EMP")
+        start_ix = periods["h"].index("PER_INI")
+        starts = [row[start_ix] for row in periods["r"]
+                  if row[period_ix] == period and row[company_ix] == company]
+        axes = tables["EJE"]
+        axis_ix = axes["h"].index("EJE_COD")
+        base_ix = axes["h"].index("EJE_BASE")
+        bases = [row[base_ix] for row in axes["r"] if norm(row[axis_ix]) == "COSTO_CONTABLE"]
+        methods = tables["METODO_REGISTRADO"]
+        indices = {name: methods["h"].index(name) for name in
+                   ("MRG_COD", "MRG_VER", "MRG_EST", "MRG_DESDE", "MRG_EJE")}
+    except (KeyError, ValueError) as exc:
+        raise Problem(422, "El libro no permite determinar el método vigente de COSTO_CONTABLE.") from exc
+    if len(starts) != 1 or len(bases) != 1:
+        raise Problem(422, "El periodo o el método base de COSTO_CONTABLE no es único.")
+    try:
+        inicio = datetime.strptime(str(starts[0]), "%Y%m%d").date()
+        candidates = []
+        for row in methods["r"]:
+            if (norm(row[indices["MRG_EJE"]]) != "COSTO_CONTABLE"
+                    or norm(row[indices["MRG_EST"]]) != "APROBADO"):
+                continue
+            fecha = datetime.strptime(str(row[indices["MRG_DESDE"]]), "%Y%m%d").date()
+            if fecha <= inicio:
+                candidates.append((fecha, row[indices["MRG_COD"]], row[indices["MRG_VER"]]))
+    except (TypeError, ValueError) as exc:
+        raise Problem(422, "La vigencia del periodo o del método de COSTO_CONTABLE no es válida.") from exc
+    if not candidates:
+        raise Problem(422, "No hay método aprobado de COSTO_CONTABLE vigente al inicio del periodo.")
+    latest = max(item[0] for item in candidates)
+    selected = [item for item in candidates if item[0] == latest]
+    if len(selected) != 1:
+        raise Problem(422, "Hay varios métodos de COSTO_CONTABLE con la misma vigencia.")
+    return selected[0][1], selected[0][2], bases[0]
 
 
 def operational_companies(tables):
@@ -453,7 +628,8 @@ class Store:
         info = {"id": identifier, "name": name, "version": 0, "created_at": now(),
                 "workbook_sha256": sha256(raw).hexdigest(), "engine_sha256": ENGINE_SHA256,
                 "engine_revision": SOURCE_REVISION, "company_code": companies[0],
-                "close_month_enabled": int("CIERRE_PASO" in tables)}
+                "close_month_enabled": int("CIERRE_PASO" in tables),
+                "result_port_enabled": int(result_port_enabled(tables))}
         directory = self.root / identifier
         directory.mkdir(mode=0o700)
         path = directory / "libro.xlsx"
@@ -478,8 +654,14 @@ class Store:
 
     def get(self, identifier):
         path = self.path(identifier)
-        tables, _ = load_data(content_bytes(path), {META, RECEIPTS, "PARAMETRO"})
-        return summary(tables, path)
+        raw = content_bytes(path)
+        tables, _ = load_data(raw, {META, RECEIPTS, "PARAMETRO"})
+        detail = summary(tables, path)
+        if "result_port_enabled" not in detail:
+            configuration, _ = load_data(raw, {"METODO_REGISTRADO", "EJE", "CORRIDA_METODO",
+                                               "RESULTADO_METODO", "TOP", "TRX_CAMPO"})
+            detail["result_port_enabled"] = int(result_port_enabled(configuration))
+        return detail
 
     def table(self, identifier, name, offset=0, limit=100):
         if not isinstance(offset, int) or not isinstance(limit, int) or offset < 0 or not 1 <= limit <= 500:
@@ -521,6 +703,8 @@ class Store:
                         raise Problem(409, "El identificador ya corresponde a otra operación.")
                     return record[2], json.loads(record[3])
             same_workbook(path, raw)
+            if txn == "T25.4":
+                validate_vnr_delivery(tables, header, lines)
             declared = [r for r in tables["TRX_CAMPO"]["r"] if r[0] == txn]
             head_fields = {r[2] for r in declared if r[4] == "C"}
             line_fields = {r[2] for r in declared if r[4] == "L"}
@@ -543,6 +727,11 @@ class Store:
                     outcome = motor.ejecutar(txn, header, user, lines)
                 except (ValueError, ArithmeticError, KeyError, IndexError, TypeError):
                     outcome = "ERROR: La operación contiene valores incompatibles con el libro."
+            if outcome == "OK" and txn == "T25.4":
+                try:
+                    verify_vnr_result_delivery(tables, motor.T, header, user, lines)
+                except Problem as error:
+                    outcome = f"ERROR: {error}"
             ok = outcome == "OK"
             status = 200 if ok else 422
             version = info["version"] + int(ok)
@@ -578,7 +767,12 @@ class Store:
         user = text_field(body, "user", 100)
         key = text_field(body, "request_id", 160)
         period = text_field(body, "period", 40)
-        command = encode({"operation": "close_month", "user": user, "period": period})
+        closure = {"operation": "close_month", "user": user, "period": period}
+        if "result_hash" in body:
+            closure["result_hash"] = text_field(body, "result_hash", 20)
+            if closure["result_hash"] != body["result_hash"]:
+                raise Problem(400, "La huella debe ser texto exacto.")
+        command = encode(closure)
         digest = sha256(command.encode()).hexdigest()
         path = self.path(identifier)
         with writer_lock(path.parent):
@@ -604,9 +798,33 @@ class Store:
                        if str(r[0]) == period and str(r[1]) == company]
             if len(periods) != 1 or periods[0][4] != "A":
                 raise Problem(422, "El periodo de la empresa no existe de forma única o no está abierto.")
+            if "EJE" in tables and "METODO_REGISTRADO" in tables:
+                method, method_version, base_method = effective_cost_accounting_method(tables, company, period)
+                if norm(method) != norm(base_method):
+                    if not result_port_enabled(tables):
+                        raise Problem(422, "El método externo vigente requiere el puerto T25.4, que no está completo en este libro.")
+                    if "result_hash" not in closure:
+                        raise Problem(422, "El método externo vigente requiere seleccionar una huella para T23.5.")
+                    corrida = tables["CORRIDA_METODO"]
+                    indices = {name: corrida["h"].index(name) for name in
+                               ("COR_METODO", "COR_VER", "COR_PER", "COR_EMP", "COR_HUELLA", "COR_EST")}
+                    selected = [row for row in corrida["r"]
+                                if all(row[indices[field]] == value for field, value in
+                                       (("COR_METODO", method), ("COR_VER", method_version),
+                                        ("COR_PER", period), ("COR_EMP", company),
+                                        ("COR_HUELLA", closure["result_hash"])))
+                                and row[indices["COR_EST"]] == "RECIBIDO"]
+                    if len(selected) != 1:
+                        raise Problem(422, "La huella no identifica una corrida RECIBIDO del método y versión vigentes.")
+                elif "result_hash" in closure:
+                    raise Problem(422, "La huella externa no se puede usar cuando rige el método base.")
+            elif "result_hash" in closure:
+                raise Problem(422, "Este libro no define método y eje para seleccionar una corrida externa.")
             steps = sorted((r[0] for r in tables["CIERRE_PASO"]["r"]
                             if len(r) > 4 and r[4] in ("OFICIAL", "CIERRE")),
                            key=lambda code: next(float(r[1]) for r in tables["CIERRE_PASO"]["r"] if r[0] == code))
+            if "result_hash" in closure and steps.count("T23.5") != 1:
+                raise Problem(422, "La selección de corrida requiere un solo paso T23.5.")
             if not steps:
                 raise Problem(422, "La configuración no declara pasos oficiales de cierre.")
             motor = Motor.__new__(Motor)
@@ -630,7 +848,8 @@ class Store:
                     row[3] = f"PER={period};EMP={company}"
                     carga["r"].append(row)
                 try:
-                    motor.procesar_carga()
+                    motor.procesar_carga(desde=start, huella_vnr=closure.get("result_hash"),
+                                         contexto_cierre={"PER": period, "EMP": company})
                     outcomes = [{"step": row[1], "result": "OK" if row[4] == "OK" and row[5] == "OK" else "ERROR",
                                  **({} if row[4] == "OK" and row[5] == "OK" else {"error": str(row[5])})}
                                 for row in carga["r"][start:]]

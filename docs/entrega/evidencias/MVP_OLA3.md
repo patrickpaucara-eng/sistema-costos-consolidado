@@ -6,6 +6,10 @@
 
 **Fuente del motor y fixture:** revisión histórica `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`, ejecutada solo en copias.
 
+## Actualización al 21 de noviembre de 2026
+
+Desde el corte histórico de la tabla de verificaciones, la ruta sintética T25.4→T23.5 recibió 26 pruebas focalizadas aprobadas. Estas verifican permisos, esquema del libro, entradas incrementales, conciliación y rollback, y la selección de método/versión vigentes aunque varias corridas compartan huella. La revisión independiente confirmó esta selección según DBD_4c. La suite integrada pasó 55/55 en Linux con Python 3.12, `openpyxl==3.1.5` y `defusedxml==0.7.1` en 230,541 s. La tabla siguiente conserva el resultado observado el 20 de noviembre.
+
 
 ## Resultado
 
@@ -29,7 +33,7 @@ El propietario resolvió seguir el MCD: los eventos actualizan transaccionalment
 
 En el motor Python, los métodos DBD ya se ejecutan por operaciones genéricas. Se hizo que las mutaciones `CTA_*` identifiquen la columna `*_EMP` desde el esquema y solo reutilicen/actualicen filas de la empresa del evento; las filas nuevas reciben esa empresa aunque la MCA omita la empresa de la clave. La prueba carga filas A y B con claves de negocio iguales y confirma que A no se altera. El mismo caso T15 compara las filas persistidas de tres cuentas contra un esperado decimal independiente en [caso_t15_eventos.json](../../../tests/fixtures/d9/caso_t15_eventos.json), repite el `request_id` y compara las siete cuentas. Otra prueba inyecta un fallo tras la escritura de `CTA_OBJ_REC` y confirma que las cuentas y el inventario/evento se revierten. Una prueba directa de `m_ACTUALIZAR` verifica que solo cambia B aunque la clave DBD omita empresa. El reintento del cierre también compara las siete hojas CTA antes y después.
 
-El caso T15 concilia parcialmente `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` por evento con aritmética separada. Se añadieron casos independientes para T17 (`CTA_CENTRO`/`CTA_FUNCION`), T19 (`CTA_GASTO`) y T20 (`CTA_VTA_PER`), con esperados y filas persistidas. T20 usa un saldo inicial sintético. Un caso adicional produce `OS-01` con T18, liquida T23.3 y aplica T23.5 con VNR; coteja importes y saldos con aritmética separada y prueba aislamiento, reintento y rollback. Sus entradas son sintéticas y la configuración es de la fixture. `RESULTADO_METODO` permanece vacío; no hay oráculo ORIA ni conciliación integral de las cuentas. D9 sigue bloqueado como salida oficial por las brechas de contrato, la ruta externa T25.4/huella y la conciliación integral.
+El caso T15 concilia parcialmente `CTA_OBJ_PER`, `CTA_OBJ_REC` y `CTA_GASTO` por evento con aritmética separada. Se añadieron casos independientes para T17 (`CTA_CENTRO`/`CTA_FUNCION`), T19 (`CTA_GASTO`) y T20 (`CTA_VTA_PER`), con esperados y filas persistidas. T20 usa un saldo inicial sintético. Un caso adicional produce `OS-01` con T18, liquida T23.3 y aplica T23.5 por la ruta base; en esta ruta `RESULTADO_METODO` permanece vacío. La ruta externa sintética T25.4→T23.5 está probada por separado y guarda resultados por huella. Ambas prueban aislamiento, reintento y rollback con entradas sintéticas y configuración de la fixture. No hay oráculo ORIA ni conciliación integral de las cuentas. D9 sigue bloqueado como salida oficial por las brechas de contrato, deducibilidad, claves, recuperación y conciliación integral.
 
 El servicio y el formulario JSON habilitan explícitamente T14, T15, T17, T18, T19 y T20. T16 y las operaciones por lotes siguen fuera del piloto. Las fuentes, cálculos independientes y límites de T17/T19/T20 constan en [D9_CUADRE_EVENTOS.md](D9_CUADRE_EVENTOS.md); el caso base de producción y liquidación está en [D9_CUADRE_T23_3_T23_5.md](D9_CUADRE_T23_3_T23_5.md).
 

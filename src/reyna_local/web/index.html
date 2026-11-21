@@ -339,6 +339,7 @@
             <div class="field"><label for="close-period">Periodo abierto</label><input id="close-period" required placeholder="2026-04"></div>
             <div class="field"><label for="close-user">Usuario autorizado</label><input id="close-user" required placeholder="Código de usuario"></div>
           </div>
+          <div id="close-hash-field" class="field" hidden><label for="close-hash">Huella de la corrida VNR externa (si corresponde)</label><input id="close-hash" class="mono" maxlength="20" autocomplete="off" spellcheck="false"></div>
           <div class="field"><label for="close-request-id">Identificador del cierre</label><input id="close-request-id" class="mono" required autocomplete="off" spellcheck="false"></div>
           <div class="actions"><button id="close-button" type="submit">Cerrar periodo</button><button id="new-close-request" class="secondary" type="button">Nuevo identificador</button></div>
           <div id="close-status" class="notice" role="status"></div>
@@ -539,8 +540,9 @@
     function restoreDraft(space) {
       const draft = formDrafts.get(space.id);
       const draftTransaction = draft?.transaction;
-      transaction.replaceChildren(makeOption("", "Selecciona una transacción"), ...space.transactions.map((entry) => makeOption(entry)));
-      transaction.value = space.transactions.includes(draftTransaction) ? draftTransaction : "";
+      const operations = space.result_port_enabled ? [...space.transactions, "T25.4"] : space.transactions;
+      transaction.replaceChildren(makeOption("", "Selecciona una transacción"), ...operations.map((entry) => makeOption(entry)));
+      transaction.value = operations.includes(draftTransaction) ? draftTransaction : "";
       operator.value = draft?.operator ?? "";
       headerInput.value = draft?.header ?? "{}";
       linesInput.value = draft?.lines ?? "[{}]";
@@ -561,6 +563,8 @@
       byId("no-detail").hidden = true;
       executeForm.hidden = !space.transactions.length;
       closeForm.hidden = !space.close_month_enabled;
+      byId("close-hash-field").hidden = !space.result_port_enabled;
+      byId("close-hash").value = "";
     }
 
     function updateExecuteState() {
@@ -825,6 +829,9 @@
       };
       executing = true;
       closeButton.disabled = true;
+      if (selectedWorkspace.result_port_enabled && byId("close-hash").value) {
+        payload.result_hash = byId("close-hash").value;
+      }
       notice(closeStatus, "Ejecutando el cierre en memoria y preparando un solo guardado…");
       try {
         const result = await api(`${workspacePath(id)}/close-month`, payload);

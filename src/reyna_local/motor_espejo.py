@@ -5,6 +5,8 @@ from decimal import Decimal as D, ROUND_HALF_UP
 from openpyxl import load_workbook
 
 import math
+VNR_ABS_TOL = 1e-9
+VNR_REL_TOL = 1e-15
 def red(x, n):   # mismo redondeo que motor.bas: mitad hacia arriba, con tolerancia 1e-9
     f = 10 ** int(n); x = float(x)
     return math.floor(x * f + 0.5 + 1e-9) / f if x >= 0 else -math.floor(-x * f + 0.5 + 1e-9) / f
@@ -41,6 +43,14 @@ def login(m, u, clave):
     f = [r for r in m.T["USUARIO"]["r"] if str(r[0]) == str(u).upper()]
     return bool(f) and f[0][m.col("USUARIO", "USU_CLAVE")] == clave_cifrada(u, clave)
 
+CLAVES_EMPRESA = {
+    "EXISTENCIA": ("EXI_EMP", "EXI_REC", "EXI_ALM"),
+    "CORRIDA_METODO": ("COR_EMP", "COR_METODO", "COR_VER", "COR_PER", "COR_HUELLA"),
+    "RESULTADO_METODO": ("RES_EMP", "RES_METODO", "RES_VER", "RES_PER", "RES_HUELLA",
+                         "RES_TIPO", "RES_CLAVE", "RES_CONC"),
+}
+
+
 class Motor:
     def __init__(self, ruta):
         wb = load_workbook(ruta)
@@ -66,7 +76,16 @@ class Motor:
         if orden: rs.sort(key=lambda r: num(r[self.col(t, orden)]))
         return rs
     def setc(self, t, row, c, v):
-        i = self.col(t, c); self.undo.append((t, row, i, row[i])); row[i] = v
+        i = self.col(t, c)
+        if c in CLAVES_EMPRESA.get(t, ()):
+            if c == CLAVES_EMPRESA[t][0] and v != self.get("EMP"):
+                raise Error(f"Empresa incompatible al escribir en {t}.")
+            if row[i] is not None and row[i] != v:
+                raise Error(f"La operación intenta cambiar la clave de {t}.")
+        elif str(t).startswith("CTA_") and isinstance(c, str) and c.endswith("_EMP"):
+            if v != self.get("EMP") or row[i] not in (None, "") and row[i] != v:
+                raise Error(f"La operación intenta cambiar la empresa de {t}.")
+        self.undo.append((t, row, i, row[i])); row[i] = v
     # ---- trama
     def get(self, k):
         if k not in self.tr: raise Error(f"Variable no definida: {k}")
@@ -94,6 +113,8 @@ class Motor:
         self.usr, self.perfil = usr, u[0][2]
         base = dict(trama); base["TRX"] = trx; base["USR"] = usr
         if "EMP" not in base and len(u[0]) > 3 and u[0][3]: base["EMP"] = u[0][3]          # EC-23: la empresa sale del usuario
+        self._vnr_aplicado = False
+        self._vnr_antes_inicio = None
         derivado = False
         if "PER" not in base and "FECHA" in base:                                          # EC-23: el periodo sale de la fecha
             pp = [r for r in self.T["PERIODO"]["r"] if norm(r[1]) == norm(base.get("EMP")) and num(r[2]) <= num(base["FECHA"]) <= num(r[3])]
@@ -107,6 +128,9 @@ class Motor:
                 raise Error(self.mensaje("MSG-SEG") + f" ({self.perfil} → {trx})")
             if not self.filas("TOP", "TOP_TRX", trx):          # I-2 (V7): una transacción sin pasos no existe; nunca «OK» vacío
                 raise Error(f"transacción {trx} no existe")
+            if trx == "T23.5" and "_huella_vnr" in base:
+                self.tr = dict(base)
+                self._vnr_antes_inicio = self._saldos_vnr()
             for k, lin in enumerate(lineas or [{}]):
                 self.tr = dict(base); self.tr.update(lin); self.tr.update(heredado); self.tr["LIN_NUM"] = k + 1
                 for r in self.filas("TOP", "TOP_TRX", trx, "TOP_SEC"):
@@ -117,6 +141,10 @@ class Motor:
                         heredado.update({x: v for x, v in self.tr.items() if antes.get(x, object()) != v})
                     else: self.opn(r[2])
                 self.alarmas(trx)                          # OT-072 (AL-1): tras el HECHO de la línea; solo escribe ALERTA, nunca lo bloquea
+            if trx == "T23.5" and "_huella_vnr" in base and not self._vnr_aplicado:
+                raise Error("El cierre no consumió la corrida externa de COSTO_CONTABLE solicitada.")
+            if trx == "T23.5" and "_huella_vnr" in base:
+                self._conciliar_vnr(self._vnr_rebajas, self._vnr_antes)
             log[3] = "O"                                   # listo para aplicar (DBD p. 26)
             if str(trama.get("MODO", "")).upper() == "PREVIA":
                 self.bitacora(trx, usr, log[0])            # queda reconstruible aunque se pierda la memoria
@@ -244,10 +272,10 @@ class Motor:
             c.append(fila)
         os.rename(ruta, os.path.join(os.path.dirname(ruta), "bandeja_procesada_" + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"))
         return k
-    def procesar_carga(self):
+    def procesar_carga(self, desde=0, huella_vnr=None, contexto_cierre=None):
         """Puerto de carga: cada fila de CARGA se ejecuta como transacción con su usuario de captura y deja su estado."""
         ok = err = 0
-        for row in self.T["CARGA"]["r"]:
+        for row in self.T["CARGA"]["r"][desde:]:
             if row[4] == "OK": continue          # ya registrada: no se duplica; las con ERROR se reintentan
             trx, usr, trama = row[1], row[2], row[3]
             partes = str(trama).split("|")
@@ -266,7 +294,12 @@ class Motor:
                     num = pend[0][0] if pend else None
                 out = self.resolver(num, str(tp.get("DEC") or "A"), usr, tp.get("DESDE"), tp.get("MOTIVO", ""))
             else:
-                out = self.ejecutar(trx, parse(partes[0]), usr, [parse(x) for x in partes[1:]] or None)
+                cabecera = parse(partes[0])
+                if contexto_cierre:
+                    cabecera.update(contexto_cierre)
+                if trx == "T23.5" and huella_vnr is not None:
+                    cabecera["_huella_vnr"] = huella_vnr
+                out = self.ejecutar(trx, cabecera, usr, [parse(x) for x in partes[1:]] or None)
             row[4] = "OK" if out == "OK" else "ERROR"; row[5] = out
             ok, err = (ok + 1, err) if out == "OK" else (ok, err + 1)
         return "OK"
@@ -512,12 +545,38 @@ class Motor:
         fs = [r for r in self.T["PARAMETRO"]["r"] if norm(r[ic]) == norm(cod)]
         f = [r for r in fs if norm(r[ie]) == norm(emp)] or [r for r in fs if norm(r[ie]) == "*"]
         return f[0][iv] if f else None
+    def _filas_empresa(self, tabla):
+        claves = CLAVES_EMPRESA[tabla]
+        columnas = self.T[tabla]["h"]
+        empresariales = [c for c in columnas if isinstance(c, str) and c.endswith("_EMP")]
+        if empresariales != [claves[0]] or any(columnas.count(c) != 1 for c in claves):
+            raise Error(f"Clave empresarial incompleta o ambigua en {tabla}.")
+        indices = [self.col(tabla, c) for c in claves]
+        empresa = self.get("EMP")
+        if empresa in (None, "", "*"):
+            raise Error(f"Se requiere una empresa concreta en {tabla}.")
+        vistas = set()
+        filas = []
+        for fila in self.T[tabla]["r"]:
+            if fila[indices[0]] != empresa:
+                continue
+            clave = tuple(fila[i] for i in indices)
+            if any(v is None or v == "" for v in clave):
+                raise Error(f"Clave incompleta en {tabla} para la empresa del evento.")
+            if clave in vistas:
+                raise Error(f"Clave duplicada en {tabla} para la empresa del evento.")
+            vistas.add(clave)
+            filas.append(fila)
+        return filas
+
     def coincide(self, tabla, mca):
         """D12 (Ola 1): primero las filas exactas; si no hay ninguna, una clave *_EMP acepta la fila común «*»."""
+        if tabla in CLAVES_EMPRESA:
+            return self._coincide(tabla, mca, False, self._filas_empresa(tabla))
         return self._coincide(tabla, mca, False) or self._coincide(tabla, mca, True)
     def _empresa_cuenta(self, tabla):
         """Resuelve el atributo de ámbito de las cuentas desde su esquema, sin enumerar tablas."""
-        if not str(tabla).startswith("CTA_"): return None
+        if tabla not in CLAVES_EMPRESA and not str(tabla).startswith("CTA_"): return None
         columnas = [c for c in self.T[tabla]["h"] if c.endswith("_EMP")]
         if len(columnas) != 1:
             raise Error(f"La cuenta {tabla} debe declarar una sola columna de empresa.")
@@ -532,15 +591,21 @@ class Motor:
         if cuenta is None: return filas
         columna, empresa = cuenta
         i = self.col(tabla, columna)
-        return [r for r in filas if norm(r[i]) == norm(empresa)]
-    def _coincide(self, tabla, mca, comodin):
+        return [r for r in filas if r[i] == empresa]
+    def _coincide(self, tabla, mca, comodin, filas=None):
         res = []
-        for row in self.T[tabla]["r"]:
+        if filas is None:
+            filas = self.T[tabla]["r"]
+        for row in filas:
             ok = True
             for _, _, c, rol, ope, ori, v in mca:
                 if rol == "K":
                     cel = row[self.col(tabla, c)]
-                    if norm(cel) != norm(self.val(ori, v)) and not (comodin and str(c).endswith("_EMP") and norm(cel) == "*"): ok = False; break
+                    buscado = self.val(ori, v)
+                    identificador_textual = (tabla in CLAVES_EMPRESA or c == "PER_COD"
+                                             or isinstance(c, str) and c.endswith(("_EMP", "_PER")))
+                    igual = cel == buscado if identificador_textual else norm(cel) == norm(buscado)
+                    if not igual and not (comodin and str(c).endswith("_EMP") and norm(cel) == "*"): ok = False; break
                 if rol == "H" and num(row[self.col(tabla, c)]) > num(self.val(ori, v)): ok = False; break
             if ok: res.append(row)
         return res
@@ -559,9 +624,16 @@ class Motor:
         return n
     def m_LEER(self, cod, tabla, sub, obl, orden, mca):
         rs = self.coincide(tabla, mca)
+        if cod == "M-PRS-LEE-MET" and self.tr.get("TRX") == "T25.4":
+            rs = [r for r in rs if r[self.col(tabla, "MRG_COD")] == self.get("PRS_METODO")
+                  and r[self.col(tabla, "MRG_VER")] == self.get("PRS_VER")]
         if orden:
             desc = str(orden).startswith("-"); oc = self.col(tabla, str(orden).lstrip("-"))
             rs.sort(key=lambda r: num(r[oc]), reverse=desc)
+            if (cod == "M-GRD-LEE-C" and self.tr.get("TRX") == "T23.5"
+                    and self.tr.get("EJE_COD") == "COSTO_CONTABLE" and len(rs) > 1
+                    and num(rs[0][oc]) == num(rs[1][oc])):
+                raise Error("Hay más de un método vigente de COSTO_CONTABLE con la misma fecha.")
         if not rs:
             if obl == "S": raise Error(f"No existe en {tabla} ({cod})")
             self.tr["HALLADA"] = "N"                       # OT-056 (R3): «hallada S/N» como parte del modo de acceso de LEER
@@ -586,6 +658,11 @@ class Motor:
             if x[5] == "SIS" and x[6] == "#SIG":
                 nv = max([num(r[i]) for r in self.T[tabla]["r"] if r is not row] + [0]) + 1; row[i] = nv; self.tr[x[2]] = nv
             else: row[i] = self.val(x[5], x[6])
+        if tabla in CLAVES_EMPRESA:
+            columna = CLAVES_EMPRESA[tabla][0]
+            if row[self.col(tabla, columna)] != self.get("EMP"):
+                raise Error(f"Empresa incompatible al crear una fila en {tabla}.")
+            self._filas_empresa(tabla)
     def m_ACTUALIZAR(self, cod, tabla, sub, obl, orden, mca):
         rs = self._coincide_cuenta(tabla, mca)
         if not rs:
@@ -630,6 +707,10 @@ class Motor:
                     raise Error(f"La columna de empresa de {tabla} debe ser clave o asignarse al crear la cuenta.")
             self.T[tabla]["r"].append(acu_fila); self.creados.append((tabla, acu_fila))
         for c, v in acu_val.items(): self.setc(tabla, acu_fila, c, v)           # ACTUALIZAR con los valores ya calculados
+        if not acu_hallada and tabla in CLAVES_EMPRESA:
+            if acu_fila[self.col(tabla, CLAVES_EMPRESA[tabla][0])] != self.get("EMP"):
+                raise Error(f"Empresa incompatible al acumular en {tabla}.")
+            self._filas_empresa(tabla)
     def trazar(self, met, var, v, det):
         row = [len(self.T["TRAZA"]["r"]) + 1, self.tr["TRX"], met, var, v, det, self.tr.get("OBJ", "")]
         self.T["TRAZA"]["r"].append(row); self.creados.append(("TRAZA", row))
@@ -683,12 +764,147 @@ class Motor:
         return cod
     def m_SI(self, cod, tabla, sub, *_):
         if all(ok for ok, _ in self.cond(cod)): self.opn(self.ref(sub))
+    def _resultados_vnr(self):
+        huella = self.tr.get("_huella_vnr")
+        if not isinstance(huella, str) or not huella:
+            raise Error("El método externo de COSTO_CONTABLE requiere una huella.")
+        identidad = (self.get("EMP"), self.get("MVIG_COSTO_CONTABLE"),
+                     self.get("MVIG_VER_COSTO_CONTABLE"), self.get("PER"), huella)
+
+        def corrida(tabla):
+            indices = [self.col(tabla, c) for c in CLAVES_EMPRESA[tabla][:5]]
+            return [r for r in self._filas_empresa(tabla)
+                    if tuple(r[i] for i in indices) == identidad]
+
+        cabeceras = corrida("CORRIDA_METODO")
+        if len(cabeceras) != 1 or cabeceras[0][self.col("CORRIDA_METODO", "COR_EST")] != "RECIBIDO":
+            raise Error("La huella no identifica una única corrida RECIBIDO del método vigente.")
+        filas = corrida("RESULTADO_METODO")
+        if not filas:
+            raise Error("La corrida de VNR seleccionada no contiene resultados.")
+        rebajas = {}
+        for fila in filas:
+            dato = dict(zip(self.T["RESULTADO_METODO"]["h"], fila))
+            clave = dato["RES_CLAVE"]
+            valor = dato["RES_VALOR"]
+            if (dato["RES_TIPO"] != "EXISTENCIA" or dato["RES_CONC"] != "REBAJA"
+                    or not isinstance(clave, str) or clave.count("|") != 1
+                    or not all(clave.split("|")) or isinstance(valor, bool)
+                    or not isinstance(valor, (float, int)) or not math.isfinite(valor) or valor < 0):
+                raise Error("El resultado seleccionado no cumple el contrato de rebaja VNR.")
+            rebajas[tuple(clave.split("|"))] = valor
+        existencias = self._filas_empresa("EXISTENCIA")
+        ix_rec = self.col("EXISTENCIA", "EXI_REC")
+        ix_alm = self.col("EXISTENCIA", "EXI_ALM")
+        ix_can = self.col("EXISTENCIA", "EXI_CAN")
+        ix_val = self.col("EXISTENCIA", "EXI_VAL")
+        disponibles = {(r[ix_rec], r[ix_alm]): (num(r[ix_can]), num(r[ix_val])) for r in existencias}
+        for clave, importe in rebajas.items():
+            existencia = disponibles.get(clave)
+            if (existencia is None or existencia[0] < 0 or existencia[1] < 0
+                    or (importe > 0 and existencia[0] <= 0)
+                    or importe > existencia[1] + max(VNR_ABS_TOL, abs(existencia[1]) * VNR_REL_TOL)):
+                raise Error("La rebaja VNR excede el valor o la cantidad de la existencia.")
+        return filas, rebajas
+
+    def _saldos_vnr(self):
+        empresa, periodo = self.get("EMP"), self.get("PER")
+        stock = {}
+        for fila in self._filas_empresa("EXISTENCIA"):
+            dato = dict(zip(self.T["EXISTENCIA"]["h"], fila))
+            clave = dato["EXI_REC"], dato["EXI_ALM"]
+            stock[clave] = (num(dato["EXI_CAN"]), num(dato["EXI_VAL"]), num(dato["EXI_CPU"]))
+        ajustes = {clave: [] for clave in stock}
+        for fila in self.T["AJUSTE_VNR"]["r"]:
+            dato = dict(zip(self.T["AJUSTE_VNR"]["h"], fila))
+            clave = dato["AVN_REC"], dato["AVN_ALM"]
+            if dato["AVN_EMP"] == empresa and dato["AVN_PER"] == periodo:
+                ajustes.setdefault(clave, [])
+                ajustes[clave].append(dato)
+        gastos = {}
+        for fila in self.T["CTA_GASTO"]["r"]:
+            dato = dict(zip(self.T["CTA_GASTO"]["h"], fila))
+            alm = dato["CGA_CEN"]
+            if (dato["CGA_EMP"] == empresa and dato["CGA_PER"] == periodo
+                    and dato["CGA_CON"] == "REBAJA_VNR"):
+                if alm in gastos:
+                    raise Error("Clave duplicada de CTA_GASTO para la conciliación VNR.")
+                gastos[alm] = (num(dato["CGA_MTO"]), dato["CGA_DED"])
+        return stock, ajustes, gastos
+
+    def _conciliar_vnr(self, rebajas, antes):
+        stock, ajustes, gastos = self._saldos_vnr()
+        claves_stock = set(antes[0]) | set(stock)
+        for clave in claves_stock:
+            if clave not in antes[0] or clave not in stock:
+                raise Error("El conjunto de existencias cambió durante la rebaja VNR.")
+            importe = rebajas.get(clave, 0)
+            inicial, final = antes[0][clave], stock[clave]
+            if not math.isclose(inicial[0], final[0], abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL):
+                raise Error("La cantidad de existencia cambió al aplicar una rebaja VNR.")
+            anteriores, actuales = antes[1].get(clave, []), ajustes.get(clave, [])
+            total_ajuste_anterior = sum(num(r["AVN_REB"]) for r in anteriores)
+            total_ajuste_actual = sum(num(r["AVN_REB"]) for r in actuales)
+            if (not math.isclose(final[1], inicial[1] - importe,
+                                 abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)
+                    or not math.isclose(total_ajuste_actual, total_ajuste_anterior + importe,
+                                        abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)):
+                raise Error("La variación de existencia o ajuste no concilia con RESULTADO_METODO.")
+            nuevas = actuales[len(anteriores):]
+            if importe > 0:
+                if len(nuevas) != 1:
+                    raise Error("Falta el ajuste VNR único para conciliar el costo unitario.")
+                ajuste = nuevas[0]
+                cpu_esperado = red((inicial[1] - importe) / inicial[0], 6)
+                if (not math.isclose(num(ajuste["AVN_REB"]), importe, abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)
+                        or not math.isclose(num(ajuste["AVN_CAN"]), inicial[0], abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)
+                        or not math.isclose(num(ajuste["AVN_CPU"]), inicial[2], abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)
+                        or not math.isclose(final[2], num(ajuste["AVN_VNR"]), abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)
+                        or not math.isclose(final[2], cpu_esperado, abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)):
+                    raise Error("La cantidad o el costo unitario de EXISTENCIA no concilia con el ajuste VNR.")
+            elif (nuevas or not math.isclose(final[2], inicial[2], abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL)):
+                raise Error("Una clave sin rebaja no debe crear un ajuste ni cambiar el costo unitario.")
+        claves_ajuste = set(antes[1]) | set(ajustes) | set(rebajas)
+        for clave in claves_ajuste:
+            anteriores, actuales = antes[1].get(clave, []), ajustes.get(clave, [])
+            anterior = sum(num(r["AVN_REB"]) for r in anteriores)
+            actual = sum(num(r["AVN_REB"]) for r in actuales)
+            if not math.isclose(actual, anterior + rebajas.get(clave, 0),
+                                abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL):
+                raise Error("Hay ajustes VNR fuera de las líneas recibidas o diferencias de importe.")
+        por_almacen = {}
+        for (_, almacen), importe in rebajas.items():
+            por_almacen[almacen] = por_almacen.get(almacen, 0) + importe
+        almacenes = set(antes[2]) | set(gastos) | set(por_almacen)
+        for alm in almacenes:
+            importe = por_almacen.get(alm, 0)
+            actual = gastos.get(alm, (0, None))
+            previo = antes[2].get(alm, (0, None))
+            if not math.isclose(actual[0], previo[0] + importe,
+                                abs_tol=VNR_ABS_TOL, rel_tol=VNR_REL_TOL):
+                raise Error("La variación de CTA_GASTO no concilia con RESULTADO_METODO.")
+            if importe > 0 and actual[1] != "N":
+                raise Error("CTA_GASTO.REBAJA_VNR debe conservar la deducibilidad N del DBD.")
+            if importe == 0 and actual[1] != previo[1]:
+                raise Error("Cambió la deducibilidad de CTA_GASTO sin una rebaja recibida.")
+
     def m_PARACADA(self, cod, tabla, sub, obl, orden, mca):
         tabla = self.ref(tabla)
         if tabla not in self.T: raise Error(f"Tabla no existe: {tabla}")
-        for row in list(self.coincide(tabla, mca)):
+        externo = (cod == "M-PC-VNR-RES" and tabla == "RESULTADO_METODO" and self.tr.get("TRX") == "T23.5")
+        if externo:
+            if self._vnr_aplicado:
+                raise Error("El cierre intentó consumir más de una vez la corrida externa de COSTO_CONTABLE.")
+            filas, rebajas = self._resultados_vnr()
+            self._vnr_rebajas = rebajas
+            self._vnr_antes = self._vnr_antes_inicio
+        else:
+            filas = self.coincide(tabla, mca)
+        for row in list(filas):
             for h, v in zip(self.T[tabla]["h"], row): self.tr[h] = v
             self.opn(self.ref(sub))                                  # la variable se lee tras cargar la fila (puede venir de ella)
+        if externo:
+            self._vnr_aplicado = True
     def m_ALGORITMO(self, cod, *_):
         alg = self.get("ALG")
         pasos = self.filas("PAL", "PAL_ALG", alg, "PAL_SEC")

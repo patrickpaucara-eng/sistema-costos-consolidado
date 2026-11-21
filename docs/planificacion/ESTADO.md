@@ -1,6 +1,6 @@
 # Estado y reanudación
 
-Actualizado el 20 de noviembre de 2026 (hora de Lima). Rama `desarrollo/mvp-ola3`, derivada de `desarrollo/capacidad-inicial@16c419f`.
+Actualizado el 21 de noviembre de 2026 (UTC). Rama `desarrollo/mvp-ola3`, derivada de `desarrollo/capacidad-inicial@16c419f`.
 
 ## Mandato del dueño
 
@@ -16,14 +16,16 @@ La Base debe permanecer estable; los cálculos deben ser repetibles por fecha e 
 | Fuentes metodológicas | MCD/DBD completos, CLEIN, casos ORIA y exportación JSONL de Frenosa indexados con hashes. Los cuatro Markdown recientes de Ola 3 también están preservados y con manifiesto SHA. |
 | Referencia del motor | Espejo Python de `desarrollo/ola1@cac2501d9f712655dda466d216dc5bff2dd446a5`, con guarda de empresa para mutaciones `CTA_*` en el consolidado; original inalterado. VBA se conserva congelado. |
 | CAP-01–CAP-05 | Importar, compra/consumo T14/T15, persistir, reabrir, reintentar, consultar y operar desde HTML, en el alcance documentado. |
-| MVP Ola 3 | Guardia de una empresa por espacio, cierre transaccional y caso controlado T18/T23.3/T23.5. 22 pruebas combinadas aprobadas; recorrido real previo de Chromium. Ver [evidencia](../entrega/evidencias/MVP_OLA3.md). Empaquetado y smoke local completados; el workflow Windows falló dos veces antes de asignar runner. No hay EXE ni prueba nativa; ver [registro](../entrega/evidencias/WINDOWS_ACTIONS_2026-11-20.md). |
-| D9 · cuentas CTA | Semántica MCD decidida; mutaciones `CTA_*` limitadas a empresa del evento. T15/T17/T19/T20 y un caso base sintético T18/T23.3/T23.5 contrastan saldos seleccionados con aritmética independiente. D9 integral pendiente: ruta externa T25.4/huella, `RESULTADO_METODO` conciliable, claves/dimensiones, deducibilidad faltante en pérdidas/ocio y revisión independiente. Ver [decisión](../entrega/evidencias/D9_DECISION_SEMANTICA.md), [contrato](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md), [caso T15](../entrega/evidencias/D9_CUADRE_T15.md), [casos T17/T19/T20](../entrega/evidencias/D9_CUADRE_EVENTOS.md), [caso T18/T23.3/T23.5](../entrega/evidencias/D9_CUADRE_T23_3_T23_5.md), [matriz O-1](../entrega/evidencias/D9_MATRIZ_Y_CASO.md) y [CSV](../entrega/evidencias/D9_CONTROL_O1.csv). |
+| Ola 2 · D2/D3 | D2: traza confirmada T14 y rechazo T15 comprobados en XLSX tras reinicio; enlaces y conteos de `LOG_TRX`/`BITACORA`, reintentos idempotentes y versión cotejados. D3: se reprodujo el saldo de existencias, pero `KARDEX`/`KARDEX_SALDO` siguen vacías en la ruta habilitada; no se acepta D3. R02/DIARIO y D4 siguen pendientes. Ver [D2](../entrega/evidencias/OLA2_D2_TRAZA.md) y [caracterización D3](../entrega/evidencias/OLA2_D3_CARACTERIZACION.md). |
+| MVP y regresión integrada | Guardias de empresa, cierre transaccional, casos base y externos D9, recibos y traza D2. La suite integrada pasó 55/55 pruebas en Linux con Python 3.12, `openpyxl==3.1.5` y `defusedxml==0.7.1` en 230,541 s; el recorrido real previo fue en Chromium. Ver [evidencia D9](../entrega/evidencias/D9_PUERTO_VNR.md). Empaquetado y smoke local completados; el workflow Windows falló dos veces antes de asignar runner. No hay EXE ni prueba nativa; ver [registro](../entrega/evidencias/WINDOWS_ACTIONS_2026-11-20.md). |
+| Ola 4 · CAP-13 | Auditoría de recibos y versión del XLSX disponible por API, con pruebas focalizadas del libro y respaldo. Comprueba coherencia interna; no autentica cambios coordinados ni valida cálculos contables. Ver [evidencia](../entrega/evidencias/AUDITORIA_RECIBOS.md). |
+| D9 · cuentas CTA | Semántica MCD decidida; mutaciones CTA y lecturas/escrituras de existencia y resultados de método limitadas por empresa. T15/T17/T19/T20 y rutas base y externa VNR contrastan saldos seleccionados con aritmética independiente. T25.4→T23.5 tiene 26/26 pruebas dedicadas, incluidas huellas compartidas entre métodos/versiones y conciliación de existencia, `AJUSTE_VNR` y `CTA_GASTO`; una revisión independiente confirmó la identidad vigente seleccionada por DBD. D9 integral sigue pendiente: deducibilidad de pérdidas/ocio, otras cuentas/dimensiones, reversa/recuperación, método/proveedor ORIA y revisión integral. Ver [D9](../entrega/evidencias/D9_PUERTO_VNR.md) y las [evidencias anteriores](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md). |
 | Plan activo | Visión en seis olas preservada como referencia; el [plan maestro](PLAN_MAESTRO.md) establece fases y correspondencia, y el [plan MVP](../entrega/PLAN_MVP_Y_PENDIENTES.md) gobierna las próximas puertas. |
 
 ## Siguiente tarea reanudable
 
 1. Resolver `CGA_DED` para pérdida anormal y ocio, las claves empresariales y las demás brechas del [contrato D9](../entrega/evidencias/D9_CONTRATO_DE_DATOS.md).
-2. Extender el caso base T18/T23.3/T23.5 al puerto T25.4, fijar selección por huella, persistir `RESULTADO_METODO` y conciliar por clave y total.
+2. Integrar los casos VNR sintéticos con el resto de D9: resolver deducibilidad y claves pendientes, ampliar la conciliación a las cuentas requeridas por O-1 y comprobar reversa/recuperación. El puerto T25.4 y la selección por huella ya tienen pruebas focalizadas, pero no aceptan un proveedor real ni cierran D9.
 3. Probar repetición del cierre, reversa, recuperación, reapertura y fallos intermedios con las cuentas presentes.
 4. Reforzar trazabilidad entre evento/línea, método DBD y cambio de cuenta; detectar claves duplicadas dentro de la empresa.
 5. Continuar con flete/T14.2 y D14 enlazando cada regla con MCD/DBD y casos ORIA/Frenosa.
