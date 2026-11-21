@@ -88,9 +88,19 @@ def verify(executable, fixture, index, directory):
         if not stored.is_file():
             raise RuntimeError(f"El libro no se guardó bajo LOCALAPPDATA: {stored}")
 
+    # C04 debe estar integrado antes de construir el paquete de entrega.
+    with running(isolated_exe, directory, env, directory / "calculo.log") as port:
+        result = json.loads(request(port, "/api/calcular?sintesis=REAL&periodo=2010-07", 200, {}))
+        if result.get("periodo_actual") != "2010-07" or result.get("kpi", {}).get("ventas") != 888730:
+            raise RuntimeError("El cálculo de julio no coincide con el caso de referencia.")
+        reporte = json.loads(request(port, "/api/exportar?tipo=html", 201, {"resultados": result}))
+        html = Path(reporte["ruta"]).read_text(encoding="utf-8")
+        if "<html" not in html.lower() or "http://" in html or "https://" in html:
+            raise RuntimeError("El HTML generado no es autónomo.")
+
     with running(isolated_exe, directory, env, directory / "segundo-arranque.log") as port:
         workspaces = json.loads(request(port, "/api/workspaces", 200))["workspaces"]
         if [item["id"] for item in workspaces] != [workspace["id"]]:
             raise RuntimeError("El segundo arranque no recuperó el espacio importado.")
 
-    print("Prueba local aprobada. HTML, API, importación y reapertura del libro.", flush=True)
+    print("Prueba local aprobada. HTML, API, importación, cálculo REAL, exportación y reapertura del libro.", flush=True)

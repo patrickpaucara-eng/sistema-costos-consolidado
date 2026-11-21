@@ -13,6 +13,18 @@ def main():
     parser.add_argument("--no-browser", action="store_true", help="Solo muestra la dirección local en la consola.")
     args = parser.parse_args()
 
+    if getattr(sys, "frozen", False):
+        root = Path(sys._MEIPASS)
+        sys.path.insert(0, str(root / "src"))
+        os.environ.setdefault("REYNA_FUENTE", str(root / "fuente"))
+        from reyna_local import codigo_fuente
+        codigo_fuente.ROOT = root
+        try:
+            from reyna_local import calculo_local
+            calculo_local.RAIZ = root
+        except ImportError:
+            pass  # C04 se integra por separado.
+
     local_appdata = os.environ.get("LOCALAPPDATA")
     if local_appdata:
         data_dir = Path(local_appdata) / "ReynaCostos" / "datos"

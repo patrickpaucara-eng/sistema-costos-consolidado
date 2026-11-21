@@ -1,3 +1,5 @@
 fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,12:03,12:10,OT-C02 exportadores y pruebas,Monografía,Codex,71 pruebas y 26 subpruebas; compuerta verde
 2026-11-21,12:03,12:11,OT-C01 pantallas y dashboard,Monografía,Codex,Implementación revisión visual y compuerta verde
+2026-11-21,14:15,14:17,OT-C05 diagnóstico de empaquetado,Monografía,Codex,Dependencias y rutas del binario pendientes de adaptar y probar
+2026-11-21,14:17,14:19,OT-C05 empaquetado y humo Linux,Monografía,Codex,Binario equivalente calcula y exporta; Windows pendiente
