@@ -224,6 +224,9 @@
       .split, .detail { grid-template-columns: minmax(0, 1fr); }
       #table-select { min-width: 0; }
     }
+
+    .selector-global {display:flex;gap:1rem;align-items:end;flex-wrap:wrap;position:sticky;top:0;z-index:3;background:#eef3f4;padding:.6rem 0;}
+    .selector-global .field {min-width:150px}.kpi-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem}.kpi {background:#eaf5f2;border-radius:10px;padding:1rem}.kpi b {display:block;font-size:1.35rem}.chart {width:100%;height:auto;min-height:100px}.chart text {font-size:11px;fill:#36575a}.legend {font-size:.82rem;color:#52686e}.result-table {overflow:auto}.result-table table {width:100%;border-collapse:collapse}.result-table th,.result-table td {padding:.5rem;border-bottom:1px solid #d8e3e5;text-align:left}.result-table th {white-space:nowrap}.data-badge {padding:.5rem;border-radius:8px;background:#fff0cf;color:#654600}.section-link {scroll-margin-top:6rem}
   </style>
 </head>
 <body>
@@ -232,14 +235,21 @@
     <aside class="rail">
       <div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>Sistema de Costos Reyna</span></div>
       <nav aria-label="Secciones del piloto">
-        <a href="#importar">Importar libro</a>
+        <a href="#inicio">Inicio</a><a href="#importar">Cargar</a><a href="#close-form">Cerrar mes</a><a href="#dashboard">Dashboard</a><a href="#costos">Costos por objeto</a><a href="#analisis">Análisis</a><a href="#proyeccion">Proyección</a><a href="#simulacion">Simulación</a><a href="#propuestas">Propuestas</a><a href="#reportes">Reportes</a><a href="#importar">Importar libro</a>
         <a href="#espacios">Espacios de trabajo</a>
         <a href="#operar">Ejecutar transacción</a>
         <a href="#consultar">Consultar tablas</a>
       </nav>
       <p>Servidor y datos locales</p>
     </aside>
-    <main id="principal">
+    <main id="principal"><div id="inicio" class="selector-global"><div class="field"><label for="result-sintesis">Síntesis</label><select id="result-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></div><div class="field"><label for="result-periodo">Periodo</label><input id="result-periodo" type="month" value="2010-07"></div><button id="result-cargar" type="button">Consultar resultados</button><span id="result-status" role="status"></span></div>
+      <section id="dashboard" class="panel stack section-link"><h2>Dashboard</h2><p id="result-origin" class="data-badge">Cargando resultados…</p><div id="result-kpis" class="kpi-grid"></div><h3>Evolución del margen</h3><p class="legend">Histórico y actual · proyección determinística · banda P05–P95 cuando está disponible</p><div id="result-line"></div><h3>Composición de costos por objeto</h3><div id="result-bars"></div><p class="legend">Material directo · mano de obra · CIF · administración · ventas · financiero</p><h3>Relevancia</h3><p class="legend">Barras: importe; línea: proporción acumulada; * indica crítico.</p><div id="result-pareto"></div><h3>Hallazgos</h3><div id="result-hallazgos" class="result-table"></div></section>
+      <section id="costos" class="panel stack section-link"><h2>Costos por objeto</h2><div id="result-objetos" class="result-table"></div></section>
+      <section id="analisis" class="panel stack section-link"><h2>Análisis y relevancia</h2><div id="result-relevancia" class="result-table"></div></section>
+      <section id="proyeccion" class="panel stack section-link"><h2>Proyección</h2><div id="result-proyeccion" class="result-table"></div></section>
+      <section id="simulacion" class="panel stack section-link"><h2>Simulación y escenarios</h2><div id="result-escenarios" class="result-table"></div></section>
+      <section id="propuestas" class="panel stack section-link"><h2>Propuestas</h2><div id="result-propuestas" class="result-table"></div></section>
+      <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Los reportes descargables se incorporarán en una entrega posterior. Consulta los datos disponibles en las secciones anteriores.</p></section>
       <header class="page-heading">
         <div>
           <h1>Piloto local de operaciones</h1>
@@ -853,6 +863,48 @@
     });
 
     loadWorkspaces();
+  (() => {
+  const $ = id => document.getElementById(id);
+  const number = x => Number.isFinite(Number(x)) ? new Intl.NumberFormat('es-PE', {maximumFractionDigits: 2}).format(Number(x)) : '—';
+  const value = x => x == null ? '—' : typeof x === 'number' ? number(x) : typeof x === 'boolean' ? (x ? 'Sí' : 'No') : typeof x === 'object' ? JSON.stringify(x) : String(x);
+  const cell = (parent, tag, text) => { const e = document.createElement(tag); e.textContent = text; parent.appendChild(e); return e; };
+  function table(id, rows, columns) {
+    const root = $(id); root.replaceChildren();
+    if (!rows.length) { cell(root, 'p', 'Información aún no disponible para esta selección.'); return; }
+    const t = document.createElement('table'), head = t.createTHead().insertRow();
+    columns.forEach(([key, label]) => cell(head, 'th', label));
+    const body = t.createTBody(); rows.forEach(row => { const tr = body.insertRow(); columns.forEach(([key]) => cell(tr, 'td', value(row[key]))); }); root.appendChild(t);
+  }
+  const svg = (tag, attrs, parent) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v)); parent.appendChild(e); return e; };
+  function graph(id, list, draw) { const root=$(id); root.replaceChildren(); if (!list.length) { cell(root,'p','Información aún no disponible para esta selección.'); return; } const s=svg('svg',{viewBox:'0 0 800 240',class:'chart',role:'img','aria-label':'Gráfico de resultados'},root); draw(s); }
+  function lineChart(series, currentPeriod) {
+    const usable=series.filter(x => (x.tipo !== 'HISTORICO' || x.periodo <= currentPeriod) && (typeof x.margen === 'number' || (typeof x.p05 === 'number' && typeof x.p95 === 'number')));
+    graph('result-line',usable,s=>{
+      const periods=[...new Set(usable.map(x=>x.periodo))].sort(); const vals=usable.flatMap(x=>[x.margen,x.p05,x.p95]).filter(x=>typeof x==='number' && Number.isFinite(x));
+      const min=Math.min(0,...vals), max=Math.max(1,...vals); const span=max-min || 1; const x=p=>55+periods.indexOf(p)*700/Math.max(1,periods.length-1); const y=v=>205-(v-min)*165/span;
+      const bands=usable.filter(a=>a.tipo==='PROYECTADO_EST' && typeof a.p05==='number' && typeof a.p95==='number').sort((a,b)=>a.periodo.localeCompare(b.periodo));
+      if (bands.length) svg('polygon',{points:[...bands.map(a=>`${x(a.periodo)},${y(a.p95)}`),...bands.slice().reverse().map(a=>`${x(a.periodo)},${y(a.p05)}`)].join(' '),fill:'#c1e4db'},s);
+      ['HISTORICO','ACTUAL','PROYECTADO_DET'].forEach((kind,i)=>{const points=usable.filter(a=>(a.tipo===kind || (kind==='HISTORICO' && a.tipo==='ACTUAL') || (kind==='PROYECTADO_DET' && a.tipo==='ACTUAL'))&&typeof a.margen==='number').sort((a,b)=>a.periodo.localeCompare(b.periodo)); points.forEach(a=>{svg('circle',{cx:x(a.periodo),cy:y(a.margen),r:4,fill:['#315d6f','#118067','#ce8334'][i]},s);}); if(points.length>1)svg('polyline',{points:points.map(a=>`${x(a.periodo)},${y(a.margen)}`).join(' '),fill:'none',stroke:['#315d6f','#118067','#ce8334'][i],'stroke-width':3},s);});
+      periods.forEach((p,i)=>{if(periods.length<=12 || i%2===0){const t=svg('text',{x:x(p),y:227,'text-anchor':'middle'},s);t.textContent=p;}}); const t=svg('text',{x:5,y:20},s);t.textContent='S/ '+number(max);
+    });
+  }
+  function stacked(items) { graph('result-bars',items,s=>{const keys=['md','mod','cif','admin','gasto_venta','financiero'], colors=['#116b61','#47988b','#82bdb1','#d0a35c','#dc7650','#845a78']; const max=Math.max(1,...items.map(a=>Number(a.costo_total)||0)); const w=650/items.length; items.forEach((a,i)=>{let current=205; keys.forEach((k,j)=>{const h=(Number(a[k])||0)*165/max;current-=h;svg('rect',{x:85+i*w,y:current,width:Math.max(10,w*.65),height:Math.max(0,h),fill:colors[j]},s);});const t=svg('text',{x:85+i*w,y:225},s);t.textContent=String(a.codigo).slice(0,20);});}); }
+  function pareto(items) { graph('result-pareto',items,s=>{const max=Math.max(1,...items.map(a=>Number(a.importe)||0));const w=650/items.length;const points=[];items.forEach((a,i)=>{const h=(Number(a.importe)||0)*155/max;const x=85+i*w;svg('rect',{x,y:205-h,width:Math.max(10,w*.6),height:Math.max(0,h),fill:a.critico?'#b85142':'#47988b'},s);if(typeof a.acumulado==='number'){const y=205-a.acumulado*155;points.push(`${x+w*.3},${y}`);svg('circle',{cx:x+w*.3,cy:y,r:4,fill:'#243f80'},s);}const t=svg('text',{x,y:225},s);t.textContent=String(a.elemento).slice(0,18)+(a.critico?' *':'');});if(points.length>1)svg('polyline',{points:points.join(' '),fill:'none',stroke:'#243f80','stroke-width':2},s);}); }
+  function render(r) {
+    $('result-origin').textContent = r._nota ? `${r._nota} · ${r.periodo_actual} · ${r.sintesis}` : `${r.empresa.nombre} · ${r.periodo_actual} · ${r.sintesis}. Caso académico: compras y cantidades vendidas simuladas; resultados sujetos a validación.`;
+    const k=$('result-kpis');k.replaceChildren(); [['ventas','Ventas'],['costo_total','Costo total'],['margen_operativo','Margen operativo'],['rentabilidad','Rentabilidad'],['costo_unitario_prom','Costo unitario promedio']].forEach(([key,label])=>{const e=cell(k,'div','');e.className='kpi';cell(e,'span',label);cell(e,'b',key==='rentabilidad'?number(r.kpi[key]*100)+' %':'S/ '+number(r.kpi[key]));});
+    lineChart(r.serie, r.periodo_actual);stacked(r.objetos);pareto(r.relevancia);
+    table('result-objetos',r.objetos,[['codigo','Orden'],['producto','Producto'],['cantidad','Cantidad'],['costo_total','Costo total S/'],['costo_unitario','Costo unitario S/'],['ingreso','Ingreso S/'],['margen','Margen S/']]);
+    table('result-hallazgos',r.hallazgos,[['tipo','Tipo'],['referencia','Referencia'],['mensaje','Hallazgo'],['impacto','Impacto S/']]);
+    table('result-relevancia',r.relevancia,[['elemento','Elemento'],['importe','Importe S/'],['porcentaje','Proporción'],['acumulado','Acumulado'],['critico','Crítico']]);
+    table('result-proyeccion',r.serie.filter(x=>x.tipo.startsWith('PROYECTADO')),[['periodo','Periodo'],['tipo','Tipo'],['margen','Margen'],['p05','P05'],['p50','P50'],['p95','P95']]);
+    table('result-escenarios',r.escenarios,[['nombre','Escenario'],['supuestos','Supuestos'],['margen_p50','Margen P50'],['prob_perdida','Probabilidad de pérdida']]);
+    table('result-propuestas',r.propuestas,[['codigo','Código'],['descripcion','Propuesta'],['impacto_anual','Impacto anual S/'],['plazo','Plazo'],['responsable','Responsable']]);
+  }
+  async function load() { $('result-status').textContent='Consultando…'; try { const p=new URLSearchParams({sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/resultados?'+p); if(!response.ok) throw Error(); const r=await response.json();render(r);$('result-status').textContent='Resultados actualizados.'; } catch { $('result-status').textContent='No se pudieron consultar los resultados. Revisa el periodo y vuelve a intentar.'; } }
+  $('result-cargar').addEventListener('click',load); load();
+})();
+
   </script>
 </body>
 </html>

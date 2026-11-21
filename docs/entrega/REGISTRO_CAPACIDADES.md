@@ -57,3 +57,6 @@ El generador integral y la conciliación D9 completa siguen pendientes. T25.4/T2
 ### OT-C02 · Exportación desde contrato
 
 El endpoint `POST /api/exportar?tipo=...` genera libros de resultados, analítica y proyección, un HTML independiente y un Word de fuentes. Consume únicamente un contrato ya calculado; el enlace desde la interfaz y la validación metodológica de los datos siguen pendientes. Ver [entrega y pruebas](evidencias/OT-C02/ENTREGA.md).
+## OT-C01 · Visualización del contrato de resultados
+
+La navegación y el dashboard leen el contrato validado por `/api/resultados`; el ejemplo de reemplazo está rotulado. Frenosa julio 2010 REAL se distribuye como una captura académica: compras y cantidades vendidas simuladas, sujeta a validación. Las listas vacías se muestran como información no disponible. Ver [entrega y capturas](evidencias/OT-C01/ENTREGA.md); la salida aún no acredita un costo empresarial oficial.

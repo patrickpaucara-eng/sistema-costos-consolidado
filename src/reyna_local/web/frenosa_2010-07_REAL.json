@@ -1,0 +1,155 @@
+{
+  "empresa": {
+    "codigo": "FRE",
+    "nombre": "Frenosa"
+  },
+  "periodo_actual": "2010-07",
+  "sintesis": "REAL",
+  "moneda": "PEN",
+  "kpi": {
+    "ventas": 888730.0,
+    "costo_total": 640876.8,
+    "margen_operativo": 247853.2,
+    "rentabilidad": 0.2789,
+    "costo_unitario_prom": 6.5382
+  },
+  "objetos": [
+    {
+      "codigo": "OT-FRENOSA-FRE9000-2010-07",
+      "producto": "OT002",
+      "cantidad": 44039.0,
+      "md": 241371.31,
+      "mod": 41418.0,
+      "cif": 59207.66,
+      "admin": 0.0,
+      "gasto_venta": 0.0,
+      "financiero": 0.0,
+      "costo_total": 341996.97,
+      "costo_unitario": 7.7658,
+      "ingreso": 453602.0,
+      "margen": 111605.03
+    },
+    {
+      "codigo": "OT-FRENOSA-FRE9002-2010-07",
+      "producto": "OT003",
+      "cantidad": 15807.0,
+      "md": 80286.92,
+      "mod": 2389.5,
+      "cif": 6780.46,
+      "admin": 0.0,
+      "gasto_venta": 0.0,
+      "financiero": 0.0,
+      "costo_total": 89456.88,
+      "costo_unitario": 5.6593,
+      "ingreso": 110649.0,
+      "margen": 21192.12
+    },
+    {
+      "codigo": "OT-FRENOSA-SW50-2010-07",
+      "producto": "OT001",
+      "cantidad": 38174.0,
+      "md": 122328.57,
+      "mod": 35842.5,
+      "cif": 51251.88,
+      "admin": 0.0,
+      "gasto_venta": 0.0,
+      "financiero": 0.0,
+      "costo_total": 209422.95,
+      "costo_unitario": 5.486,
+      "ingreso": 324479.0,
+      "margen": 115056.05
+    }
+  ],
+  "actividades": [],
+  "serie": [
+    {
+      "periodo": "2010-01",
+      "tipo": "HISTORICO",
+      "ventas": 295704.03,
+      "costo_total": 314003.71,
+      "margen": -18299.68
+    },
+    {
+      "periodo": "2010-02",
+      "tipo": "HISTORICO",
+      "ventas": 273835.86,
+      "costo_total": 312911.21,
+      "margen": -39075.35
+    },
+    {
+      "periodo": "2010-03",
+      "tipo": "HISTORICO",
+      "ventas": 509069.4,
+      "costo_total": 443599.79,
+      "margen": 65469.61
+    },
+    {
+      "periodo": "2010-04",
+      "tipo": "HISTORICO",
+      "ventas": 698219.99,
+      "costo_total": 545453.12,
+      "margen": 152766.87
+    },
+    {
+      "periodo": "2010-05",
+      "tipo": "HISTORICO",
+      "ventas": 804834.42,
+      "costo_total": 604551.83,
+      "margen": 200282.59
+    },
+    {
+      "periodo": "2010-06",
+      "tipo": "HISTORICO",
+      "ventas": 913036.8,
+      "costo_total": 639779.35,
+      "margen": 273257.45
+    },
+    {
+      "periodo": "2010-07",
+      "tipo": "ACTUAL",
+      "ventas": 888730.0,
+      "costo_total": 640876.8,
+      "margen": 247853.2
+    },
+    {
+      "periodo": "2010-08",
+      "tipo": "HISTORICO",
+      "ventas": 1002448.17,
+      "costo_total": 682258.61,
+      "margen": 320189.56
+    },
+    {
+      "periodo": "2010-09",
+      "tipo": "HISTORICO",
+      "ventas": 1104595.19,
+      "costo_total": 707535.97,
+      "margen": 397059.22
+    },
+    {
+      "periodo": "2010-10",
+      "tipo": "HISTORICO",
+      "ventas": 1013318.6,
+      "costo_total": 699712.01,
+      "margen": 313606.59
+    },
+    {
+      "periodo": "2010-11",
+      "tipo": "HISTORICO",
+      "ventas": 618438.41,
+      "costo_total": 650348.26,
+      "margen": -31909.85
+    },
+    {
+      "periodo": "2010-12",
+      "tipo": "HISTORICO",
+      "ventas": 754771.69,
+      "costo_total": 634152.51,
+      "margen": 120619.18
+    }
+  ],
+  "estado_resultados": [],
+  "relevancia": [],
+  "hallazgos": [],
+  "propuestas": [],
+  "escenarios": []
+}
