@@ -228,6 +228,7 @@
     .selector-global {display:flex;gap:1rem;align-items:end;flex-wrap:wrap;position:sticky;top:0;z-index:3;background:#eef3f4;padding:.6rem 0;}
     .selector-global .field {min-width:150px}.kpi-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem}.kpi {background:#eaf5f2;border-radius:10px;padding:1rem}.kpi b {display:block;font-size:1.35rem}.chart {width:100%;height:auto;min-height:100px}.chart text {font-size:11px;fill:#36575a}.legend {font-size:.82rem;color:#52686e}.result-table {overflow:auto}.result-table table {width:100%;border-collapse:collapse}.result-table th,.result-table td {padding:.5rem;border-bottom:1px solid #d8e3e5;text-align:left}.result-table th {white-space:nowrap}.data-badge {padding:.5rem;border-radius:8px;background:#fff0cf;color:#654600}.section-link {scroll-margin-top:6rem}
   .sw{display:inline-block;width:11px;height:11px;border-radius:2px;margin:0 .3rem 0 .7rem;vertical-align:middle}.eje{font-size:11px;fill:#55657a}
+.nav-grupo{margin:1rem 0 .2rem;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.65}.ok{color:#0b7a4b;font-weight:700}.xx{color:#b00020;font-weight:700}.ruta-sel{display:flex;gap:1rem;flex-wrap:wrap;align-items:end}.etapa-chip{display:inline-block;background:#e8eff8;border-radius:6px;padding:.1rem .45rem;font-size:.8rem}.paso{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}.paso div{background:#f4f8f7;border-left:4px solid #118067;border-radius:6px;padding:.6rem}.paso b{display:block;font-size:1.1rem}
 </style>
 </head>
 <body>
@@ -236,10 +237,10 @@
     <aside class="rail">
       <div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>Sistema de Costos Reyna</span></div>
       <nav aria-label="Secciones del piloto">
-        <a href="#inicio">Inicio</a><a href="#importar">Cargar</a><a href="#close-form">Cerrar mes</a><a href="#dashboard">Dashboard</a><a href="#costos">Costos por objeto</a><a href="#analisis">Análisis</a><a href="#proyeccion">Proyección</a><a href="#simulacion">Simulación</a><a href="#propuestas">Propuestas</a><a href="#reportes">Reportes</a><a href="#importar">Importar libro</a>
-        <a href="#espacios">Espacios de trabajo</a>
-        <a href="#operar">Ejecutar transacción</a>
-        <a href="#consultar">Consultar tablas</a>
+        <p class="nav-grupo">Gestión de costos</p>
+        <a href="#dashboard">Dashboard</a><a href="#costos">Costos por objeto</a><a href="#ruta">Ruta del costo</a><a href="#comparar">Comparar síntesis</a><a href="#analisis">Análisis</a><a href="#proyeccion">Proyección</a><a href="#simulacion">Simulación</a><a href="#propuestas">Propuestas</a><a href="#control">Calidad y cuadre</a><a href="#modelo">Modelo ABC</a><a href="#reportes">Reportes</a>
+        <p class="nav-grupo">Datos del ERP</p>
+        <a href="#importar">Importar libro</a><a href="#espacios">Espacios de trabajo</a><a href="#operar">Registrar movimiento</a><a href="#consultar">Consultar tablas</a><a href="#close-form">Cerrar mes</a>
       </nav>
       <p>Servidor y datos locales</p>
     </aside>
@@ -250,11 +251,17 @@
       <section id="proyeccion" class="panel stack section-link"><h2>Proyección a 6 meses</h2><p class="legend">Determinística: una cifra por mes con el modelo que menos se equivocó fuera de muestra. Estocástica: 2,000 simulaciones Monte Carlo; hay 90 % de probabilidad de que el margen caiga entre P05 y P95.</p><div id="result-proyeccion" class="result-table"></div></section>
       <section id="simulacion" class="panel stack section-link"><h2>Simulación y escenarios</h2><p class="legend">Cada barra va del P05 al P95 del margen simulado; el punto es la mediana; la línea roja es margen cero (a su izquierda hay pérdida).</p><div id="result-rangos"></div><div id="result-escenarios" class="result-table"></div></section>
       <section id="propuestas" class="panel stack section-link"><h2>Propuestas</h2><div id="result-propuestas" class="result-table"></div><p id="result-propuestas-total"></p></section>
+      <section id="ruta" class="panel stack section-link"><h2>Ruta del costo</h2><p class="legend">De dónde sale cada sol: recurso → centro o actividad → orden, con el inductor, la tasa y el monto que llega. Los tramos «origen» suman exactamente el costo del elemento (algoritmo de trazabilidad ALG-11).</p>
+        <div class="ruta-sel"><div class="field"><label for="ruta-objeto">Orden</label><select id="ruta-objeto"></select></div><div class="field"><label for="ruta-elemento">Elemento</label><select id="ruta-elemento"></select></div></div>
+        <div id="ruta-pasos" class="paso"></div><h3>Desde qué recursos</h3><div id="ruta-origen" class="result-table"></div><h3>A través de qué actividades o centros</h3><div id="ruta-via" class="result-table"></div><details><summary>Ver todos los tramos (detalle de cálculo)</summary><div id="ruta-tabla" class="result-table"></div></details><h3 id="kardex-titulo">Kardex del material (promedio ponderado)</h3><div id="ruta-kardex" class="result-table"></div></section>
+      <section id="comparar" class="panel stack section-link"><h2>Comparar síntesis</h2><p class="legend">El mismo producto visto con tres reglas: REAL (costo integral para decidir precio y rentabilidad), CONTABLE (inventario según NIC 2; administración, ventas y financieros van a resultados, NIIF 18) y ESTIMADO (lo que la historia permitía esperar, fuera de muestra).</p><div id="comparar-tabla" class="result-table"></div></section>
+      <section id="control" class="panel stack section-link"><h2>Calidad y cuadre</h2><p class="legend">Verificaciones que el sistema calcula sobre cada resultado. Las marcadas ✗ en datos de origen son deficiencias de la fuente que el sistema detecta y neutraliza (reparto proporcional que conserva el costo).</p><div id="control-resumen" class="kpi-grid"></div><div id="control-tabla" class="result-table"></div></section>
+      <section id="modelo" class="panel stack section-link"><h2>Modelo ABC de la empresa</h2><p class="legend">El modelo se define con datos del libro DBD (no está programado): cambiar de empresa es cambiar estas tablas.</p><h3>Reglas de reparto por etapa</h3><div id="modelo-reglas" class="result-table"></div><h3>Recursos</h3><div id="modelo-recursos" class="result-table"></div><h3>Actividades</h3><div id="modelo-actividades" class="result-table"></div><h3>Inductores</h3><div id="modelo-inductores" class="result-table"></div></section>
       <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Descarga los resultados seleccionados.</p><div class="actions"><button type="button" data-exportar="resultados">Excel resultados</button><button type="button" data-exportar="analitica">Excel analítica</button><button type="button" data-exportar="proyeccion">Excel proyección</button><button type="button" data-exportar="html">HTML sin conexión</button><button type="button" data-exportar="codigo">Word código</button></div><p id="export-status" role="status"></p></section>
       <header class="page-heading">
         <div>
-          <h1>Piloto local de operaciones</h1>
-          <p>Importa un libro, registra un movimiento y consulta las filas guardadas.</p>
+          <h1>Datos del ERP: carga y revisión</h1>
+          <p>El sistema no reemplaza al ERP: importa sus datos en el formato del DBD, los valida y los usa para costear.</p>
         </div>
         <span id="connection" class="connection" role="status">Conectando…</span>
       </header>
@@ -919,7 +926,55 @@
     table('result-proyeccion',proy,[['periodo','Mes'],['ventas','Ventas S/'],['costo_total','Costo S/'],['margen','Margen determinístico S/'],['p05','Margen P05'],['p50','Margen P50'],['p95','Margen P95']]);
     table('result-escenarios',r.escenarios.map(x=>({...x,prob_perdida: typeof x.prob_perdida==='number' ? number(x.prob_perdida*100)+' %' : '—'})),[['nombre','Escenario'],['margen_p05','P05'],['margen_p50','P50'],['margen_p95','P95'],['prob_perdida','Probabilidad de pérdida']]);
     document.querySelectorAll('#result-escenarios tbody tr').forEach((row,i)=>{ if(r.escenarios[i].prob_perdida > .10) row.lastElementChild.style.color='#b00020'; });
+    ruta(r); control(r); modeloABC(r); comparar(r);
     table('result-propuestas',r.propuestas,[['codigo','Código'],['descripcion','Propuesta'],['impacto_anual','Impacto anual S/'],['plazo','Plazo'],['responsable','Responsable']]);
+  }
+  const ELEM={MD:'Material directo',PD:'Mano de obra directa',SD:'Servicios directos',CIF:'Costos indirectos',GAD:'Administración',GVT:'Ventas',GFI:'Financieros'};
+  const ETAPA={P1:'P1 Material',P2:'P2 Mano de obra',P3:'P3 Servicios',P4A:'P4A Recursos → centros/actividades',P4B:'P4B Apoyo → productivos',P4C:'P4C Actividades → órdenes',P5:'P5 Administración',P6:'P6 Ventas',P7:'P7 Financieros'};
+  function ruta(r){
+    const so=$('ruta-objeto'), se=$('ruta-elemento'), tr=r.trazas||[];
+    const prevO=so.value, prevE=se.value; so.replaceChildren(); se.replaceChildren();
+    r.objetos.forEach(o=>{const op=cell(so,'option',`${o.producto} · ${o.codigo}`);op.value=o.codigo;});
+    [...new Set(tr.map(t=>t.elemento))].forEach(e=>{const op=cell(se,'option',ELEM[e]||e);op.value=e;});
+    if([...so.options].some(o=>o.value===prevO)) so.value=prevO; if([...se.options].some(o=>o.value===prevE)) se.value=prevE;
+    const pintar=()=>{
+      const filas=tr.filter(t=>t.objeto===so.value&&t.elemento===se.value), pasos=$('ruta-pasos'); pasos.replaceChildren();
+      if(!tr.length){ cell(pasos,'p','La síntesis ESTIMADO es estadística: no tiene ruta de reparto. Cambia a REAL o CONTABLE.'); $('ruta-tabla').replaceChildren(); }
+      const porEtapa={}; filas.forEach(t=>{porEtapa[t.etapa]=(porEtapa[t.etapa]||0)+t.monto;});
+      Object.keys(porEtapa).sort().forEach(e=>{const d=cell(pasos,'div','');cell(d,'span',ETAPA[e]||e);cell(d,'b','S/ '+number(porEtapa[e]));});
+      const raiz=filas.filter(t=>t.raiz).reduce((a,t)=>a+t.monto,0); if(filas.length){const d=cell(pasos,'div','');d.style.borderColor='#243f80';cell(d,'span','Total del elemento (suma de orígenes)');cell(d,'b','S/ '+number(raiz));}
+      const agrupa=(lista,clave)=>{const m={};lista.forEach(t=>{const k=clave(t);m[k]=m[k]||{nombre:k,monto:0,tramos:0};m[k].monto+=t.monto;m[k].tramos++;});const tot=Object.values(m).reduce((a,x)=>a+x.monto,0);return Object.values(m).sort((a,b)=>b.monto-a.monto).map(x=>({...x,monto:Math.round(x.monto*100)/100,porcentaje:tot?x.monto/tot:0}));};
+      const pct=l=>l.map(x=>({...x,porcentaje:number(x.porcentaje*100)+' %'}));
+      if(tr.length){ table('ruta-origen',pct(agrupa(filas.filter(t=>t.raiz),t=>t.origen_nombre)),[['nombre','Recurso de origen'],['monto','Monto S/'],['porcentaje','% del elemento']]);
+        table('ruta-via',pct(agrupa(filas.filter(t=>t.destino===so.value&&!t.raiz),t=>t.origen_nombre+' — '+t.criterio_nombre)),[['nombre','Actividad o centro — inductor hacia la orden'],['monto','Monto S/'],['porcentaje','% del elemento']]); }
+      else { $('ruta-origen').replaceChildren(); $('ruta-via').replaceChildren(); }
+      if(tr.length) table('ruta-tabla',filas.map(t=>({...t,etapa:ETAPA[t.etapa]||t.etapa,de:t.origen_nombre+(t.raiz?' (origen)':''),a:t.destino_nombre})),[['etapa','Etapa'],['de','De'],['a','A'],['criterio_nombre','Inductor'],['cantidad_destino','Cantidad del destino'],['total_criterio','Total del inductor'],['tasa','Tasa'],['monto','Monto que llega S/']]);
+      const mats=new Set(filas.filter(t=>t.etapa==='P1').map(t=>t.origen)), k=(r.kardex||[]).filter(x=>mats.has(x.material));
+      $('kardex-titulo').hidden=!k.length; if(k.length) table('ruta-kardex',k,[['fecha','Fecha'],['movimiento','Movimiento'],['comprobante','Comprobante'],['cantidad','Cantidad'],['costo_unitario','Costo unitario'],['importe','Importe S/'],['saldo_cantidad','Saldo cantidad'],['saldo_importe','Saldo S/']]); else $('ruta-kardex').replaceChildren();
+    };
+    so.onchange=pintar; se.onchange=pintar; pintar();
+  }
+  function control(r){
+    const c=r.control||[], res=$('control-resumen'); res.replaceChildren();
+    const ok=c.filter(x=>x.ok).length; [['Verificaciones',c.length],['Cumplen',ok],['Observadas',c.length-ok]].forEach(([l,v])=>{const e=cell(res,'div','');e.className='kpi';cell(e,'span',l);cell(e,'b',String(v));});
+    table('control-tabla',c.map(x=>({...x,estado:x.ok?'✓ cumple':'✗ observado'})),[['estado','Estado'],['control','Verificación'],['esperado','Esperado'],['obtenido','Obtenido'],['diferencia','Diferencia'],['detalle','Explicación']]);
+    document.querySelectorAll('#control-tabla tbody tr').forEach((tr,i)=>{tr.firstElementChild.className=c[i].ok?'ok':'xx';});
+  }
+  function modeloABC(r){
+    const m=r.modelo||{};
+    table('modelo-reglas',m.reglas||[],[['etapa','Etapa'],['etapa_nombre','Qué reparte'],['origen','Origen'],['inductor','Inductor'],['fuente','Fuente del dato']]);
+    table('modelo-recursos',m.recursos||[],[['codigo','Código'],['nombre','Recurso'],['tipo','Tipo'],['elemento','Elemento'],['unidad','Unidad']]);
+    table('modelo-actividades',m.actividades||[],[['codigo','Código'],['nombre','Actividad'],['unidad','Unidad']]);
+    table('modelo-inductores',m.inductores||[],[['codigo','Código'],['nombre','Inductor'],['unidad','Unidad']]);
+  }
+  async function comparar(r){
+    const per=r.periodo_actual, todas={};
+    await Promise.all(['REAL','CONTABLE','ESTIMADO'].map(async s=>{ if(s===r.sintesis){todas[s]=r;return;} try{const x=await fetch('/api/resultados?'+new URLSearchParams({sintesis:s,periodo:per}));if(x.ok){const j=await x.json(); if(!j._nota) todas[s]=j;}}catch{} }));
+    const filas=r.objetos.map(o=>{ const g=s=>(todas[s]?.objetos||[]).find(x=>x.codigo===o.codigo); const re=g('REAL'),co=g('CONTABLE'),es=g('ESTIMADO');
+      const dif=re&&co?re.costo_unitario-co.costo_unitario:null; const desv=re&&es&&es.costo_unitario?(re.costo_unitario/es.costo_unitario-1):null;
+      return {producto:o.producto,real:re?.costo_unitario,contable:co?.costo_unitario,estimado:es?.costo_unitario,
+        explica:(dif!==null?`REAL − CONTABLE = S/ ${number(dif)} por unidad: administración, ventas y financieros (gasto del periodo en NIC 2). `:'')+(desv!==null?`REAL ${desv>=0?'supera':'queda debajo de'} lo esperado en ${number(Math.abs(desv)*100)} %`+(()=>{const b=(todas.ESTIMADO?.estimacion||{})[o.producto]; if(!b) return '.'; const dentro=re.costo_unitario>=b.p05&&re.costo_unitario<=b.p95; return dentro?` y está dentro de la banda esperada (S/ ${number(b.p05)}–${number(b.p95)}): variación normal.`:` y está FUERA de la banda esperada (S/ ${number(b.p05)}–${number(b.p95)}): conviene revisar la causa.`;})():'ESTIMADO no disponible (se necesitan más de 7 meses de historia).')};});
+    table('comparar-tabla',filas,[['producto','Producto'],['real','REAL S/ por unidad'],['contable','CONTABLE S/ por unidad'],['estimado','ESTIMADO S/ por unidad'],['explica','Lectura']]);
   }
   async function load() { $('result-status').textContent='Consultando…'; try { const p=new URLSearchParams({sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/resultados?'+p); if(!response.ok) throw Error(); const r=await response.json();render(r);$('result-status').textContent='Resultados actualizados.'; } catch { $('result-status').textContent='No se pudieron consultar los resultados. Revisa el periodo y vuelve a intentar.'; } }
   $('result-calcular').addEventListener('click', async () => {

@@ -77,7 +77,9 @@ def generar(plantilla, salida, periodos=None):
         rec.append([c, nom, "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", c, "EC_" + c, 19000101, "Cuadro 6"]); cri.append(["EC_" + c, "Inductor de " + nom, "%", "S"])
     for c, nom, k in [("MANT", "Mantenimiento", "SOP_MANT"), ("CC", "Control de calidad", "SOP_CC"), ("ING", "Ingeniería y desarrollo", "SOP_ING")]:
         rec.append([c, nom, "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", c, k, 19000101, "Cuadros 7-9 y 12"]); cri.append([k, "Distribución de " + nom, "", "S"])
-    for k in ("AC_PROD", "AC_SOP", "CONSUMO"): cri.append([k, k, "", "S"])
+    for k, d, u in (("AC_PROD", "Peso de producción de cada orden en la actividad", "%"),
+                    ("AC_SOP", "Peso de soporte de cada orden en la actividad", "%"),
+                    ("CONSUMO", "Consumo de material según kardex", "kg")): cri.append([k, d, u, "S"])
     for a in acts: rr.append(["P4C", a, "AC_PROD", 19000101, "Pesos AC-OT producción"]); rr.append(["P4C", "S-" + a, "AC_SOP", 19000101, "Pesos AC-OT soporte"])
     codot = {(r["periodo"], r["ot_id"]): r["codigo_ot"] for r in ot}
     for p in pers:
@@ -114,13 +116,18 @@ CENTROS_GASTO = [("ADM_FRE", "ADM", "Administración", "KG_PRODUCIDOS"), ("VTA_C
 DESTINO_CENTRO = {"ADM01": "ADM_FRE", "ADM02": "ADM_FRE", "VTA01": "VTA_COM", "VTA02": "VTA_FLE", "FIN01": "FIN_FRE"}
 
 
+IND_NOMBRE = {"KG_PRODUCIDOS": "Kg producidos por orden", "VENTAS_NETAS": "Ventas netas por orden",
+              "KG_VENDIDOS": "Kg vendidos por orden", "KG_MATERIAL": "Kg de material consumido por orden"}
+IND_UNIDAD = {"KG_PRODUCIDOS": "kg", "VENTAS_NETAS": "S/", "KG_VENDIDOS": "kg", "KG_MATERIAL": "kg"}
+
+
 def _gastos_integrales(wb, pers, ot, codot, evento, lin, rec, rr, cri, med):
     """ABC integral (mono, D-9): gastos de administración, ventas y financieros → centros ADM/VTA/FIN (P4A) → órdenes (P5/P6/P7)
     con su inductor. Supuestos declarados en datos/frenosa_supuestos/Gastos_Operativos_SUPUESTOS.csv. La síntesis decide qué es costo."""
     g = list(csv.DictReader(open(os.path.join(DIR, "..", "frenosa_supuestos", "Gastos_Operativos_SUPUESTOS.csv"), encoding="utf-8")))
     for c, tipo, nom, ind in CENTROS_GASTO:
         wb["CENTRO"].append([c, EMP, tipo, 0, 0, 0, ind, None, None, "S", tipo])
-        cri.append(["DIR_" + c, "Directo a " + nom, "", "S"]); cri.append([ind, ind, "", "S"])
+        cri.append(["DIR_" + c, "Directo a " + nom, "", "S"]); cri.append([ind, IND_NOMBRE.get(ind, ind), IND_UNIDAD.get(ind, ""), "S"])
         rr.append([{"ADM": "P5", "VTA": "P6", "FIN": "P7"}[tipo], c, ind, 19000101, "Inductor ABC del gasto"])
     for r in {x["recurso"]: x for x in g}.values():
         rec.append([r["recurso"], r["nombre"], "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", r["recurso"], "DIR_" + DESTINO_CENTRO[r["recurso"]], 19000101, "Gasto a su centro"])

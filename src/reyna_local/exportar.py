@@ -12,7 +12,8 @@ TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'ht
 SIN_RESULTADOS = ('codigo', 'entrada')          # se generan desde el repositorio, no desde un contrato
 RAIZ = Path(__file__).resolve().parents[2]
 SECCIONES = {
-    'resultados': [('Objetos', 'objetos'), ('Actividades', 'actividades'), ('Estado NIIF 18', 'estado_resultados')],
+    'resultados': [('Objetos', 'objetos'), ('Actividades', 'actividades'), ('Estado NIIF 18', 'estado_resultados'),
+                   ('Kardex', 'kardex'), ('Calidad y cuadre', 'control')],
     'analitica': [('Relevancia', 'relevancia'), ('Hallazgos', 'hallazgos')],
     'proyeccion': [('Serie', 'serie'), ('Escenarios', 'escenarios'), ('Propuestas', 'propuestas')],
 }
@@ -41,7 +42,7 @@ def _libro(resultados, tipo, destino):
         resumen.append([key, _celda(value)])
     for nombre, campo in SECCIONES[tipo]:
         hoja = libro.create_sheet(nombre)
-        rows = resultados[campo]
+        rows = resultados.get(campo) or []
         columnas = _columnas(rows)
         if not columnas:
             hoja.append(['Sin datos disponibles'])
@@ -56,7 +57,38 @@ def _libro(resultados, tipo, destino):
             hoja.append([])
             hoja.append(['TOTAL impacto anual (S/)', round(sum(float(r.get('impacto_anual') or 0) for r in rows), 2)])
             hoja.cell(hoja.max_row, 1).font = Font(bold=True)
+    if tipo == 'resultados':
+        _hojas_ruta_y_modelo(libro, resultados)
     libro.save(destino)
+    libro.close()
+
+
+def _tabla_en_hoja(hoja, rows):
+    columnas = _columnas(rows)
+    if not columnas:
+        hoja.append(['Sin datos disponibles']); return
+    hoja.append([ETIQUETAS_XLS.get(c, c) for c in columnas])
+    for cell in hoja[hoja.max_row]: cell.font = Font(bold=True)
+    for row in rows: hoja.append([_celda(row.get(c)) for c in columnas])
+
+
+ETIQUETAS_XLS = {'objeto': 'Orden', 'elemento': 'Elemento', 'etapa': 'Etapa', 'origen_nombre': 'De', 'destino_nombre': 'A',
+                 'criterio_nombre': 'Inductor', 'cantidad_destino': 'Cantidad del destino', 'total_criterio': 'Total del inductor',
+                 'tasa': 'Tasa', 'monto': 'Monto atribuido S/', 'raiz': 'Es origen'}
+
+
+def _hojas_ruta_y_modelo(libro, r):
+    """Como la consulta de costeo del prototipo: una hoja por etapa del reparto (P1…P7) y el modelo ABC."""
+    trazas = r.get('trazas') or []
+    cols = ['objeto', 'elemento', 'origen_nombre', 'destino_nombre', 'criterio_nombre', 'cantidad_destino', 'total_criterio', 'tasa', 'monto', 'raiz']
+    for etapa in sorted({t['etapa'] for t in trazas}):
+        hoja = libro.create_sheet(('Ruta ' + etapa)[:31]); hoja.freeze_panes = 'A2'
+        _tabla_en_hoja(hoja, [{c: t.get(c) for c in cols} for t in trazas if t['etapa'] == etapa])
+    m = r.get('modelo') or {}
+    for nombre, campo in (('Modelo - Reglas', 'reglas'), ('Modelo - Recursos', 'recursos'), ('Modelo - Actividades', 'actividades'),
+                          ('Modelo - Inductores', 'inductores'), ('Modelo - Centros', 'centros')):
+        if m.get(campo):
+            hoja = libro.create_sheet(nombre[:31]); hoja.freeze_panes = 'A2'; _tabla_en_hoja(hoja, m[campo])
 
 
 def _entrada(destino):
@@ -133,8 +165,20 @@ def _html(resultados, destino):
         return '<table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>'
     kpis = ''.join('<div class="kpi"><span>' + escape(ETIQUETAS.get(k, k)) + '</span><b data-valor="' + escape(str(v)) + '">' + escape(_fmt(k, v)) + '</b></div>'
                    for k, v in resultados['kpi'].items())
-    secciones = ''.join('<h2>' + escape(nombre) + '</h2>' + tabla(resultados[campo])
+    secciones = ''.join('<h2>' + escape(nombre) + '</h2>' + tabla(resultados.get(campo) or [])
                         for nombre, campo in [*SECCIONES['resultados'], *SECCIONES['analitica'], *SECCIONES['proyeccion']])
+    trazas = resultados.get('trazas') or []
+    if trazas:
+        resumen = {}
+        for t in trazas:
+            if t.get('raiz'):
+                k = (t['objeto'], t['elemento'], t['origen_nombre']); resumen[k] = resumen.get(k, 0) + float(t['monto'])
+        filas = [dict(objeto=o, elemento=e, origen=n, monto=round(v, 2)) for (o, e, n), v in sorted(resumen.items())]
+        secciones += ('<h2>Ruta del costo: de qué recurso sale cada elemento de cada orden</h2><p class="nota">Suma de los tramos de origen '
+                      '(algoritmo ALG-11); el detalle tramo por tramo está en el Excel de resultados (hojas «Ruta P1…P7»).</p>' + tabla(filas))
+    reglas = (resultados.get('modelo') or {}).get('reglas') or []
+    if reglas:
+        secciones += '<h2>Modelo ABC: reglas de reparto por etapa</h2>' + tabla(reglas)
     # Dibuja valores publicados; la banda corresponde al margen P05–P95.
     serie = resultados['serie']
     chart = ''

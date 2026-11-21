@@ -64,100 +64,100 @@
  "actividades": [
   {
    "codigo": "FO-1",
-   "nombre": "FO-1",
+   "nombre": "Impregnación",
    "costo": 40161.24,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "FO-2",
-   "nombre": "FO-2",
+   "nombre": "Enrollado",
    "costo": 17772.52,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "FO-3",
-   "nombre": "FO-3",
+   "nombre": "Prensado",
    "costo": 28370.98,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "FO-4",
-   "nombre": "FO-4",
+   "nombre": "Horneado",
    "costo": 37556.63,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "FO-5",
-   "nombre": "FO-5",
+   "nombre": "Lijado",
    "costo": 15099.25,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "FO-6",
-   "nombre": "FO-6",
+   "nombre": "Taladrado",
    "costo": 17809.65,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "FO-7",
-   "nombre": "FO-7",
+   "nombre": "Acabado",
    "costo": 14228.73,
-   "inductor": "",
+   "inductor": "Peso de producción de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-1",
-   "nombre": "S-FO-1",
+   "nombre": "Soporte de Impregnación",
    "costo": 3936.78,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-2",
-   "nombre": "S-FO-2",
+   "nombre": "Soporte de Enrollado",
    "costo": 1329.46,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-3",
-   "nombre": "S-FO-3",
+   "nombre": "Soporte de Prensado",
    "costo": 6041.62,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-4",
-   "nombre": "S-FO-4",
+   "nombre": "Soporte de Horneado",
    "costo": 3701.92,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-5",
-   "nombre": "S-FO-5",
+   "nombre": "Soporte de Lijado",
    "costo": 6552.74,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-6",
-   "nombre": "S-FO-6",
+   "nombre": "Soporte de Taladrado",
    "costo": 2483.6,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   },
   {
    "codigo": "S-FO-7",
-   "nombre": "S-FO-7",
+   "nombre": "Soporte de Acabado",
    "costo": 1120.88,
-   "inductor": "",
+   "inductor": "Peso de soporte de cada orden en la actividad",
    "tasa": 0.0
   }
  ],
@@ -368,5 +368,908 @@
  ],
  "proyeccion_info": {
   "aviso": "Historia insuficiente para proyectar (6 meses; se requieren al menos 7)"
- }
+ },
+ "trazas": [],
+ "kardex": [
+  {
+   "fecha": "2010-06-02",
+   "material": "MAT_SW50",
+   "material_nombre": "Material SW50",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 001-5318",
+   "cantidad": 11527.0,
+   "costo_unitario": 3.191792,
+   "importe": 36791.79,
+   "saldo_cantidad": 16910.0,
+   "saldo_importe": 54395.09
+  },
+  {
+   "fecha": "2010-06-02",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 002-3411",
+   "cantidad": 17131.0,
+   "costo_unitario": 5.551383,
+   "importe": 95100.74,
+   "saldo_cantidad": 23208.0,
+   "saldo_importe": 128232.49
+  },
+  {
+   "fecha": "2010-06-02",
+   "material": "MAT_FRE9002",
+   "material_nombre": "Material FRE9002",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 003-1911",
+   "cantidad": 5463.0,
+   "costo_unitario": 4.983088,
+   "importe": 27222.61,
+   "saldo_cantidad": 7716.0,
+   "saldo_importe": 38712.42
+  },
+  {
+   "fecha": "2010-06-04",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "DEVOLUCION",
+   "comprobante": "F/ 002-3411",
+   "cantidad": -445.0,
+   "costo_unitario": 5.525357,
+   "importe": -2458.78,
+   "saldo_cantidad": 22763.0,
+   "saldo_importe": 125773.71
+  },
+  {
+   "fecha": "2010-06-05",
+   "material": "MAT_SW50",
+   "material_nombre": "Material SW50",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-046",
+   "cantidad": -11684.0,
+   "costo_unitario": 3.216741,
+   "importe": -37584.41,
+   "saldo_cantidad": 5226.0,
+   "saldo_importe": 16810.69
+  },
+  {
+   "fecha": "2010-06-05",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-049",
+   "cantidad": -15286.0,
+   "costo_unitario": 5.525357,
+   "importe": -84460.61,
+   "saldo_cantidad": 7477.0,
+   "saldo_importe": 41313.1
+  },
+  {
+   "fecha": "2010-06-05",
+   "material": "MAT_FRE9002",
+   "material_nombre": "Material FRE9002",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-052",
+   "cantidad": -5359.0,
+   "costo_unitario": 5.017161,
+   "importe": -26886.97,
+   "saldo_cantidad": 2357.0,
+   "saldo_importe": 11825.45
+  },
+  {
+   "fecha": "2010-06-12",
+   "material": "MAT_SW50",
+   "material_nombre": "Material SW50",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 001-5321",
+   "cantidad": 24872.0,
+   "costo_unitario": 3.187106,
+   "importe": 79269.69,
+   "saldo_cantidad": 30098.0,
+   "saldo_importe": 96080.38
+  },
+  {
+   "fecha": "2010-06-12",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 002-3416",
+   "cantidad": 24029.0,
+   "costo_unitario": 5.406868,
+   "importe": 129921.63,
+   "saldo_cantidad": 31506.0,
+   "saldo_importe": 171234.73
+  },
+  {
+   "fecha": "2010-06-12",
+   "material": "MAT_FRE9002",
+   "material_nombre": "Material FRE9002",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 003-1916",
+   "cantidad": 8604.0,
+   "costo_unitario": 5.089692,
+   "importe": 43791.71,
+   "saldo_cantidad": 10961.0,
+   "saldo_importe": 55617.16
+  },
+  {
+   "fecha": "2010-06-15",
+   "material": "MAT_SW50",
+   "material_nombre": "Material SW50",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-047",
+   "cantidad": -13335.0,
+   "costo_unitario": 3.192251,
+   "importe": -42568.67,
+   "saldo_cantidad": 16763.0,
+   "saldo_importe": 53511.71
+  },
+  {
+   "fecha": "2010-06-15",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-050",
+   "cantidad": -16407.0,
+   "costo_unitario": 5.434988,
+   "importe": -89171.85,
+   "saldo_cantidad": 15099.0,
+   "saldo_importe": 82062.88
+  },
+  {
+   "fecha": "2010-06-15",
+   "material": "MAT_FRE9002",
+   "material_nombre": "Material FRE9002",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-053",
+   "cantidad": -4849.0,
+   "costo_unitario": 5.074095,
+   "importe": -24604.29,
+   "saldo_cantidad": 6112.0,
+   "saldo_importe": 31012.87
+  },
+  {
+   "fecha": "2010-06-22",
+   "material": "MAT_SW50",
+   "material_nombre": "Material SW50",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-048",
+   "cantidad": -13918.0,
+   "costo_unitario": 3.192251,
+   "importe": -44429.75,
+   "saldo_cantidad": 2845.0,
+   "saldo_importe": 9081.95
+  },
+  {
+   "fecha": "2010-06-22",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-051",
+   "cantidad": -12346.0,
+   "costo_unitario": 5.434988,
+   "importe": -67100.36,
+   "saldo_cantidad": 2753.0,
+   "saldo_importe": 14962.52
+  },
+  {
+   "fecha": "2010-06-22",
+   "material": "MAT_FRE9002",
+   "material_nombre": "Material FRE9002",
+   "movimiento": "SALIDA",
+   "comprobante": "VS 2010-054",
+   "cantidad": -5283.0,
+   "costo_unitario": 5.074095,
+   "importe": -26806.45,
+   "saldo_cantidad": 829.0,
+   "saldo_importe": 4206.43
+  },
+  {
+   "fecha": "2010-06-26",
+   "material": "MAT_SW50",
+   "material_nombre": "Material SW50",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 001-5327",
+   "cantidad": 2996.0,
+   "costo_unitario": 3.332597,
+   "importe": 9984.46,
+   "saldo_cantidad": 5841.0,
+   "saldo_importe": 19066.41
+  },
+  {
+   "fecha": "2010-06-26",
+   "material": "MAT_FRE9000",
+   "material_nombre": "Material FRE9000",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 002-3420",
+   "cantidad": 3853.0,
+   "costo_unitario": 5.585136,
+   "importe": 21519.53,
+   "saldo_cantidad": 6606.0,
+   "saldo_importe": 36482.05
+  },
+  {
+   "fecha": "2010-06-26",
+   "material": "MAT_FRE9002",
+   "material_nombre": "Material FRE9002",
+   "movimiento": "ENTRADA",
+   "comprobante": "F/ 003-1927",
+   "cantidad": 1495.0,
+   "costo_unitario": 5.098696,
+   "importe": 7622.55,
+   "saldo_cantidad": 2324.0,
+   "saldo_importe": 11828.98
+  }
+ ],
+ "modelo": {
+  "recursos": [
+   {
+    "codigo": "MAT_SW50",
+    "nombre": "Material SW50",
+    "tipo": "MAT_DIR",
+    "elemento": "MD",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "MAT_FRE9000",
+    "nombre": "Material FRE9000",
+    "tipo": "MAT_DIR",
+    "elemento": "MD",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "MAT_FRE9002",
+    "nombre": "Material FRE9002",
+    "tipo": "MAT_DIR",
+    "elemento": "MD",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "MOD",
+    "nombre": "Personal directo (operarios)",
+    "tipo": "PERS_DIR",
+    "elemento": "PD",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "REC001",
+    "nombre": "Personal indirecto",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "REC002",
+    "nombre": "Servicios",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "REC003",
+    "nombre": "Operacionales",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "REC004",
+    "nombre": "No operacionales",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "REC005",
+    "nombre": "Instalaciones",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "MANT",
+    "nombre": "Mantenimiento",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "CC",
+    "nombre": "Control de calidad",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "ING",
+    "nombre": "Ingeniería y desarrollo",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "ADM01",
+    "nombre": "Sueldos de administración",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "ADM02",
+    "nombre": "Alquiler y servicios de oficina",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "VTA01",
+    "nombre": "Comisiones de venta (3 % de ventas)",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "VTA02",
+    "nombre": "Fletes de despacho a clientes",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FIN01",
+    "nombre": "Intereses de préstamo de capital de trabajo",
+    "tipo": "INDIRECTO",
+    "elemento": "IND",
+    "unidad": "S/"
+   }
+  ],
+  "actividades": [
+   {
+    "codigo": "FO-1",
+    "nombre": "Impregnación",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-1",
+    "nombre": "Soporte de Impregnación",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FO-2",
+    "nombre": "Enrollado",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-2",
+    "nombre": "Soporte de Enrollado",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FO-3",
+    "nombre": "Prensado",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-3",
+    "nombre": "Soporte de Prensado",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FO-4",
+    "nombre": "Horneado",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-4",
+    "nombre": "Soporte de Horneado",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FO-5",
+    "nombre": "Lijado",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-5",
+    "nombre": "Soporte de Lijado",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FO-6",
+    "nombre": "Taladrado",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-6",
+    "nombre": "Soporte de Taladrado",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "FO-7",
+    "nombre": "Acabado",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "S-FO-7",
+    "nombre": "Soporte de Acabado",
+    "unidad": "S/"
+   }
+  ],
+  "centros": [
+   {
+    "codigo": "ADM_FRE",
+    "tipo": "ADM",
+    "inductor": "KG_PRODUCIDOS"
+   },
+   {
+    "codigo": "VTA_COM",
+    "tipo": "VTA",
+    "inductor": "VENTAS_NETAS"
+   },
+   {
+    "codigo": "VTA_FLE",
+    "tipo": "VTA",
+    "inductor": "KG_VENDIDOS"
+   },
+   {
+    "codigo": "FIN_FRE",
+    "tipo": "FIN",
+    "inductor": "KG_MATERIAL"
+   }
+  ],
+  "inductores": [
+   {
+    "codigo": "MIN_STD",
+    "nombre": "Minutos estándar",
+    "unidad": "min"
+   },
+   {
+    "codigo": "EC_REC001",
+    "nombre": "Inductor de Personal indirecto",
+    "unidad": "%"
+   },
+   {
+    "codigo": "EC_REC002",
+    "nombre": "Inductor de Servicios",
+    "unidad": "%"
+   },
+   {
+    "codigo": "EC_REC003",
+    "nombre": "Inductor de Operacionales",
+    "unidad": "%"
+   },
+   {
+    "codigo": "EC_REC004",
+    "nombre": "Inductor de No operacionales",
+    "unidad": "%"
+   },
+   {
+    "codigo": "EC_REC005",
+    "nombre": "Inductor de Instalaciones",
+    "unidad": "%"
+   },
+   {
+    "codigo": "SOP_MANT",
+    "nombre": "Distribución de Mantenimiento",
+    "unidad": null
+   },
+   {
+    "codigo": "SOP_CC",
+    "nombre": "Distribución de Control de calidad",
+    "unidad": null
+   },
+   {
+    "codigo": "SOP_ING",
+    "nombre": "Distribución de Ingeniería y desarrollo",
+    "unidad": null
+   },
+   {
+    "codigo": "AC_PROD",
+    "nombre": "Peso de producción de cada orden en la actividad",
+    "unidad": "%"
+   },
+   {
+    "codigo": "AC_SOP",
+    "nombre": "Peso de soporte de cada orden en la actividad",
+    "unidad": "%"
+   },
+   {
+    "codigo": "CONSUMO",
+    "nombre": "Consumo de material según kardex",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "DIR_ADM_FRE",
+    "nombre": "Directo a Administración",
+    "unidad": null
+   },
+   {
+    "codigo": "KG_PRODUCIDOS",
+    "nombre": "Kg producidos por orden",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "DIR_VTA_COM",
+    "nombre": "Directo a Ventas: comisiones",
+    "unidad": null
+   },
+   {
+    "codigo": "VENTAS_NETAS",
+    "nombre": "Ventas netas por orden",
+    "unidad": "S/"
+   },
+   {
+    "codigo": "DIR_VTA_FLE",
+    "nombre": "Directo a Ventas: despacho",
+    "unidad": null
+   },
+   {
+    "codigo": "KG_VENDIDOS",
+    "nombre": "Kg vendidos por orden",
+    "unidad": "kg"
+   },
+   {
+    "codigo": "DIR_FIN_FRE",
+    "nombre": "Directo a Financiamiento",
+    "unidad": null
+   },
+   {
+    "codigo": "KG_MATERIAL",
+    "nombre": "Kg de material consumido por orden",
+    "unidad": "kg"
+   }
+  ],
+  "reglas": [
+   {
+    "etapa": "P1",
+    "etapa_nombre": "Material directo por kardex",
+    "origen": "MAT_SW50",
+    "inductor": "CONSUMO",
+    "fuente": "Material por kardex (D-10)"
+   },
+   {
+    "etapa": "P1",
+    "etapa_nombre": "Material directo por kardex",
+    "origen": "MAT_FRE9000",
+    "inductor": "CONSUMO",
+    "fuente": "Material por kardex (D-10)"
+   },
+   {
+    "etapa": "P1",
+    "etapa_nombre": "Material directo por kardex",
+    "origen": "MAT_FRE9002",
+    "inductor": "CONSUMO",
+    "fuente": "Material por kardex (D-10)"
+   },
+   {
+    "etapa": "P2",
+    "etapa_nombre": "Mano de obra a actividades",
+    "origen": "MOD",
+    "inductor": "MIN_STD",
+    "fuente": "Minutos estándar Te×kg"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "REC001",
+    "inductor": "EC_REC001",
+    "fuente": "Cuadro 6"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "REC002",
+    "inductor": "EC_REC002",
+    "fuente": "Cuadro 6"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "REC003",
+    "inductor": "EC_REC003",
+    "fuente": "Cuadro 6"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "REC004",
+    "inductor": "EC_REC004",
+    "fuente": "Cuadro 6"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "REC005",
+    "inductor": "EC_REC005",
+    "fuente": "Cuadro 6"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "MANT",
+    "inductor": "SOP_MANT",
+    "fuente": "Cuadros 7-9 y 12"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "CC",
+    "inductor": "SOP_CC",
+    "fuente": "Cuadros 7-9 y 12"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "ING",
+    "inductor": "SOP_ING",
+    "fuente": "Cuadros 7-9 y 12"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-1",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-1",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-2",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-2",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-3",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-3",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-4",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-4",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-5",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-5",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-6",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-6",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "FO-7",
+    "inductor": "AC_PROD",
+    "fuente": "Pesos AC-OT producción"
+   },
+   {
+    "etapa": "P4C",
+    "etapa_nombre": "Actividades a órdenes",
+    "origen": "S-FO-7",
+    "inductor": "AC_SOP",
+    "fuente": "Pesos AC-OT soporte"
+   },
+   {
+    "etapa": "P5",
+    "etapa_nombre": "Administración a órdenes",
+    "origen": "ADM_FRE",
+    "inductor": "KG_PRODUCIDOS",
+    "fuente": "Inductor ABC del gasto"
+   },
+   {
+    "etapa": "P6",
+    "etapa_nombre": "Ventas a órdenes",
+    "origen": "VTA_COM",
+    "inductor": "VENTAS_NETAS",
+    "fuente": "Inductor ABC del gasto"
+   },
+   {
+    "etapa": "P6",
+    "etapa_nombre": "Ventas a órdenes",
+    "origen": "VTA_FLE",
+    "inductor": "KG_VENDIDOS",
+    "fuente": "Inductor ABC del gasto"
+   },
+   {
+    "etapa": "P7",
+    "etapa_nombre": "Financieros a órdenes",
+    "origen": "FIN_FRE",
+    "inductor": "KG_MATERIAL",
+    "fuente": "Inductor ABC del gasto"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "ADM01",
+    "inductor": "DIR_ADM_FRE",
+    "fuente": "Gasto a su centro"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "ADM02",
+    "inductor": "DIR_ADM_FRE",
+    "fuente": "Gasto a su centro"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "VTA01",
+    "inductor": "DIR_VTA_COM",
+    "fuente": "Gasto a su centro"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "VTA02",
+    "inductor": "DIR_VTA_FLE",
+    "fuente": "Gasto a su centro"
+   },
+   {
+    "etapa": "P4A",
+    "etapa_nombre": "Recursos indirectos a centros y actividades",
+    "origen": "FIN01",
+    "inductor": "DIR_FIN_FRE",
+    "fuente": "Gasto a su centro"
+   }
+  ]
+ },
+ "control": [
+  {
+   "control": "Conservación del reparto: recursos del periodo = costo llegado a las órdenes",
+   "esperado": 732366.0,
+   "obtenido": 732366.0,
+   "diferencia": 0.0,
+   "ok": true,
+   "detalle": "Ningún sol se pierde ni se crea al repartir por etapas (I9)."
+  },
+  {
+   "control": "Centros y actividades quedan en cero (todo lo recibido se reparte)",
+   "esperado": 288752.65,
+   "obtenido": 288752.65,
+   "diferencia": 0.0,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Kardex Material FRE9000: saldo inicial + movimientos = saldo final",
+   "esperado": 36482.05,
+   "obtenido": 36482.05,
+   "diferencia": 0.0,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Kardex Material FRE9000: sin saldos negativos",
+   "esperado": 0,
+   "obtenido": 2753.0,
+   "diferencia": 0,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Kardex Material FRE9002: saldo inicial + movimientos = saldo final",
+   "esperado": 11828.97,
+   "obtenido": 11828.98,
+   "diferencia": 0.01,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Kardex Material FRE9002: sin saldos negativos",
+   "esperado": 0,
+   "obtenido": 829.0,
+   "diferencia": 0,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Kardex Material SW50: saldo inicial + movimientos = saldo final",
+   "esperado": 19066.41,
+   "obtenido": 19066.41,
+   "diferencia": 0.0,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Kardex Material SW50: sin saldos negativos",
+   "esperado": 0,
+   "obtenido": 2845.0,
+   "diferencia": 0,
+   "ok": true,
+   "detalle": ""
+  },
+  {
+   "control": "Inductor de Servicios (recurso «Servicios») suma 99 %, no 100 %",
+   "esperado": 1,
+   "obtenido": 0.99,
+   "diferencia": -0.01,
+   "ok": false,
+   "detalle": "Deficiencia del dato fuente. El sistema reparte en proporción (Σ medidas) y conserva el costo; un reparto por porcentaje directo habría perdido o creado dinero."
+  },
+  {
+   "control": "Inductor de Operacionales (recurso «Operacionales») suma 101 %, no 100 %",
+   "esperado": 1,
+   "obtenido": 1.01,
+   "diferencia": 0.01,
+   "ok": false,
+   "detalle": "Deficiencia del dato fuente. El sistema reparte en proporción (Σ medidas) y conserva el costo; un reparto por porcentaje directo habría perdido o creado dinero."
+  },
+  {
+   "control": "Inductor de No operacionales (recurso «No operacionales») suma 101 %, no 100 %",
+   "esperado": 1,
+   "obtenido": 1.01,
+   "diferencia": 0.01,
+   "ok": false,
+   "detalle": "Deficiencia del dato fuente. El sistema reparte en proporción (Σ medidas) y conserva el costo; un reparto por porcentaje directo habría perdido o creado dinero."
+  },
+  {
+   "control": "Inductor de Instalaciones (recurso «Instalaciones») suma 99 %, no 100 %",
+   "esperado": 1,
+   "obtenido": 0.99,
+   "diferencia": -0.01,
+   "ok": false,
+   "detalle": "Deficiencia del dato fuente. El sistema reparte en proporción (Σ medidas) y conserva el costo; un reparto por porcentaje directo habría perdido o creado dinero."
+  },
+  {
+   "control": "Contrato de resultados válido (errores encontrados)",
+   "esperado": 0,
+   "obtenido": 0,
+   "diferencia": 0,
+   "ok": true,
+   "detalle": ""
+  }
+ ]
 }

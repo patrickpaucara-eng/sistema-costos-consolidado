@@ -5,3 +5,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,14:40,15:05,Revisión e integración C04-C07 + RA-17 banda centrada,Monografía,Claude,PR 4-7 unidos; compuerta VERDE 94 pruebas
 2026-11-21,15:20,15:55,OT-C08 paquete de 13 entregables + HTML sin conexión rediseñado,Monografía,Claude,armar.py; compuerta VERDE 95 pruebas
 2026-11-21,15:55,16:40,OT-C09 revisión visual y usabilidad (10 correcciones) + revisión PDF de Word,Monografía,Claude,compuerta VERDE 95 pruebas
+2026-11-21,16:35,18:05,Ruta del costo ALG-11 + kardex + modelo ABC + comparador + calidad y cuadre + menú gerencial,Monografía,Claude,compuerta VERDE 100 pruebas
