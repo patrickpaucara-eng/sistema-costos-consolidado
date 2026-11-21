@@ -2,3 +2,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,11:53,12:40,"Etapa 1: unión OT-C03, Frenosa 12 meses (kardex con flete, encadenamiento), contrato de resultados reales",Etapa 1,Claude,"12 meses conservan el costo; contrato REAL válido"
 2026-11-21,12:01,12:45,"Etapa 2: etapa P7 financieros, gastos operativos declarados, síntesis REAL/CONTABLE y estado de resultados NIIF 18; regresión de Oria",Etapa 2,Claude,"Oria exacto; síntesis con barreras"
 2026-11-21,12:16,13:10,"Etapa 3: analítica (diagnóstico, relevancia, proyección 6 meses det/est, ESTIMADO, escenarios, propuestas); integración de PR #2 y #3; órdenes C04-C06",Etapa 3,Claude,"27 resultados publicados; 2 correcciones críticas"
+2026-11-21,14:40,15:05,Revisión e integración C04-C07 + RA-17 banda centrada,Monografía,Claude,PR 4-7 unidos; compuerta VERDE 94 pruebas
