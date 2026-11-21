@@ -22,7 +22,8 @@ def test_armar_entregables(tmp_path, monkeypatch):
         if n == '11':
             continue                                                            # EXE: se compila en Windows
         for s in armar.SINTESIS if '{s}' in arch else ('',):
-            assert arch.format(s=s) in nombres, arch
+            for a in arch.format(s=s).split(', '):
+                assert a in nombres, a
     for s in armar.SINTESIS:
         r = json.loads((ROOT / f'datos/resultados/frenosa_2010-12_{s}.json').read_text(encoding='utf-8'))
         ws = load_workbook(salida / f'06_resultados_{s}.xlsx', read_only=True)['Objetos']
@@ -30,6 +31,8 @@ def test_armar_entregables(tmp_path, monkeypatch):
         assert abs(sum(f[col] for f in filas[1:]) - r['kpi']['costo_total']) < 0.05
         html = (salida / f'12_sistema_sin_conexion_{s}.html').read_text(encoding='utf-8')
         assert 'http://' not in html and 'https://' not in html                 # sin conexión de verdad
-    entrada = load_workbook(salida / '05_datos_entrada.xlsx', read_only=True)
-    assert 'FUENTES' in entrada.sheetnames and 'Gastos_Operativos_SUPUESTOS' in entrada.sheetnames
+    entrada = load_workbook(salida / '05_datos_entrada.xlsx', read_only=True)          # el libro DBD con que se calcula
+    assert entrada.sheetnames[0] == 'LEEME' and {'EMPRESA', 'KARDEX', 'REGLA_REPARTO', 'VENTA'} <= set(entrada.sheetnames)
+    fuentes = load_workbook(salida / '05b_fuentes_erp_adaptador.xlsx', read_only=True)  # lo que el adaptador convierte
+    assert 'FUENTES' in fuentes.sheetnames and 'Gastos_Operativos_SUPUESTOS' in fuentes.sheetnames
     assert '11. Ejecutable' in (salida / 'LEEME.txt').read_text(encoding='utf-8')

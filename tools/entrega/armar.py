@@ -15,7 +15,7 @@ INDICE = [
     ('02', 'Etapas del desarrollo (Word)', '02_etapas.docx'),
     ('03', 'Código fuente (Word)', '03_codigo_fuente.docx'),
     ('04', 'Prueba de funcionamiento (Word)', '04_pruebas.docx'),
-    ('05', 'Datos de entrada (Excel)', '05_datos_entrada.xlsx'),
+    ('05', 'Datos de entrada (Excel): libro DBD + fuentes del adaptador', '05_datos_entrada.xlsx, 05b_fuentes_erp_adaptador.xlsx'),
     ('06', 'Resultados por síntesis (Excel)', '06_resultados_{s}.xlsx'),
     ('07', 'Analítica: relevancia y diagnóstico (Excel)', '07_analitica_{s}.xlsx'),
     ('08', 'Proyección, escenarios y propuestas (Excel)', '08_proyeccion_propuestas_{s}.xlsx'),
@@ -38,6 +38,28 @@ def cargar(periodo, sintesis):
     return r
 
 
+def fuentes_adaptador(destino):
+    """Archivos de origen (formato propio de la empresa) que el adaptador de Frenosa convierte al libro DBD."""
+    import csv
+    from openpyxl import Workbook
+    from openpyxl.styles import Font
+    wb = Workbook(); f = wb.active; f.title = 'FUENTES'
+    f.append(['Origen de los datos de Frenosa. El adaptador casos/frenosa/generar.py los convierte al libro DBD (05_datos_entrada.xlsx).'])
+    for nota in (ROOT / 'datos/frenosa/FUENTES.md', ROOT / 'datos/frenosa_supuestos/LEEME.md'):
+        if nota.is_file():
+            f.append([]); f.append([nota.relative_to(ROOT).as_posix()]); f.cell(f.max_row, 1).font = Font(bold=True)
+            for linea in nota.read_text(encoding='utf-8').splitlines(): f.append([linea])
+    usados = set()
+    for carpeta in ('datos/frenosa', 'datos/frenosa_supuestos'):
+        for archivo in sorted((ROOT / carpeta).glob('*.csv')):
+            n = archivo.stem[:31]
+            while n in usados: n = n[:28] + '_' + str(len(usados))
+            usados.add(n); h = wb.create_sheet(n)
+            with archivo.open(encoding='utf-8-sig', newline='') as fh:
+                for fila in csv.reader(fh): h.append(fila)
+    wb.save(destino); return destino
+
+
 def mover(origen, destino):
     shutil.move(str(origen), str(destino)); return destino
 
@@ -50,6 +72,7 @@ def armar(periodo, salida, junit=None):
     hechos = list(DOC.generar(salida, junit))                    # 01, 02, 04, 09, 10
     hechos.append(mover(exportar(None, 'codigo', tmp), salida / '03_codigo_fuente.docx'))
     hechos.append(mover(exportar(None, 'entrada', tmp), salida / '05_datos_entrada.xlsx'))
+    hechos.append(fuentes_adaptador(salida / '05b_fuentes_erp_adaptador.xlsx'))
     for s in SINTESIS:
         r = cargar(periodo, s)
         for tipo, nombre in (('resultados', '06_resultados_{s}.xlsx'), ('analitica', '07_analitica_{s}.xlsx'),

@@ -28,11 +28,11 @@ def _fec(s):
 
 def generar(plantilla, salida, periodos=None):
     shutil.copy(plantilla, salida); wb = load_workbook(salida)
-    for s in ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "EVENTO", "LINEA", "KARDEX", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "CENTRO", "ACTIVIDAD"]:
+    for s in ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "EVENTO", "LINEA", "KARDEX", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "CENTRO", "ACTIVIDAD", "VENTA", "CLIENTE"]:
         if wb[s].max_row > 1: wb[s].delete_rows(2, wb[s].max_row - 1)
     ot = leer("Ordenes_Trabajo.csv"); pers = sorted({r["periodo"] for r in ot})
     pers = [p for p in pers if periodos is None or p in periodos]
-    wb["EMPRESA"].append([EMP, "Frenosa (caso de desarrollo)", "PEN"])
+    wb["EMPRESA"].append([EMP, "Frenosa", "PEN"])
     eve, lin, kdx, rec, rr, cri, med = (wb[s] for s in ["EVENTO", "LINEA", "KARDEX", "RECURSO", "REGLA_REPARTO", "CRITERIO", "MEDIDA"])
     n = [0]
     def evento(trx, per, fec, obj=None):
@@ -43,7 +43,7 @@ def generar(plantilla, salida, periodos=None):
         a, m = p.split("-"); fin = 20000000 + 0  # placeholder
         wb["PERIODO"].append([p, EMP, int(a + m + "01"), int(a + m + "31"), "A"])
     for r in ot:
-        if r["periodo"] in pers: wb["OBJETO"].append([r["codigo_ot"], EMP, r["objeto_costo_id"], num(r["cantidad_producida"]), "T", None, None, None, None])
+        if r["periodo"] in pers: wb["OBJETO"].append([r["codigo_ot"], EMP, r["codigo_ot"].split("-")[2], num(r["cantidad_producida"]), "T", None, None, None, None])
     # --- kardex continuo (D-10, D-11) ---
     saldos = []                                   # (periodo, material, cantidad, importe) de «saldo inicial» para comprobar encadenamiento
     primero = True
@@ -108,6 +108,13 @@ def generar(plantilla, salida, periodos=None):
             for r in [r for r in leer(hoja) if r["periodo"] == p]: agg[codot[(p, r["ot_id"])]] = num(r["porcentaje_inductor"])
             for o, v in agg.items(): med.append([p, EMP, k, "OBJ", o, v])
     _gastos_integrales(wb, pers, ot, codot, evento, lin, rec, rr, cri, med)
+    # ventas del ERP → tabla VENTA del DBD (producto, cantidad, ingreso neto por periodo)
+    prod = {r["ot_id"] + "|" + r["periodo"]: r["codigo_ot"].split("-")[2] for r in ot}
+    wb["CLIENTE"].append(["MERCADO", "Clientes de autopartes (agregado)", "DIRECTO", "LIMA"])
+    for i, v in enumerate(leer("Ventas.csv"), 1):
+        if v["periodo"] in pers:
+            wb["VENTA"].append([i, 1, v["periodo"], "MERCADO", prod[v["ot_id"] + "|" + v["periodo"]], num(v["cantidad_vendida"]),
+                                round(num(v["ventas_netas_soles"]), 2), None, None, None, EMP, "DIRECTO"])
     wb.save(salida); return salida, saldos
 
 

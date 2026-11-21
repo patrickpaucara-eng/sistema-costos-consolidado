@@ -21,12 +21,13 @@ def _producto(ot):
     return partes[2] if len(partes) >= 5 else str(ot)
 
 
-def serie_producto(por_per, cantidades):
-    """{producto: [(periodo, {elemento: total}, cantidad)]} en orden de periodo."""
+def serie_producto(por_per, cantidades, productos=None):
+    """{producto: [(periodo, {elemento: total}, cantidad)]} en orden de periodo. El producto de cada orden viene del libro
+    (OBJETO.OBJ_PRO); sin él se deduce del código (compatibilidad)."""
     out = {}
     for p in sorted(por_per):
         for o, v in por_per[p].items():
-            out.setdefault(_producto(o), []).append((p, {e: float(v.get(e, 0)) for e, _ in ELEMENTOS}, cantidades.get(o, 0.0)))
+            out.setdefault((productos or {}).get(o) or _producto(o), []).append((p, {e: float(v.get(e, 0)) for e, _ in ELEMENTOS}, cantidades.get(o, 0.0)))
     return out
 
 

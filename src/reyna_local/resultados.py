@@ -27,33 +27,38 @@ def _incluidos(sintesis):
     return PROD + OPER + FIN if sintesis in ("REAL", "ESTIMADO") else PROD
 
 
-def construir(libro, emp="FRE", nombre="Frenosa", periodo=None, ventas_csv=None, sintesis="REAL", _cache=None):
+def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sintesis="REAL", _cache=None):
     """REAL     costo integral = MD + MOD + CIF + administración + ventas + financieros (gerencial, precio objetivo).
     CONTABLE costo del inventario = MD + MOD + CIF (NIC 2 §10-16); el resto es gasto del periodo; estado de resultados NIIF 18.
     ESTIMADO costo más fiel según la historia (estadística, fuera de muestra), con banda; no es un estándar.
     En las tres: descriptivo, diagnóstico, relevancia, proyección 6 meses (determinística y estocástica), escenarios y propuestas."""
     from reyna_local import analisis as A
     if sintesis not in ("REAL", "CONTABLE", "ESTIMADO"): raise ValueError("síntesis desconocida")
+    e0 = (P.leer(libro, ["EMPRESA"]).get("EMPRESA") or [{}])[0]          # la empresa sale del libro DBD, no del código
+    emp = emp or e0.get("EMP_COD"); nombre = nombre or e0.get("EMP_NOM") or emp
     por_per, h = _cache or calcular_periodos(libro, emp)
     pers = sorted(por_per); periodo = periodo or pers[-1]
     objs = P.leer(libro, ["OBJETO"])["OBJETO"]
-    can = {r["OBJ_NUM"]: float(r["OBJ_CAN"] or 0) for r in objs}; pro = {r["OBJ_NUM"]: r["OBJ_PRO"] for r in objs}
+    can = {r["OBJ_NUM"]: float(r["OBJ_CAN"] or 0) for r in objs}; pro = {r["OBJ_NUM"]: str(r["OBJ_PRO"] or r["OBJ_NUM"]) for r in objs}
+    # ingresos: tabla VENTA del DBD (periodo, producto, ingreso neto); se reparten entre las órdenes del producto por cantidad
     ventas = {}
-    if ventas_csv:
-        for r in csv.DictReader(open(ventas_csv, encoding="utf-8")): ventas[(r["periodo"], r["ot_id"])] = float(r["ventas_netas_soles"])
-    idx = {"SW50": "OT001", "FRE9000": "OT002", "FRE9002": "OT003"}
-    def ingreso(p, ot): return ventas.get((p, idx.get(A._producto(ot))), 0.0)
+    for v in P.leer(libro, ["VENTA"]).get("VENTA", []):
+        if v.get("VTA_PER") and (v.get("VTA_EMP") in (None, emp)):
+            k = (str(v["VTA_PER"]), str(v["VTA_REC"])); ventas[k] = ventas.get(k, 0.0) + float(v.get("VTA_ING") or 0)
+    def ingreso(p, o):
+        hermanas = [x for x in por_per.get(p, {}) if pro.get(x) == pro.get(o)]; q = sum(can.get(x, 0) for x in hermanas)
+        return round(ventas.get((p, pro.get(o)), 0.0) * (can.get(o, 0) / q if q else 1 / max(1, len(hermanas))), 2)
     inc = _incluidos(sintesis)
-    series = A.serie_producto(por_per, can)
+    series = A.serie_producto(por_per, can, pro)
     est = A.estimado(series, periodo) if sintesis == "ESTIMADO" else {}
     objetos = []
     for o, v in sorted(por_per[periodo].items()):
         el = {e: _f(v.get(e, 0)) for e in PROD + OPER + FIN}
-        if sintesis == "ESTIMADO" and A._producto(o) in est:
-            el = {e: round(est[A._producto(o)]["cu_elementos"][e] * can[o], 2) for e in el}
+        if sintesis == "ESTIMADO" and pro.get(o) in est:
+            el = {e: round(est[pro[o]]["cu_elementos"][e] * can[o], 2) for e in el}
         el = {e: (x if e in inc else 0.0) for e, x in el.items()}
         ct = round(sum(el.values()), 2); ing = ingreso(periodo, o)
-        objetos.append(dict(codigo=o, producto=A._producto(o), cantidad=can.get(o, 0), md=el["MD"], mod=round(el["PD"] + el["SD"], 2), cif=el["CIF"],
+        objetos.append(dict(codigo=o, producto=pro.get(o, o), cantidad=can.get(o, 0), md=el["MD"], mod=round(el["PD"] + el["SD"], 2), cif=el["CIF"],
                             admin=el["GAD"], gasto_venta=el["GVT"], financiero=el["GFI"], costo_total=ct,
                             costo_unitario=round(ct / can[o], 4) if can.get(o) else 0, ingreso=ing, margen=round(ing - ct, 2)))
     def tot_per(p): return {e: round(sum(_f(v.get(e, 0)) for v in por_per[p].values()), 2) for e in PROD + OPER + FIN}

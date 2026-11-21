@@ -71,6 +71,18 @@ class ReynaHandler(BaseHTTPRequestHandler):
         if origins and origins != [f"http://{origin_host}"]:
             raise Problem(HTTPStatus.FORBIDDEN, "Abre la pantalla desde la misma dirección del servidor local.")
 
+    def _raw_body(self, limite=20 * 1024 * 1024):
+        lengths = self.headers.get_all("Content-Length", [])
+        if self.headers.get("Transfer-Encoding") or len(lengths) != 1 or not lengths[0].isdigit():
+            raise Problem(HTTPStatus.BAD_REQUEST, "Envía el archivo con su tamaño indicado.")
+        n = int(lengths[0])
+        if n > limite:
+            raise Problem(HTTPStatus.REQUEST_ENTITY_TOO_LARGE, "El libro supera el límite de 20 MiB.")
+        raw = self.rfile.read(n)
+        if len(raw) != n:
+            raise Problem(HTTPStatus.BAD_REQUEST, "El archivo recibido está incompleto.")
+        return raw
+
     def _body(self):
         if self.headers.get("Transfer-Encoding"):
             raise Problem(HTTPStatus.BAD_REQUEST, "Envía un cuerpo JSON con tamaño indicado.")
@@ -142,28 +154,55 @@ class ReynaHandler(BaseHTTPRequestHandler):
         if target.path in {"/", "/index.html"} and method == "GET":
             self._send(HTTPStatus.OK, self.server.index, "text/html; charset=utf-8")
             return
+        if target.path == "/api/libros" and method == "GET":
+            from .calculo_local import catalogo
+            self._json(HTTPStatus.OK, {"libros": catalogo(store.root)})
+            return
+        if target.path == "/api/libros" and method == "POST":
+            from .calculo_local import registrar
+            ficha, errores = registrar(store.root, self._raw_body())
+            if errores:
+                self._json(422, {"error": "El libro no cumple el formato DBD. Corrige estos puntos y vuelve a cargarlo.", "errores": errores})
+            else:
+                self._json(HTTPStatus.CREATED, ficha)
+            return
+        if target.path == "/api/plantilla" and method == "GET":
+            from .libro_dbd import plantilla_vacia
+            import tempfile as _t
+            with _t.TemporaryDirectory() as d:
+                contenido = Path(plantilla_vacia(Path(d) / "plantilla.xlsx")).read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            self.send_header("Content-Disposition", 'attachment; filename="plantilla_dbd_reyna.xlsx"')
+            self.send_header("Content-Length", str(len(contenido))); self.end_headers(); self.wfile.write(contenido)
+            return
         if target.path == "/api/calcular" and method == "POST":
             try:
-                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=2)
-                if set(params) != {"sintesis", "periodo"} or any(len(v) != 1 for v in params.values()):
+                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=3)
+                if not {"sintesis", "periodo"} <= set(params) <= {"sintesis", "periodo", "empresa"} or any(len(v) != 1 for v in params.values()):
                     raise ValueError
                 sintesis, periodo = params["sintesis"][0], params["periodo"][0]
-                if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"2010-(0[1-9]|1[0-2])", periodo):
+                empresa = params.get("empresa", [None])[0]
+                if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
+                    raise ValueError
+                if empresa is not None and not re.fullmatch(r"[a-z0-9_]{1,60}", empresa):
                     raise ValueError
                 self._body()
             except ValueError:
                 raise Problem(400, "Elige una síntesis y un periodo disponibles.") from None
             try:
                 from .calculo_local import calcular
-                resultado = calcular(store.root, periodo, sintesis)
-            except (OSError, ValueError, KeyError, ImportError):
-                raise Problem(422, "No se pudo calcular el periodo. Revisa los datos del caso.") from None
+                resultado = calcular(store.root, periodo, sintesis, empresa)
+            except ValueError as exc:
+                raise Problem(422, f"No se pudo calcular el periodo: {exc}") from None
+            except (OSError, KeyError, ImportError):
+                raise Problem(422, "No se pudo calcular el periodo. Revisa que el periodo exista en el libro de la empresa.") from None
             self._json(HTTPStatus.OK, resultado)
             return
         if target.path == "/api/descargar" and method == "GET":
             params = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
             nombre = params.get("archivo", [""])[0]
-            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
+            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo|entrada)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
                 raise Problem(400, "Elige un reporte válido.")
             try:
                 contenido = (store.root / "exportaciones" / nombre).read_bytes()
@@ -184,15 +223,18 @@ class ReynaHandler(BaseHTTPRequestHandler):
             return
         if target.path == "/api/resultados" and method == "GET":
             try:
-                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=2)
-                if set(params) != {"sintesis", "periodo"} or any(len(x) != 1 for x in params.values()):
+                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=3)
+                if not {"sintesis", "periodo"} <= set(params) <= {"sintesis", "periodo", "empresa"} or any(len(x) != 1 for x in params.values()):
                     raise ValueError
                 sintesis, periodo = params["sintesis"][0], params["periodo"][0]
+                empresa = params.get("empresa", ["frenosa"])[0]
                 if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
+                    raise ValueError
+                if not re.fullmatch(r"[a-z0-9_]{1,60}", empresa):
                     raise ValueError
             except ValueError:
                 raise Problem(400, "Elige una síntesis y un periodo válidos.") from None
-            nombre = f"frenosa_{periodo}_{sintesis}.json"
+            nombre = f"{empresa}_{periodo}_{sintesis}.json"
             candidatos = [self.server.store.root / "resultados" / nombre,
                           Path(__file__).resolve().parents[2] / "datos" / "resultados" / nombre,
                           INDEX.parent / nombre]
@@ -206,6 +248,10 @@ class ReynaHandler(BaseHTTPRequestHandler):
             except (OSError, ValueError, TypeError, KeyError):
                 raise Problem(422, "Los resultados disponibles no se pueden mostrar. Revisa el archivo de resultados.") from None
             self._json(HTTPStatus.OK, resultado)
+            return
+        if target.path == "/api/sello" and method == "POST":
+            from .calculo_local import verificar_sello
+            self._json(HTTPStatus.OK, verificar_sello(store.root, self._body().get("resultados") or {}))
             return
         if parts[:3] != ["", "api", "workspaces"]:
             raise Problem(HTTPStatus.NOT_FOUND, "La ruta no existe.")

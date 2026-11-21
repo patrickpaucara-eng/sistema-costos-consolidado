@@ -50,7 +50,7 @@
       background: #f7fafb;
     }
     input[aria-invalid="true"], textarea[aria-invalid="true"] { border-color: var(--error); }
-    button {
+    button, .button {
       cursor: pointer;
       min-height: 42px;
       border: 1px solid transparent;
@@ -60,6 +60,7 @@
       background: var(--accent);
       font-weight: 650;
     }
+    .button { display:inline-flex; align-items:center; text-decoration:none; }
     button:hover:not(:disabled) { background: var(--accent-dark); }
     button:disabled { cursor: not-allowed; opacity: .55; }
     button.secondary { color: var(--ink); background: var(--paper); border-color: #b9cbce; }
@@ -240,11 +241,11 @@
         <p class="nav-grupo">Gestión de costos</p>
         <a href="#dashboard">Dashboard</a><a href="#costos">Costos por objeto</a><a href="#ruta">Ruta del costo</a><a href="#comparar">Comparar síntesis</a><a href="#analisis">Análisis</a><a href="#proyeccion">Proyección</a><a href="#simulacion">Simulación</a><a href="#propuestas">Propuestas</a><a href="#control">Calidad y cuadre</a><a href="#modelo">Modelo ABC</a><a href="#reportes">Reportes</a>
         <p class="nav-grupo">Datos del ERP</p>
-        <a href="#importar">Importar libro</a><a href="#espacios">Espacios de trabajo</a><a href="#operar">Registrar movimiento</a><a href="#consultar">Consultar tablas</a><a href="#close-form">Cerrar mes</a>
+        <a href="#cargar-libro">Cargar empresa (libro DBD)</a><a href="#importar">Importar libro de operación</a><a href="#espacios">Espacios de trabajo</a><a href="#operar">Registrar movimiento</a><a href="#consultar">Consultar tablas</a><a href="#close-form">Cerrar mes</a>
       </nav>
       <p>Servidor y datos locales</p>
     </aside>
-    <main id="principal"><div id="inicio" class="selector-global"><div class="field"><label for="result-sintesis">Síntesis</label><select id="result-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></div><div class="field"><label for="result-periodo">Periodo</label><input id="result-periodo" type="month" value="2010-07"></div><button id="result-cargar" type="button">Consultar resultados</button><button id="result-calcular" type="button">Calcular</button><span id="result-status" role="status"></span></div>
+    <main id="principal"><div id="inicio" class="selector-global"><div class="field"><label for="result-empresa">Empresa</label><select id="result-empresa"><option value="frenosa">Frenosa</option></select></div><div class="field"><label for="result-sintesis">Síntesis</label><select id="result-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></div><div class="field"><label for="result-periodo">Periodo</label><input id="result-periodo" type="month" value="2010-07"></div><button id="result-cargar" type="button">Consultar resultados</button><button id="result-calcular" type="button">Calcular</button><span id="result-status" role="status"></span></div>
       <section id="dashboard" class="panel stack section-link"><h2>Dashboard</h2><p id="result-origin" class="data-badge">Cargando resultados…</p><div id="result-kpis" class="kpi-grid"></div><h3>Evolución de ventas, costos y margen</h3><p id="result-method"></p><p id="result-short"></p><p class="legend"><i class="sw" style="background:#315d6f"></i>Ventas <i class="sw" style="background:#ce8334"></i>Costo total <i class="sw" style="background:#118067"></i>Margen <i class="sw" style="background:#c1e4db"></i>Rango 90 % del margen (P05–P95). Línea sólida: histórico · punteada: proyección determinística · punto: mes actual.</p><div id="result-line"></div><h3>Composición de costos por objeto</h3><div id="result-bars"></div><p class="legend"><i class="sw" style="background:#116b61"></i>Material directo <i class="sw" style="background:#47988b"></i>Mano de obra <i class="sw" style="background:#82bdb1"></i>CIF <i class="sw" style="background:#d0a35c"></i>Administración <i class="sw" style="background:#dc7650"></i>Ventas <i class="sw" style="background:#845a78"></i>Financiero</p><h3>Relevancia</h3><p class="legend">Barras: importe de cada elemento · línea: % acumulado · <i class="sw" style="background:#b85142"></i>crítico (forma el 80 % del costo) <i class="sw" style="background:#47988b"></i>no crítico</p><div id="result-pareto"></div><h3>Hallazgos</h3><div id="result-hallazgos" class="result-table"></div></section>
       <section id="costos" class="panel stack section-link"><h2>Costos por objeto</h2><p id="result-sintesis-nota"></p><div id="result-estimacion"></div><div id="result-objetos" class="result-table"></div></section>
       <section id="analisis" class="panel stack section-link"><h2>Análisis y relevancia</h2><div id="result-relevancia" class="result-table"></div></section>
@@ -255,9 +256,11 @@
         <div class="ruta-sel"><div class="field"><label for="ruta-objeto">Orden</label><select id="ruta-objeto"></select></div><div class="field"><label for="ruta-elemento">Elemento</label><select id="ruta-elemento"></select></div></div>
         <div id="ruta-pasos" class="paso"></div><h3>Desde qué recursos</h3><div id="ruta-origen" class="result-table"></div><h3>A través de qué actividades o centros</h3><div id="ruta-via" class="result-table"></div><details><summary>Ver todos los tramos (detalle de cálculo)</summary><div id="ruta-tabla" class="result-table"></div></details><h3 id="kardex-titulo">Kardex del material (promedio ponderado)</h3><div id="ruta-kardex" class="result-table"></div></section>
       <section id="comparar" class="panel stack section-link"><h2>Comparar síntesis</h2><p class="legend">El mismo producto visto con tres reglas: REAL (costo integral para decidir precio y rentabilidad), CONTABLE (inventario según NIC 2; administración, ventas y financieros van a resultados, NIIF 18) y ESTIMADO (lo que la historia permitía esperar, fuera de muestra).</p><div id="comparar-tabla" class="result-table"></div></section>
-      <section id="control" class="panel stack section-link"><h2>Calidad y cuadre</h2><p class="legend">Verificaciones que el sistema calcula sobre cada resultado. Las marcadas ✗ en datos de origen son deficiencias de la fuente que el sistema detecta y neutraliza (reparto proporcional que conserva el costo).</p><div id="control-resumen" class="kpi-grid"></div><div id="control-tabla" class="result-table"></div></section>
+      <section id="control" class="panel stack section-link"><h2>Calidad y cuadre</h2><p class="legend">Verificaciones que el sistema calcula sobre cada resultado. Las marcadas ✗ en datos de origen son deficiencias de la fuente que el sistema detecta y neutraliza (reparto proporcional que conserva el costo).</p><div id="control-resumen" class="kpi-grid"></div><div id="sello" class="panel"></div><div id="control-tabla" class="result-table"></div></section>
       <section id="modelo" class="panel stack section-link"><h2>Modelo ABC de la empresa</h2><p class="legend">El modelo se define con datos del libro DBD (no está programado): cambiar de empresa es cambiar estas tablas.</p><h3>Reglas de reparto por etapa</h3><div id="modelo-reglas" class="result-table"></div><h3>Recursos</h3><div id="modelo-recursos" class="result-table"></div><h3>Actividades</h3><div id="modelo-actividades" class="result-table"></div><h3>Inductores</h3><div id="modelo-inductores" class="result-table"></div></section>
-      <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Descarga los resultados seleccionados.</p><div class="actions"><button type="button" data-exportar="resultados">Excel resultados</button><button type="button" data-exportar="analitica">Excel analítica</button><button type="button" data-exportar="proyeccion">Excel proyección</button><button type="button" data-exportar="html">HTML sin conexión</button><button type="button" data-exportar="codigo">Word código</button></div><p id="export-status" role="status"></p></section>
+      <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Descarga los resultados de la empresa, el periodo y la síntesis elegidos. El Excel de resultados incluye la ruta del costo (una hoja por etapa P1…P7), el kardex, el modelo ABC y el panel de calidad.</p><div class="actions"><button type="button" data-exportar="resultados">Excel resultados</button><button type="button" data-exportar="analitica">Excel analítica</button><button type="button" data-exportar="proyeccion">Excel proyección</button><button type="button" data-exportar="html">HTML sin conexión</button><button type="button" data-exportar="entrada">Excel datos de entrada (libro DBD)</button><button type="button" data-exportar="codigo">Word código</button></div><p id="export-status" role="status"></p></section>
+      <section id="cargar-libro" class="panel stack section-link"><h2>Cargar empresa (libro DBD)</h2><p class="legend">El sistema acepta un solo formato: el libro del DBD. Si los datos de tu ERP vienen en otro formato, se usa un adaptador (como el de Frenosa) que llena la plantilla. El libro se valida completo antes de aceptarlo; si algo no cumple, se rechaza y se explica qué corregir.</p>
+        <div class="actions"><a class="button" href="/api/plantilla" download>Descargar plantilla vacía</a><label class="button" for="libro-archivo">Elegir libro .xlsx</label><input id="libro-archivo" type="file" accept=".xlsx" hidden></div><p id="libro-estado" role="status"></p><ul id="libro-errores"></ul></section>
       <header class="page-heading">
         <div>
           <h1>Datos del ERP: carga y revisión</h1>
@@ -954,7 +957,16 @@
     };
     so.onchange=pintar; se.onchange=pintar; pintar();
   }
-  function control(r){
+  async function sello(r){
+    const box=$('sello'); box.replaceChildren(); const s=r.sello;
+    if(!s){ cell(box,'p','Resultado sin sello (publicado antes de esta versión o de ejemplo). Pulsa Calcular para sellarlo.'); return; }
+    cell(box,'h3','Sello del resultado');
+    [['Libro de datos',s.libro],['Huella del libro (SHA-256)',s.huella_libro],['Versión del sistema',s.version_sistema],['Método',s.metodo],['Semilla / simulaciones',`${s.semilla} / ${s.simulaciones}`],['Calculado',s.calculado]].forEach(([k,v])=>{const p=cell(box,'p','');cell(p,'b',k+': ');p.append(String(v));});
+    const est=cell(box,'p','Verificando…');
+    try{ const x=await fetch('/api/sello',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:{sello:s}})}); const j=await x.json();
+      est.textContent={VIGENTE:'✓ Sello vigente: el libro con que se calculó no ha cambiado.',LIBRO_MODIFICADO:'✗ El libro cambió después del cálculo: vuelve a calcular para emitir un resultado nuevo.',LIBRO_NO_DISPONIBLE:'El libro de origen no está en este equipo.'}[j.estado]||j.estado; est.className=j.estado==='VIGENTE'?'ok':'xx'; }catch{ est.textContent='No se pudo verificar el sello.'; }
+  }
+  function control(r){ sello(r);
     const c=r.control||[], res=$('control-resumen'); res.replaceChildren();
     const ok=c.filter(x=>x.ok).length; [['Verificaciones',c.length],['Cumplen',ok],['Observadas',c.length-ok]].forEach(([l,v])=>{const e=cell(res,'div','');e.className='kpi';cell(e,'span',l);cell(e,'b',String(v));});
     table('control-tabla',c.map(x=>({...x,estado:x.ok?'✓ cumple':'✗ observado'})),[['estado','Estado'],['control','Verificación'],['esperado','Esperado'],['obtenido','Obtenido'],['diferencia','Diferencia'],['detalle','Explicación']]);
@@ -969,25 +981,35 @@
   }
   async function comparar(r){
     const per=r.periodo_actual, todas={};
-    await Promise.all(['REAL','CONTABLE','ESTIMADO'].map(async s=>{ if(s===r.sintesis){todas[s]=r;return;} try{const x=await fetch('/api/resultados?'+new URLSearchParams({sintesis:s,periodo:per}));if(x.ok){const j=await x.json(); if(!j._nota) todas[s]=j;}}catch{} }));
+    await Promise.all(['REAL','CONTABLE','ESTIMADO'].map(async s=>{ if(s===r.sintesis){todas[s]=r;return;} try{const x=await fetch('/api/resultados?'+new URLSearchParams({empresa:$('result-empresa').value,sintesis:s,periodo:per}));if(x.ok){const j=await x.json(); if(!j._nota) todas[s]=j;}}catch{} }));
     const filas=r.objetos.map(o=>{ const g=s=>(todas[s]?.objetos||[]).find(x=>x.codigo===o.codigo); const re=g('REAL'),co=g('CONTABLE'),es=g('ESTIMADO');
       const dif=re&&co?re.costo_unitario-co.costo_unitario:null; const desv=re&&es&&es.costo_unitario?(re.costo_unitario/es.costo_unitario-1):null;
       return {producto:o.producto,real:re?.costo_unitario,contable:co?.costo_unitario,estimado:es?.costo_unitario,
         explica:(dif!==null?`REAL − CONTABLE = S/ ${number(dif)} por unidad: administración, ventas y financieros (gasto del periodo en NIC 2). `:'')+(desv!==null?`REAL ${desv>=0?'supera':'queda debajo de'} lo esperado en ${number(Math.abs(desv)*100)} %`+(()=>{const b=(todas.ESTIMADO?.estimacion||{})[o.producto]; if(!b) return '.'; const dentro=re.costo_unitario>=b.p05&&re.costo_unitario<=b.p95; return dentro?` y está dentro de la banda esperada (S/ ${number(b.p05)}–${number(b.p95)}): variación normal.`:` y está FUERA de la banda esperada (S/ ${number(b.p05)}–${number(b.p95)}): conviene revisar la causa.`;})():'ESTIMADO no disponible (se necesitan más de 7 meses de historia).')};});
     table('comparar-tabla',filas,[['producto','Producto'],['real','REAL S/ por unidad'],['contable','CONTABLE S/ por unidad'],['estimado','ESTIMADO S/ por unidad'],['explica','Lectura']]);
   }
-  async function load() { $('result-status').textContent='Consultando…'; try { const p=new URLSearchParams({sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/resultados?'+p); if(!response.ok) throw Error(); const r=await response.json();render(r);$('result-status').textContent='Resultados actualizados.'; } catch { $('result-status').textContent='No se pudieron consultar los resultados. Revisa el periodo y vuelve a intentar.'; } }
+  async function load() { $('result-status').textContent='Consultando…'; try { const p=new URLSearchParams({empresa:$('result-empresa').value,sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/resultados?'+p); if(!response.ok) throw Error(); const r=await response.json();render(r);$('result-status').textContent='Resultados actualizados.'; } catch { $('result-status').textContent='No se pudieron consultar los resultados. Revisa el periodo y vuelve a intentar.'; } }
   $('result-calcular').addEventListener('click', async () => {
     const button=$('result-calcular'); button.disabled=true; $('result-status').textContent='Calculando…';
-    try { const p=new URLSearchParams({sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/calcular?'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); if(!response.ok) throw Error(); render(await response.json()); $('result-status').textContent='Cálculo completado.'; }
-    catch { $('result-status').textContent='No se pudo calcular. Revisa el periodo y los datos.'; } finally { button.disabled=false; }
+    try { const p=new URLSearchParams({empresa:$('result-empresa').value,sintesis:$('result-sintesis').value,periodo:$('result-periodo').value}); const response=await fetch('/api/calcular?'+p,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}); if(!response.ok){ const e=await response.json().catch(()=>({})); throw Error(e.error||e.detail||''); } render(await response.json()); $('result-status').textContent='Cálculo completado.'; }
+    catch (e) { $('result-status').textContent=(e.message||'No se pudo calcular. Revisa el periodo y los datos.'); } finally { button.disabled=false; }
   });
   document.querySelectorAll('[data-exportar]').forEach(button=>button.addEventListener('click',async()=>{
     $('export-status').textContent='Preparando reporte…'; button.disabled=true;
     try { if(button.dataset.exportar!=='codigo' && (!resultadoActual || resultadoActual.periodo_actual!==$('result-periodo').value || resultadoActual.sintesis!==$('result-sintesis').value)) throw Error(); const r=await fetch('/api/exportar?tipo='+button.dataset.exportar,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:resultadoActual})}); if(!r.ok)throw Error(); const data=await r.json(); const archivo=data.ruta.split(/[\\/]/).pop(); const download=await fetch('/api/descargar?archivo='+encodeURIComponent(archivo)); if(!download.ok)throw Error(); const url=URL.createObjectURL(await download.blob()); const a=document.createElement('a');a.href=url;a.download=archivo;a.click();setTimeout(()=>URL.revokeObjectURL(url),10000); $('export-status').textContent='Reporte descargado.'; }
     catch { $('export-status').textContent='No se pudo descargar el reporte.'; } finally {button.disabled=false;}
   }));
-  $('result-cargar').addEventListener('click',load); load();
+  async function cargarEmpresas(){ try{ const j=await (await fetch('/api/libros')).json(); const sel=$('result-empresa'), prev=sel.value; sel.replaceChildren();
+      j.libros.forEach(l=>{const o=cell(sel,'option',l.nombre+(l.demostracion?' (demostración)':''));o.value=l.id;o.dataset.periodos=JSON.stringify(l.periodos);});
+      if([...sel.options].some(o=>o.value===prev)) sel.value=prev; ajustarPeriodo(); }catch{} }
+  function ajustarPeriodo(){ const o=$('result-empresa').selectedOptions[0]; if(!o) return; const ps=JSON.parse(o.dataset.periodos||'[]'); if(ps.length){ $('result-periodo').min=ps[0]; $('result-periodo').max=ps[ps.length-1]; if(!ps.includes($('result-periodo').value)) $('result-periodo').value=ps[ps.length-1]; } }
+  $('result-empresa').addEventListener('change',()=>{ajustarPeriodo();load();});
+  $('libro-archivo').addEventListener('change',async ev=>{ const f=ev.target.files[0]; if(!f) return; const est=$('libro-estado'), lista=$('libro-errores'); lista.replaceChildren(); est.textContent='Validando el libro…';
+    try{ const x=await fetch('/api/libros',{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:await f.arrayBuffer()}); const j=await x.json();
+      if(x.ok){ est.textContent=`✓ Libro aceptado: ${j.nombre}. Elige un periodo y pulsa Calcular.`; await cargarEmpresas(); $('result-empresa').value=j.id; ajustarPeriodo(); }
+      else { est.textContent='✗ '+(j.error||'El libro fue rechazado.'); (j.errores||[]).forEach(e=>cell(lista,'li',e)); } }
+    catch{ est.textContent='No se pudo enviar el libro.'; } ev.target.value=''; });
+  $('result-cargar').addEventListener('click',load); cargarEmpresas().then(load);
 })();
 
   </script>

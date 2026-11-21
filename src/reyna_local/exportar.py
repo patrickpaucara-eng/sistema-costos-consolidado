@@ -91,28 +91,23 @@ def _hojas_ruta_y_modelo(libro, r):
             hoja = libro.create_sheet(nombre[:31]); hoja.freeze_panes = 'A2'; _tabla_en_hoja(hoja, m[campo])
 
 
-def _entrada(destino):
-    """Datos de entrada del caso tal como los lee el cálculo: una hoja por CSV y la procedencia."""
-    import csv
-    libro = Workbook(); fuentes = libro.active; fuentes.title = 'FUENTES'
-    for nota in (RAIZ / 'datos/frenosa/FUENTES.md', RAIZ / 'datos/frenosa_supuestos/LEEME.md'):
-        if nota.is_file():
-            fuentes.append([nota.relative_to(RAIZ).as_posix()]); fuentes.cell(fuentes.max_row, 1).font = Font(bold=True)
-            for linea in nota.read_text(encoding='utf-8').splitlines():
-                fuentes.append([_celda(linea)])
-            fuentes.append([])
-    nombres = set()
-    for carpeta in ('datos/frenosa', 'datos/frenosa_supuestos'):
-        for archivo in sorted((RAIZ / carpeta).glob('*.csv')):
-            nombre = archivo.stem[:31]
-            while nombre in nombres: nombre = nombre[:29] + '_' + str(len(nombres))
-            nombres.add(nombre); hoja = libro.create_sheet(nombre)
-            with archivo.open(encoding='utf-8-sig', newline='') as f:
-                for i, fila in enumerate(csv.reader(f)):
-                    hoja.append([_celda(_numero(v)) for v in fila])
-                    if i == 0:
-                        for cell in hoja[1]: cell.font = Font(bold=True)
-            hoja.freeze_panes = 'A2'
+def _entrada(destino, resultados=None):
+    """Datos de entrada = el libro DBD exacto con que se calculó (el que valida libro_dbd y sella el resultado),
+    con una hoja LEEME al inicio. Los archivos de origen del ERP pertenecen al adaptador de cada empresa."""
+    import shutil
+    from .calculo_local import libros
+    from . import libro_dbd as B
+    disp = libros(destino.parent.parent) if destino.parent.name == 'exportaciones' else libros(destino.parent)
+    nombre = Path(((resultados or {}).get('sello') or {}).get('libro', 'frenosa.xlsx')).stem
+    origen = disp.get(nombre) or next(iter(disp.values()))
+    shutil.copy(origen, destino)
+    from openpyxl import load_workbook
+    libro = load_workbook(destino); ws = libro.create_sheet('LEEME', 0)
+    ws.append(['Datos de entrada del Sistema de Costos Reyna (formato DBD)']); ws['A1'].font = Font(bold=True)
+    ws.append(['Libro', origen.name]); ws.append(['Huella SHA-256 del libro original', B.huella(origen)])
+    ws.append(['Empresa', ' · '.join(B.empresa(origen))]); ws.append([])
+    ws.append(['Hoja', 'Contenido'])
+    for n in B.OBLIGATORIAS + B.OPCIONALES: ws.append([n, B.DESCRIPCION.get(n, '')])
     libro.save(destino); libro.close()
 
 
@@ -302,7 +297,7 @@ def exportar(resultados, tipo, carpeta):
         elif tipo == 'html':
             _html(resultados, destino)
         elif tipo == 'entrada':
-            _entrada(destino)
+            _entrada(destino, resultados if isinstance(resultados, dict) else None)
         else:
             from .codigo_fuente import generar_word
             generar_word(destino)
