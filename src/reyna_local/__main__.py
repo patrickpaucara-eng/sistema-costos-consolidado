@@ -158,9 +158,31 @@ class ReynaHandler(BaseHTTPRequestHandler):
             from .calculo_local import catalogo
             self._json(HTTPStatus.OK, {"libros": catalogo(store.root)})
             return
+        if target.path == "/api/libros/versiones" and method == "GET":
+            from .calculo_local import versiones
+            s_ = parse_qs(target.query).get("id", [""])[0]
+            if not re.fullmatch(r"[a-z0-9_]{1,60}", s_): raise Problem(400, "Elige una empresa válida.")
+            self._json(HTTPStatus.OK, {"versiones": versiones(store.root, s_)})
+            return
+        if target.path == "/api/libros/restaurar" and method == "POST":
+            from .calculo_local import restaurar
+            q = parse_qs(target.query); s_ = q.get("id", [""])[0]; v_ = q.get("version", [""])[0]
+            if not re.fullmatch(r"[a-z0-9_]{1,60}", s_) or not re.fullmatch(r"[a-z0-9_]{1,60}__\d{8}-\d{6}(?:-\d{6})?\.xlsx", v_):
+                raise Problem(400, "Elige una versión válida.")
+            self._body()
+            try:
+                self._json(HTTPStatus.OK, restaurar(store.root, s_, v_))
+            except ValueError as exc:
+                raise Problem(404, str(exc)) from None
+            return
         if target.path == "/api/libros" and method == "POST":
-            from .calculo_local import registrar
-            ficha, errores = registrar(store.root, self._raw_body())
+            from .calculo_local import registrar, YaExiste
+            try:
+                ficha, errores = registrar(store.root, self._raw_body(), reemplazar=parse_qs(target.query).get("reemplazar") == ["1"])
+            except YaExiste as e:
+                self._json(409, {"error": f"Ya existe un libro de «{e.ficha['nombre']}». ¿Reemplazarlo? La versión actual se guardará y podrás volver a ella.",
+                                 "existe": e.ficha})
+                return
             if errores:
                 self._json(422, {"error": "El libro no cumple el formato DBD. Corrige estos puntos y vuelve a cargarlo.", "errores": errores})
             else:
@@ -240,7 +262,11 @@ class ReynaHandler(BaseHTTPRequestHandler):
             candidatos = [self.server.store.root / "resultados" / nombre,
                           Path(__file__).resolve().parents[2] / "datos" / "resultados" / nombre,
                           INDEX.parent / nombre]
-            archivo = next((p for p in candidatos if p.is_file()), INDEX.parent / "resultados_ejemplo.json")
+            archivo = next((p for p in candidatos if p.is_file()), None)
+            if archivo is None:
+                if empresa != "frenosa":                    # nunca mostrar el ejemplo de otra empresa como si fuera suyo
+                    raise Problem(404, "No hay resultados calculados para esa empresa y periodo. Pulsa Calcular.")
+                archivo = INDEX.parent / "resultados_ejemplo.json"
             try:
                 resultado = json.loads(archivo.read_text(encoding="utf-8"))
                 if validar(resultado):

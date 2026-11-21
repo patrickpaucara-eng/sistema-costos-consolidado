@@ -69,3 +69,23 @@ def test_cargar_otra_empresa_calcular_y_sellar(tmp_path):
         assert sello() == 'LIBRO_MODIFICADO'
     finally:
         server.shutdown(); th.join(); server.server_close()
+
+
+def test_reemplazar_pide_confirmacion_guarda_version_y_restaura(tmp_path):
+    """Arrepentimiento (DBD p. 26): reemplazar exige confirmar; la versión previa se guarda y se puede volver a ella."""
+    datos = tmp_path / 'datos'
+    server = ReynaServer(datos, 0); th = threading.Thread(target=server.serve_forever, daemon=True); th.start()
+    base = f'http://127.0.0.1:{server.server_port}'
+    try:
+        try:
+            _post(base + '/api/libros', FRENOSA.read_bytes(), 'application/octet-stream')
+            raise AssertionError('reemplazó sin confirmar')
+        except HTTPError as e:
+            assert e.code == 409 and 'Reemplazarlo' in json.load(e)['error']
+        assert json.load(_post(base + '/api/libros?reemplazar=1', FRENOSA.read_bytes(), 'application/octet-stream'))['id'] == 'frenosa'
+        vers = json.load(urlopen(base + '/api/libros/versiones?id=frenosa'))['versiones']
+        assert len(vers) == 1
+        assert json.load(_post(base + f'/api/libros/restaurar?id=frenosa&version={vers[0]}', b'{}', 'application/json'))['nombre'] == 'Frenosa'
+        assert len(json.load(urlopen(base + '/api/libros/versiones?id=frenosa'))['versiones']) == 2   # nada se pierde
+    finally:
+        server.shutdown(); th.join(); server.server_close()

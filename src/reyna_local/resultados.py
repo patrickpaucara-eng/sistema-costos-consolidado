@@ -102,6 +102,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     r["kardex"] = _kardex(libro, val, periodo, nom)
     r["modelo"] = _modelo(libro)
     r["control"] = _control(aristas, r, nom)
+    r["datos_libro"] = _datos_libro(libro, periodo, nom)
     if est:
         r["estimacion"] = {k: dict(cu_total=round(v["cu_total"], 4), p05=round(v["p05"], 4), p95=round(v["p95"], 4), metodo=v["metodo"],
                                    mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
@@ -217,3 +218,18 @@ def _control(aristas, r, nom):
         add("CONTABLE: el inventario no incluye administración, ventas ni financieros (NIC 2 §16)", 0, fin)
     add("Contrato de resultados válido (errores encontrados)", 0, len(validar({**r, "control": []})), tol=0)
     return chk
+
+
+def _datos_libro(libro, periodo, nom):
+    """DBD p. 24: todo dato guardado debe verse en alguna interfaz. Tablas del libro del periodo que no tienen otra pantalla."""
+    t = P.leer(libro, ["VENTA", "MEDIDA", "CENTRO", "CLIENTE", "OBJETO"])
+    return dict(
+        ventas=[dict(producto=v.get("VTA_REC"), cliente=v.get("VTA_CLI"), canal=v.get("VTA_CANAL"), cantidad=v.get("VTA_CAN"),
+                     ingreso=v.get("VTA_ING")) for v in t.get("VENTA", []) if str(v.get("VTA_PER")) == periodo],
+        medidas=[dict(inductor=m.get("MED_CRIT"), inductor_nombre=nom.get(m.get("MED_CRIT"), m.get("MED_CRIT")), nivel=m.get("MED_NIVEL"),
+                      destino=m.get("MED_DEST"), destino_nombre=nom.get(m.get("MED_DEST"), m.get("MED_DEST")), cantidad=m.get("MED_CAN"))
+                 for m in t.get("MEDIDA", []) if str(m.get("MED_PER")) == periodo],
+        ordenes=[dict(orden=o.get("OBJ_NUM"), producto=o.get("OBJ_PRO"), cantidad=o.get("OBJ_CAN"), estado=o.get("OBJ_EST"))
+                 for o in t.get("OBJETO", [])][:1000],
+        centros=[dict(codigo=c.get("CEN_COD"), tipo=c.get("CEN_TIPO") or c.get("CEN_FUN"), inductor=c.get("CEN_INDUCTOR")) for c in t.get("CENTRO", [])],
+        clientes=[dict(codigo=c.get("CLI_COD"), nombre=c.get("CLI_NOM"), canal=c.get("CLI_CANAL"), region=c.get("CLI_REGION")) for c in t.get("CLIENTE", [])])

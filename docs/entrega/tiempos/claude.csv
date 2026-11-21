@@ -8,3 +8,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,16:35,18:05,Ruta del costo ALG-11 + kardex + modelo ABC + comparador + calidad y cuadre + menú gerencial,Monografía,Claude,compuerta VERDE 100 pruebas
 2026-11-21,18:05,19:20,Cargador único DBD + validación + sello + adaptador Frenosa separado + plantilla vacía,Monografía,Claude,compuerta VERDE 104 pruebas
 2026-11-21,19:20,20:10,Sistema HTML sin conexión interactivo + raíz única para el EXE (fallo de build corregido),Monografía,Claude,binario Linux calcula; compuerta VERDE
+2026-11-21,17:30,18:35,Diseño externo según DBD pp.23-29 (navegación Masiva-Detalle-Resumen, defaults, arrepentimiento, catálogo de mensajes, datos del libro),Monografía,Claude,compuerta VERDE 105 pruebas

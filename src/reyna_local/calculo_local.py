@@ -38,8 +38,35 @@ def catalogo(carpeta):
     return filas
 
 
-def registrar(carpeta, contenido, nombre_archivo="libro.xlsx"):
-    """Valida un libro subido; si cumple el formato DBD lo guarda como <slug de la empresa>.xlsx. Devuelve (ficha, errores)."""
+class YaExiste(Exception):
+    """Arrepentimiento (DBD p. 26): reemplazar un libro existente exige confirmación explícita."""
+    def __init__(self, ficha): super().__init__(ficha["nombre"]); self.ficha = ficha
+
+
+def versiones(carpeta, s):
+    d = Path(carpeta) / "libros" / "_versiones"
+    return [p.name for p in sorted(d.glob(f"{s}__*.xlsx"), reverse=True)] if d.is_dir() else []
+
+
+def restaurar(carpeta, s, version):
+    """Vuelve a la versión anterior elegida; la actual se guarda también como versión (nada se pierde)."""
+    d = Path(carpeta) / "libros"; v = d / "_versiones" / version
+    if not v.name.startswith(f"{s}__") or not v.is_file() or "/" in version or "\\" in version:
+        raise ValueError("Esa versión no existe.")
+    actual = d / f"{s}.xlsx"
+    if actual.is_file(): _guardar_version(d, s, actual)
+    shutil.copy(v, actual); _cache.pop(s, None)
+    cod, nom = B.empresa(actual); return dict(id=s, codigo=cod, nombre=nom)
+
+
+def _guardar_version(d, s, archivo):
+    (d / "_versiones").mkdir(parents=True, exist_ok=True)
+    shutil.copy(archivo, d / "_versiones" / f"{s}__{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}.xlsx")
+
+
+def registrar(carpeta, contenido, nombre_archivo="libro.xlsx", reemplazar=False):
+    """Valida un libro subido; si cumple el formato DBD lo guarda como <slug de la empresa>.xlsx. Devuelve (ficha, errores).
+    Si la empresa ya tiene libro, pide confirmación (YaExiste) y, al reemplazar, guarda la versión anterior."""
     dest_dir = Path(carpeta) / "libros"; dest_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".xlsx", dir=dest_dir, delete=False) as f:
         f.write(contenido); tmp = Path(f.name)
@@ -48,6 +75,10 @@ def registrar(carpeta, contenido, nombre_archivo="libro.xlsx"):
         if errores:
             return None, errores
         cod, nom = B.empresa(tmp); s = B.slug(nom)
+        if s in libros(carpeta) and not reemplazar:
+            raise YaExiste(dict(id=s, codigo=cod, nombre=nom))
+        previo = libros(carpeta).get(s)
+        if previo is not None and previo.is_file(): _guardar_version(dest_dir, s, previo)   # también el de demostración
         os.replace(tmp, dest_dir / f"{s}.xlsx"); _cache.pop(s, None)
         return dict(id=s, codigo=cod, nombre=nom), []
     finally:
