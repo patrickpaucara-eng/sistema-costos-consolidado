@@ -3,11 +3,14 @@ name: Paquete offline de Windows
 on:
   workflow_dispatch:
   push:
-    branches: [desarrollo/mvp-ola3]
+    branches: [desarrollo/mono]
     paths:
       - .github/workflows/windows-offline.yml
       - pyproject.toml
-      - src/reyna_local/**
+      - src/**
+      - casos/**
+      - datos/**
+      - fuente/**
       - tests/fixtures/ola1/Sistema_Costos.xlsx
       - tools/windows/**
 
