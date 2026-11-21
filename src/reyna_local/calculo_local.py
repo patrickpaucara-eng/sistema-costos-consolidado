@@ -2,6 +2,7 @@
 Libros de la carpeta de datos del usuario (<datos>/libros/*.xlsx) más el libro de demostración incluido (casos/libros)."""
 from datetime import datetime
 import json
+import re
 import os
 from pathlib import Path
 import shutil
@@ -17,12 +18,31 @@ _cache = {}
 
 
 def libros(carpeta):
-    """{slug: ruta} — los del usuario tienen prioridad sobre los de demostración."""
+    """{id: ruta}. Flujo único: además de los libros cargados (y el de demostración), cada ESPACIO DE OPERACIÓN es un libro
+    que se costea tal como quedó después de sus transacciones (id «esp_» + identificador del espacio)."""
     out = {}
     for base in (RAIZ / "casos" / "libros", Path(carpeta) / "libros"):
         for p in sorted(base.glob("*.xlsx")) if base.is_dir() else []:
             out[p.stem] = p
+    c = Path(carpeta)
+    if c.is_dir():
+        for d in sorted(c.iterdir()):
+            if re.fullmatch(r"[0-9a-f]{32}", d.name) and (d / "libro.xlsx").is_file():
+                out["esp_" + d.name[:12]] = d / "libro.xlsx"
     return out
+
+
+def _nombre_espacio(p):
+    try:
+        from openpyxl import load_workbook
+        wb = load_workbook(p, read_only=True)
+        try:
+            meta = {r[0]: r[1] for r in wb["_ReynaEspacio"].iter_rows(min_row=2, values_only=True) if r and r[0]}
+        finally:
+            wb.close()
+        return meta.get("name")
+    except Exception:
+        return None
 
 
 def catalogo(carpeta):
@@ -30,9 +50,11 @@ def catalogo(carpeta):
     for s, p in libros(carpeta).items():
         try:
             cod, nom = B.empresa(p)
+            if s.startswith("esp_"): nom = f"{nom} · espacio «{_nombre_espacio(p) or s}»"
             from openpyxl import load_workbook
             wb = load_workbook(p, read_only=True); pers = sorted(str(r[0]) for r in wb["PERIODO"].iter_rows(min_row=2, values_only=True) if r and r[0]); wb.close()
-            filas.append(dict(id=s, codigo=cod, nombre=nom, periodos=pers, demostracion=str(p).startswith(str(RAIZ / "casos"))))
+            filas.append(dict(id=s, codigo=cod, nombre=nom, periodos=pers, demostracion=str(p).startswith(str(RAIZ / "casos")),
+                              operacion=s.startswith("esp_")))
         except Exception:
             continue
     return filas
@@ -85,6 +107,12 @@ def registrar(carpeta, contenido, nombre_archivo="libro.xlsx", reemplazar=False)
         tmp.unlink(missing_ok=True)
 
 
+def ruta_libro(carpeta, s):
+    p = libros(carpeta).get(s)
+    if p is None: raise ValueError("La empresa elegida no tiene libro cargado.")
+    return p
+
+
 def _sello(libro, resultado):
     info = resultado.get("proyeccion_info") or {}
     return dict(libro=Path(libro).name, huella_libro=B.huella(libro), version_sistema=B.VERSION,
@@ -108,9 +136,11 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
         if errores:
             raise ValueError("El libro no cumple el formato DBD: " + "; ".join(errores[:5]))
         h = B.huella(libro)
+        from .flujo import preparar
+        costeo = preparar(libro)                 # kardex derivado de las transacciones del motor operativo (flujo único)
         if _cache.get(s, (None,))[0] != h:
-            cod, _ = B.empresa(libro); _cache[s] = (h, calcular_periodos(str(libro), cod))
-        resultado = construir(str(libro), periodo=periodo, sintesis=sintesis, _cache=_cache[s][1])
+            cod, _ = B.empresa(libro); _cache[s] = (h, calcular_periodos(costeo, cod))
+        resultado = construir(costeo, periodo=periodo, sintesis=sintesis, _cache=_cache[s][1])
         resultado["sello"] = _sello(libro, resultado)
         if validar(resultado) or resultado['periodo_actual'] != periodo or resultado['sintesis'] != sintesis:
             raise ValueError('El resultado no cumple el contrato solicitado.')

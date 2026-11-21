@@ -13,10 +13,21 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 def _f(x): return float(round(D(x), 2))
 
 
+def previos(libro):
+    """Entradas previas del reparto: valuación del kardex (ALG-01) y merma en exceso registrada por el motor operativo
+    (LINEA.LIN_EXC, NIC 2 §16 a): esa parte no va a la orden, es pérdida del periodo."""
+    exc = {}
+    for l in P.leer(libro, ["LINEA"]).get("LINEA", []):
+        try: x = float(l.get("LIN_EXC") or 0)
+        except (TypeError, ValueError): x = 0
+        if x > 0: exc[R._clave(l["LIN_EVE"], l["LIN_NUM"])] = x
+    return {"VALUACION_PROMEDIO": valuacion_alg01(libro), "EXCESO": exc}
+
+
 def calcular_periodos(libro, emp):
-    val = valuacion_alg01(libro); h = P.leer_conceptos(libro, R.CONSUME)
+    prev = previos(libro); h = P.leer_conceptos(libro, R.CONSUME)
     pers = sorted({str(r["CODIGO"]) for r in h.get("PERIODO", [])})
-    return {p: R.interno(h, dict(PER=p, EMP=emp), {"VALUACION_PROMEDIO": val}) for p in pers}, h
+    return {p: R.interno(h, dict(PER=p, EMP=emp), prev) for p in pers}, h
 
 
 PROD = ("MD", "PD", "SD", "CIF"); OPER = ("GAD", "GVT"); FIN = ("GFI",)
@@ -76,12 +87,15 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
           dict(categoria="OPERACION", concepto="Gastos de administración", importe=-t["GAD"]),
           dict(categoria="OPERACION", concepto="Gastos de ventas", importe=-t["GVT"]),
           dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-t["GFI"])]
-    r_oper = round(vt - cventas - t["GAD"] - t["GVT"], 2)
+    perd = _perdidas(libro, periodo)
+    tp = round(sum(x["importe"] for x in perd), 2)
+    if tp: er.insert(4, dict(categoria="OPERACION", concepto="Pérdidas anormales: merma en exceso (NIC 2 §16 a)", importe=-tp))
+    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp, 2)
     hall = A.diagnostico(series, periodo)
     rel = A.relevancia({e: t[e] for e in inc})
     esc = A.escenarios(dict(ventas=vt, **t))
     prop = A.propuestas(series, periodo, hall, rel)
-    val = valuacion_alg01(libro); par = dict(PER=periodo, EMP=emp); prev = {"VALUACION_PROMEDIO": val}
+    prev = previos(libro); val = prev["VALUACION_PROMEDIO"]; par = dict(PER=periodo, EMP=emp)
     nom = _nombres(libro)
     _, aristas, _ = R.correr(h, par, prev)
     acts, ind = [], {}
@@ -98,6 +112,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
                       costo_unitario_prom=round(ct / q, 4) if q else 0, resultado_antes_impuestos=round(r_oper - t["GFI"], 2)),
              objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=rel, hallazgos=hall, propuestas=prop,
              escenarios=esc, proyeccion_info=info)
+    r["perdidas"] = perd
     r["trazas"] = _trazas(h, par, prev, objetos, inc, nom) if sintesis != "ESTIMADO" else []
     r["kardex"] = _kardex(libro, val, periodo, nom)
     r["modelo"] = _modelo(libro)
@@ -202,6 +217,13 @@ def _control(aristas, r, nom):
         add(f"Kardex {nom.get(mat, mat)}: saldo inicial + movimientos = saldo final", ini + sum(x["importe"] for x in fil), fil[-1]["saldo_importe"])
         neg = min(x["saldo_cantidad"] for x in fil)
         chk.append(dict(control=f"Kardex {nom.get(mat, mat)}: sin saldos negativos", esperado=0, obtenido=round(neg, 4), diferencia=0, ok=neg >= -1e-6, detalle=""))
+    # 3b. Lo que salió del almacén hacia órdenes = material de las órdenes + merma en exceso (pérdida del periodo)
+    if k:
+        sal = -sum(x["importe"] for x in k if x["movimiento"] == "SALIDA")
+        md = sum(o["md"] for o in r["objetos"]) if r["sintesis"] != "ESTIMADO" else None
+        if md is not None:
+            add("Salidas del kardex = material de las órdenes + merma en exceso", sal, md + sum(p["importe"] for p in r.get("perdidas") or []),
+                tol=0.05 * max(1, len(k)), detalle="La merma que excede el estándar (COMPONENTE) se separa como pérdida del periodo (NIC 2 §16 a).")
     # 4. Inductores en % deben sumar 100 %
     tot = {}
     for a in aristas:
@@ -233,3 +255,22 @@ def _datos_libro(libro, periodo, nom):
                  for o in t.get("OBJETO", [])][:1000],
         centros=[dict(codigo=c.get("CEN_COD"), tipo=c.get("CEN_TIPO") or c.get("CEN_FUN"), inductor=c.get("CEN_INDUCTOR")) for c in t.get("CENTRO", [])],
         clientes=[dict(codigo=c.get("CLI_COD"), nombre=c.get("CLI_NOM"), canal=c.get("CLI_CANAL"), region=c.get("CLI_REGION")) for c in t.get("CLIENTE", [])])
+
+
+def _perdidas(libro, periodo):
+    """Merma en exceso del estándar (COMPONENTE: estándar × unidades × (1 + merma normal)) que el motor operativo separó al
+    registrar el consumo: es gasto del periodo, nunca costo del producto (NIC 2 §16 a), en REAL y en CONTABLE."""
+    prev = previos(libro); val = {}
+    for t, k, c, v in prev["VALUACION_PROMEDIO"]:
+        if c == "MONTO": val["-".join(str(k).split("-")[:2])] = float(v)
+    t = P.leer(libro, ["EVENTO", "LINEA"]); ev = {R._clave(e["EVE_NUM"], 0).split("-")[0]: e for e in t.get("EVENTO", [])}
+    out = []
+    for l in t.get("LINEA", []):
+        k = R._clave(l["LIN_EVE"], l["LIN_NUM"]); x = prev["EXCESO"].get(k)
+        e = ev.get(k.split("-")[0])
+        if not x or not e or str(e.get("EVE_PER")) != periodo: continue
+        q = float(l.get("LIN_CAN") or 0); v = val.get(k)
+        if v is None: v = float(l.get("LIN_MTO") or 0)
+        out.append(dict(orden=e.get("EVE_OBJ"), recurso=l["LIN_REC"], cantidad_exceso=x, cantidad_total=q,
+                        importe=round(v * x / q, 2) if q else 0.0, evento=k))
+    return out

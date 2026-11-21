@@ -92,10 +92,16 @@ def _contexto(hechos, per, emp):
     return ele, cen, obj, act, reglas, med, eventos
 
 
+def _clave(evento, numero):
+    n = lambda v: str(int(v)) if isinstance(v, float) and v == int(v) else str(v)
+    return f"{n(evento)}-{n(numero)}"
+
+
 def _origenes(hechos, previos, ele, eventos):
     """Montos de origen por (etapa, recurso) y consumos implícitos (criterio CONSUMO) por destino."""
     monto = defaultdict(D); consumo = defaultdict(lambda: defaultdict(D)); directo_cen = defaultdict(D)
     val = {}
+    exceso = {str(k): _d(v) for k, v in (previos.get("EXCESO") or {}).items()}   # merma en exceso (NIC 2 §16 a): no es costo de la orden
     for t, k, c, v in (previos.get("VALUACION_PROMEDIO") or []):
         if t == "SALIDA" and c == "MONTO": val[str(k)] = _d(v)
     for r in hechos["(sin MCD) LINEA"]:
@@ -108,7 +114,9 @@ def _origenes(hechos, previos, ele, eventos):
             if not obj: continue          # entradas al almacén (sin OT); una salida de MD sin OT la rechaza K0 (R-51)
             k = next((kk for kk in val if kk.startswith(f"{r['EVENTO']}-{r['NUMERO']}-")), None)
             if k is None: raise Rechazo(f"P1: la salida {r['EVENTO']}-{r['NUMERO']} de {rec} no tiene valorización (eje VALUACION)")
-            monto[("P1", rec)] += val[k]; consumo[rec][("OBJ", str(obj))] += _d(r["CANTIDAD"])
+            q = _d(r["CANTIDAD"]); x = exceso.get(_clave(r["EVENTO"], r["NUMERO"]), D(0))
+            parte = (q - x) / q if q and x else D(1)
+            monto[("P1", rec)] += val[k] * parte; consumo[rec][("OBJ", str(obj))] += q - x
         else:
             m = _d(r["CANTIDAD"]) * _d(r["COSTO_UNITARIO_DOCUMENTO"])
             if e == "IND" and cen and not obj:

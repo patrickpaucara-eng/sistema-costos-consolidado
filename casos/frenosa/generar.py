@@ -6,7 +6,7 @@ Solo datos. Reglas aplicadas (decisiones del dueño):
 - Mano de obra → actividades por minutos estándar Te × kg (Fd común se cancela); otros recursos y soporte → actividades;
   actividades → órdenes con pesos de producción y de soporte.
 Uso: python casos/frenosa/generar.py casos/plantilla_caso.xlsx <salida.xlsx>"""
-import csv, os, shutil, sys
+import calendar, csv, os, shutil, sys
 from collections import defaultdict
 from openpyxl import load_workbook
 DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "datos", "frenosa")
@@ -26,8 +26,37 @@ def _fec(s):
     return int(str(s).replace("-", "")[:8])
 
 
+class _Hoja:
+    """Escribe filas en el orden de columnas de la plantilla de costeo, pero en la hoja de destino por NOMBRE de columna:
+    el adaptador funciona igual con la plantilla de costeo o con la plantilla única del DBD (que tiene más columnas)."""
+    def __init__(self, ws, orden):
+        self.ws, self.orden = ws, orden; self.cab = [c.value for c in ws[1]]
+    @property
+    def max_row(self): return self.ws.max_row
+    def delete_rows(self, *a): return self.ws.delete_rows(*a)
+    def append(self, fila):
+        d = fila if isinstance(fila, dict) else dict(zip(self.orden, fila))
+        for c in self.cab:                       # multiempresa (I-5): toda clave de empresa de la fila es la de este libro
+            if c and c.endswith("_EMP") and d.get(c) is None: d[c] = EMP
+        self.ws.append([d.get(c) for c in self.cab])
+
+
+class _Libro:
+    def __init__(self, wb, orden): self.wb, self.orden, self.h = wb, orden, {}
+    def __getitem__(self, n):
+        if n not in self.h: self.h[n] = _Hoja(self.wb[n], self.orden.get(n) or [c.value for c in self.wb[n][1]])
+        return self.h[n]
+    def save(self, salida): self.wb.save(salida)
+
+
+def _orden_costeo():
+    wb = load_workbook(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "plantilla_caso.xlsx"), read_only=True)
+    try: return {ws.title: [c.value for c in next(ws.iter_rows(max_row=1))] for ws in wb.worksheets}
+    finally: wb.close()
+
+
 def generar(plantilla, salida, periodos=None):
-    shutil.copy(plantilla, salida); wb = load_workbook(salida)
+    shutil.copy(plantilla, salida); base = load_workbook(salida); wb = _Libro(base, _orden_costeo())
     for s in ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "EVENTO", "LINEA", "KARDEX", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "CENTRO", "ACTIVIDAD", "VENTA", "CLIENTE"]:
         if wb[s].max_row > 1: wb[s].delete_rows(2, wb[s].max_row - 1)
     ot = leer("Ordenes_Trabajo.csv"); pers = sorted({r["periodo"] for r in ot})
@@ -43,7 +72,10 @@ def generar(plantilla, salida, periodos=None):
         a, m = p.split("-"); fin = 20000000 + 0  # placeholder
         wb["PERIODO"].append([p, EMP, int(a + m + "01"), int(a + m + "31"), "A"])
     for r in ot:
-        if r["periodo"] in pers: wb["OBJETO"].append([r["codigo_ot"], EMP, r["codigo_ot"].split("-")[2], num(r["cantidad_producida"]), "T", None, None, None, None])
+        if r["periodo"] in pers:
+            a_, m_ = map(int, r["periodo"].split("-")); fin_mes = int(f"{a_}{m_:02d}{calendar.monthrange(a_, m_)[1]:02d}")
+            wb["OBJETO"].append(dict(OBJ_NUM=r["codigo_ot"], OBJ_EMP=EMP, OBJ_PRO=r["codigo_ot"].split("-")[2], OBJ_CAN=num(r["cantidad_producida"]),
+                                     OBJ_EST="T", OBJ_FEC_TER=fin_mes))   # orden mensual: admite movimientos hasta fin de mes (R-80)
     # --- kardex continuo (D-10, D-11) ---
     saldos = []                                   # (periodo, material, cantidad, importe) de «saldo inicial» para comprobar encadenamiento
     primero = True
@@ -115,7 +147,41 @@ def generar(plantilla, salida, periodos=None):
         if v["periodo"] in pers:
             wb["VENTA"].append([i, 1, v["periodo"], "MERCADO", prod[v["ot_id"] + "|" + v["periodo"]], num(v["cantidad_vendida"]),
                                 round(num(v["ventas_netas_soles"]), 2), None, None, None, EMP, "DIRECTO"])
-    wb.save(salida); return salida, saldos
+    # usuarios de la plantilla única: operan esta empresa (los permisos por transacción vienen de PERFIL_TRX)
+    if "USUARIO" in base.sheetnames:
+        for u in base["USUARIO"].iter_rows(min_row=2):
+            if u[0].value: u[3].value = EMP
+    if "CENTRO" in base.sheetnames:                                # almacén de materiales (lo usan T14/T15 del motor operativo)
+        wb["CENTRO"].append(["ALM_FRE", EMP, "ALM", 0, 0, 0, None, None, None, "S", "ALM"])
+        wb["CENTRO"].append(["PLANTA_FRE", EMP, "PRD", 0, 0, 0, None, None, None, "S", "PRD"])   # centro que consume (T15)
+    if "COMPONENTE" in base.sheetnames:                            # lista de materiales: 1 kg de material por pieza (peso 1 kg, Cuadro 14)
+        for c, d in MAT.items():
+            wb["COMPONENTE"].append(dict(CMP_PRO=d[4:], CMP_REC=d, CMP_CAN_EST=1, CMP_MERMA=0))
+    if "ASIGNACION" in base.sheetnames:                            # valuación de materiales: promedio ponderado (ALG-PROM)
+        wb["ASIGNACION"].append(dict(ASI_TIPO="TRE", ASI_OBJ="MAT_DIR", ASI_PROP="INV", ASI_ALG="ALG-PROM", ASI_DESDE=19000101))
+    wb.save(salida)
+    if "EXISTENCIA" in base.sheetnames: _existencias(salida)
+    return salida, saldos
+
+
+def _existencias(salida):
+    """Saldo vigente de cada material en el almacén (EXISTENCIA y KARDEX_SALDO), igual al cierre del kardex continuo:
+    es el punto de partida de los movimientos que se registren después en el motor operativo."""
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "src"))
+    from integra_env import valuacion_alg01
+    val = {(k[1], k[2]): k[3] for k in valuacion_alg01(salida)}
+    wb = load_workbook(salida); sal = {}
+    cab = [c.value for c in wb["KARDEX"][1]]
+    for f in wb["KARDEX"].iter_rows(min_row=2, values_only=True):
+        r = dict(zip(cab, f))
+        if not r.get("KDX_REC"): continue
+        q, v = sal.get((r["KDX_REC"], r["KDX_ALM"]), (0.0, 0.0)); can = float(r["KDX_CAN"] or 0)
+        monto = float(r["KDX_VAL"]) if can >= 0 and r.get("KDX_VAL") is not None else -float(val.get((f"{r['KDX_EVE']}-{r['KDX_LIN']}-{r['KDX_ALM']}", "MONTO"), 0))
+        sal[(r["KDX_REC"], r["KDX_ALM"])] = (q + can, v + monto)
+    for (rec, alm), (q, v) in sorted(sal.items()):
+        wb["EXISTENCIA"].append([rec, alm, q, round(v, 2), round(v / q, 6) if q else 0, EMP])
+        wb["KARDEX_SALDO"].append([rec, alm, q, round(v, 2)])
+    wb.save(salida)
 
 
 CENTROS_GASTO = [("ADM_FRE", "ADM", "Administración", "KG_PRODUCIDOS"), ("VTA_COM", "VTA", "Ventas: comisiones", "VENTAS_NETAS"),

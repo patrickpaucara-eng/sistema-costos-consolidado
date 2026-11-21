@@ -9,3 +9,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,18:05,19:20,Cargador único DBD + validación + sello + adaptador Frenosa separado + plantilla vacía,Monografía,Claude,compuerta VERDE 104 pruebas
 2026-11-21,19:20,20:10,Sistema HTML sin conexión interactivo + raíz única para el EXE (fallo de build corregido),Monografía,Claude,binario Linux calcula; compuerta VERDE
 2026-11-21,17:30,18:35,Diseño externo según DBD pp.23-29 (navegación Masiva-Detalle-Resumen, defaults, arrepentimiento, catálogo de mensajes, datos del libro),Monografía,Claude,compuerta VERDE 105 pruebas
+2026-11-21,18:38,19:55,Flujo único: plantilla DBD única, adaptador por columnas, espacio = libro, kardex derivado, merma en exceso a pérdida,Monografía,Claude,compuerta VERDE 106 pruebas; humo del binario aprobado

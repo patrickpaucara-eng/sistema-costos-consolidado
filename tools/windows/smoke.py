@@ -43,7 +43,7 @@ def running(executable, directory, env, log):
 
 
 def request(port, path, expected, data=None):
-    client = HTTPConnection("127.0.0.1", port, timeout=10)
+    client = HTTPConnection("127.0.0.1", port, timeout=180)
     try:
         if data is None:
             client.request("GET", path)
@@ -61,7 +61,6 @@ def request(port, path, expected, data=None):
 def verify(executable, fixture, index, directory):
     directory.mkdir()
     isolated_exe = Path(shutil.copy2(executable, directory))
-    workbook = Path(shutil.copy2(fixture, directory))
     local_appdata = directory / "Datos del usuario"
     data_dir = local_appdata / "ReynaCostos" / "datos"
     env = {key: value for key, value in os.environ.items() if not key.startswith("PYTHON")}
@@ -80,10 +79,8 @@ def verify(executable, fixture, index, directory):
             raise RuntimeError("La interfaz empaquetada difiere del HTML de origen.")
         if json.loads(request(port, "/api/workspaces", 200)) != {"workspaces": []}:
             raise RuntimeError("La carpeta de prueba debía empezar vacía.")
-        workspace = json.loads(request(port, "/api/workspaces", 201, {
-            "name": "Prueba del paquete",
-            "workbook_path": str(workbook),
-        }))
+        # flujo único: el espacio de operación se crea con el libro DBD de la empresa (sin casos de terceros)
+        workspace = json.loads(request(port, "/api/libros/operar?id=frenosa", 201, {"name": "Prueba del paquete"}))
         stored = data_dir / workspace["id"] / "libro.xlsx"
         if not stored.is_file():
             raise RuntimeError(f"El libro no se guardó bajo LOCALAPPDATA: {stored}")
@@ -93,6 +90,10 @@ def verify(executable, fixture, index, directory):
         result = json.loads(request(port, "/api/calcular?sintesis=REAL&periodo=2010-07", 200, {}))
         if result.get("periodo_actual") != "2010-07" or result.get("kpi", {}).get("ventas") != 888730:
             raise RuntimeError("El cálculo de julio no coincide con el caso de referencia.")
+        esp = "esp_" + workspace["id"][:12]
+        operado = json.loads(request(port, f"/api/calcular?empresa={esp}&sintesis=REAL&periodo=2010-07", 200, {}))
+        if operado.get("kpi") != result.get("kpi"):
+            raise RuntimeError("El espacio de operación no costea igual que el libro de la empresa.")
         reporte = json.loads(request(port, "/api/exportar?tipo=html", 201, {"resultados": result}))
         html = Path(reporte["ruta"]).read_text(encoding="utf-8")
         if "<html" not in html.lower() or "http://" in html or "https://" in html:

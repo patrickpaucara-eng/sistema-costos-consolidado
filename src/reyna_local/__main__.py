@@ -175,6 +175,18 @@ class ReynaHandler(BaseHTTPRequestHandler):
             except ValueError as exc:
                 raise Problem(404, str(exc)) from None
             return
+        if target.path == "/api/libros/operar" and method == "POST":
+            from .calculo_local import ruta_libro
+            s_ = parse_qs(target.query).get("id", [""])[0]
+            if not re.fullmatch(r"[a-z0-9_]{1,60}", s_) or s_.startswith("esp_"): raise Problem(400, "Elige un libro de empresa válido.")
+            body = self._body()
+            try:
+                ruta = ruta_libro(store.root, s_)
+            except ValueError as exc:
+                raise Problem(404, str(exc)) from None
+            nombre = str(body.get("name") or f"Operación {s_}")[:160]
+            self._json(HTTPStatus.CREATED, store.create({"name": nombre, "workbook_path": str(ruta)}))
+            return
         if target.path == "/api/libros" and method == "POST":
             from .calculo_local import registrar, YaExiste
             try:

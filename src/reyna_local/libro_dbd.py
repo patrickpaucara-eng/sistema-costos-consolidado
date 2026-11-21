@@ -7,7 +7,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 
 from .raiz import RAIZ
-PLANTILLA = RAIZ / "casos" / "plantilla_caso.xlsx"
+PLANTILLA = RAIZ / "casos" / "plantilla_dbd.xlsx"      # plantilla ÚNICA (D-6): operar y costear en el mismo libro
 VERSION = "1.0-MN01"
 
 # tablas que la empresa debe llenar (las demás son configuración del método o salidas del sistema)
@@ -141,5 +141,6 @@ def plantilla_vacia(destino):
     ws.append(["Hoja", "Obligatoria", "Qué contiene"])
     for n in OBLIGATORIAS + OPCIONALES: ws.append([n, "Sí" if n in OBLIGATORIAS else "No", DESCRIPCION.get(n, "")])
     ws.append([]); ws.append(["Las demás hojas son configuración del método o salidas del sistema: no se llenan."])
+    ws.append(["Para operar el libro (registrar compras, consumos, cerrar el mes) asigna tu empresa a los usuarios: hoja USUARIO, columna USU_EMP."])
     ws.append(["Si los datos de tu ERP tienen otro formato, escribe un adaptador que llene esta plantilla (ejemplo: casos/frenosa/generar.py)."])
     wb.save(destino); return destino
