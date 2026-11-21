@@ -6,3 +6,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,14:02,14:09,OT-C07 pantallas y HTML de analítica,Monografía,Codex,Tres síntesis y recorrido con navegador verificados
 2026-11-21,14:15,14:17,OT-C05 diagnóstico de empaquetado,Monografía,Codex,Dependencias y rutas del binario pendientes de adaptar y probar
 2026-11-21,14:17,14:19,OT-C05 empaquetado y humo Linux,Monografía,Codex,Binario equivalente calcula y exporta; Windows pendiente
+2026-11-21,14:25,14:33,OT-C06 generadores Word y pruebas,Monografía,Codex,Cinco documentos generados y verificación de estructura
