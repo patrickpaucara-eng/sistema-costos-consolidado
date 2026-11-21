@@ -65,12 +65,47 @@ def _html(resultados, destino):
     kpis = ''.join('<li><b>' + escape(k) + ':</b> ' + escape(str(v)) + '</li>' for k, v in resultados['kpi'].items())
     secciones = ''.join('<h2>' + escape(nombre) + '</h2>' + tabla(resultados[campo])
                         for nombre, campo in [*SECCIONES['resultados'], *SECCIONES['analitica'], *SECCIONES['proyeccion']])
+    # Gráfico sin dependencias ni acceso de red; usa las cifras del contrato.
+    serie = [x for x in resultados['serie'] if isinstance(x.get('margen'), (int, float))]
+    chart = ''
+    if serie:
+        valores = [x['margen'] for x in serie]
+        minimo, maximo = min(0, *valores), max(1, *valores)
+        puntos = ' '.join(f'{40 + 700*i/max(1,len(serie)-1):.2f},{190 - 150*(v-minimo)/(maximo-minimo):.2f}' for i,v in enumerate(valores))
+        chart = '<h2>Margen por periodo</h2><svg viewBox="0 0 780 220" role="img" aria-label="Margen por periodo"><polyline fill="none" stroke="#118067" stroke-width="3" points="' + puntos + '"/></svg>'
+    objetos = resultados['objetos']
+    if objetos:
+        keys = ('md', 'mod', 'cif', 'admin', 'gasto_venta', 'financiero')
+        colors = ('#116b61', '#47988b', '#82bdb1', '#d0a35c', '#dc7650', '#845a78')
+        maximum = max(1, *(float(o.get('costo_total', 0)) for o in objetos))
+        width = 650 / len(objetos)
+        bars = []
+        for index, obj in enumerate(objetos):
+            y = 190
+            for key, color in zip(keys, colors):
+                height = max(0, float(obj.get(key, 0))) * 150 / maximum
+                y -= height
+                bars.append(f'<rect x="{60+index*width:.2f}" y="{y:.2f}" width="{width*.6:.2f}" height="{height:.2f}" fill="{color}"/>')
+            bars.append(f'<text x="{60+index*width:.2f}" y="215">{escape(str(obj.get("codigo", "")))}</text>')
+        chart += '<h2>Costos por objeto</h2><svg viewBox="0 0 780 230" role="img" aria-label="Costos por objeto">' + ''.join(bars) + '</svg>'
+    relevancia = resultados['relevancia']
+    if relevancia:
+        maximum = max(1, *(float(x.get('importe', 0)) for x in relevancia))
+        width = 650 / len(relevancia)
+        barras, puntos = [], []
+        for index, item in enumerate(relevancia):
+            x = 60 + index * width
+            height = max(0, float(item.get('importe', 0))) * 150 / maximum
+            color = '#b85142' if item.get('critico') else '#47988b'
+            barras.append(f'<rect x="{x:.2f}" y="{190-height:.2f}" width="{width*.6:.2f}" height="{height:.2f}" fill="{color}"/>')
+            puntos.append(f'{x+width*.3:.2f},{190-float(item.get("acumulado",0))*150:.2f}')
+        chart += '<h2>Relevancia</h2><svg viewBox="0 0 780 220" role="img" aria-label="Relevancia">' + ''.join(barras) + '<polyline fill="none" stroke="#243f80" stroke-width="2" points="' + ' '.join(puntos) + '"/></svg>'
     documento = ('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
                  '<title>Resultados de costos</title><style>body{font:16px system-ui;margin:2rem;color:#15253d}'
                  'table{border-collapse:collapse;display:block;overflow:auto;margin-bottom:2rem}td,th{border:1px solid #ccd6e0;'
                  'padding:.5rem;text-align:left}th{background:#e8eff8}li{margin:.5rem}</style><h1>Resultados de costos</h1><p>'
                  + escape(str(resultados.get('_nota', 'Resultado suministrado'))) + ' · ' + escape(resultados['periodo_actual'])
-                 + ' · ' + escape(resultados['sintesis']) + '</p><ul>' + kpis + '</ul>' + secciones + '</html>')
+                 + ' · ' + escape(resultados['sintesis']) + '</p><ul>' + kpis + '</ul>' + chart + secciones + '</html>')
     destino.write_text(documento, encoding='utf-8')
 
 

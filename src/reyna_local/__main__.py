@@ -142,6 +142,35 @@ class ReynaHandler(BaseHTTPRequestHandler):
         if target.path in {"/", "/index.html"} and method == "GET":
             self._send(HTTPStatus.OK, self.server.index, "text/html; charset=utf-8")
             return
+        if target.path == "/api/calcular" and method == "POST":
+            try:
+                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=2)
+                if set(params) != {"sintesis", "periodo"} or any(len(v) != 1 for v in params.values()):
+                    raise ValueError
+                sintesis, periodo = params["sintesis"][0], params["periodo"][0]
+                if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"2010-(0[1-9]|1[0-2])", periodo):
+                    raise ValueError
+                self._body()
+            except ValueError:
+                raise Problem(400, "Elige una síntesis y un periodo disponibles.") from None
+            try:
+                from .calculo_local import calcular
+                resultado = calcular(store.root, periodo, sintesis)
+            except (OSError, ValueError, KeyError, ImportError):
+                raise Problem(422, "No se pudo calcular el periodo. Revisa los datos del caso.") from None
+            self._json(HTTPStatus.OK, resultado)
+            return
+        if target.path == "/api/descargar" and method == "GET":
+            params = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
+            nombre = params.get("archivo", [""])[0]
+            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
+                raise Problem(400, "Elige un reporte válido.")
+            try:
+                contenido = (store.root / "exportaciones" / nombre).read_bytes()
+            except OSError:
+                raise Problem(404, "El reporte no está disponible.") from None
+            self._send(HTTPStatus.OK, contenido, "application/octet-stream")
+            return
         if target.path == "/api/exportar" and method == "POST":
             try:
                 params = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
