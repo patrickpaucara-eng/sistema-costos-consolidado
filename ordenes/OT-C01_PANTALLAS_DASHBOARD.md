@@ -3,7 +3,7 @@ Rama: `codex/ot-c01` desde `desarrollo/mono`. PR contra `desarrollo/mono`. No un
 **Objetivo:** el sistema se ve y se navega como un producto profesional (20 % de la nota: «flexible, fácil, agradable»).
 **Entrada:** el contrato `src/reyna_local/contrato.py` y su ejemplo `tests/fixtures/contrato/resultados_ejemplo.json`. Las pantallas SOLO leen el contrato; no calculan costos.
 **Hacer:**
-1. Endpoint `GET /api/resultados?sintesis=REAL|CONTABLE|ESTIMADO&periodo=AAAA-MM` en `__main__.py`. Por ahora devuelve el ejemplo (marcado «EJEMPLO»); Claude conectará el cálculo real después sin cambiar la forma.
+1. Endpoint `GET /api/resultados?sintesis=REAL|CONTABLE|ESTIMADO&periodo=AAAA-MM` en `__main__.py`. Devuelve `datos/resultados/frenosa_<periodo>_<sintesis>.json` si existe (ya hay **datos reales** de Frenosa julio 2010 en REAL) y si no, el ejemplo marcado «EJEMPLO». Claude agregará más periodos y síntesis sin cambiar la forma.
 2. Navegación en `web/index.html` (o varios archivos en `web/`): Inicio · Cargar (lo existente) · Cerrar mes · **Dashboard** · Costos por objeto · Análisis (hallazgos y relevancia) · Proyección · Simulación (escenarios) · Propuestas · Reportes. Selector de síntesis y periodo visible siempre.
 3. **Dashboard:** 5 KPI del contrato; gráfico de línea con histórico + actual + proyectado determinístico y banda estocástica P05–P95; barras apiladas por objeto (md, mod, cif, admin, gasto_venta, financiero); Pareto de relevancia con los críticos marcados; tabla de hallazgos con impacto en S/.
 4. Gráficos con JavaScript **embebido** (sin CDN: debe funcionar sin internet). Diseño limpio, consistente, legible, números con separador de miles.
