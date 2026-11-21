@@ -1,7 +1,7 @@
 """Construye el CONTRATO de resultados (contrato.py) desde el cálculo publicado del caso. Las pantallas solo leen esto.
 Etapa 1: síntesis REAL, ABC de producción (MD, MOD, CIF) y serie histórica. Etapas 2-3 agregan admin/ventas/financieros
 (NIIF 18), relevancia, hallazgos, proyección, escenarios y propuestas sin cambiar la forma."""
-import csv, os
+import csv, math, os
 from decimal import Decimal as D
 import puerto_lectura as P
 from metodos import reparto_etapas as R
@@ -19,50 +19,73 @@ def calcular_periodos(libro, emp):
     return {p: R.interno(h, dict(PER=p, EMP=emp), {"VALUACION_PROMEDIO": val}) for p in pers}, h
 
 
+PROD = ("MD", "PD", "SD", "CIF"); OPER = ("GAD", "GVT"); FIN = ("GFI",)
+
+
+def _incluidos(sintesis):
+    """Reglas por tipo de síntesis (D-8/D-9): qué elementos forman el costo del objeto."""
+    return PROD + OPER + FIN if sintesis in ("REAL", "ESTIMADO") else PROD
+
+
 def construir(libro, emp="FRE", nombre="Frenosa", periodo=None, ventas_csv=None, sintesis="REAL", _cache=None):
-    """Síntesis (D-8/D-9, reglas por tipo de síntesis):
-    REAL     costo integral del objeto = MD + MOD + CIF + administración + ventas + financieros (gerencial, precio objetivo).
-    CONTABLE costo del inventario = MD + MOD + CIF (NIC 2 §10-16): administración, ventas y financieros son gastos del periodo;
-             estado de resultados NIIF 18: Operación (ventas, costo de ventas, administración, ventas) y Financiación (financieros)."""
-    if sintesis not in ("REAL", "CONTABLE"): raise ValueError("síntesis ESTIMADO: Etapa 3")
+    """REAL     costo integral = MD + MOD + CIF + administración + ventas + financieros (gerencial, precio objetivo).
+    CONTABLE costo del inventario = MD + MOD + CIF (NIC 2 §10-16); el resto es gasto del periodo; estado de resultados NIIF 18.
+    ESTIMADO costo más fiel según la historia (estadística, fuera de muestra), con banda; no es un estándar.
+    En las tres: descriptivo, diagnóstico, relevancia, proyección 6 meses (determinística y estocástica), escenarios y propuestas."""
+    from reyna_local import analisis as A
+    if sintesis not in ("REAL", "CONTABLE", "ESTIMADO"): raise ValueError("síntesis desconocida")
     por_per, h = _cache or calcular_periodos(libro, emp)
     pers = sorted(por_per); periodo = periodo or pers[-1]
-    can = {str(r["NUMERO"]): float(r.get("CANTIDAD") or 0) for r in P.leer(libro, ["OBJETO"])["OBJETO"] for r in [dict(NUMERO=r["OBJ_NUM"], CANTIDAD=r["OBJ_CAN"], PRO=r["OBJ_PRO"])]}
-    pro = {r["OBJ_NUM"]: r["OBJ_PRO"] for r in P.leer(libro, ["OBJETO"])["OBJETO"]}
+    objs = P.leer(libro, ["OBJETO"])["OBJETO"]
+    can = {r["OBJ_NUM"]: float(r["OBJ_CAN"] or 0) for r in objs}; pro = {r["OBJ_NUM"]: r["OBJ_PRO"] for r in objs}
     ventas = {}
     if ventas_csv:
-        for r in csv.DictReader(open(ventas_csv, encoding="utf-8")):
-            ventas[(r["periodo"], r["ot_id"])] = float(r["ventas_netas_soles"])
-    def ingreso(p, ot):   # ventas por OT del periodo (ot_id OT00n dentro del código)
-        idx = {"SW50": "OT001", "FRE9000": "OT002", "FRE9002": "OT003"}
-        clave = next((v for k, v in idx.items() if f"-{k}-" in ot), None)
-        return ventas.get((p, clave), 0.0)
+        for r in csv.DictReader(open(ventas_csv, encoding="utf-8")): ventas[(r["periodo"], r["ot_id"])] = float(r["ventas_netas_soles"])
+    idx = {"SW50": "OT001", "FRE9000": "OT002", "FRE9002": "OT003"}
+    def ingreso(p, ot): return ventas.get((p, idx.get(A._producto(ot))), 0.0)
+    inc = _incluidos(sintesis)
+    series = A.serie_producto(por_per, can)
+    est = A.estimado(series, periodo) if sintesis == "ESTIMADO" else {}
     objetos = []
     for o, v in sorted(por_per[periodo].items()):
-        md, mod, cif = _f(v.get("MD", 0)), _f(v.get("PD", 0)) + _f(v.get("SD", 0)), _f(v.get("CIF", 0))
-        gad, gvt, gfi = (_f(v.get(k, 0)) for k in ("GAD", "GVT", "GFI"))
-        if sintesis == "CONTABLE": gad = gvt = gfi = 0.0          # gastos del periodo, nunca inventario (NIC 2 §16)
-        ct = round(md + mod + cif + gad + gvt + gfi, 2); ing = ingreso(periodo, o)
-        objetos.append(dict(codigo=o, producto=pro.get(o, o), cantidad=can.get(o, 0), md=md, mod=mod, cif=cif, admin=gad, gasto_venta=gvt,
-                            financiero=gfi, costo_total=ct, costo_unitario=round(ct / can[o], 4) if can.get(o) else 0, ingreso=ing, margen=round(ing - ct, 2)))
+        el = {e: _f(v.get(e, 0)) for e in PROD + OPER + FIN}
+        if sintesis == "ESTIMADO" and A._producto(o) in est:
+            el = {e: round(est[A._producto(o)]["cu_elementos"][e] * can[o], 2) for e in el}
+        el = {e: (x if e in inc else 0.0) for e, x in el.items()}
+        ct = round(sum(el.values()), 2); ing = ingreso(periodo, o)
+        objetos.append(dict(codigo=o, producto=pro.get(o, o), cantidad=can.get(o, 0), md=el["MD"], mod=round(el["PD"] + el["SD"], 2), cif=el["CIF"],
+                            admin=el["GAD"], gasto_venta=el["GVT"], financiero=el["GFI"], costo_total=ct,
+                            costo_unitario=round(ct / can[o], 4) if can.get(o) else 0, ingreso=ing, margen=round(ing - ct, 2)))
+    def tot_per(p): return {e: round(sum(_f(v.get(e, 0)) for v in por_per[p].values()), 2) for e in PROD + OPER + FIN}
+    def vta_per(p): return round(sum(ingreso(p, o) for o in por_per[p]), 2)
     serie = []
-    for p in pers:
-        ct = sum(_f(sum(v.values())) for v in por_per[p].values()); vt = sum(ingreso(p, o) for o in por_per[p])
-        serie.append(dict(periodo=p, tipo="ACTUAL" if p == periodo else "HISTORICO", ventas=round(vt, 2), costo_total=round(ct, 2), margen=round(vt - ct, 2)))
-    vt = sum(o["ingreso"] for o in objetos); ct = sum(o["costo_total"] for o in objetos); q = sum(o["cantidad"] for o in objetos)
-    tot = {k: round(sum(_f(v.get(k, 0)) for v in por_per[periodo].values()), 2) for k in ("MD", "PD", "SD", "CIF", "GAD", "GVT", "GFI")}
-    cventas = round(tot["MD"] + tot["PD"] + tot["SD"] + tot["CIF"], 2)
-    er = [dict(categoria="OPERACION", concepto="Ventas netas", importe=round(vt, 2)),
+    for p in [x for x in pers if x <= periodo]:
+        t = tot_per(p); ct = round(sum(t[e] for e in inc), 2); vt = vta_per(p)
+        serie.append(dict(periodo=p, tipo="ACTUAL" if p == periodo else "HISTORICO", ventas=vt, costo_total=ct, margen=round(vt - ct, 2)))
+    proy, info = A.proyectar([(x["periodo"], x["ventas"], x["costo_total"]) for x in serie])
+    serie += proy
+    t = tot_per(periodo); vt = vta_per(periodo)
+    cventas = round(sum(t[e] for e in PROD), 2)
+    er = [dict(categoria="OPERACION", concepto="Ventas netas", importe=vt),
           dict(categoria="OPERACION", concepto="Costo de ventas (MD + MOD + CIF)", importe=-cventas),
-          dict(categoria="OPERACION", concepto="Gastos de administración", importe=-tot["GAD"]),
-          dict(categoria="OPERACION", concepto="Gastos de ventas", importe=-tot["GVT"]),
-          dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-tot["GFI"])]
-    r_oper = round(vt - cventas - tot["GAD"] - tot["GVT"], 2)
+          dict(categoria="OPERACION", concepto="Gastos de administración", importe=-t["GAD"]),
+          dict(categoria="OPERACION", concepto="Gastos de ventas", importe=-t["GVT"]),
+          dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-t["GFI"])]
+    r_oper = round(vt - cventas - t["GAD"] - t["GVT"], 2)
+    hall = A.diagnostico(series, periodo)
+    rel = A.relevancia({e: t[e] for e in inc})
+    esc = A.escenarios(dict(ventas=vt, **t))
+    prop = A.propuestas(series, periodo, hall, rel)
     acts = []
     for (tipo, clave, conc, val) in R.calcular(h, dict(PER=periodo, EMP=emp), {"VALUACION_PROMEDIO": valuacion_alg01(libro)})[0]:
         if tipo == "ACTIVIDAD": acts.append(dict(codigo=clave, nombre=clave, costo=round(val, 2), inductor="", tasa=0.0))
-    return dict(empresa=dict(codigo=emp, nombre=nombre), periodo_actual=periodo, sintesis=sintesis, moneda="PEN",
-                kpi=dict(ventas=round(vt, 2), costo_total=round(ct, 2), margen_operativo=r_oper,
-                         rentabilidad=round(r_oper / vt, 4) if vt else 0, costo_unitario_prom=round(ct / q, 4) if q else 0,
-                         resultado_antes_impuestos=round(r_oper - tot["GFI"], 2)),
-                objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=[], hallazgos=[], propuestas=[], escenarios=[])
+    ct = sum(o["costo_total"] for o in objetos); q = sum(o["cantidad"] for o in objetos)
+    r = dict(empresa=dict(codigo=emp, nombre=nombre), periodo_actual=periodo, sintesis=sintesis, moneda="PEN",
+             kpi=dict(ventas=vt, costo_total=round(ct, 2), margen_operativo=r_oper, rentabilidad=round(r_oper / vt, 4) if vt else 0,
+                      costo_unitario_prom=round(ct / q, 4) if q else 0, resultado_antes_impuestos=round(r_oper - t["GFI"], 2)),
+             objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=rel, hallazgos=hall, propuestas=prop,
+             escenarios=esc, proyeccion_info=info)
+    if est:
+        r["estimacion"] = {k: dict(cu_total=round(v["cu_total"], 4), p05=round(v["p05"], 4), p95=round(v["p95"], 4), metodo=v["metodo"],
+                                   mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
+    return r

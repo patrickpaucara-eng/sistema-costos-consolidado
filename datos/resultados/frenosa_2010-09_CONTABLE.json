@@ -1,0 +1,463 @@
+{
+ "empresa": {
+  "codigo": "FRE",
+  "nombre": "Frenosa"
+ },
+ "periodo_actual": "2010-09",
+ "sintesis": "CONTABLE",
+ "moneda": "PEN",
+ "kpi": {
+  "ventas": 1104595.19,
+  "costo_total": 707535.97,
+  "margen_operativo": 307852.43,
+  "rentabilidad": 0.2787,
+  "costo_unitario_prom": 6.2913,
+  "resultado_antes_impuestos": 295852.43
+ },
+ "objetos": [
+  {
+   "codigo": "OT-FRENOSA-FRE9000-2010-09",
+   "producto": "OT002",
+   "cantidad": 51966.0,
+   "md": 279093.79,
+   "mod": 43645.5,
+   "cif": 65099.46,
+   "admin": 0.0,
+   "gasto_venta": 0.0,
+   "financiero": 0.0,
+   "costo_total": 387838.75,
+   "costo_unitario": 7.4633,
+   "ingreso": 574743.96,
+   "margen": 186905.21
+  },
+  {
+   "codigo": "OT-FRENOSA-FRE9002-2010-09",
+   "producto": "OT003",
+   "cantidad": 16597.0,
+   "md": 82264.69,
+   "mod": 2470.5,
+   "cif": 7039.17,
+   "admin": 0.0,
+   "gasto_venta": 0.0,
+   "financiero": 0.0,
+   "costo_total": 91774.36,
+   "costo_unitario": 5.5296,
+   "ingreso": 125971.23,
+   "margen": 34196.87
+  },
+  {
+   "codigo": "OT-FRENOSA-SW50-2010-09",
+   "producto": "OT001",
+   "cantidad": 43900.0,
+   "md": 137424.49,
+   "mod": 36234.0,
+   "cif": 54264.37,
+   "admin": 0.0,
+   "gasto_venta": 0.0,
+   "financiero": 0.0,
+   "costo_total": 227922.86,
+   "costo_unitario": 5.1919,
+   "ingreso": 403880.0,
+   "margen": 175957.14
+  }
+ ],
+ "actividades": [
+  {
+   "codigo": "FO-1",
+   "nombre": "FO-1",
+   "costo": 42761.05,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "FO-2",
+   "nombre": "FO-2",
+   "costo": 19035.59,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "FO-3",
+   "nombre": "FO-3",
+   "costo": 29860.27,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "FO-4",
+   "nombre": "FO-4",
+   "costo": 39579.53,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "FO-5",
+   "nombre": "FO-5",
+   "costo": 16271.24,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "FO-6",
+   "nombre": "FO-6",
+   "costo": 19019.96,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "FO-7",
+   "nombre": "FO-7",
+   "costo": 15166.35,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-1",
+   "nombre": "S-FO-1",
+   "costo": 4209.96,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-2",
+   "nombre": "S-FO-2",
+   "costo": 1431.72,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-3",
+   "nombre": "S-FO-3",
+   "costo": 6488.84,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-4",
+   "nombre": "S-FO-4",
+   "costo": 3928.44,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-5",
+   "nombre": "S-FO-5",
+   "costo": 7168.68,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-6",
+   "nombre": "S-FO-6",
+   "costo": 2633.2,
+   "inductor": "",
+   "tasa": 0.0
+  },
+  {
+   "codigo": "S-FO-7",
+   "nombre": "S-FO-7",
+   "costo": 1198.16,
+   "inductor": "",
+   "tasa": 0.0
+  }
+ ],
+ "serie": [
+  {
+   "periodo": "2010-01",
+   "tipo": "HISTORICO",
+   "ventas": 295704.03,
+   "costo_total": 314003.71,
+   "margen": -18299.68
+  },
+  {
+   "periodo": "2010-02",
+   "tipo": "HISTORICO",
+   "ventas": 273835.86,
+   "costo_total": 312911.21,
+   "margen": -39075.35
+  },
+  {
+   "periodo": "2010-03",
+   "tipo": "HISTORICO",
+   "ventas": 509069.4,
+   "costo_total": 443599.79,
+   "margen": 65469.61
+  },
+  {
+   "periodo": "2010-04",
+   "tipo": "HISTORICO",
+   "ventas": 698219.99,
+   "costo_total": 545453.12,
+   "margen": 152766.87
+  },
+  {
+   "periodo": "2010-05",
+   "tipo": "HISTORICO",
+   "ventas": 804834.42,
+   "costo_total": 604551.83,
+   "margen": 200282.59
+  },
+  {
+   "periodo": "2010-06",
+   "tipo": "HISTORICO",
+   "ventas": 913036.8,
+   "costo_total": 639779.35,
+   "margen": 273257.45
+  },
+  {
+   "periodo": "2010-07",
+   "tipo": "HISTORICO",
+   "ventas": 888730.0,
+   "costo_total": 640876.8,
+   "margen": 247853.2
+  },
+  {
+   "periodo": "2010-08",
+   "tipo": "HISTORICO",
+   "ventas": 1002448.17,
+   "costo_total": 682258.61,
+   "margen": 320189.56
+  },
+  {
+   "periodo": "2010-09",
+   "tipo": "ACTUAL",
+   "ventas": 1104595.19,
+   "costo_total": 707535.97,
+   "margen": 397059.22
+  },
+  {
+   "periodo": "2010-10",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54
+  },
+  {
+   "periodo": "2010-10",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54,
+   "p05": 368185.48,
+   "p50": 456302.5,
+   "p95": 469647.5
+  },
+  {
+   "periodo": "2010-11",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54
+  },
+  {
+   "periodo": "2010-11",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54,
+   "p05": 350651.42,
+   "p50": 452113.44,
+   "p95": 553575.46
+  },
+  {
+   "periodo": "2010-12",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54
+  },
+  {
+   "periodo": "2010-12",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54,
+   "p05": 421234.37,
+   "p50": 522696.39,
+   "p95": 624158.41
+  },
+  {
+   "periodo": "2011-01",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54
+  },
+  {
+   "periodo": "2011-01",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54,
+   "p05": 403700.31,
+   "p50": 593279.34,
+   "p95": 708086.36
+  },
+  {
+   "periodo": "2011-02",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54
+  },
+  {
+   "periodo": "2011-02",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54,
+   "p05": 474283.26,
+   "p50": 602435.28,
+   "p95": 778669.32
+  },
+  {
+   "periodo": "2011-03",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54
+  },
+  {
+   "periodo": "2011-03",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 1093255.51,
+   "costo_total": 707535.97,
+   "margen": 385719.54,
+   "p05": 470094.2,
+   "p50": 659673.24,
+   "p95": 849252.27
+  }
+ ],
+ "estado_resultados": [
+  {
+   "categoria": "OPERACION",
+   "concepto": "Ventas netas",
+   "importe": 1104595.19
+  },
+  {
+   "categoria": "OPERACION",
+   "concepto": "Costo de ventas (MD + MOD + CIF)",
+   "importe": -707535.97
+  },
+  {
+   "categoria": "OPERACION",
+   "concepto": "Gastos de administración",
+   "importe": -39500.0
+  },
+  {
+   "categoria": "OPERACION",
+   "concepto": "Gastos de ventas",
+   "importe": -49706.79
+  },
+  {
+   "categoria": "FINANCIACION",
+   "concepto": "Gastos financieros",
+   "importe": -12000.0
+  }
+ ],
+ "relevancia": [
+  {
+   "elemento": "Material directo",
+   "importe": 498782.97,
+   "porcentaje": 0.705,
+   "acumulado": 0.705,
+   "critico": true
+  },
+  {
+   "elemento": "Costos indirectos de fabricación",
+   "importe": 126403.0,
+   "porcentaje": 0.1787,
+   "acumulado": 0.8836,
+   "critico": true
+  },
+  {
+   "elemento": "Mano de obra directa",
+   "importe": 82350.0,
+   "porcentaje": 0.1164,
+   "acumulado": 1.0,
+   "critico": false
+  }
+ ],
+ "hallazgos": [
+  {
+   "tipo": "VARIACION_CU",
+   "referencia": "FRE9000",
+   "mensaje": "El costo unitario de FRE9000 varió -6.8% frente a su promedio de 6 meses (S/ 8.4004 vs S/ 9.0118); la causa principal es Mano de obra directa (-0.2177 por unidad).",
+   "impacto": -31772.76,
+   "causa": "PD",
+   "variacion": -0.0678
+  },
+  {
+   "tipo": "VARIACION_CU",
+   "referencia": "SW50",
+   "mensaje": "El costo unitario de SW50 varió -9.2% frente a su promedio de 6 meses (S/ 6.0731 vs S/ 6.6911); la causa principal es Mano de obra directa (-0.2387 por unidad).",
+   "impacto": -27127.76,
+   "causa": "PD",
+   "variacion": -0.0924
+  }
+ ],
+ "propuestas": [],
+ "escenarios": [
+  {
+   "nombre": "Base",
+   "supuestos": {},
+   "margen": 295852.43,
+   "margen_p50": 285230.14,
+   "margen_p05": 227077.66,
+   "margen_p95": 338185.92,
+   "prob_perdida": 0.0
+  },
+  {
+   "nombre": "Precio del material +10 %",
+   "supuestos": {
+    "precio_material": 1.1
+   },
+   "margen": 245974.13,
+   "margen_p50": 232437.49,
+   "margen_p05": 178465.23,
+   "margen_p95": 284721.77,
+   "prob_perdida": 0.0
+  },
+  {
+   "nombre": "Volumen −10 %",
+   "supuestos": {
+    "volumen": 0.9
+   },
+   "margen": 240241.89,
+   "margen_p50": 228385.39,
+   "margen_p05": 177003.85,
+   "margen_p95": 275568.92,
+   "prob_perdida": 0.0
+  },
+  {
+   "nombre": "Salarios +5 %",
+   "supuestos": {
+    "salario": 1.05
+   },
+   "margen": 291734.93,
+   "margen_p50": 279622.62,
+   "margen_p05": 221172.44,
+   "margen_p95": 331245.59,
+   "prob_perdida": 0.0
+  },
+  {
+   "nombre": "Precio de venta +3 %",
+   "supuestos": {
+    "precio_venta": 1.03
+   },
+   "margen": 327499.08,
+   "margen_p50": 312831.76,
+   "margen_p05": 251555.58,
+   "margen_p95": 367992.84,
+   "prob_perdida": 0.0
+  }
+ ],
+ "proyeccion_info": {
+  "modelo_ventas": "SES",
+  "modelo_costo": "INGENUO",
+  "modelo_margen": "SES",
+  "mase_margen": 0.985,
+  "semilla": 2010,
+  "simulaciones": 2000
+ }
+}

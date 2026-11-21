@@ -11,3 +11,5 @@
 | RA-07 | Una hoja de entrada vacía no se exportó por generar archivos solo al encontrar filas | Crear un CSV con cabecera para toda hoja declarada, incluso sin filas | `tests/test_frenosa_fuentes.py` |
 | RA-07 | Codex y Claude editaron el mismo .xlsx de tiempos → conflicto binario | Cada agente registra en su CSV; un script arma el .xlsx | `tools/consolidar_tiempos.py` |
 | RA-08 | Claude puso un archivo de supuestos entre los datos reales del caso (la prueba de Codex lo detectó) | Datos del caso y supuestos van en carpetas separadas | `tests/test_frenosa_fuentes.py` |
+| RA-09 | Banda estocástica con errores de dos series desalineados (métodos distintos) → banda inflada | La incertidumbre se mide sobre la variable que se reporta (margen), con sus propios errores | `test_proyeccion_reproducible_y_banda_creciente` |
+| RA-10 | Propuesta contra el mejor mes histórico → impacto inflado por un atípico | Brechas contra el promedio de la ventana del diagnóstico | `src/reyna_local/analisis.py` (propuestas) |

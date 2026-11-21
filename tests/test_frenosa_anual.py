@@ -47,7 +47,10 @@ def test_julio_material_cerca_del_cuadro_1(caso):
 def test_contrato_real_valido(caso):
     r = resultados.construir(caso[0], ventas_csv=str(RAIZ / "datos/frenosa/Ventas.csv"), periodo="2010-07")
     assert contrato.validar(r) == []
-    assert len(r["serie"]) == 12 and r["kpi"]["ventas"] == 888730.0      # Cuadro 18: 324,479 + 453,602 + 110,649
+    # Etapa 3 (contrato ampliado): la serie llega hasta el periodo elegido (7 meses) y agrega 6 meses proyectados (det + est)
+    hist = [x for x in r["serie"] if x["tipo"] in ("HISTORICO", "ACTUAL")]
+    assert len(hist) == 7 and sum(1 for x in r["serie"] if x["tipo"] == "PROYECTADO_DET") == 6
+    assert r["kpi"]["ventas"] == 888730.0                                  # Cuadro 18: 324,479 + 453,602 + 110,649
 
 
 def test_sintesis_real_y_contable(caso):
