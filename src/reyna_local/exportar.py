@@ -65,14 +65,47 @@ def _html(resultados, destino):
     kpis = ''.join('<li><b>' + escape(k) + ':</b> ' + escape(str(v)) + '</li>' for k, v in resultados['kpi'].items())
     secciones = ''.join('<h2>' + escape(nombre) + '</h2>' + tabla(resultados[campo])
                         for nombre, campo in [*SECCIONES['resultados'], *SECCIONES['analitica'], *SECCIONES['proyeccion']])
-    # Gráfico sin dependencias ni acceso de red; usa las cifras del contrato.
-    serie = [x for x in resultados['serie'] if isinstance(x.get('margen'), (int, float))]
+    # Dibuja valores publicados; la banda corresponde al margen P05–P95.
+    serie = resultados['serie']
     chart = ''
     if serie:
-        valores = [x['margen'] for x in serie]
+        periodos = sorted({str(x['periodo']) for x in serie})
+        valores = [float(x[k]) for x in serie for k in ('ventas','costo_total','margen','p05','p50','p95') if isinstance(x.get(k), (int,float))]
         minimo, maximo = min(0, *valores), max(1, *valores)
-        puntos = ' '.join(f'{40 + 700*i/max(1,len(serie)-1):.2f},{190 - 150*(v-minimo)/(maximo-minimo):.2f}' for i,v in enumerate(valores))
-        chart = '<h2>Margen por periodo</h2><svg viewBox="0 0 780 220" role="img" aria-label="Margen por periodo"><polyline fill="none" stroke="#118067" stroke-width="3" points="' + puntos + '"/></svg>'
+        x = lambda periodo: 40 + 700 * periodos.index(str(periodo)) / max(1, len(periodos)-1)
+        y = lambda value: 190 - 150 * (value-minimo) / (maximo-minimo)
+        grupos = []
+        banda = sorted((r for r in serie if r.get('tipo')=='PROYECTADO_EST' and isinstance(r.get('p05'),(int,float)) and isinstance(r.get('p95'),(int,float))), key=lambda r:r['periodo'])
+        if banda:
+            puntos = [f"{x(r['periodo']):.2f},{y(r['p95']):.2f}" for r in banda] + [f"{x(r['periodo']):.2f},{y(r['p05']):.2f}" for r in reversed(banda)]
+            grupos.append('<polygon data-banda="p05-p95" fill="#c1e4db" points="'+' '.join(puntos)+'"/>')
+            grupos.append('<polyline fill="none" stroke="#118067" stroke-dasharray="3 3" points="'+' '.join(f"{x(r['periodo']):.2f},{y(r['p50']):.2f}" for r in banda if isinstance(r.get('p50'),(int,float)))+'"/>')
+        for campo, color in [('ventas','#315d6f'),('costo_total','#ce8334'),('margen','#118067')]:
+            for tipo in ('HISTORICO','PROYECTADO_DET'):
+                filas = sorted((r for r in serie if r.get('tipo') in (tipo,'ACTUAL') and isinstance(r.get(campo),(int,float))),key=lambda r:r['periodo'])
+                puntos = ' '.join(f"{x(r['periodo']):.2f},{y(r[campo]):.2f}" for r in filas)
+                grupos.append(f'<polyline fill="none" stroke="{color}" stroke-width="2" stroke-dasharray="{("5 5" if tipo == "PROYECTADO_DET" else "none")}" points="{puntos}"/>')
+        chart = '<h2>Ventas, costo y margen</h2><p>Histórico sólido · determinístico punteado · banda estocástica P05–P95 y línea P50</p><svg viewBox="0 0 780 220" role="img" aria-label="Evolución">'+''.join(grupos)+'</svg>'
+    info = resultados.get('proyeccion_info') or {}
+    chart += '<p>' + escape(' · '.join(f'{k}: {v}' for k,v in info.items())) + '</p>'
+    if not any(str(r.get('tipo','')).startswith('PROYECTADO') for r in serie):
+        chart += '<p>Se necesitan más de 6 meses para proyectar</p>'
+    if resultados.get('sintesis') == 'CONTABLE':
+        chart += '<p>Financieros fuera del inventario (NIC 2 / NIIF 18)</p>'
+    if resultados.get('sintesis') == 'ESTIMADO':
+        chart += '<h2>Estimación estadística fuera de muestra (no es un estándar)</h2>' + tabla([dict(producto=k, **v) for k,v in (resultados.get('estimacion') or {}).items()])
+    escenarios = resultados['escenarios']
+    rangos = [r for r in escenarios if all(isinstance(r.get(k),(int,float)) for k in ('margen_p05','margen_p50','margen_p95'))]
+    if rangos:
+        bajo = min(0, *(r['margen_p05'] for r in rangos))
+        alto = max(1, *(r['margen_p95'] for r in rangos))
+        escala = lambda v: 150 + 570 * (v-bajo)/(alto-bajo)
+        figuras = []
+        for i,r in enumerate(rangos):
+            y_r = 25 + i * 170 / max(1,len(rangos))
+            figuras.append(f'<text x="5" y="{y_r+4:.2f}">{escape(str(r.get("nombre", "")))}</text><line x1="{escala(r["margen_p05"]):.2f}" x2="{escala(r["margen_p95"]):.2f}" y1="{y_r:.2f}" y2="{y_r:.2f}" stroke="#118067" stroke-width="5"/><circle cx="{escala(r["margen_p50"]):.2f}" cy="{y_r:.2f}" r="5" fill="#243f80"/>')
+        chart += '<h2>Rango de escenarios</h2><svg viewBox="0 0 780 220" role="img" aria-label="Escenarios">'+''.join(figuras)+'</svg>'
+    chart += '<p>Impacto anual total: S/ ' + escape(str(round(sum(float(x.get('impacto_anual',0)) for x in resultados['propuestas']),2))) + '</p>'
     objetos = resultados['objetos']
     if objetos:
         keys = ('md', 'mod', 'cif', 'admin', 'gasto_venta', 'financiero')
