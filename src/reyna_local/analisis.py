@@ -92,6 +92,7 @@ def proyectar(serie_meses, horizonte=6, n=2000, semilla=2010, par=None):
     v = [x for _, x, _ in serie_meses]; c = [x for _, _, x in serie_meses]; mg = [a - b for a, b in zip(v, c)]
     dv, _, mv, _ = _rutas(v, horizonte, par, n, semilla); dc, _, mc, _ = _rutas(c, horizonte, par, n, semilla)
     _, em, mm_, rm = _rutas(mg, horizonte, par, n, semilla)
+    sesgo = sum(em) / len(em); em = [e - sesgo for e in em]           # RA-17: la banda mide dispersión alrededor del DET, no el sesgo de otro modelo
     rng = random.Random(semilla)
     sims = [[0.0] * horizonte for _ in range(n)]
     for k in range(n):

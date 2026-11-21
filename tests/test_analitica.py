@@ -64,3 +64,16 @@ def test_diagnostico_a_mano(base):
     pts = s["FRE9000"]; dic = pts[-1]; prev = pts[-7:-1]
     cu = sum(dic[1].values()) / dic[2]; ref = sum(sum(x[1].values()) / x[2] for x in prev) / 6
     assert abs(h["FRE9000"]["variacion"] - round((cu - ref) / ref, 4)) < 1e-4
+
+
+def test_banda_centrada_en_el_deterministico():
+    """RA-17: la mediana estocástica acompaña al determinístico (antes se alejaba -132 mil en 6 meses por sesgo de otro modelo)."""
+    import json, pathlib
+    from reyna_local import analisis as A
+    r = json.loads(pathlib.Path("datos/resultados/frenosa_2010-12_REAL.json").read_text(encoding="utf-8"))
+    hist = [(x["periodo"], x["ventas"], x["costo_total"]) for x in r["serie"] if x["tipo"] in ("HISTORICO", "ACTUAL")]
+    filas, _ = A.proyectar(hist)
+    est = [x for x in filas if x["tipo"] == "PROYECTADO_EST"]
+    for x in est:
+        ancho = x["p95"] - x["p05"]
+        assert x["p05"] < x["margen"] < x["p95"] and abs(x["p50"] - x["margen"]) < 0.15 * ancho
