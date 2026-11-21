@@ -1,0 +1,102 @@
+[
+ {
+  "COD": "P-H01",
+  "REGLA": "H-01",
+  "EVALUADOR": "H01",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "CONTRAFACTUAL_FAMILIA",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H02",
+  "REGLA": "H-02",
+  "EVALUADOR": "H02",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "DIFERENCIA_TOTAL",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H03",
+  "REGLA": "H-03",
+  "EVALUADOR": "H03",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "OBJ_CAN_X_DESV",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H04",
+  "REGLA": "H-04",
+  "EVALUADOR": "H04",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "SIMULACION",
+  "NIVEL": 2,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H05",
+  "REGLA": "H-05",
+  "EVALUADOR": "H05",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "SIMULACION",
+  "NIVEL": 1,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H06",
+  "REGLA": "H-06",
+  "EVALUADOR": "H06",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "SIN_IMPACTO",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H07",
+  "REGLA": "H-07",
+  "EVALUADOR": "H07",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "SIN_IMPACTO",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H13",
+  "REGLA": "H-13",
+  "EVALUADOR": "H13",
+  "ACCION": "{TXT_3}",
+  "IMPACTO": "ELEMENTO",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "{TXT_5}"
+ },
+ {
+  "COD": "P-H14",
+  "REGLA": "H-14",
+  "EVALUADOR": "H14",
+  "ACCION": "Revisar {REFERENCIA_2} de {REFERENCIA} frente a la variación habitual de su familia",
+  "IMPACTO": "SIN_IMPACTO",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "Basado en {N} OT; confianza {CONFIANZA}"
+ },
+ {
+  "COD": "P-H14H",
+  "REGLA": "H-14H",
+  "EVALUADOR": "H14H",
+  "ACCION": "Revisar la composición de la familia {REFERENCIA}: su {REFERENCIA_2} varía más de lo esperado",
+  "IMPACTO": "SIN_IMPACTO",
+  "NIVEL": 0,
+  "ACTIVO": "S",
+  "RIESGO": "Coeficiente de variación calculado con las OT del periodo"
+ }
+]

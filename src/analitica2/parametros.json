@@ -1,0 +1,14 @@
+[
+ {"CODIGO": "A2.ELE_DESV_MD", "VALOR": 0.10, "MINIMO": 0.05, "MAXIMO": 0.50, "DUENO": "SISTEMA", "PROTEGIDO": "N", "DESCRIPCION": "ALG-13: desviación máxima de MD frente a la familia"},
+ {"CODIGO": "A2.ELE_DESV_PD", "VALOR": 0.10, "MINIMO": 0.05, "MAXIMO": 0.50, "DUENO": "SISTEMA", "PROTEGIDO": "N", "DESCRIPCION": "ALG-13: desviación máxima de PD frente a la familia"},
+ {"CODIGO": "A2.ELE_DESV_SD", "VALOR": 0.10, "MINIMO": 0.05, "MAXIMO": 0.50, "DUENO": "SISTEMA", "PROTEGIDO": "N", "DESCRIPCION": "ALG-13: desviación máxima de SD frente a la familia"},
+ {"CODIGO": "A2.ELE_DESV_CIF", "VALOR": 0.10, "MINIMO": 0.05, "MAXIMO": 0.50, "DUENO": "SISTEMA", "PROTEGIDO": "N", "DESCRIPCION": "ALG-13: desviación máxima de CIF frente a la familia"},
+ {"CODIGO": "A2.Z_MAX", "VALOR": 2.0, "MINIMO": 1.5, "MAXIMO": 4.0, "DUENO": "SISTEMA", "PROTEGIDO": "N", "DESCRIPCION": "ALG-14: z máximo"},
+ {"CODIGO": "A2.CV_MAX", "VALOR": 0.30, "MINIMO": 0.10, "MAXIMO": 1.00, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "ALG-14: coeficiente de variación máximo de la familia"},
+ {"CODIGO": "A2.K_CONTRAE", "VALOR": 3, "MINIMO": 0, "MAXIMO": 20, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "ALG-14: constante de contracción"},
+ {"CODIGO": "A2.VENTANA", "VALOR": 1, "MINIMO": 1, "MAXIMO": 12, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "ALG-14: periodos de historia"},
+ {"CODIGO": "A2.FIRMA_TOL", "VALOR": 1.00, "MINIMO": 0.50, "MAXIMO": 1.00, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "ALG-12: tolerancia Jaccard de la firma"},
+ {"CODIGO": "A2.AUT_N", "VALOR": 10, "MINIMO": 5, "MAXIMO": 50, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "AUT-01: decisiones consideradas"},
+ {"CODIGO": "A2.AUT_PROMOVER", "VALOR": 0.90, "MINIMO": 0.70, "MAXIMO": 1.00, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "AUT-01: tasa de aprobación para promover"},
+ {"CODIGO": "A2.AUT_REVERSIONES", "VALOR": 2, "MINIMO": 1, "MAXIMO": 5, "DUENO": "COSTOS", "PROTEGIDO": "S", "DESCRIPCION": "AUT-01: reversiones para degradar"}
+]
