@@ -4,3 +4,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,12:16,13:10,"Etapa 3: analítica (diagnóstico, relevancia, proyección 6 meses det/est, ESTIMADO, escenarios, propuestas); integración de PR #2 y #3; órdenes C04-C06",Etapa 3,Claude,"27 resultados publicados; 2 correcciones críticas"
 2026-11-21,14:40,15:05,Revisión e integración C04-C07 + RA-17 banda centrada,Monografía,Claude,PR 4-7 unidos; compuerta VERDE 94 pruebas
 2026-11-21,15:20,15:55,OT-C08 paquete de 13 entregables + HTML sin conexión rediseñado,Monografía,Claude,armar.py; compuerta VERDE 95 pruebas
+2026-11-21,15:55,16:40,OT-C09 revisión visual y usabilidad (10 correcciones) + revisión PDF de Word,Monografía,Claude,compuerta VERDE 95 pruebas

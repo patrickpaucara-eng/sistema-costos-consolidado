@@ -17,7 +17,7 @@
  "objetos": [
   {
    "codigo": "OT-FRENOSA-FRE9000-2010-05",
-   "producto": "OT002",
+   "producto": "FRE9000",
    "cantidad": 40516.0,
    "md": 220731.17,
    "mod": 40621.5,
@@ -32,7 +32,7 @@
   },
   {
    "codigo": "OT-FRENOSA-FRE9002-2010-05",
-   "producto": "OT003",
+   "producto": "FRE9002",
    "cantidad": 15017.0,
    "md": 75539.3,
    "mod": 2389.5,
@@ -47,7 +47,7 @@
   },
   {
    "codigo": "OT-FRENOSA-SW50-2010-05",
-   "producto": "OT001",
+   "producto": "SW50",
    "cantidad": 35884.0,
    "md": 113820.36,
    "mod": 36639.0,

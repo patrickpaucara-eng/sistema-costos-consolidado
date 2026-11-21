@@ -53,7 +53,7 @@ def construir(libro, emp="FRE", nombre="Frenosa", periodo=None, ventas_csv=None,
             el = {e: round(est[A._producto(o)]["cu_elementos"][e] * can[o], 2) for e in el}
         el = {e: (x if e in inc else 0.0) for e, x in el.items()}
         ct = round(sum(el.values()), 2); ing = ingreso(periodo, o)
-        objetos.append(dict(codigo=o, producto=pro.get(o, o), cantidad=can.get(o, 0), md=el["MD"], mod=round(el["PD"] + el["SD"], 2), cif=el["CIF"],
+        objetos.append(dict(codigo=o, producto=A._producto(o), cantidad=can.get(o, 0), md=el["MD"], mod=round(el["PD"] + el["SD"], 2), cif=el["CIF"],
                             admin=el["GAD"], gasto_venta=el["GVT"], financiero=el["GFI"], costo_total=ct,
                             costo_unitario=round(ct / can[o], 4) if can.get(o) else 0, ingreso=ing, margen=round(ing - ct, 2)))
     def tot_per(p): return {e: round(sum(_f(v.get(e, 0)) for v in por_per[p].values()), 2) for e in PROD + OPER + FIN}
