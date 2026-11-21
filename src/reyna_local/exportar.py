@@ -8,7 +8,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from .contrato import validar
 
-TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx'}
+TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'entrada': '.xlsx'}
+SIN_RESULTADOS = ('codigo', 'entrada')          # se generan desde el repositorio, no desde un contrato
+RAIZ = Path(__file__).resolve().parents[2]
 SECCIONES = {
     'resultados': [('Objetos', 'objetos'), ('Actividades', 'actividades'), ('Estado NIIF 18', 'estado_resultados')],
     'analitica': [('Relevancia', 'relevancia'), ('Hallazgos', 'hallazgos')],
@@ -50,8 +52,74 @@ def _libro(resultados, tipo, destino):
         hoja.freeze_panes = 'A2'
         for row in rows:
             hoja.append([_celda(row.get(col)) for col in columnas])
+        if campo == 'propuestas':
+            hoja.append([])
+            hoja.append(['TOTAL impacto anual (S/)', round(sum(float(r.get('impacto_anual') or 0) for r in rows), 2)])
+            hoja.cell(hoja.max_row, 1).font = Font(bold=True)
     libro.save(destino)
+
+
+def _entrada(destino):
+    """Datos de entrada del caso tal como los lee el cálculo: una hoja por CSV y la procedencia."""
+    import csv
+    libro = Workbook(); fuentes = libro.active; fuentes.title = 'FUENTES'
+    for nota in (RAIZ / 'datos/frenosa/FUENTES.md', RAIZ / 'datos/frenosa_supuestos/LEEME.md'):
+        if nota.is_file():
+            fuentes.append([nota.relative_to(RAIZ).as_posix()]); fuentes.cell(fuentes.max_row, 1).font = Font(bold=True)
+            for linea in nota.read_text(encoding='utf-8').splitlines():
+                fuentes.append([_celda(linea)])
+            fuentes.append([])
+    nombres = set()
+    for carpeta in ('datos/frenosa', 'datos/frenosa_supuestos'):
+        for archivo in sorted((RAIZ / carpeta).glob('*.csv')):
+            nombre = archivo.stem[:31]
+            while nombre in nombres: nombre = nombre[:29] + '_' + str(len(nombres))
+            nombres.add(nombre); hoja = libro.create_sheet(nombre)
+            with archivo.open(encoding='utf-8-sig', newline='') as f:
+                for i, fila in enumerate(csv.reader(f)):
+                    hoja.append([_celda(_numero(v)) for v in fila])
+                    if i == 0:
+                        for cell in hoja[1]: cell.font = Font(bold=True)
+            hoja.freeze_panes = 'A2'
+    libro.save(destino); libro.close()
+
+
+def _numero(v):
+    if not v or (len(v) > 1 and v[0] == '0' and v[1] != '.'):     # códigos con cero inicial siguen siendo texto
+        return v
+    try:
+        return float(v) if any(c in v for c in '.eE') else int(v)
+    except (TypeError, ValueError):
+        return v
     libro.close()
+
+
+ETIQUETAS = {
+    'ventas': 'Ventas (S/)', 'costo_total': 'Costo total (S/)', 'margen_operativo': 'Margen operativo (S/)', 'margen': 'Margen (S/)',
+    'rentabilidad': 'Rentabilidad', 'costo_unitario_prom': 'Costo unitario promedio (S/)', 'resultado_antes_impuestos': 'Resultado antes de impuestos (S/)',
+    'codigo': 'Código', 'producto': 'Producto', 'cantidad': 'Cantidad', 'md': 'Material directo', 'mod': 'Mano de obra directa', 'cif': 'CIF',
+    'admin': 'Administración', 'gasto_venta': 'Gasto de venta', 'financiero': 'Financiero', 'costo_unitario': 'Costo unitario', 'ingreso': 'Ingreso',
+    'periodo': 'Periodo', 'tipo': 'Tipo', 'p05': 'P05', 'p50': 'P50 (mediana)', 'p95': 'P95', 'elemento': 'Elemento', 'importe': 'Importe (S/)',
+    'porcentaje': '%', 'acumulado': '% acumulado', 'critico': 'Crítico', 'referencia': 'Referencia', 'mensaje': 'Hallazgo', 'impacto': 'Impacto (S/)',
+    'causa': 'Causa', 'variacion': 'Variación', 'nombre': 'Escenario', 'supuestos': 'Supuestos', 'margen_p05': 'Margen P05', 'margen_p50': 'Margen P50',
+    'margen_p95': 'Margen P95', 'prob_perdida': 'Prob. de pérdida', 'descripcion': 'Descripción', 'impacto_anual': 'Impacto anual (S/)',
+    'plazo': 'Plazo', 'responsable': 'Responsable', 'cu_total': 'Costo unitario estimado', 'metodo': 'Método', 'mase': 'MASE',
+    'HISTORICO': 'Histórico', 'ACTUAL': 'Actual', 'PROYECTADO_DET': 'Proyección determinística', 'PROYECTADO_EST': 'Proyección estocástica (rango 90 %)',
+}
+PORCENTAJES = {'rentabilidad', 'porcentaje', 'acumulado', 'variacion', 'prob_perdida'}
+MESES = ('enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre')
+
+
+def _fmt(campo, v):
+    if isinstance(v, bool):
+        return 'Sí' if v else 'No'
+    if isinstance(v, (int, float)):
+        if campo in PORCENTAJES:
+            return f'{v * 100:,.1f} %'
+        return f'{v:,.4f}' if abs(v) < 100 and v != int(v) else f'{v:,.2f}'
+    if isinstance(v, dict):
+        return ', '.join(f'{k}: {x}' for k, x in v.items())
+    return ETIQUETAS.get(str(v), str(v)) if v is not None else '—'
 
 
 def _html(resultados, destino):
@@ -59,10 +127,12 @@ def _html(resultados, destino):
         columnas = _columnas(rows)
         if not columnas:
             return '<p>Sin datos disponibles.</p>'
-        head = ''.join('<th>' + escape(str(c)) + '</th>' for c in columnas)
-        body = ''.join('<tr>' + ''.join('<td>' + escape(str(r.get(c, ''))) + '</td>' for c in columnas) + '</tr>' for r in rows)
+        head = ''.join('<th>' + escape(ETIQUETAS.get(c, c)) + '</th>' for c in columnas)
+        body = ''.join('<tr>' + ''.join('<td' + (f' class="n" data-valor="{r.get(c)}"' if isinstance(r.get(c), (int, float)) and not isinstance(r.get(c), bool) else '') + '>'
+                                        + escape(_fmt(c, r.get(c))) + '</td>' for c in columnas) + '</tr>' for r in rows)
         return '<table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>'
-    kpis = ''.join('<li><b>' + escape(k) + ':</b> ' + escape(str(v)) + '</li>' for k, v in resultados['kpi'].items())
+    kpis = ''.join('<div class="kpi"><span>' + escape(ETIQUETAS.get(k, k)) + '</span><b data-valor="' + escape(str(v)) + '">' + escape(_fmt(k, v)) + '</b></div>'
+                   for k, v in resultados['kpi'].items())
     secciones = ''.join('<h2>' + escape(nombre) + '</h2>' + tabla(resultados[campo])
                         for nombre, campo in [*SECCIONES['resultados'], *SECCIONES['analitica'], *SECCIONES['proyeccion']])
     # Dibuja valores publicados; la banda corresponde al margen P05–P95.
@@ -85,9 +155,20 @@ def _html(resultados, destino):
                 filas = sorted((r for r in serie if r.get('tipo') in (tipo,'ACTUAL') and isinstance(r.get(campo),(int,float))),key=lambda r:r['periodo'])
                 puntos = ' '.join(f"{x(r['periodo']):.2f},{y(r[campo]):.2f}" for r in filas)
                 grupos.append(f'<polyline fill="none" stroke="{color}" stroke-width="2" stroke-dasharray="{("5 5" if tipo == "PROYECTADO_DET" else "none")}" points="{puntos}"/>')
-        chart = '<h2>Ventas, costo y margen</h2><p>Histórico sólido · determinístico punteado · banda estocástica P05–P95 y línea P50</p><svg viewBox="0 0 780 220" role="img" aria-label="Evolución">'+''.join(grupos)+'</svg>'
+        ejes = (f'<line x1="40" x2="740" y1="{y(0):.2f}" y2="{y(0):.2f}" stroke="#8a97a8" stroke-dasharray="2 3"/>'
+                f'<text x="0" y="{y(maximo)+4:.2f}" class="eje">{maximo/1000:,.0f} mil</text><text x="0" y="{y(0)+4:.2f}" class="eje">0</text>'
+                f'<text x="0" y="{y(minimo)+4:.2f}" class="eje">{minimo/1000:,.0f} mil</text>'
+                f'<text x="40" y="212" class="eje">{periodos[0]}</text><text x="700" y="212" class="eje">{periodos[-1]}</text>')
+        leyenda = ('<p class="leyenda"><i style="background:#315d6f"></i>Ventas <i style="background:#ce8334"></i>Costo total '
+                   '<i style="background:#118067"></i>Margen <i style="background:#c1e4db"></i>Rango 90 % del margen (P05–P95) · '
+                   'línea sólida: histórico · punteada: proyección determinística</p>')
+        chart = '<h2>Ventas, costo y margen</h2>' + leyenda + '<svg viewBox="0 0 780 220" role="img" aria-label="Evolución">'+ejes+''.join(grupos)+'</svg>'
     info = resultados.get('proyeccion_info') or {}
-    chart += '<p>' + escape(' · '.join(f'{k}: {v}' for k,v in info.items())) + '</p>'
+    if info:
+        chart += ('<p class="nota">Modelos elegidos por menor error fuera de muestra — ventas: ' + escape(str(info.get('modelo_ventas'))) + ' · costo: '
+                  + escape(str(info.get('modelo_costo'))) + ' · margen: ' + escape(str(info.get('modelo_margen'))) + ' (MASE ' + escape(str(info.get('mase_margen')))
+                  + '; menor que 1 = mejor que repetir el último mes) · ' + escape(str(info.get('simulaciones'))) + ' simulaciones Monte Carlo, semilla '
+                  + escape(str(info.get('semilla'))) + '.</p>')
     if not any(str(r.get('tipo','')).startswith('PROYECTADO') for r in serie):
         chart += '<p>Se necesitan más de 6 meses para proyectar</p>'
     if resultados.get('sintesis') == 'CONTABLE':
@@ -99,13 +180,14 @@ def _html(resultados, destino):
     if rangos:
         bajo = min(0, *(r['margen_p05'] for r in rangos))
         alto = max(1, *(r['margen_p95'] for r in rangos))
-        escala = lambda v: 150 + 570 * (v-bajo)/(alto-bajo)
+        escala = lambda v: 240 + 520 * (v-bajo)/(alto-bajo)
         figuras = []
         for i,r in enumerate(rangos):
             y_r = 25 + i * 170 / max(1,len(rangos))
             figuras.append(f'<text x="5" y="{y_r+4:.2f}">{escape(str(r.get("nombre", "")))}</text><line x1="{escala(r["margen_p05"]):.2f}" x2="{escala(r["margen_p95"]):.2f}" y1="{y_r:.2f}" y2="{y_r:.2f}" stroke="#118067" stroke-width="5"/><circle cx="{escala(r["margen_p50"]):.2f}" cy="{y_r:.2f}" r="5" fill="#243f80"/>')
-        chart += '<h2>Rango de escenarios</h2><svg viewBox="0 0 780 220" role="img" aria-label="Escenarios">'+''.join(figuras)+'</svg>'
-    chart += '<p>Impacto anual total: S/ ' + escape(str(round(sum(float(x.get('impacto_anual',0)) for x in resultados['propuestas']),2))) + '</p>'
+        figuras.append(f'<line x1="{escala(0):.2f}" x2="{escala(0):.2f}" y1="10" y2="200" stroke="#b85142" stroke-dasharray="3 3"/><text x="{escala(0)+4:.2f}" y="212" class="eje">margen 0</text>')
+        chart += '<h2>Rango de escenarios</h2><p class="leyenda">Barra: margen P05–P95 · punto: mediana · línea roja: pérdida</p><svg viewBox="0 0 780 220" role="img" aria-label="Escenarios">'+''.join(figuras)+'</svg>'
+    chart += '<p><b>Impacto anual total de las propuestas: S/ ' + escape(f"{sum(float(x.get('impacto_anual',0)) for x in resultados['propuestas']):,.2f}") + '</b></p>'
     objetos = resultados['objetos']
     if objetos:
         keys = ('md', 'mod', 'cif', 'admin', 'gasto_venta', 'financiero')
@@ -133,19 +215,32 @@ def _html(resultados, destino):
             barras.append(f'<rect x="{x:.2f}" y="{190-height:.2f}" width="{width*.6:.2f}" height="{height:.2f}" fill="{color}"/>')
             puntos.append(f'{x+width*.3:.2f},{190-float(item.get("acumulado",0))*150:.2f}')
         chart += '<h2>Relevancia</h2><svg viewBox="0 0 780 220" role="img" aria-label="Relevancia">' + ''.join(barras) + '<polyline fill="none" stroke="#243f80" stroke-width="2" points="' + ' '.join(puntos) + '"/></svg>'
-    documento = ('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width">'
-                 '<title>Resultados de costos</title><style>body{font:16px system-ui;margin:2rem;color:#15253d}'
-                 'table{border-collapse:collapse;display:block;overflow:auto;margin-bottom:2rem}td,th{border:1px solid #ccd6e0;'
-                 'padding:.5rem;text-align:left}th{background:#e8eff8}li{margin:.5rem}</style><h1>Resultados de costos</h1><p>'
-                 + escape(str(resultados.get('_nota', 'Resultado suministrado'))) + ' · ' + escape(resultados['periodo_actual'])
-                 + ' · ' + escape(resultados['sintesis']) + '</p><ul>' + kpis + '</ul>' + chart + secciones + '</html>')
+    a, m = str(resultados['periodo_actual']).split('-')[:2] if '-' in str(resultados['periodo_actual']) else (resultados['periodo_actual'], '0')
+    mes = (MESES[int(m) - 1] + ' ' + a) if m.isdigit() and 1 <= int(m) <= 12 else str(resultados['periodo_actual'])
+    explica = {'REAL': 'Costo integral (producción, administración, ventas y financieros) con ABC por etapas.',
+               'CONTABLE': 'Costo de inventario según NIC 2; administración, ventas y financieros van a resultados (NIIF 18).',
+               'ESTIMADO': 'Estimación estadística fuera de muestra con banda P05–P95 (no es un estándar).'}.get(resultados['sintesis'], '')
+    documento = ('<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+                 '<title>Resultados de costos</title><style>:root{color-scheme:light}body{font:15px/1.5 system-ui,Segoe UI,sans-serif;margin:0;'
+                 'background:#f4f7fa;color:#15253d}main{max-width:1100px;margin:auto;padding:1.5rem}header{background:#15253d;color:#fff;padding:1.2rem 1.5rem}'
+                 'header h1{margin:0;font-size:1.5rem}header p{margin:.3rem 0 0;opacity:.85}h2{margin-top:2rem;border-bottom:2px solid #c1e4db;padding-bottom:.3rem}'
+                 '.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.8rem}.kpi{background:#fff;border-radius:8px;padding:.8rem;'
+                 'box-shadow:0 1px 3px #0002}.kpi span{display:block;font-size:.8rem;color:#55657a}.kpi b{font-size:1.25rem}svg{background:#fff;border-radius:8px;'
+                 'width:100%;height:auto}.eje{font-size:11px;fill:#55657a}.leyenda i{display:inline-block;width:12px;height:12px;margin:0 .3rem 0 .8rem;'
+                 'vertical-align:middle;border-radius:2px}.nota{font-size:.85rem;color:#55657a}table{border-collapse:collapse;display:block;overflow:auto;'
+                 'margin-bottom:1.5rem;background:#fff}td,th{border:1px solid #dbe3ec;padding:.4rem .6rem;text-align:left}td.n{text-align:right;'
+                 'font-variant-numeric:tabular-nums}th{background:#e8eff8;font-size:.85rem}</style><header><h1>Sistema de Costos Reyna · '
+                 + escape(str(resultados['empresa'].get('nombre', ''))) + '</h1><p>' + escape(mes) + ' · Síntesis ' + escape(resultados['sintesis'])
+                 + ' · ' + escape(explica) + ('' if '_nota' not in resultados else ' · ' + escape(str(resultados['_nota']))) + '</p></header><main>'
+                 '<h2>Indicadores</h2><div class="kpis">' + kpis + '</div>' + chart + secciones
+                 + '<p class="nota">Archivo generado sin conexión: todos los datos vienen del resultado calculado; no requiere internet.</p></main></html>')
     destino.write_text(documento, encoding='utf-8')
 
 
 def exportar(resultados, tipo, carpeta):
     if tipo not in TIPOS:
         raise ValueError('El tipo de reporte no existe.')
-    if tipo != 'codigo':
+    if tipo not in SIN_RESULTADOS:
         if not isinstance(resultados, dict):
             raise ValueError('Se requieren resultados para exportar.')
         try:
@@ -162,6 +257,8 @@ def exportar(resultados, tipo, carpeta):
             _libro(resultados, tipo, destino)
         elif tipo == 'html':
             _html(resultados, destino)
+        elif tipo == 'entrada':
+            _entrada(destino)
         else:
             from .codigo_fuente import generar_word
             generar_word(destino)
