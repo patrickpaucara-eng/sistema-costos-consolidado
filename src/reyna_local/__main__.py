@@ -5,6 +5,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import math
+import re
 from pathlib import Path
 import signal
 import sys
@@ -14,6 +15,7 @@ import webbrowser
 
 from .receipt_audit import audit_receipts
 from .store import Problem, Store
+from .contrato import validar
 
 
 INDEX = Path(__file__).parent / "web" / "index.html"
@@ -138,6 +140,31 @@ class ReynaHandler(BaseHTTPRequestHandler):
         store = self.server.store
         if target.path in {"/", "/index.html"} and method == "GET":
             self._send(HTTPStatus.OK, self.server.index, "text/html; charset=utf-8")
+            return
+        if target.path == "/api/resultados" and method == "GET":
+            try:
+                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=2)
+                if set(params) != {"sintesis", "periodo"} or any(len(x) != 1 for x in params.values()):
+                    raise ValueError
+                sintesis, periodo = params["sintesis"][0], params["periodo"][0]
+                if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
+                    raise ValueError
+            except ValueError:
+                raise Problem(400, "Elige una síntesis y un periodo válidos.") from None
+            nombre = f"frenosa_{periodo}_{sintesis}.json"
+            candidatos = [self.server.store.root / "resultados" / nombre,
+                          Path(__file__).resolve().parents[2] / "datos" / "resultados" / nombre,
+                          INDEX.parent / nombre]
+            archivo = next((p for p in candidatos if p.is_file()), INDEX.parent / "resultados_ejemplo.json")
+            try:
+                resultado = json.loads(archivo.read_text(encoding="utf-8"))
+                if validar(resultado):
+                    raise ValueError
+                if archivo.name != "resultados_ejemplo.json" and (resultado["periodo_actual"] != periodo or resultado["sintesis"] != sintesis):
+                    raise ValueError
+            except (OSError, ValueError, TypeError, KeyError):
+                raise Problem(422, "Los resultados disponibles no se pueden mostrar. Revisa el archivo de resultados.") from None
+            self._json(HTTPStatus.OK, resultado)
             return
         if parts[:3] != ["", "api", "workspaces"]:
             raise Problem(HTTPStatus.NOT_FOUND, "La ruta no existe.")

@@ -1,0 +1,318 @@
+{
+ "_nota": "EJEMPLO para construir pantallas; NO son resultados reales",
+ "empresa": {
+  "codigo": "EMP01",
+  "nombre": "Metalmecánica de ejemplo"
+ },
+ "periodo_actual": "2010-07",
+ "sintesis": "REAL",
+ "moneda": "PEN",
+ "kpi": {
+  "ventas": 688200.0,
+  "costo_total": 577200.0,
+  "margen_operativo": 111000.0,
+  "rentabilidad": 0.15,
+  "costo_unitario_prom": 5.25
+ },
+ "objetos": [
+  {
+   "codigo": "OT-01",
+   "producto": "Producto A",
+   "cantidad": 38000,
+   "md": 79800.0,
+   "mod": 49400.0,
+   "cif": 34200.0,
+   "admin": 15200.0,
+   "gasto_venta": 11400.0,
+   "financiero": 7600.0,
+   "costo_total": 197600.0,
+   "costo_unitario": 5.2,
+   "ingreso": 235600.0,
+   "margen": 38000.0
+  },
+  {
+   "codigo": "OT-02",
+   "producto": "Producto B",
+   "cantidad": 52000,
+   "md": 109200.0,
+   "mod": 67600.0,
+   "cif": 46800.0,
+   "admin": 20800.0,
+   "gasto_venta": 15600.0,
+   "financiero": 10400.0,
+   "costo_total": 270400.0,
+   "costo_unitario": 5.2,
+   "ingreso": 322400.0,
+   "margen": 52000.0
+  },
+  {
+   "codigo": "OT-03",
+   "producto": "Producto C",
+   "cantidad": 21000,
+   "md": 44100.0,
+   "mod": 27300.0,
+   "cif": 18900.0,
+   "admin": 8400.0,
+   "gasto_venta": 6300.0,
+   "financiero": 4200.0,
+   "costo_total": 109200.0,
+   "costo_unitario": 5.2,
+   "ingreso": 130200.0,
+   "margen": 21000.0
+  }
+ ],
+ "actividades": [
+  {
+   "codigo": "FO-1",
+   "nombre": "Impregnación",
+   "costo": 40000,
+   "inductor": "kg",
+   "tasa": 0.5
+  },
+  {
+   "codigo": "FO-2",
+   "nombre": "Prensado",
+   "costo": 52000,
+   "inductor": "hora-máquina",
+   "tasa": 30.1
+  },
+  {
+   "codigo": "FO-3",
+   "nombre": "Horneado",
+   "costo": 61000,
+   "inductor": "hora-horno",
+   "tasa": 22.4
+  }
+ ],
+ "serie": [
+  {
+   "periodo": "2010-01",
+   "tipo": "HISTORICO",
+   "ventas": 600000,
+   "costo_total": 510000.0,
+   "margen": 90000.0
+  },
+  {
+   "periodo": "2010-02",
+   "tipo": "HISTORICO",
+   "ventas": 612000,
+   "costo_total": 520200.0,
+   "margen": 91800.0
+  },
+  {
+   "periodo": "2010-03",
+   "tipo": "HISTORICO",
+   "ventas": 624000,
+   "costo_total": 530400.0,
+   "margen": 93600.0
+  },
+  {
+   "periodo": "2010-04",
+   "tipo": "HISTORICO",
+   "ventas": 636000,
+   "costo_total": 540600.0,
+   "margen": 95400.0
+  },
+  {
+   "periodo": "2010-05",
+   "tipo": "HISTORICO",
+   "ventas": 648000,
+   "costo_total": 550800.0,
+   "margen": 97200.0
+  },
+  {
+   "periodo": "2010-06",
+   "tipo": "HISTORICO",
+   "ventas": 660000,
+   "costo_total": 561000.0,
+   "margen": 99000.0
+  },
+  {
+   "periodo": "2010-07",
+   "tipo": "ACTUAL",
+   "ventas": 672000,
+   "costo_total": 571200.0,
+   "margen": 100800.0
+  },
+  {
+   "periodo": "2010-08",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 690000,
+   "costo_total": 579600.0,
+   "margen": 110400.0
+  },
+  {
+   "periodo": "2010-08",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 690000,
+   "costo_total": 579600.0,
+   "margen": 110400.0,
+   "p05": 69000.0,
+   "p50": 110400.0,
+   "p95": 144900.0
+  },
+  {
+   "periodo": "2010-09",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 698000,
+   "costo_total": 586320.0,
+   "margen": 111680.0
+  },
+  {
+   "periodo": "2010-09",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 698000,
+   "costo_total": 586320.0,
+   "margen": 111680.0,
+   "p05": 69800.0,
+   "p50": 111680.0,
+   "p95": 146580.0
+  },
+  {
+   "periodo": "2010-10",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 706000,
+   "costo_total": 593040.0,
+   "margen": 112960.0
+  },
+  {
+   "periodo": "2010-10",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 706000,
+   "costo_total": 593040.0,
+   "margen": 112960.0,
+   "p05": 70600.0,
+   "p50": 112960.0,
+   "p95": 148260.0
+  },
+  {
+   "periodo": "2010-11",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 714000,
+   "costo_total": 599760.0,
+   "margen": 114240.0
+  },
+  {
+   "periodo": "2010-11",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 714000,
+   "costo_total": 599760.0,
+   "margen": 114240.0,
+   "p05": 71400.0,
+   "p50": 114240.0,
+   "p95": 149940.0
+  },
+  {
+   "periodo": "2010-12",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 722000,
+   "costo_total": 606480.0,
+   "margen": 115520.0
+  },
+  {
+   "periodo": "2010-12",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 722000,
+   "costo_total": 606480.0,
+   "margen": 115520.0,
+   "p05": 72200.0,
+   "p50": 115520.0,
+   "p95": 151620.0
+  },
+  {
+   "periodo": "2011-01",
+   "tipo": "PROYECTADO_DET",
+   "ventas": 730000,
+   "costo_total": 613200.0,
+   "margen": 116800.0
+  },
+  {
+   "periodo": "2011-01",
+   "tipo": "PROYECTADO_EST",
+   "ventas": 730000,
+   "costo_total": 613200.0,
+   "margen": 116800.0,
+   "p05": 73000.0,
+   "p50": 116800.0,
+   "p95": 153300.0
+  }
+ ],
+ "estado_resultados": [
+  {
+   "categoria": "OPERACION",
+   "concepto": "Ventas",
+   "importe": 690000
+  },
+  {
+   "categoria": "OPERACION",
+   "concepto": "Costo de ventas",
+   "importe": -520000
+  },
+  {
+   "categoria": "OPERACION",
+   "concepto": "Gastos de administración y ventas",
+   "importe": -80000
+  },
+  {
+   "categoria": "FINANCIACION",
+   "concepto": "Gastos financieros",
+   "importe": -15000
+  }
+ ],
+ "relevancia": [
+  {
+   "elemento": "Material directo",
+   "importe": 233100,
+   "porcentaje": 0.42,
+   "acumulado": 0.42,
+   "critico": true
+  },
+  {
+   "elemento": "Mano de obra",
+   "importe": 144300,
+   "porcentaje": 0.26,
+   "acumulado": 0.68,
+   "critico": true
+  },
+  {
+   "elemento": "CIF",
+   "importe": 99900,
+   "porcentaje": 0.18,
+   "acumulado": 0.86,
+   "critico": false
+  }
+ ],
+ "hallazgos": [
+  {
+   "tipo": "H-13",
+   "referencia": "OT-02",
+   "mensaje": "El material directo está 18 % sobre su familia",
+   "impacto": 12500
+  }
+ ],
+ "propuestas": [
+  {
+   "codigo": "P-01",
+   "descripcion": "Renegociar precio del material principal",
+   "impacto_anual": 48000,
+   "plazo": "3 meses",
+   "responsable": "Compras"
+  }
+ ],
+ "escenarios": [
+  {
+   "nombre": "Base",
+   "supuestos": {},
+   "margen_p50": 0.16,
+   "prob_perdida": 0.03
+  },
+  {
+   "nombre": "Precio material +10 %",
+   "supuestos": {
+    "precio_material": 1.1
+   },
+   "margen_p50": 0.12,
+   "prob_perdida": 0.09
+  }
+ ]
+}
