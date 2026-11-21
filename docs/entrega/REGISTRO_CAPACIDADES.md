@@ -53,3 +53,7 @@ La persistencia usa temporal, respaldo anterior y reemplazo atómico; el respald
 CAP-13 verifica cada captura contra su propia versión. La transacción exitosa suma uno, el cierre exitoso suma el número de pasos registrados y un rechazo persistido suma cero. La huella cubre únicamente el comando. Una edición coordinada de los campos de control puede conservar su coherencia. La autenticidad del historial y la conciliación con tablas de negocio requieren evidencia independiente.
 
 El generador integral y la conciliación D9 completa siguen pendientes. T25.4/T23.5 está verificada solo con métodos sintéticos; no hay proveedor comercial ni aceptación del método ORIA. También siguen pendientes flete/T14.2, D14, devoluciones EVE_ORI, coproductos, costo financiero, operación conjunta de varias empresas, autenticación, volúmenes reales, varios operadores y analítica autónoma. El aislamiento se reforzó solo para existencia y resultados de método, además de las mutaciones `CTA_*`; no equivale a probar toda la cadena. El motor es copia del espejo Python de Ola 1 con cambios de guarda D9; la paridad de origen no demuestra que sus reglas representen íntegramente el método ORIA.
+
+### OT-C02 · Exportación desde contrato
+
+El endpoint `POST /api/exportar?tipo=...` genera libros de resultados, analítica y proyección, un HTML independiente y un Word de fuentes. Consume únicamente un contrato ya calculado; el enlace desde la interfaz y la validación metodológica de los datos siguen pendientes. Ver [entrega y pruebas](evidencias/OT-C02/ENTREGA.md).
