@@ -13,6 +13,7 @@ from urllib.parse import parse_qs, unquote, urlsplit
 import webbrowser
 
 from .receipt_audit import audit_receipts
+from .exportar import exportar, TIPOS
 from .store import Problem, Store
 
 
@@ -138,6 +139,17 @@ class ReynaHandler(BaseHTTPRequestHandler):
         store = self.server.store
         if target.path in {"/", "/index.html"} and method == "GET":
             self._send(HTTPStatus.OK, self.server.index, "text/html; charset=utf-8")
+            return
+        if target.path == "/api/exportar" and method == "POST":
+            try:
+                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
+                if set(params) != {"tipo"} or len(params["tipo"]) != 1 or params["tipo"][0] not in TIPOS:
+                    raise ValueError("Elige un tipo de reporte válido.")
+                body = self._body()
+                ruta = exportar(body.get("resultados"), params["tipo"][0], store.root / "exportaciones")
+            except ValueError as exc:
+                raise Problem(HTTPStatus.BAD_REQUEST, str(exc)) from None
+            self._json(HTTPStatus.CREATED, {"ruta": str(ruta), "tipo": params["tipo"][0]})
             return
         if parts[:3] != ["", "api", "workspaces"]:
             raise Problem(HTTPStatus.NOT_FOUND, "La ruta no existe.")
