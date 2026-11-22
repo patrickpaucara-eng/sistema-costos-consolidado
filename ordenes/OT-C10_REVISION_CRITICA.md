@@ -32,3 +32,16 @@ qué obtuviste, archivo/línea y gravedad (BLOQUEA ENTREGA / CORREGIR / MENOR). 
    python-docx, HTML con un navegador sin red). Lista lo que falte o esté roto.
 
 Tiempo en `docs/entrega/tiempos/codex.csv`. Compuerta: `python tools/verificar.py` debe seguir VERDE (no cambiaste código).
+
+## G. Lógica completa (agregada el 22-nov; base ≥ `83c3c9b`)
+10. Flujo único: `/api/libros/operar?id=frenosa` → registra un T15 y un T14 en dólares por `/api/workspaces/<id>/execute` →
+    recalcula el espacio (`esp_…`). Comprueba kardex, pérdidas por merma en exceso y conciliación EXISTENCIA motor = kardex.
+11. Inventarios: cambia en una copia del libro cantidades vendidas, deja una orden abierta y una orden que termine el mes
+    siguiente; verifica costo de ventas, producto terminado, en proceso y el ajuste D14 con aritmética propia.
+12. Coproductos (T18 con dos productos): REAL por unidades, CONTABLE por valor de venta relativo; el costo conjunto se conserva.
+13. Capacidad ociosa (MEDIDA nivel CAP), costeo normal (TARIFA_CENTRO PRED) y variaciones (TARIFA STD).
+14. Costo de adquisición: flete del documento, T14.2 tardío (parte a inventario y parte a gasto), centro COM (REAL en inventario,
+    CONTABLE gasto) y devolución al proveedor a costo directo.
+15. Cierre y aprobación: intenta aprobar sin revisar, aprobar con el mismo usuario que emitió, alterar un paquete sellado, reabrir
+    sin motivo. Todo debe rechazarse. Verifica que la v1 sigue existiendo tras emitir la v2.
+16. Autonomía: aprueba noviembre y recalcula diciembre; recalcula a mano el ahorro realizado y el factor de efectividad.
