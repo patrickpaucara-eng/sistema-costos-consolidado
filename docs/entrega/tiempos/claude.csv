@@ -15,3 +15,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,21:15,21:50,Punto 3: coproductos (T18) REAL por unidades y CONTABLE por VVR,Sistema,Claude,compuerta VERDE 112 pruebas
 2026-11-21,21:50,22:50,Punto 4: costeo normal (tasa predeterminada) y variaciones de material; compras en moneda extranjera; devoluciones de clientes,Sistema,Claude,compuerta VERDE 116 pruebas
 2026-11-21,22:55,23:59,Punto 5: flete del documento, T14.2 ajuste tardío, centro de compras ABC (REAL en inventario; CONTABLE gasto); devoluciones a costo directo,Sistema,Claude,compuerta VERDE 119 pruebas
+2026-11-22,00:00,01:00,Puntos 6 y 7: cierre (verificar, conciliar motor vs costeo, sellar, reabrir por versión) y aprobación con separación de funciones,Sistema,Claude,compuerta VERDE 120 pruebas

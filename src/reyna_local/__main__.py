@@ -175,6 +175,30 @@ class ReynaHandler(BaseHTTPRequestHandler):
             except ValueError as exc:
                 raise Problem(404, str(exc)) from None
             return
+        if target.path.startswith("/api/cierres"):
+            from . import cierre as CI
+            from .calculo_local import calcular as _calc, ruta_libro
+            q = {k: v[0] for k, v in parse_qs(target.query).items()}
+            for k, patron in (("empresa", r"[a-z0-9_]{1,60}"), ("periodo", r"\d{4}-(0[1-9]|1[0-2])"), ("id", r"[a-z0-9_]+_\d{4}-\d{2}_v\d+")):
+                if k in q and not re.fullmatch(patron, q[k]): raise Problem(400, "Parámetros inválidos.")
+            try:
+                if target.path == "/api/cierres" and method == "GET":
+                    self._json(HTTPStatus.OK, {"cierres": CI.listar(store.root, q.get("empresa"))}); return
+                if target.path == "/api/cierres/verificar" and method == "GET":
+                    self._json(HTTPStatus.OK, CI.verificar(store.root, q["id"])); return
+                if target.path == "/api/cierres/emitir" and method == "POST":
+                    b = self._body()
+                    self._json(HTTPStatus.CREATED, CI.emitir(store.root, q["empresa"], q["periodo"], str(b.get("usuario") or ""), _calc,
+                                                             ruta_libro(store.root, q["empresa"]), str(b.get("motivo") or "")[:500])); return
+                if target.path == "/api/cierres/accion" and method == "POST":
+                    b = self._body(); emp = q["id"].rsplit("_", 2)[0]
+                    self._json(HTTPStatus.OK, CI.accion(store.root, q["id"], str(b.get("accion") or ""), str(b.get("usuario") or ""),
+                                                        str(b.get("comentario") or "")[:500], ruta_libro(store.root, emp))); return
+            except (CI.Rechazo, ValueError) as exc:
+                raise Problem(422, str(exc)) from None
+            except KeyError:
+                raise Problem(400, "Faltan parámetros.") from None
+            raise Problem(HTTPStatus.NOT_FOUND, "La ruta no existe.")
         if target.path == "/api/libros/operar" and method == "POST":
             from .calculo_local import ruta_libro
             s_ = parse_qs(target.query).get("id", [""])[0]
