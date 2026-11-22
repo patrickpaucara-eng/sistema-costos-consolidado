@@ -8,13 +8,22 @@ por unidad y merma normal) y al precio estándar (TARIFA tipo STD; si no hay, el
 cantidad = (Q real − Q estándar) × P estándar; precio = (P real − P estándar) × Q real."""
 
 
+def _leer(P, libro, tablas):
+    """Tablas opcionales: un libro sin ellas simplemente no tiene costeo normal o variaciones (no es error)."""
+    out = {}
+    for t in tablas:
+        try: out.update(P.leer(libro, [t]))
+        except (KeyError, PermissionError): out[t] = []
+    return out
+
+
 def _vigente(filas, clave_per, periodo):
     v = [f for f in filas if str(f.get(clave_per) or "") <= periodo]
     return max(v, key=lambda f: str(f.get(clave_per))) if v else None
 
 
 def costeo_normal(por_per, periodo, libro, P):
-    t = P.leer(libro, ["CENTRO", "TARIFA_CENTRO", "MEDIDA"])
+    t = _leer(P, libro, ["CENTRO", "TARIFA_CENTRO", "MEDIDA"])
     prod = [c for c in t.get("CENTRO", []) if str(c.get("CEN_FUN") or c.get("CEN_TIPO")) == "PRD" and c.get("CEN_INDUCTOR")]
     if not prod: return None
     cen = prod[0]; base_crit = cen["CEN_INDUCTOR"]
@@ -43,7 +52,7 @@ def costeo_normal(por_per, periodo, libro, P):
 
 def variaciones_material(kardex_todo, periodo, libro, P, val_cu):
     """kardex_todo: filas del kardex del periodo (resultados._kardex); val_cu: no usado (precio real = importe / cantidad)."""
-    t = P.leer(libro, ["COMPONENTE", "OBJETO", "TARIFA", "EVENTO"])
+    t = _leer(P, libro, ["COMPONENTE", "OBJETO", "TARIFA", "EVENTO"])
     cmp_ = {(c["CMP_PRO"], c["CMP_REC"]): c for c in t.get("COMPONENTE", [])}
     if not cmp_: return []
     obj = {o["OBJ_NUM"]: o for o in t.get("OBJETO", [])}
