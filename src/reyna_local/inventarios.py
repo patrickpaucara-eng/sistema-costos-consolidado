@@ -1,7 +1,10 @@
-"""Inventarios de proceso y de producto terminado, y costo de ventas (NIC 2; D14).
+"""Inventarios de proceso y de producto terminado, costo de ventas (NIC 2), D14 y coproductos (D-9).
 - Una orden acumula costo de producción (MD + MOD + CIF) en cada periodo en que recibe costo.
 - Mientras no termina (OBJETO.OBJ_EST distinto de T/L, o su fecha de término es posterior al periodo) su costo acumulado es
   INVENTARIO EN PROCESO. Al terminar, entra al KARDEX DE PRODUCTO TERMINADO (promedio ponderado) con todo lo acumulado.
+- COPRODUCTOS: si la orden registra varios productos de salida (transacción T18: EVENTO de la orden + LINEA por producto),
+  el costo conjunto se reparte entre ellos: REAL por unidades físicas; CONTABLE por valor de venta relativo (VVR = cantidad ×
+  precio de venta del periodo), D-9. Sin T18, la orden produce su OBJ_PRO en la cantidad OBJ_CAN.
 - Las ventas (VENTA.VTA_CAN) salen del producto terminado al costo promedio: eso es el COSTO DE VENTAS.
 - D14 · venta antes de liquidar: si se vende más de lo que hay terminado, el faltante sale a un costo PROVISIONAL (último
   promedio conocido, o el costo unitario de producción del periodo). Cuando entra la producción que lo respalda, la diferencia
@@ -10,54 +13,77 @@
 PROD = ("MD", "PD", "SD", "CIF")
 
 
-def _termina(o, info, p):
+def _termina(info, p):
     est = str(info.get("OBJ_EST") or "T").upper(); fin = info.get("OBJ_FEC_TER")
     if est not in ("T", "L"): return False
     if fin in (None, ""): return True
     a, m = p.split("-"); return int(float(fin)) <= int(f"{a}{m}31")
 
 
-def calcular(por_per, objetos_info, pro, can, ventas_q, periodo):
-    """por_per: {periodo: {orden: {elemento: monto}}}; objetos_info: {orden: fila OBJETO}; ventas_q: {(periodo, producto): cantidad}.
-    Devuelve dict con kardex_pt (filas del periodo), saldos_pt, en_proceso, costo_ventas, ajustes_d14 y totales."""
+def _cu_periodo(por_per, p, pro, can, prod):
+    tot = q = 0.0
+    for o, v in por_per[p].items():
+        if pro.get(o) == prod: tot += sum(float(v.get(e, 0)) for e in PROD); q += float(can.get(o, 0))
+    return tot / q if q else 0.0
+
+
+def reparto_conjunto(costo, salidas, precios, p, base):
+    """[(producto, cantidad)] → [(producto, cantidad, costo asignado, peso)]. FISICA: por unidades; VVR: por cantidad × precio.
+    Si falta el precio de algún coproducto, VVR no es aplicable y se usan unidades físicas (se informa en la base)."""
+    if base == "VVR" and all((p, prod) in (precios or {}) for prod, _ in salidas):
+        pesos = [q * precios[(p, prod)] for prod, q in salidas]; usada = "VVR"
+    else:
+        pesos = [q for _, q in salidas]; usada = "FISICA"
+    T = sum(pesos) or 1.0
+    return [(prod, q, costo * w / T, w / T) for (prod, q), w in zip(salidas, pesos)], usada
+
+
+def calcular(por_per, objetos_info, pro, can, ventas_q, periodo, salidas=None, precios=None, base="FISICA"):
+    """por_per: {periodo: {orden: {elemento: monto}}}; objetos_info: {orden: fila OBJETO}; ventas_q: {(periodo, producto): cantidad};
+    salidas: {orden: [(producto, cantidad)]} (T18); precios: {(periodo, producto): precio unitario}; base: FISICA | VVR."""
     acum, terminada = {}, set()
-    stock = {}                              # producto → (cantidad, valor)
-    pendiente = {}                          # producto → [(cantidad, cu_provisional, periodo)]
-    ultimo_cu = {}
-    filas, ajustes, cv = [], [], {}
+    stock, pendiente, ultimo_cu = {}, {}, {}
+    filas, ajustes, coprod, cv = [], [], [], {}
+
+    def entrada(prod, q, val, o, p):
+        cu = val / q if q else 0.0; ultimo_cu[prod] = cu
+        pend = pendiente.get(prod, []); resto_q, resto_v = q, val
+        while pend and resto_q > 1e-9:                     # D14: liquida primero las ventas provisionales pendientes
+            pq, pcu, pp = pend[0]; usa = min(pq, resto_q); dif = round((cu - pcu) * usa, 2)
+            if abs(dif) >= 0.005:
+                ajustes.append(dict(periodo=p, producto=prod, orden=o, cantidad=usa, cu_provisional=round(pcu, 6),
+                                    cu_real=round(cu, 6), ajuste=dif, venta_de=pp))
+                cv[p] += dif
+            resto_q -= usa; resto_v -= cu * usa
+            if usa >= pq - 1e-9: pend.pop(0)
+            else: pend[0] = (pq - usa, pcu, pp)
+        sq, sv = stock.get(prod, (0.0, 0.0)); stock[prod] = (sq + resto_q, sv + resto_v)
+        if p == periodo:
+            filas.append(dict(producto=prod, movimiento="ENTRADA DE PRODUCCIÓN", documento=o, cantidad=round(q, 4), costo_unitario=round(cu, 6),
+                              importe=round(val, 2), saldo_cantidad=round(stock[prod][0], 4), saldo_importe=round(stock[prod][1], 2)))
+
     for p in sorted(x for x in por_per if x <= periodo):
         cv[p] = 0.0
         for o, v in por_per[p].items():
-            if o in terminada: continue
-            acum[o] = acum.get(o, 0.0) + sum(float(v.get(e, 0)) for e in PROD)
-        # 1) entradas: órdenes que terminan en p
-        for o in sorted(acum):
-            if o in terminada or not _termina(o, objetos_info.get(o, {}), p): continue
-            terminada.add(o); prod = pro.get(o, o); q = float(can.get(o, 0)); val = acum[o]
-            cu = val / q if q else 0.0; ultimo_cu[prod] = cu
-            # D14: primero se liquidan las ventas provisionales pendientes de este producto
-            pend = pendiente.get(prod, [])
-            while pend and q > 1e-9:
-                pq, pcu, pp = pend[0]; usa = min(pq, q); dif = round((cu - pcu) * usa, 2)
-                if abs(dif) >= 0.005:
-                    ajustes.append(dict(periodo=p, producto=prod, orden=o, cantidad=usa, cu_provisional=round(pcu, 6), cu_real=round(cu, 6),
-                                        ajuste=dif, venta_de=pp))
-                    cv[p] += dif
-                q -= usa; val -= cu * usa
-                if usa >= pq - 1e-9: pend.pop(0)
-                else: pend[0] = (pq - usa, pcu, pp)
-            sq, sv = stock.get(prod, (0.0, 0.0)); stock[prod] = (sq + q, sv + val)
-            if p == periodo:
-                filas.append(dict(producto=prod, movimiento="ENTRADA DE PRODUCCIÓN", documento=o, cantidad=round(float(can.get(o, 0)), 4),
-                                  costo_unitario=round(cu, 6), importe=round(acum[o], 2), saldo_cantidad=round(stock[prod][0], 4),
-                                  saldo_importe=round(stock[prod][1], 2)))
-        # 2) salidas: ventas del periodo al promedio
-        for (pv, prod), qv in sorted(ventas_q.items()):
+            if o not in terminada: acum[o] = acum.get(o, 0.0) + sum(float(v.get(e, 0)) for e in PROD)
+        for o in sorted(acum):                              # 1) entradas: órdenes que terminan en p
+            if o in terminada or not _termina(objetos_info.get(o, {}), p): continue
+            terminada.add(o)
+            sal = (salidas or {}).get(o) or [(pro.get(o, o), float(can.get(o, 0)))]
+            if len(sal) > 1:                                # coproductos: reparto del costo conjunto (D-9)
+                partes, usada = reparto_conjunto(acum[o], sal, precios, p, base)
+                for prod, q, val, w in partes:
+                    entrada(prod, q, val, o, p)
+                    if p == periodo:
+                        coprod.append(dict(orden=o, producto=prod, cantidad=q, base=usada, participacion=round(w, 6), costo_asignado=round(val, 2),
+                                           costo_unitario=round(val / q, 6) if q else 0.0))
+            else:
+                entrada(sal[0][0], sal[0][1], acum[o], o, p)
+        for (pv, prod), qv in sorted(ventas_q.items()):     # 2) salidas: ventas del periodo al promedio
             if pv != p or not qv: continue
             sq, sv = stock.get(prod, (0.0, 0.0)); cpu = sv / sq if sq > 1e-9 else ultimo_cu.get(prod, 0.0)
-            sale = min(qv, max(sq, 0.0)); falta = qv - sale
-            costo = cpu * sale
-            if falta > 1e-9:                                       # D14: venta antes de liquidar → costo provisional
+            sale = min(qv, max(sq, 0.0)); falta = qv - sale; costo = cpu * sale
+            if falta > 1e-9:                                # D14: venta antes de liquidar → costo provisional
                 cprov = ultimo_cu.get(prod) or _cu_periodo(por_per, p, pro, can, prod)
                 pendiente.setdefault(prod, []).append((falta, cprov, p)); costo += cprov * falta
             stock[prod] = (sq - sale, sv - cpu * sale); cv[p] += costo
@@ -69,16 +95,5 @@ def calcular(por_per, objetos_info, pro, can, ventas_q, periodo):
     saldos = [dict(producto=k, cantidad=round(q, 4), importe=round(v, 2)) for k, (q, v) in sorted(stock.items())]
     pend = [dict(producto=k, cantidad=round(sum(x[0] for x in v), 4)) for k, v in pendiente.items() if v]
     return dict(kardex_pt=filas, saldos_pt=saldos, en_proceso=en_proceso, costo_ventas=round(cv.get(periodo, 0.0), 2),
-                ajustes_d14=[a for a in ajustes if a["periodo"] == periodo], ventas_pendientes_d14=pend,
+                ajustes_d14=[a for a in ajustes if a["periodo"] == periodo], ventas_pendientes_d14=pend, coproductos=coprod,
                 total_pt=round(sum(x["importe"] for x in saldos), 2), total_proceso=round(sum(x["costo_acumulado"] for x in en_proceso), 2))
-
-
-def _vino_antes(o, por_per, p):
-    return any(o in por_per[x] for x in por_per if x < p)
-
-
-def _cu_periodo(por_per, p, pro, can, prod):
-    tot = q = 0.0
-    for o, v in por_per[p].items():
-        if pro.get(o) == prod: tot += sum(float(v.get(e, 0)) for e in PROD); q += float(can.get(o, 0))
-    return tot / q if q else 0.0

@@ -83,7 +83,10 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     serie += proy
     t = tot_per(periodo); vt = vta_per(periodo)
     from reyna_local import inventarios as INV
-    inv = INV.calcular(por_per, {r["OBJ_NUM"]: r for r in objs}, pro, can, ventas_q, periodo) if any(ventas_q.values()) else None
+    sal18 = _salidas_t18(libro)
+    precios = {k: ventas[k] / q for k, q in ventas_q.items() if q}
+    inv = INV.calcular(por_per, {r["OBJ_NUM"]: r for r in objs}, pro, can, ventas_q, periodo, salidas=sal18, precios=precios,
+                       base="VVR" if sintesis == "CONTABLE" else "FISICA") if any(ventas_q.values()) or sal18 else None
     # costo de ventas: salidas del producto terminado (NIC 2). Sin cantidades vendidas se asume vendido lo producido.
     cventas = inv["costo_ventas"] if inv else round(sum(t[e] for e in PROD), 2)
     er = [dict(categoria="OPERACION", concepto="Ventas netas", importe=vt),
@@ -283,4 +286,17 @@ def _perdidas(libro, periodo):
         if v is None: v = float(l.get("LIN_MTO") or 0)
         out.append(dict(orden=e.get("EVE_OBJ"), recurso=l["LIN_REC"], cantidad_exceso=x, cantidad_total=q,
                         importe=round(v * x / q, 2) if q else 0.0, evento=k))
+    return out
+
+
+def _salidas_t18(libro):
+    """Productos de salida de cada orden (T18: resultado del objeto). Varias salidas = coproductos (D-9)."""
+    t = P.leer(libro, ["EVENTO", "LINEA"]); ev = {}
+    for e in t.get("EVENTO", []):
+        if str(e.get("EVE_TRX")) == "T18" and e.get("EVE_OBJ"): ev[R._clave(e["EVE_NUM"], 0).split("-")[0]] = e["EVE_OBJ"]
+    out = {}
+    for l in t.get("LINEA", []):
+        o = ev.get(R._clave(l["LIN_EVE"], 0).split("-")[0])
+        if o and l.get("LIN_REC"):
+            d = dict(out.get(o, [])); d[str(l["LIN_REC"])] = d.get(str(l["LIN_REC"]), 0.0) + float(l.get("LIN_CAN") or 0); out[o] = list(d.items())
     return out

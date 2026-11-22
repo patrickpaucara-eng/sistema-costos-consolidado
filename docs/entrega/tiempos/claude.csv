@@ -12,3 +12,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,18:38,19:55,Flujo único: plantilla DBD única, adaptador por columnas, espacio = libro, kardex derivado, merma en exceso a pérdida,Monografía,Claude,compuerta VERDE 106 pruebas; humo del binario aprobado
 2026-11-21,19:55,20:40,Punto 1: inventario en proceso y terminado; costo de ventas por kardex de PT; D14 venta antes de liquidar,Sistema,Claude,compuerta VERDE 109 pruebas
 2026-11-21,20:40,21:15,Punto 2: capacidad ociosa (MEDIDA nivel CAP) y merma normal vs anormal integrada,Sistema,Claude,compuerta VERDE 111 pruebas
+2026-11-21,21:15,21:50,Punto 3: coproductos (T18) REAL por unidades y CONTABLE por VVR,Sistema,Claude,compuerta VERDE 112 pruebas
