@@ -52,11 +52,13 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     objs = P.leer(libro, ["OBJETO"])["OBJETO"]
     can = {r["OBJ_NUM"]: float(r["OBJ_CAN"] or 0) for r in objs}; pro = {r["OBJ_NUM"]: str(r["OBJ_PRO"] or r["OBJ_NUM"]) for r in objs}
     # ingresos: tabla VENTA del DBD (periodo, producto, ingreso neto); se reparten entre las órdenes del producto por cantidad
-    ventas, ventas_q = {}, {}
+    ventas, ventas_q, devol = {}, {}, {}
     for v in P.leer(libro, ["VENTA"]).get("VENTA", []):
         if v.get("VTA_PER") and (v.get("VTA_EMP") in (None, emp)):
             k = (str(v["VTA_PER"]), str(v["VTA_REC"])); ventas[k] = ventas.get(k, 0.0) + float(v.get("VTA_ING") or 0)
-            ventas_q[k] = ventas_q.get(k, 0.0) + float(v.get("VTA_CAN") or 0)
+            qv = float(v.get("VTA_CAN") or 0)
+            if qv < 0: devol[k] = devol.get(k, 0.0) - qv            # devolución de cliente
+            else: ventas_q[k] = ventas_q.get(k, 0.0) + qv
     def ingreso(p, o):
         hermanas = [x for x in por_per.get(p, {}) if pro.get(x) == pro.get(o)]; q = sum(can.get(x, 0) for x in hermanas)
         return round(ventas.get((p, pro.get(o)), 0.0) * (can.get(o, 0) / q if q else 1 / max(1, len(hermanas))), 2)
@@ -84,9 +86,9 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     t = tot_per(periodo); vt = vta_per(periodo)
     from reyna_local import inventarios as INV
     sal18 = _salidas_t18(libro)
-    precios = {k: ventas[k] / q for k, q in ventas_q.items() if q}
+    precios = {k: ventas[k] / q for k, q in ventas_q.items() if q and ventas.get(k, 0) > 0}
     inv = INV.calcular(por_per, {r["OBJ_NUM"]: r for r in objs}, pro, can, ventas_q, periodo, salidas=sal18, precios=precios,
-                       base="VVR" if sintesis == "CONTABLE" else "FISICA") if any(ventas_q.values()) or sal18 else None
+                       base="VVR" if sintesis == "CONTABLE" else "FISICA", devoluciones=devol) if any(ventas_q.values()) or sal18 else None
     # costo de ventas: salidas del producto terminado (NIC 2). Sin cantidades vendidas se asume vendido lo producido.
     cventas = inv["costo_ventas"] if inv else round(sum(t[e] for e in PROD), 2)
     er = [dict(categoria="OPERACION", concepto="Ventas netas", importe=vt),
@@ -131,6 +133,10 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     r["modelo"] = _modelo(libro)
     r["control"] = _control(aristas, r, nom)
     r["datos_libro"] = _datos_libro(libro, periodo, nom)
+    from reyna_local import normal as N
+    cn = N.costeo_normal(por_per, periodo, libro, P)
+    if cn: r["costeo_normal"] = cn
+    r["variaciones"] = N.variaciones_material(r["kardex"], periodo, libro, P, val)
     if est:
         r["estimacion"] = {k: dict(cu_total=round(v["cu_total"], 4), p05=round(v["p05"], 4), p95=round(v["p95"], 4), metodo=v["metodo"],
                                    mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
@@ -184,7 +190,7 @@ def _kardex(libro, val, periodo, nom):
             mov = "DEVOLUCION" if r["KDX_TRX"] == "T14.1" else "SALIDA"
         q, v = q + can, v + monto; saldo[rec] = (q, v)
         if r["KDX_PER"] == periodo:
-            f = str(r["KDX_FEC"]); out.append(dict(fecha=f"{f[:4]}-{f[4:6]}-{f[6:8]}" if len(f) == 8 else f, material=rec, material_nombre=nom.get(rec, rec), movimiento=mov, comprobante=r["KDX_CPB"],
+            f = str(r["KDX_FEC"]); out.append(dict(evento=R._clave(r["KDX_EVE"], r["KDX_LIN"]), fecha=f"{f[:4]}-{f[4:6]}-{f[6:8]}" if len(f) == 8 else f, material=rec, material_nombre=nom.get(rec, rec), movimiento=mov, comprobante=r["KDX_CPB"],
                             cantidad=can, costo_unitario=round(c, 6), importe=round(monto, 2), saldo_cantidad=round(q, 4), saldo_importe=round(v, 2)))
     return out
 

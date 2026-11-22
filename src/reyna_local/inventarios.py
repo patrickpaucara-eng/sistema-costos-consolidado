@@ -6,6 +6,8 @@
   el costo conjunto se reparte entre ellos: REAL por unidades físicas; CONTABLE por valor de venta relativo (VVR = cantidad ×
   precio de venta del periodo), D-9. Sin T18, la orden produce su OBJ_PRO en la cantidad OBJ_CAN.
 - Las ventas (VENTA.VTA_CAN) salen del producto terminado al costo promedio: eso es el COSTO DE VENTAS.
+- DEVOLUCIONES DE CLIENTES (VENTA con cantidad negativa): reingresan al producto terminado al costo con que salieron y
+  reducen el costo de ventas del periodo; el ingreso se revierte en las ventas netas.
 - D14 · venta antes de liquidar: si se vende más de lo que hay terminado, el faltante sale a un costo PROVISIONAL (último
   promedio conocido, o el costo unitario de producción del periodo). Cuando entra la producción que lo respalda, la diferencia
   (costo real − provisional) × unidades se reconoce como AJUSTE DEL COSTO DE VENTAS en ese periodo; la venta original no se
@@ -38,11 +40,11 @@ def reparto_conjunto(costo, salidas, precios, p, base):
     return [(prod, q, costo * w / T, w / T) for (prod, q), w in zip(salidas, pesos)], usada
 
 
-def calcular(por_per, objetos_info, pro, can, ventas_q, periodo, salidas=None, precios=None, base="FISICA"):
+def calcular(por_per, objetos_info, pro, can, ventas_q, periodo, salidas=None, precios=None, base="FISICA", devoluciones=None):
     """por_per: {periodo: {orden: {elemento: monto}}}; objetos_info: {orden: fila OBJETO}; ventas_q: {(periodo, producto): cantidad};
     salidas: {orden: [(producto, cantidad)]} (T18); precios: {(periodo, producto): precio unitario}; base: FISICA | VVR."""
     acum, terminada = {}, set()
-    stock, pendiente, ultimo_cu = {}, {}, {}
+    stock, pendiente, ultimo_cu, ultimo_cu_venta = {}, {}, {}, {}
     filas, ajustes, coprod, cv = [], [], [], {}
 
     def entrada(prod, q, val, o, p):
@@ -86,11 +88,19 @@ def calcular(por_per, objetos_info, pro, can, ventas_q, periodo, salidas=None, p
             if falta > 1e-9:                                # D14: venta antes de liquidar → costo provisional
                 cprov = ultimo_cu.get(prod) or _cu_periodo(por_per, p, pro, can, prod)
                 pendiente.setdefault(prod, []).append((falta, cprov, p)); costo += cprov * falta
-            stock[prod] = (sq - sale, sv - cpu * sale); cv[p] += costo
+            stock[prod] = (sq - sale, sv - cpu * sale); cv[p] += costo; ultimo_cu_venta[prod] = costo / qv
             if p == periodo:
                 filas.append(dict(producto=prod, movimiento="SALIDA POR VENTA" + (" (parte provisional D14)" if falta > 1e-9 else ""),
                                   documento=f"Ventas {p}", cantidad=-round(qv, 4), costo_unitario=round(costo / qv, 6) if qv else 0,
                                   importe=-round(costo, 2), saldo_cantidad=round(stock[prod][0], 4), saldo_importe=round(stock[prod][1], 2)))
+        for (pv, prod), qd in sorted((devoluciones or {}).items()):   # 3) devoluciones de clientes (M-F-DCL)
+            if pv != p or not qd: continue
+            sq, sv = stock.get(prod, (0.0, 0.0)); cu = ultimo_cu_venta.get(prod) or ultimo_cu.get(prod, 0.0)
+            stock[prod] = (sq + qd, sv + qd * cu); cv[p] -= qd * cu        # reingresa al costo con que salió; reduce el costo de ventas
+            if p == periodo:
+                filas.append(dict(producto=prod, movimiento="DEVOLUCIÓN DE CLIENTE", documento=f"Ventas {p}", cantidad=round(qd, 4),
+                                  costo_unitario=round(cu, 6), importe=round(qd * cu, 2), saldo_cantidad=round(stock[prod][0], 4),
+                                  saldo_importe=round(stock[prod][1], 2)))
     en_proceso = [dict(orden=o, producto=pro.get(o, o), costo_acumulado=round(v, 2)) for o, v in sorted(acum.items()) if o not in terminada]
     saldos = [dict(producto=k, cantidad=round(q, 4), importe=round(v, 2)) for k, (q, v) in sorted(stock.items())]
     pend = [dict(producto=k, cantidad=round(sum(x[0] for x in v), 4)) for k, v in pendiente.items() if v]

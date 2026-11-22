@@ -153,7 +153,7 @@ def generar(plantilla, salida, periodos=None):
             if u[0].value: u[3].value = EMP
     if "CENTRO" in base.sheetnames:                                # almacén de materiales (lo usan T14/T15 del motor operativo)
         wb["CENTRO"].append(["ALM_FRE", EMP, "ALM", 0, 0, 0, None, None, None, "S", "ALM"])
-        wb["CENTRO"].append(["PLANTA_FRE", EMP, "PRD", 0, 0, 0, None, None, None, "S", "PRD"])   # centro que consume (T15)
+        wb["CENTRO"].append(["PLANTA_FRE", EMP, "PRD", 0, 0, 0, "KG_PRODUCIDOS", None, None, "S", "PRD"])   # centro que consume (T15); base del costeo normal
     if "COMPONENTE" in base.sheetnames:                            # lista de materiales: 1 kg de material por pieza (peso 1 kg, Cuadro 14)
         for c, d in MAT.items():
             wb["COMPONENTE"].append(dict(CMP_PRO=d[4:], CMP_REC=d, CMP_CAN_EST=1, CMP_MERMA=0))
