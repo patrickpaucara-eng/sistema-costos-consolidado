@@ -178,7 +178,7 @@ def correr(hechos, parametros, previos):
             if crit == "CONSUMO":
                 dest = OrderedDict(sorted((k, v) for k, v in consumo[n[1]].items() if v > 0))
             else:
-                dest = OrderedDict(sorted((k, v) for k, v in med.get(crit, {}).items() if v > 0))
+                dest = OrderedDict(sorted((k, v) for k, v in med.get(crit, {}).items() if v > 0 and k[0] != "CAP"))
             malos = [k for k in dest if k[0] not in NIVELES[et]]
             if malos: raise Rechazo(f"{et} {n[1]}: el criterio {crit} apunta a niveles no permitidos {sorted({k[0] for k in malos})}")
             if et == "P4A" and {k[0] for k in dest if dest[k]} >= {"CEN", "ACT"}:     # R-26: nunca a centros y actividades a la vez
@@ -187,14 +187,17 @@ def correr(hechos, parametros, previos):
                 raise Rechazo(f"R-25: P4B {n[1]} reparte a un centro que no es productivo")
             T = sum(dest.values())
             if T == 0: raise Rechazo(f"I8: {et} {n[1]} tiene monto {red(tot_n)} y su criterio {crit} suma cero")
+            cap = med.get(crit, {}).get(("CAP", n[1]), D(0))      # capacidad práctica del origen (MEDIDA nivel CAP)
+            if cap > T:                                            # capacidad ociosa: no es costo del producto (NIC 2 §13)
+                dest[("OCIO", n[1])] = cap - T; T = cap
             if n[0] == "CEN": distrib[n[1]] += tot_n
             for e in sorted(saldo[n]):
                 m = saldo[n][e]
                 if m == 0: continue
                 for (niv, d), q in dest.items():
                     a = m * q / T
-                    le = _elemento_llegada(et, e, niv, d, cen)
-                    tipo = {"OBJ": "OBJ", "ACT": "ACT", "CEN": "CEN"}[niv]
+                    le = "OCIO" if niv == "OCIO" else _elemento_llegada(et, e, niv, d, cen)
+                    tipo = {"OBJ": "OBJ", "ACT": "ACT", "CEN": "CEN", "OCIO": "OCIO"}[niv]
                     saldo[(tipo, d)][le] += a
                     if tipo == "CEN":
                         (propio if et == "P4A" else recibido)[d] += a

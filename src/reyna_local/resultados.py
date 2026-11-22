@@ -92,9 +92,14 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
           dict(categoria="OPERACION", concepto="Gastos de ventas", importe=-t["GVT"]),
           dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-t["GFI"])]
     perd = _perdidas(libro, periodo)
+    _, ar_, _ = R.correr(h, dict(PER=periodo, EMP=emp), previos(libro))
+    ocio = [dict(origen=a["origen"], etapa=a["etapa"], capacidad_no_usada=float(a["medida"]), capacidad=float(a["total"]), importe=round(float(a["monto"]), 2))
+            for a in ar_ if a["nivel"] == "OCIO"]
+    to = round(sum(x["importe"] for x in ocio), 2)
+    if to: er.insert(4, dict(categoria="OPERACION", concepto="Costo de capacidad ociosa (NIC 2 §13)", importe=-to))
     tp = round(sum(x["importe"] for x in perd), 2)
     if tp: er.insert(4, dict(categoria="OPERACION", concepto="Pérdidas anormales: merma en exceso (NIC 2 §16 a)", importe=-tp))
-    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp, 2)
+    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp - to, 2)
     hall = A.diagnostico(series, periodo)
     rel = A.relevancia({e: t[e] for e in inc})
     esc = A.escenarios(dict(ventas=vt, **t))
@@ -116,7 +121,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
                       costo_unitario_prom=round(ct / q, 4) if q else 0, resultado_antes_impuestos=round(r_oper - t["GFI"], 2)),
              objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=rel, hallazgos=hall, propuestas=prop,
              escenarios=esc, proyeccion_info=info)
-    r["perdidas"] = perd
+    r["perdidas"] = perd; r["capacidad_ociosa"] = ocio
     if inv: r["inventarios"] = inv
     r["trazas"] = _trazas(h, par, prev, objetos, inc, nom) if sintesis != "ESTIMADO" else []
     r["kardex"] = _kardex(libro, val, periodo, nom)
@@ -204,10 +209,10 @@ def _control(aristas, r, nom):
                                                                diferencia=dif, ok=abs(dif) <= tol, detalle=detalle))
     # 1. Conservación: lo que entra como recurso termina íntegro en las órdenes (P1..P7)
     entra = sum(float(a["monto"]) for a in aristas if a["org_tipo"] == "REC")
-    llega = sum(float(a["monto"]) for a in aristas if a["nivel"] == "OBJ")
+    llega = sum(float(a["monto"]) for a in aristas if a["nivel"] in ("OBJ", "OCIO"))
     sale_int = sum(float(a["monto"]) for a in aristas if a["org_tipo"] != "REC")
-    llega_int = sum(float(a["monto"]) for a in aristas if a["nivel"] != "OBJ")
-    add("Conservación del reparto: recursos del periodo = costo llegado a las órdenes", entra, llega,
+    llega_int = sum(float(a["monto"]) for a in aristas if a["nivel"] not in ("OBJ", "OCIO"))
+    add("Conservación del reparto: recursos del periodo = costo llegado a las órdenes + capacidad ociosa", entra, llega,
         detalle="Ningún sol se pierde ni se crea al repartir por etapas (I9).")
     add("Centros y actividades quedan en cero (todo lo recibido se reparte)", llega_int, sale_int)
     # 2. Ruta del costo: los tramos raíz explican cada elemento de cada orden

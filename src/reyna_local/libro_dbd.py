@@ -25,7 +25,7 @@ DESCRIPCION = {
     "KARDEX": "Movimientos de almacén de materiales; las entradas llevan su valor (KDX_VAL).",
     "REGLA_REPARTO": "Modelo ABC: en qué etapa (P1…P7) y con qué inductor se reparte cada origen.",
     "CRITERIO": "Inductores (unidad de medida).",
-    "MEDIDA": "Cantidad de cada inductor por destino y periodo (minutos, kg, %, ventas…).",
+    "MEDIDA": "Cantidad de cada inductor por destino y periodo (minutos, kg, %, ventas…). Nivel CAP = capacidad práctica de un origen (ocio).",
     "CENTRO": "Centros de costo (producción, apoyo, administración, ventas, financieros).",
     "ACTIVIDAD": "Actividades del modelo ABC.",
     "VENTA": "Ventas del periodo por producto: cantidad e ingreso neto.",
