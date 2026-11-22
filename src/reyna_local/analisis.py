@@ -166,23 +166,30 @@ def escenarios(t, n=2000, semilla=2010):
 
 
 def propuestas(series, periodo, hallazgos, rel):
-    """Prescriptivo: brecha contra el promedio de 6 meses de la propia historia (no un estándar), anualizada (× 12)."""
+    """Prescriptivo: brecha contra el promedio de 6 meses de la propia historia (no un estándar), anualizada (× 12).
+    Cada propuesta guarda su línea base y su objetivo medibles (producto, elemento, costo unitario actual y objetivo): así la
+    analítica autónoma puede medir después si se cumplió."""
     out = []
-    for prod, pts in sorted(series.items()):
-        idx = next((i for i, x in enumerate(pts) if x[0] == periodo), None)
-        if idx is None or idx == 0: continue
-        _, el, q = pts[idx]
-        if not q: continue
+    def cu(prod, e):
+        pts = series.get(prod, []); idx = next((i for i, x in enumerate(pts) if x[0] == periodo), None)
+        if idx is None or idx == 0 or not pts[idx][2]: return None
         hist = [x for x in pts[max(0, idx - 6):idx] if x[2]]
-        md_ref = sum(x[1]["MD"] / x[2] for x in hist) / len(hist)          # promedio de 6 meses (no el mejor mes: podría ser atípico)
-        brecha = el["MD"] / q - md_ref
+        if not hist: return None
+        return pts[idx][1][e] / pts[idx][2], sum(x[1][e] / x[2] for x in hist) / len(hist), pts[idx][2]
+    for prod in sorted(series):
+        v = cu(prod, "MD")
+        if not v: continue
+        base, ref, q = v; brecha = base - ref        # promedio de 6 meses (no el mejor mes: podría ser atípico)
         if brecha > 0:
             out.append(dict(codigo=f"P-MD-{prod}", descripcion=f"Material de {prod}: volver al costo unitario promedio de los últimos 6 meses "
-                            f"(S/ {md_ref:,.4f}) con compras consolidadas y negociación de precio y flete",
-                            impacto_anual=round(brecha * q * 12, 2), plazo="3 meses", responsable="Compras"))
+                            f"(S/ {ref:,.4f}) con compras consolidadas y negociación de precio y flete",
+                            impacto_anual=round(brecha * q * 12, 2), plazo="3 meses", responsable="Compras",
+                            producto=prod, elemento="MD", cu_base=round(base, 6), cu_objetivo=round(ref, 6), cantidad_mes=q))
     for h in hallazgos:
         if h["impacto"] > 0 and h["causa"] in ("CIF", "PD"):
+            v = cu(h["referencia"], h["causa"]) or (None, None, None)
             out.append(dict(codigo=f"P-{h['causa']}-{h['referencia']}", descripcion=f"{h['referencia']}: reducir {dict(ELEMENTOS)[h['causa']]} "
                             "al promedio histórico (programación de la carga, mantenimiento preventivo)",
-                            impacto_anual=round(h["impacto"] * 12, 2), plazo="6 meses", responsable="Producción"))
+                            impacto_anual=round(h["impacto"] * 12, 2), plazo="6 meses", responsable="Producción",
+                            producto=h["referencia"], elemento=h["causa"], cu_base=v[0] and round(v[0], 6), cu_objetivo=v[1] and round(v[1], 6), cantidad_mes=v[2]))
     return sorted(out, key=lambda p: -p["impacto_anual"])

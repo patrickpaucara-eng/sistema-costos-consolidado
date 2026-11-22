@@ -142,6 +142,8 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
         if _cache.get(clave, (None,))[0] != h:
             cod, _ = B.empresa(libro); _cache[clave] = (h, calcular_periodos(costeo, cod))
         resultado = construir(costeo, periodo=periodo, sintesis=sintesis, _cache=_cache[clave][1])
+        from .autonomia import aplicar
+        aplicar(resultado, carpeta, s)                    # seguimiento de propuestas aprobadas y aprendizaje (punto 9)
         resultado["sello"] = _sello(libro, resultado)
         if validar(resultado) or resultado['periodo_actual'] != periodo or resultado['sintesis'] != sintesis:
             raise ValueError('El resultado no cumple el contrato solicitado.')
