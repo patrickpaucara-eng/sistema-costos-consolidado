@@ -179,7 +179,7 @@ def correr(hechos, parametros, previos):
         if et in ("P1", "P2", "P3", "P4A"):
             nodos = [n for n in saldo if n[0] == "REC" and origen_ini.get(n) == et]
         elif et == "P4B":
-            nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "APR"]
+            nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "APR" and ("P4D", n[1]) not in reglas]   # el CA de apoyo del Modelo 3 va en P4D
         elif et == "P4D":
             nodos = [n for n in saldo if n[0] == "CEN" and (et, n[1]) in reglas]
         elif et == "P4E":

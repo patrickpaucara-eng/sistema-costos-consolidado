@@ -46,4 +46,7 @@ def test_panel_de_calidad_detecta_inductores_que_no_suman_100():
 def test_modelo_abc_es_dato_del_libro():
     m = _r('2010-07', 'REAL')['modelo']
     assert {x['etapa'] for x in m['reglas']} >= {'P1', 'P2', 'P4A', 'P4C', 'P5', 'P6', 'P7'}
-    assert len(m['actividades']) == 14 and all(x['nombre'] for x in m['recursos'])
+    # Modelo 3 de Oria (decisión del dueño, 22-nov): 14 actividades operativas (7 FO + 7 soporte) + 3 de apoyo
+    # (mantenimiento, calidad, ingeniería). Los costos por OT no cambian (comparación antes/después: diferencia 0).
+    assert len(m['actividades']) == 17 and all(x['nombre'] for x in m['recursos'])
+    assert sum(1 for x in m['actividades'] if x['nivel'] == 'Apoyo') == 3

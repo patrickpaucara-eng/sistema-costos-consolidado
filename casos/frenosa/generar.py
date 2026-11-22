@@ -56,7 +56,10 @@ def _orden_costeo():
 
 
 def generar(plantilla, salida, periodos=None):
-    shutil.copy(plantilla, salida); base = load_workbook(salida); wb = _Libro(base, _orden_costeo())
+    shutil.copy(plantilla, salida); base = load_workbook(salida)
+    act = base["ACTIVIDAD"]                                         # Modelo 3: el nivel de la actividad (columna opcional del DBD)
+    if "ACT_NIVEL" not in [c.value for c in act[1]]: act.cell(1, act.max_column + 1, "ACT_NIVEL")
+    wb = _Libro(base, _orden_costeo())
     for s in ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "EVENTO", "LINEA", "KARDEX", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "CENTRO", "ACTIVIDAD", "VENTA", "CLIENTE"]:
         if wb[s].max_row > 1: wb[s].delete_rows(2, wb[s].max_row - 1)
     ot = leer("Ordenes_Trabajo.csv"); pers = sorted({r["periodo"] for r in ot})
@@ -102,13 +105,27 @@ def generar(plantilla, salida, periodos=None):
     # --- mano de obra, otros recursos y soporte por periodo ---
     acts = []
     for r in leer("Actividades.csv"):
-        if r["periodo"] == pers[0]: acts.append(r["codigo_actividad"]); wb["ACTIVIDAD"].append([r["codigo_actividad"], r["nombre_actividad"], "kg"]); wb["ACTIVIDAD"].append(["S-" + r["codigo_actividad"], "Soporte de " + r["nombre_actividad"], "S/"])
+        if r["periodo"] == pers[0]:
+            acts.append(r["codigo_actividad"])
+            wb["ACTIVIDAD"].append(dict(ACT_COD=r["codigo_actividad"], ACT_DES=r["nombre_actividad"], ACT_UNI="kg", ACT_NIVEL="O"))
+            wb["ACTIVIDAD"].append(dict(ACT_COD="S-" + r["codigo_actividad"], ACT_DES="Soporte de " + r["nombre_actividad"], ACT_UNI="S/", ACT_NIVEL="O"))
+    # Modelo 3 de Oria (escalonado): cada proceso de soporte es un centro de actividad de apoyo (CA) con su actividad de
+    # apoyo (ACA), que el sistema reparte a la parte de soporte de cada actividad operativa (ACO) con los Cuadros 7 y 12.
+    SOPORTE = [("MANT", "Mantenimiento", "SOP_MANT"), ("CC", "Control de calidad", "SOP_CC"), ("ING", "Ingeniería y desarrollo", "SOP_ING")]
+    for c, nom, k in SOPORTE:
+        wb["ACTIVIDAD"].append(dict(ACT_COD="A-" + c, ACT_DES=nom, ACT_UNI="S/", ACT_NIVEL="A"))
     rec.append(["MOD", "Personal directo (operarios)", "PERS_DIR", "S/", None, "S"]); rr.append(["P2", "MOD", "MIN_STD", 19000101, "Minutos estándar Te×kg"]); cri.append(["MIN_STD", "Minutos estándar", "min", "S"])
     otros = {r["codigo_recurso"]: r["nombre_recurso"] for r in leer("costo_otros_recursos(CI).csv")}
     for c, nom in otros.items():
         rec.append([c, nom, "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", c, "EC_" + c, 19000101, "Cuadro 6"]); cri.append(["EC_" + c, "Inductor de " + nom, "%", "S"])
-    for c, nom, k in [("MANT", "Mantenimiento", "SOP_MANT"), ("CC", "Control de calidad", "SOP_CC"), ("ING", "Ingeniería y desarrollo", "SOP_ING")]:
-        rec.append([c, nom, "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", c, k, 19000101, "Cuadros 7-9 y 12"]); cri.append([k, "Distribución de " + nom, "", "S"])
+    for c, nom, k in SOPORTE:
+        rec.append([c, nom, "INDIRECTO", "S/", None, "S"])
+        rr.append(["P4A", c, "EC_CA_" + c, 19000101, "Modelo 3 (Oria): inductor EC-CA, el costo del soporte es de su centro"])
+        rr.append(["P4D", "CA_" + c, "CAA_ACA_" + c, 19000101, "Modelo 3 (Oria): inductor CAA-ACA"])
+        rr.append(["P4E", "A-" + c, k, 19000101, "Modelo 3 (Oria): inductor ACA-ACO, Cuadros 7 y 12"])
+        cri.append(["EC_CA_" + c, "Costo de " + nom + " a su centro de actividad", "%", "S"])
+        cri.append(["CAA_ACA_" + c, "Centro de " + nom + " a su actividad de apoyo", "%", "S"])
+        cri.append([k, "Distribución de " + nom + " a las actividades operativas", "", "S"])
     for k, d, u in (("AC_PROD", "Peso de producción de cada orden en la actividad", "%"),
                     ("AC_SOP", "Peso de soporte de cada orden en la actividad", "%"),
                     ("CONSUMO", "Consumo de material según kardex", "kg")): cri.append([k, d, u, "S"])
@@ -132,6 +149,8 @@ def generar(plantilla, salida, periodos=None):
         ing = sum(num(r["cantidad"]) * num(r["costo_unitario_soles"]) for r in leer("Soporte_Ingenieria(CI).csv") if r["periodo"] == p)
         for c, imp in (("MANT", sum(mant.values())), ("CC", cc), ("ING", ing)):
             e = evento("T17", p, int(p.replace("-", "") + "28")); lin.append([e, 1, c, 1, imp, None, None, imp, None, None])
+        for c, _, _ in SOPORTE:
+            med.append([p, EMP, "EC_CA_" + c, "CEN", "CA_" + c, 1]); med.append([p, EMP, "CAA_ACA_" + c, "ACT", "A-" + c, 1])
         for a, v in mant.items(): med.append([p, EMP, "SOP_MANT", "ACT", "S-" + a, v])
         for r in [r for r in leer("Soporte_CC_ING_Inductores.csv") if r["periodo"] == p]:
             med.append([p, EMP, "SOP_CC" if r["proceso_soporte"].startswith("Control") else "SOP_ING", "ACT", "S-" + r["codigo_actividad"], num(r["porcentaje_distribucion"])])
@@ -154,6 +173,8 @@ def generar(plantilla, salida, periodos=None):
     if "CENTRO" in base.sheetnames:                                # almacén de materiales (lo usan T14/T15 del motor operativo)
         wb["CENTRO"].append(["ALM_FRE", EMP, "ALM", 0, 0, 0, None, None, None, "S", "ALM"])
         wb["CENTRO"].append(["PLANTA_FRE", EMP, "PRD", 0, 0, 0, "KG_PRODUCIDOS", None, None, "S", "PRD"])   # centro que consume (T15); base del costeo normal
+        for c, nom in (("MANT", "Mantenimiento"), ("CC", "Control de calidad"), ("ING", "Ingeniería y desarrollo")):   # CA de apoyo (Modelo 3)
+            wb["CENTRO"].append(["CA_" + c, EMP, "APR", 0, 0, 1, None, None, None, "S", "APR"])
     if "COMPONENTE" in base.sheetnames:                            # lista de materiales: 1 kg de material por pieza (peso 1 kg, Cuadro 14)
         for c, d in MAT.items():
             wb["COMPONENTE"].append(dict(CMP_PRO=d[4:], CMP_REC=d, CMP_CAN_EST=1, CMP_MERMA=0))

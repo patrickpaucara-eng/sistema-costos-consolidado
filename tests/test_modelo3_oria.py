@@ -113,3 +113,14 @@ def test_caso_anterior_del_motor_sigue_igual():
     f = R.interno(c["hechos"], c["parametros"], c["previos"])
     for _, o, e, v in c["espera"]:
         assert round(float(f[o][e]), 6) == v
+
+
+def test_frenosa_corre_como_modelo3():
+    """El caso Frenosa: el soporte (mantenimiento, calidad, ingeniería) lo reparte el sistema por CA → ACA → ACO."""
+    from reyna_local.resultados import construir
+    raiz = os.path.join(os.path.dirname(__file__), "..")
+    r = construir(os.path.join(raiz, "casos", "libros", "frenosa.xlsx"), "FRE", "Frenosa")
+    etapas = {t["etapa"] for t in r["trazas"] if t["elemento"] == "CIF"}
+    assert {"P4A", "P4D", "P4E", "P4C"} <= etapas
+    niveles = {a["codigo"]: a["nivel"] for a in r["modelo"]["actividades"]}
+    assert niveles["A-MANT"] == "Apoyo" and niveles["FO-1"] == "Operativa"
