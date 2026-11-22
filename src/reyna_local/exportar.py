@@ -84,6 +84,11 @@ def _hojas_ruta_y_modelo(libro, r):
     for etapa in sorted({t['etapa'] for t in trazas}):
         hoja = libro.create_sheet(('Ruta ' + etapa)[:31]); hoja.freeze_panes = 'A2'
         _tabla_en_hoja(hoja, [{c: t.get(c) for c in cols} for t in trazas if t['etapa'] == etapa])
+    inv = r.get('inventarios') or {}
+    for nombre, filas in (('Inventario PT', inv.get('kardex_pt')), ('Saldos PT', inv.get('saldos_pt')), ('En proceso', inv.get('en_proceso')),
+                          ('Ajustes D14', inv.get('ajustes_d14')), ('Pérdidas anormales', r.get('perdidas'))):
+        if filas:
+            hoja = libro.create_sheet(nombre[:31]); hoja.freeze_panes = 'A2'; _tabla_en_hoja(hoja, filas)
     m = r.get('modelo') or {}
     for nombre, campo in (('Modelo - Reglas', 'reglas'), ('Modelo - Recursos', 'recursos'), ('Modelo - Actividades', 'actividades'),
                           ('Modelo - Inductores', 'inductores'), ('Modelo - Centros', 'centros')):

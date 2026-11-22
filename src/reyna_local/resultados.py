@@ -52,10 +52,11 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     objs = P.leer(libro, ["OBJETO"])["OBJETO"]
     can = {r["OBJ_NUM"]: float(r["OBJ_CAN"] or 0) for r in objs}; pro = {r["OBJ_NUM"]: str(r["OBJ_PRO"] or r["OBJ_NUM"]) for r in objs}
     # ingresos: tabla VENTA del DBD (periodo, producto, ingreso neto); se reparten entre las órdenes del producto por cantidad
-    ventas = {}
+    ventas, ventas_q = {}, {}
     for v in P.leer(libro, ["VENTA"]).get("VENTA", []):
         if v.get("VTA_PER") and (v.get("VTA_EMP") in (None, emp)):
             k = (str(v["VTA_PER"]), str(v["VTA_REC"])); ventas[k] = ventas.get(k, 0.0) + float(v.get("VTA_ING") or 0)
+            ventas_q[k] = ventas_q.get(k, 0.0) + float(v.get("VTA_CAN") or 0)
     def ingreso(p, o):
         hermanas = [x for x in por_per.get(p, {}) if pro.get(x) == pro.get(o)]; q = sum(can.get(x, 0) for x in hermanas)
         return round(ventas.get((p, pro.get(o)), 0.0) * (can.get(o, 0) / q if q else 1 / max(1, len(hermanas))), 2)
@@ -81,9 +82,12 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     proy, info = A.proyectar([(x["periodo"], x["ventas"], x["costo_total"]) for x in serie])
     serie += proy
     t = tot_per(periodo); vt = vta_per(periodo)
-    cventas = round(sum(t[e] for e in PROD), 2)
+    from reyna_local import inventarios as INV
+    inv = INV.calcular(por_per, {r["OBJ_NUM"]: r for r in objs}, pro, can, ventas_q, periodo) if any(ventas_q.values()) else None
+    # costo de ventas: salidas del producto terminado (NIC 2). Sin cantidades vendidas se asume vendido lo producido.
+    cventas = inv["costo_ventas"] if inv else round(sum(t[e] for e in PROD), 2)
     er = [dict(categoria="OPERACION", concepto="Ventas netas", importe=vt),
-          dict(categoria="OPERACION", concepto="Costo de ventas (MD + MOD + CIF)", importe=-cventas),
+          dict(categoria="OPERACION", concepto="Costo de ventas (MD + MOD + CIF de lo vendido)", importe=-cventas),
           dict(categoria="OPERACION", concepto="Gastos de administración", importe=-t["GAD"]),
           dict(categoria="OPERACION", concepto="Gastos de ventas", importe=-t["GVT"]),
           dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-t["GFI"])]
@@ -113,6 +117,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
              objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=rel, hallazgos=hall, propuestas=prop,
              escenarios=esc, proyeccion_info=info)
     r["perdidas"] = perd
+    if inv: r["inventarios"] = inv
     r["trazas"] = _trazas(h, par, prev, objetos, inc, nom) if sintesis != "ESTIMADO" else []
     r["kardex"] = _kardex(libro, val, periodo, nom)
     r["modelo"] = _modelo(libro)
