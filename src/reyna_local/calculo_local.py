@@ -77,7 +77,7 @@ def restaurar(carpeta, s, version):
         raise ValueError("Esa versión no existe.")
     actual = d / f"{s}.xlsx"
     if actual.is_file(): _guardar_version(d, s, actual)
-    shutil.copy(v, actual); _cache.pop(s, None)
+    shutil.copy(v, actual); [_cache.pop((s, k), None) for k in 'CR']
     cod, nom = B.empresa(actual); return dict(id=s, codigo=cod, nombre=nom)
 
 
@@ -101,7 +101,7 @@ def registrar(carpeta, contenido, nombre_archivo="libro.xlsx", reemplazar=False)
             raise YaExiste(dict(id=s, codigo=cod, nombre=nom))
         previo = libros(carpeta).get(s)
         if previo is not None and previo.is_file(): _guardar_version(dest_dir, s, previo)   # también el de demostración
-        os.replace(tmp, dest_dir / f"{s}.xlsx"); _cache.pop(s, None)
+        os.replace(tmp, dest_dir / f"{s}.xlsx"); [_cache.pop((s, k), None) for k in 'CR']
         return dict(id=s, codigo=cod, nombre=nom), []
     finally:
         tmp.unlink(missing_ok=True)
@@ -137,10 +137,11 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
             raise ValueError("El libro no cumple el formato DBD: " + "; ".join(errores[:5]))
         h = B.huella(libro)
         from .flujo import preparar
-        costeo = preparar(libro)                 # kardex derivado de las transacciones del motor operativo (flujo único)
-        if _cache.get(s, (None,))[0] != h:
-            cod, _ = B.empresa(libro); _cache[s] = (h, calcular_periodos(costeo, cod))
-        resultado = construir(costeo, periodo=periodo, sintesis=sintesis, _cache=_cache[s][1])
+        costeo = preparar(libro, sintesis)       # kardex derivado + costo de adquisición completo (vista de la síntesis)
+        clave = (s, "C" if sintesis == "CONTABLE" else "R")
+        if _cache.get(clave, (None,))[0] != h:
+            cod, _ = B.empresa(libro); _cache[clave] = (h, calcular_periodos(costeo, cod))
+        resultado = construir(costeo, periodo=periodo, sintesis=sintesis, _cache=_cache[clave][1])
         resultado["sello"] = _sello(libro, resultado)
         if validar(resultado) or resultado['periodo_actual'] != periodo or resultado['sintesis'] != sintesis:
             raise ValueError('El resultado no cumple el contrato solicitado.')

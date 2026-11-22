@@ -104,7 +104,9 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     if to: er.insert(4, dict(categoria="OPERACION", concepto="Costo de capacidad ociosa (NIC 2 §13)", importe=-to))
     tp = round(sum(x["importe"] for x in perd), 2)
     if tp: er.insert(4, dict(categoria="OPERACION", concepto="Pérdidas anormales: merma en exceso (NIC 2 §16 a)", importe=-tp))
-    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp - to, 2)
+    ajg = _ajustes_gasto(libro, periodo); ta = round(sum(x["importe"] for x in ajg), 2)
+    if ta: er.insert(4, dict(categoria="OPERACION", concepto="Ajustes de compra de material ya consumido (T14.2)", importe=-ta))
+    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp - to - ta, 2)
     hall = A.diagnostico(series, periodo)
     rel = A.relevancia({e: t[e] for e in inc})
     esc = A.escenarios(dict(ventas=vt, **t))
@@ -126,7 +128,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
                       costo_unitario_prom=round(ct / q, 4) if q else 0, resultado_antes_impuestos=round(r_oper - t["GFI"], 2)),
              objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=rel, hallazgos=hall, propuestas=prop,
              escenarios=esc, proyeccion_info=info)
-    r["perdidas"] = perd; r["capacidad_ociosa"] = ocio
+    r["perdidas"] = perd; r["capacidad_ociosa"] = ocio; r["ajustes_compra"] = ajg
     if inv: r["inventarios"] = inv
     r["trazas"] = _trazas(h, par, prev, objetos, inc, nom) if sintesis != "ESTIMADO" else []
     r["kardex"] = _kardex(libro, val, periodo, nom)
@@ -183,7 +185,9 @@ def _kardex(libro, val, periodo, nom):
     for r in rows:
         rec = r["KDX_REC"]; q, v = saldo.get(rec, (0.0, 0.0)); can = float(r["KDX_CAN"] or 0)
         clave = f"{r['KDX_EVE']}-{r['KDX_LIN']}-{r['KDX_ALM']}"
-        if can >= 0 and r["KDX_VAL"] is not None:
+        if can == 0 and r["KDX_VAL"] is not None:
+            monto = float(r["KDX_VAL"]) if q > 0 else 0.0; c = 0.0; mov = "AJUSTE DE VALOR"
+        elif can >= 0 and r["KDX_VAL"] is not None:
             monto = float(r["KDX_VAL"]); c = monto / can if can else 0.0; mov = "ENTRADA" if r["KDX_CPB"] != "SALDO" else "SALDO INICIAL"
         else:
             monto = -float(cu.get((clave, "MONTO"), 0.0)); c = float(cu.get((clave, "CU"), 0.0))
@@ -306,3 +310,14 @@ def _salidas_t18(libro):
         if o and l.get("LIN_REC"):
             d = dict(out.get(o, [])); d[str(l["LIN_REC"])] = d.get(str(l["LIN_REC"]), 0.0) + float(l.get("LIN_CAN") or 0); out[o] = list(d.items())
     return out
+
+
+def _ajustes_gasto(libro, periodo):
+    from openpyxl import load_workbook
+    wb = load_workbook(libro, read_only=True)
+    try:
+        if "_AJUSTES_GASTO" not in wb.sheetnames: return []
+        f = list(wb["_AJUSTES_GASTO"].iter_rows(values_only=True))
+    finally:
+        wb.close()
+    return [dict(zip(f[0], x)) for x in f[1:] if x and x[0] == periodo]

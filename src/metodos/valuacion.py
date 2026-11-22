@@ -73,7 +73,7 @@ FICHA = dict(nombre="VALUACION_PROMEDIO", version="2.0", vigente_desde="2026-01-
     fuente="NIC 2 §25; ARQUITECTURA_V4_1 §7.3 ALG-01", supuestos="Movimientos de un recurso en un almacén; Decimal de 28 dígitos",
     limites="R-50: una salida mayor que la existencia se rechaza (no admite saldo negativo)",
     caso="Caso_PROMEDIO_MOVIL_7.xlsx")
-CONSUME = {"(sin MCD) KARDEX": ["KDX_EVE", "KDX_LIN", "RECURSO", "ALMACEN", "KDX_CAN", "KDX_VAL"]}
+CONSUME = {"(sin MCD) KARDEX": ["KDX_EVE", "KDX_LIN", "RECURSO", "ALMACEN", "KDX_CAN", "KDX_VAL", "KDX_TRX"]}
 DEPENDE_DE = {}
 PARAMETROS = []
 ENTREGA = {"SALIDA": ["CU", "MONTO"], "EXISTENCIA": ["CANTIDAD", "VALOR"]}
@@ -93,7 +93,7 @@ def _normalizar(r):
     val = _campo(r, "VALOR", "KDX_VAL")
     return dict(eve=_campo(r, "EVENTO", "KDX_EVE"), lin=_campo(r, "LINEA", "KDX_LIN"),
                 fec=_campo(r, "FECHA", "KDX_FEC") or 0, rec=r["RECURSO"], alm=r["ALMACEN"],
-                cant=D(str(cant)), val=D(str(val if val is not None else 0)))
+                cant=D(str(cant)), val=D(str(val if val is not None else 0)), trx=str(r.get("KDX_TRX") or ""))
 
 
 def _clave_orden(m):
@@ -109,11 +109,16 @@ def _simular(hechos):
         grupos.setdefault((m["rec"], m["alm"]), []).append(m)
     out = {}
     for (rec, alm) in sorted(grupos, key=lambda k: (str(k[0]), str(k[1]))):
-        can = val = D(0)
+        can = val = ind = D(0)                       # ind: costo indirecto de compras incluido en el valor (D-11)
         capas = {}                                   # código de entrada -> valor aún no consumido
         salidas = []
         for m in sorted(grupos[(rec, alm)], key=_clave_orden):
             cod = f"{m['eve']}-{m['lin']}-{alm}"
+            if m["cant"] == 0 and m["val"] != 0:      # ajuste de valor sin cantidad (flete, costo indirecto de compras, T14.2)
+                if can > 0:
+                    val += m["val"]; capas[cod] = capas.get(cod, D(0)) + m["val"]
+                    if m["trx"] == "AJV_IND": ind += m["val"]
+                continue
             if m["cant"] > 0:
                 can += m["cant"]
                 val += m["val"]
@@ -124,6 +129,10 @@ def _simular(hechos):
                     raise ValueError(f"R-50: la salida {cod} de {q} es mayor que la existencia {can} de {rec} en {alm}")
                 q = min(q, can)
                 cpu = val / can if can else D(0)
+                if m["trx"] == "T14.1" and ind:         # D-11: la devolución sale a costo directo; el indirecto queda en inventario
+                    cpu = (val - ind) / can if can else D(0)
+                else:
+                    ind -= ind * q / can if can else D(0)
                 monto = q * cpu
                 consumo = {}
                 if val != 0:
@@ -134,7 +143,7 @@ def _simular(hechos):
                 can -= q
                 val -= monto
                 if can == 0:
-                    val = D(0)
+                    val = D(0); ind = D(0)
                     capas = {}
                 salidas.append(dict(cod=cod, cantidad=q, cpu=cpu, monto=monto, consumo=consumo))
         out[(rec, alm)] = dict(salidas=salidas, can=can, val=val, capas=capas)
