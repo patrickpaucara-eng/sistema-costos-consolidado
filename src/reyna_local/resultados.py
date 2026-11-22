@@ -116,7 +116,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     _, aristas, _ = R.correr(h, par, prev)
     acts, ind = [], {}
     for a in aristas:                                   # inductor de cada actividad hacia los objetos (P4C)
-        if a["etapa"] == "P4C": ind[a["origen"]] = (a["criterio"], a["total"])
+        if a["etapa"] in ("P4C", "P4E"): ind[a["origen"]] = (a["criterio"], a["total"])
     for (tipo, clave, conc, v_) in R.calcular(h, par, prev)[0]:
         if tipo == "ACTIVIDAD":
             cri, tot = ind.get(clave, ("", 0))
@@ -148,7 +148,9 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
 ELEMENTO_NOMBRE = {"MD": "Material directo", "PD": "Mano de obra directa", "SD": "Servicios directos", "CIF": "Costos indirectos de fabricación",
                    "GAD": "Gastos de administración", "GVT": "Gastos de ventas", "GFI": "Gastos financieros"}
 ETAPA_NOMBRE = {"P1": "Material directo por kardex", "P2": "Mano de obra a actividades", "P3": "Servicios directos",
-                "P4A": "Recursos indirectos a centros y actividades", "P4B": "Apoyo a productivos", "P4C": "Actividades a órdenes",
+                "P4A": "Recursos indirectos a centros y actividades", "P4B": "Apoyo a productivos",
+                "P4D": "Centros de actividad a actividades", "P4E": "Actividades estratégicas y de apoyo a operativas (escalonado)",
+                "P4C": "Actividades a órdenes",
                 "P5": "Administración a órdenes", "P6": "Ventas a órdenes", "P7": "Financieros a órdenes"}
 
 
@@ -206,7 +208,9 @@ def _modelo(libro):
     return dict(
         recursos=[dict(codigo=r["REC_COD"], nombre=r.get("REC_DES"), tipo=r.get("REC_TRE"), elemento=ele.get(r.get("REC_TRE")), unidad=r.get("REC_UNI"))
                   for r in t.get("RECURSO", [])],
-        actividades=[dict(codigo=r["ACT_COD"], nombre=r.get("ACT_DES"), unidad=r.get("ACT_UNI")) for r in t.get("ACTIVIDAD", [])],
+        actividades=[dict(codigo=r["ACT_COD"], nombre=r.get("ACT_DES"), unidad=r.get("ACT_UNI"),
+                          nivel={"E": "Estratégica", "A": "Apoyo"}.get(str(r.get("ACT_NIVEL") or "O").strip().upper(), "Operativa"))
+                     for r in t.get("ACTIVIDAD", [])],
         centros=[dict(codigo=r["CEN_COD"], tipo=r.get("CEN_TIPO") or r.get("CEN_FUN"), inductor=r.get("CEN_INDUCTOR")) for r in t.get("CENTRO", [])],
         inductores=[dict(codigo=r["CRI_COD"], nombre=r.get("CRI_DES"), unidad=r.get("CRI_UNI")) for r in t.get("CRITERIO", [])],
         reglas=[dict(etapa=r["RRE_ETAPA"], etapa_nombre=ETAPA_NOMBRE.get(r["RRE_ETAPA"], r["RRE_ETAPA"]), origen=r["RRE_ORIGEN"],
@@ -250,7 +254,7 @@ def _control(aristas, r, nom):
     # 4. Inductores en % deben sumar 100 %
     tot = {}
     for a in aristas:
-        if a["etapa"] in ("P4A", "P4B", "P4C"): tot[(a["origen"], a["criterio"])] = float(a["total"])
+        if a["etapa"] in ("P4A", "P4B", "P4D", "P4E", "P4C"): tot[(a["origen"], a["criterio"])] = float(a["total"])
     for (org, cri), v in sorted(tot.items()):
         if 0.5 < v < 1.5 and abs(v - 1) > 0.0005:
             chk.append(dict(control=f"{nom.get(cri, cri)} (recurso «{nom.get(org, org)}») suma {v * 100:.0f} %, no 100 %", esperado=1, obtenido=v,

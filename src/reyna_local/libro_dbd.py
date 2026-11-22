@@ -13,6 +13,8 @@ VERSION = "1.0-MN01"
 # tablas que la empresa debe llenar (las demás son configuración del método o salidas del sistema)
 OBLIGATORIAS = ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "TIPO_RECURSO", "EVENTO", "LINEA", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "VENTA"]
 OPCIONALES = ["CENTRO", "ACTIVIDAD", "KARDEX", "CLIENTE"]
+COLUMNAS_OPCIONALES = {"ACT_NIVEL"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
+ETAPAS_VALIDAS = ("P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7")
 DE_DATOS = OBLIGATORIAS + OPCIONALES + ["INV_PROCESO", "ESTIMACION", "LIN_ESTIM", "RESULTADO_METODO", "ALERTA", "PARAM_CAMBIO"]
 DESCRIPCION = {
     "EMPRESA": "Una fila: código, nombre y moneda funcional.",
@@ -23,11 +25,11 @@ DESCRIPCION = {
     "EVENTO": "Cabecera de cada documento del ERP (compra, consumo, planilla, gasto): periodo, fecha, objeto o centro.",
     "LINEA": "Detalle de cada documento: recurso, cantidad, costo unitario e importe.",
     "KARDEX": "Movimientos de almacén de materiales; las entradas llevan su valor (KDX_VAL).",
-    "REGLA_REPARTO": "Modelo ABC: en qué etapa (P1…P7) y con qué inductor se reparte cada origen.",
+    "REGLA_REPARTO": "Modelo ABC: en qué etapa (P1…P7; P4D centro→actividad, P4E actividad→actividad escalonado) y con qué inductor se reparte cada origen.",
     "CRITERIO": "Inductores (unidad de medida).",
     "MEDIDA": "Cantidad de cada inductor por destino y periodo (minutos, kg, %, ventas…). Nivel CAP = capacidad práctica de un origen (ocio).",
     "CENTRO": "Centros de costo (producción, apoyo, administración, ventas, financieros).",
-    "ACTIVIDAD": "Actividades del modelo ABC.",
+    "ACTIVIDAD": "Actividades del modelo ABC; ACT_NIVEL = E estratégica, A apoyo u O operativa (Modelo 3 de Oria, vacío = O).",
     "VENTA": "Ventas del periodo por producto: cantidad e ingreso neto.",
     "CLIENTE": "Clientes o mercados (opcional).",
 }
@@ -70,7 +72,7 @@ def validar(libro):
             if n in OBLIGATORIAS: err.append(f"Falta la hoja {n}. {DESCRIPCION.get(n, '')}")
             continue
         cab, filas = t[n]
-        faltan = [c for c in modelo.get(n, []) if c and c not in cab]
+        faltan = [c for c in modelo.get(n, []) if c and c not in cab and c not in COLUMNAS_OPCIONALES]
         if faltan: err.append(f"Hoja {n}: faltan las columnas {', '.join(faltan)}.")
         if n in OBLIGATORIAS and not filas: err.append(f"Hoja {n} está vacía. {DESCRIPCION.get(n, '')}")
     if err: return err
@@ -96,8 +98,11 @@ def validar(libro):
     for i, r in enumerate(g("REGLA_REPARTO")):
         ref("REGLA_REPARTO", i, "RRE_ORIGEN", r.get("RRE_ORIGEN"), recs | cens | acts, "RECURSO, CENTRO ni ACTIVIDAD")
         ref("REGLA_REPARTO", i, "RRE_CRIT", r.get("RRE_CRIT"), cris, "CRITERIO")
-        if r.get("RRE_ETAPA") not in ("P1", "P2", "P3", "P4A", "P4B", "P4C", "P5", "P6", "P7"):
-            err.append(f"Hoja REGLA_REPARTO, fila {i + 2}: la etapa «{r.get('RRE_ETAPA')}» no es P1…P7.")
+        if r.get("RRE_ETAPA") not in ETAPAS_VALIDAS:
+            err.append(f"Hoja REGLA_REPARTO, fila {i + 2}: la etapa «{r.get('RRE_ETAPA')}» no es {', '.join(ETAPAS_VALIDAS)}.")
+    for i, r in enumerate(g("ACTIVIDAD")):
+        if str(r.get("ACT_NIVEL") or "O").strip().upper() not in ("E", "A", "O"):
+            err.append(f"Hoja ACTIVIDAD, fila {i + 2}: ACT_NIVEL = «{r.get('ACT_NIVEL')}» debe ser E (estratégica), A (apoyo) u O (operativa).")
     for i, r in enumerate(g("MEDIDA")):
         ref("MEDIDA", i, "MED_CRIT", r.get("MED_CRIT"), cris, "CRITERIO"); ref("MEDIDA", i, "MED_PER", str(r.get("MED_PER")), pers, "PERIODO")
         if not _num(r.get("MED_CAN")) or float(r["MED_CAN"]) < 0: err.append(f"Hoja MEDIDA, fila {i + 2}: la cantidad debe ser un número ≥ 0.")

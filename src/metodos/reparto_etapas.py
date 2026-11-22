@@ -2,7 +2,13 @@
 """MÉTODO · REPARTO_ETAPAS (ARQUITECTURA_V4_1 §7.4, §7.5 ALG-04, §7.11 trazar/ALG-11, §7.12 ALG-09).
 Un solo mecanismo de asignación por etapas para todo elemento de costo:
   P1 MD, P2 PD, P3 SD  → OBJETO o ACTIVIDAD (P2 también INEF)
-  P4A IND → CENTRO o ACTIVIDAD · P4B APR → PRO · P4C PRO/ACTIVIDAD → OBJETO · P5 ADM → OBJETO · P6 VTA → OBJETO
+  P4A IND → CENTRO o ACTIVIDAD · P4B APR → PRO · P4D CENTRO DE ACTIVIDAD → ACTIVIDAD
+  P4E ACTIVIDAD → ACTIVIDAD escalonado (Estratégica → Apoyo/Operativa; Apoyo → Operativa) · P4C PRO/ACTIVIDAD → OBJETO
+  P5 ADM → OBJETO · P6 VTA → OBJETO · P7 FIN → OBJETO
+Modelos ABC de Oria (GE704W sem. 07) como DATOS, no como programas: Modelo 1 EC→AC→OC (P4A a actividades, P4C);
+Modelo 2 EC→CA→AC→OC (P4A a centros, P4D, P4C); Modelo 3 escalonado EC→CA→ACE→ACA→ACO→OC (P4A, P4D, P4E, P4C), con
+los costos directos que pueden entrar a la actividad operativa (P1-P3 a ACT). El nivel de la actividad (ACT_NIVEL: E, A, O;
+vacío = O) ordena el escalonado: una actividad solo entrega a niveles inferiores, nunca hacia atrás ni entre pares.
 Monto del destino = monto del origen × medida del destino / Σ medidas (Decimal). El elemento viaja con el monto
 (MD, PD, SD, CIF, GAD, GVT). Estado en memoria; orden por código; I1 por etapa; I8 y R-53 detienen el cálculo.
 Publicación con ALG-09 (2 decimales, residuo al mayor bruto; empate, menor código)."""
@@ -17,7 +23,8 @@ FICHA = dict(nombre="REPARTO_ETAPAS", version="2.0", vigente_desde="2026-01-01",
     formula="destino = origen × medida(destino) / Σ medidas; el elemento viaja con el monto; ALG-09 al publicar",
     fuente="ARQUITECTURA_V4_1 ALG-04; Oria (2026) procesos P1-P6 y ABC; Horngren caps. 4 y 15; NIC 2 §13",
     supuestos="Medidas del periodo cargadas; un criterio vigente por (etapa, origen); costo de material valorizado por el eje VALUACION",
-    limites="Sin reparto entre centros de apoyo (método directo); escalonado y recíproco son otras versiones del eje")
+    limites="Centros: apoyo → productivo por método directo (P4B). Actividades: escalonado E → A → O (P4E, Modelo 3 de Oria). "
+            "El recíproco no está implementado en este motor")
 CONSUME = {
     "(sin MCD) REGLA_REPARTO": ["ETAPA", "ORIGEN", "CRITERIO", "DESDE"],
     "(sin MCD) MEDIDA": ["PERIODO", "EMPRESA", "CRITERIO", "NIVEL", "DESTINO", "CANTIDAD"],
@@ -27,7 +34,7 @@ CONSUME = {
     "(sin MCD) TIPO_RECURSO": ["CODIGO", "ELEMENTO_COSTO"],
     "CENTRO": ["CODIGO", "EMPRESA", "TIPO"],
     "(sin MCD) OBJETO": ["NUMERO", "EMPRESA", "TIPO"],
-    "ACTIVIDAD": ["CODIGO"],
+    "ACTIVIDAD": ["CODIGO", "NIVEL"],
     "PERIODO": ["CODIGO", "EMPRESA", "INICIO"],
 }
 DEPENDE_DE = {"VALUACION_PROMEDIO": [("SALIDA", "MONTO")]}
@@ -37,7 +44,11 @@ ENTREGA = {"OBJETO": ["MD", "PD", "SD", "CIF", "GAD", "GVT", "GFI"],
            "ORIGEN": ["ELEMENTO", "MONTO", "MEDIDA_TOTAL", "CRITERIO", "CPU_CIERRE", "PRECIO_ULTIMA_COMPRA"], "ARISTA": ["ELEMENTO", "MEDIDA", "MONTO"],
            "RECURSO": ["INEF"]}
 
-ETAPAS = ["P1", "P2", "P3", "P4A", "P4B", "P4C", "P5", "P6", "P7"]   # P7 FIN → OBJETO (mono, D-9: financieros por capa)
+ETAPAS = ["P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7"]   # P7 FIN → OBJETO (mono, D-9: financieros por capa)
+# Pasadas de ejecución: P4E corre dos veces (primero las estratégicas, luego las de apoyo) para que el escalonado
+# reparta también lo que el apoyo recibió de la estratégica.
+PASES = ["P1", "P2", "P3", "P4A", "P4B", "P4D", ("P4E", "E"), ("P4E", "A"), "P4C", "P5", "P6", "P7"]
+NIVEL_ACT = {"E": 0, "A": 1, "O": 2}          # Estratégica, Apoyo, Operativa (Oria, Modelo 3)
 ELEM = {"MD": "MD", "MAT": "MD", "PD": "PD", "MOD": "PD", "SD": "SD", "IND": "IND"}
 ELEM_ETAPA = {"MD": "P1", "PD": "P2", "SD": "P3", "IND": "P4A"}
 CENTS = D("0.01")
@@ -77,7 +88,7 @@ def _contexto(hechos, per, emp):
     ele = {r["CODIGO"]: tre.get(r["TIPO_RECURSO"]) for r in hechos["RECURSO"]}
     cen = {r["CODIGO"]: str(r["TIPO"]) for r in hechos["CENTRO"] if r["EMPRESA"] == emp}
     obj = {r["NUMERO"]: str(r["TIPO"]) for r in hechos["(sin MCD) OBJETO"] if r["EMPRESA"] == emp}
-    act = {r["CODIGO"] for r in hechos["ACTIVIDAD"]}
+    act = {r["CODIGO"]: nivel_actividad(r.get("NIVEL"), r["CODIGO"]) for r in hechos["ACTIVIDAD"]}
     p = next((r for r in hechos["PERIODO"] if r["CODIGO"] == per and r["EMPRESA"] == emp), None)
     if not p: raise Rechazo(f"No existe el periodo {per} de la empresa {emp}")
     ini = int(p["INICIO"])
@@ -128,7 +139,14 @@ def _origenes(hechos, previos, ele, eventos):
 
 
 NIVELES = {"P1": {"OBJ", "ACT"}, "P2": {"OBJ", "ACT"}, "P3": {"OBJ", "ACT"}, "P4A": {"CEN", "ACT"}, "P4B": {"CEN"},
-           "P4C": {"OBJ"}, "P5": {"OBJ"}, "P6": {"OBJ"}, "P7": {"OBJ"}}
+           "P4D": {"ACT"}, "P4E": {"ACT"}, "P4C": {"OBJ"}, "P5": {"OBJ"}, "P6": {"OBJ"}, "P7": {"OBJ"}}
+
+
+def nivel_actividad(v, codigo=""):
+    """E, A u O (vacío = O, la actividad operativa de los modelos 1 y 2). Otro valor detiene el cálculo."""
+    n = str(v or "O").strip().upper()[:1] or "O"
+    if n not in NIVEL_ACT: raise Rechazo(f"ACTIVIDAD {codigo}: nivel «{v}» no es E (estratégica), A (apoyo) ni O (operativa)")
+    return n
 
 
 def _elemento_llegada(etapa, elemento, nivel, dest, cen):
@@ -156,11 +174,16 @@ def correr(hechos, parametros, previos):
         e = _elemento_llegada("P4A", "IND", "CEN", c, cen)
         saldo[("CEN", c)][e] += m; propio[c] += m
         aristas.append(dict(etapa="K3", origen=rec, org_tipo="REC", org_ele="IND", destino=c, nivel="CEN", elemento=e, criterio="DOCUMENTO", medida=D(1), total=D(1), monto=m))
-    for et in ETAPAS:
+    for paso in PASES:
+        et, lvl = paso if isinstance(paso, tuple) else (paso, None)
         if et in ("P1", "P2", "P3", "P4A"):
             nodos = [n for n in saldo if n[0] == "REC" and origen_ini.get(n) == et]
         elif et == "P4B":
             nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "APR"]
+        elif et == "P4D":
+            nodos = [n for n in saldo if n[0] == "CEN" and (et, n[1]) in reglas]
+        elif et == "P4E":
+            nodos = [n for n in saldo if n[0] == "ACT" and act.get(n[1], "O") == lvl]
         elif et == "P4C":
             nodos = [n for n in saldo if (n[0] == "CEN" and cen.get(n[1]) == "PRO") or n[0] == "ACT"]
         elif et == "P5":
@@ -183,6 +206,9 @@ def correr(hechos, parametros, previos):
             if malos: raise Rechazo(f"{et} {n[1]}: el criterio {crit} apunta a niveles no permitidos {sorted({k[0] for k in malos})}")
             if et == "P4A" and {k[0] for k in dest if dest[k]} >= {"CEN", "ACT"}:     # R-26: nunca a centros y actividades a la vez
                 raise Rechazo(f"R-26 {et} {n[1]}: el criterio {crit} reparte a centros y a actividades a la vez (contaría el costo dos veces)")
+            if et == "P4E" and any(NIVEL_ACT[act.get(k[1], "O")] <= NIVEL_ACT[lvl] for k in dest):
+                malo = sorted(k[1] for k in dest if NIVEL_ACT[act.get(k[1], "O")] <= NIVEL_ACT[lvl])
+                raise Rechazo(f"P4E {n[1]} (nivel {lvl}): el escalonado solo entrega a niveles inferiores; {', '.join(malo)} no lo son")
             if et == "P4B" and any(cen.get(k[1]) != "PRO" for k in dest):
                 raise Rechazo(f"R-25: P4B {n[1]} reparte a un centro que no es productivo")
             T = sum(dest.values())

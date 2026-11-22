@@ -32,6 +32,8 @@ def construir():
                 if n == "TIPO_RECURSO":                 # vocabulario de elementos del motor operativo (columnas COP_MAT, COP_MOD…);
                     d["TRE_ELE"] = {"MD": "MAT", "PD": "MOD"}.get(d.get("TRE_ELE"), d.get("TRE_ELE"))   # el costeo lo traduce (ELEM)
                 wb[n].append([d.get(c) for c in cab])
+    act = wb["ACTIVIDAD"]                                                  # Modelo 3 (Oria): nivel E/A/O de la actividad
+    if "ACT_NIVEL" not in [c.value for c in act[1]]: act.cell(1, act.max_column + 1, "ACT_NIVEL")
     tc = wb["TIPO_CAMBIO"]; tc.append(["PEN", 19000101, 1])              # moneda funcional por defecto
     for u in wb["USUARIO"].iter_rows(min_row=2):                          # los usuarios se asignan a la empresa al cargarla
         u[3].value = None

@@ -962,7 +962,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
   }
   window.addEventListener('hashchange',mostrar);
   const ELEM={MD:'Material directo',PD:'Mano de obra directa',SD:'Servicios directos',CIF:'Costos indirectos',GAD:'Administración',GVT:'Ventas',GFI:'Financieros'};
-  const ETAPA={P1:'P1 Material',P2:'P2 Mano de obra',P3:'P3 Servicios',P4A:'P4A Recursos → centros/actividades',P4B:'P4B Apoyo → productivos',P4C:'P4C Actividades → órdenes',P5:'P5 Administración',P6:'P6 Ventas',P7:'P7 Financieros'};
+  const ETAPA={P1:'P1 Material',P2:'P2 Mano de obra',P3:'P3 Servicios',P4A:'P4A Recursos → centros/actividades',P4B:'P4B Apoyo → productivos',P4D:'P4D Centros de actividad → actividades',P4E:'P4E Escalonado: estratégicas/apoyo → operativas',P4C:'P4C Actividades → órdenes',P5:'P5 Administración',P6:'P6 Ventas',P7:'P7 Financieros'};
   function ruta(r){
     const so=$('ruta-objeto'), se=$('ruta-elemento'), tr=r.trazas||[];
     const prevO=so.value, prevE=se.value; so.replaceChildren(); se.replaceChildren();
