@@ -5,7 +5,7 @@
 - Casos a mano: ocio con el mismo inductor y con criterio propio; merma en exceso a la orden que la causó.
 - Síntesis: REAL lleva pérdida y ocio en columnas propias del costo de la orden; CONTABLE los deja fuera (NIC 2) y el resultado
   operativo es el mismo en ambas."""
-import os, random, shutil, sys
+import json, os, random, shutil, sys
 from decimal import Decimal as D
 from pathlib import Path
 
@@ -123,10 +123,71 @@ def test_real_lleva_el_ocio_en_columna_y_contable_lo_deja_fuera(tmp_path):
     real = resultados.construir(str(p), periodo="2010-12", sintesis="REAL", _cache=c)
     cont = resultados.construir(str(p), periodo="2010-12", sintesis="CONTABLE", _cache=c)
     assert contrato.validar(real) == [] and contrato.validar(cont) == []
-    ocio = sum(x["importe"] for x in real["capacidad_ociosa"])
+    ocio = sum(x["importe_produccion"] for x in real["capacidad_ociosa"])
     assert ocio > 0 and abs(sum(o["ocio"] for o in real["objetos"]) - ocio) < 0.05
     assert all(o["ocio"] == 0 for o in cont["objetos"])
     gastos = sum(o["admin"] + o["gasto_venta"] + o["financiero"] for o in real["objetos"])
     assert abs(real["kpi"]["costo_total"] - cont["kpi"]["costo_total"] - gastos - ocio) < 0.05
     assert real["kpi"]["margen_operativo"] == cont["kpi"]["margen_operativo"]
     assert all(x["ok"] for x in real["control"] if "Conservación" in x["control"] or "Ocio" in x["control"] or "Ruta" in x["control"])
+
+
+# ---------- regresiones de la revisión independiente OT-R01 (Codex, 23-nov) ----------
+def test_r01_1_saldo_mixto_que_suma_cero_igual_se_reparte():
+    """Una actividad recibe MOD 100 y un indirecto −100 (nota de crédito): suma cero, pero cada elemento debe llegar a la orden."""
+    reglas = [("P2", "MOD", "HH"), ("P4A", "NC", "DIR"), ("P4C", "X", "UNI")]
+    med = _med("HH", "ACT", [("X", 1)]) + _med("DIR", "ACT", [("X", 1)]) + _med("UNI", "OBJ", [("OT1", 1)])
+    h = _base(reglas, med, [("MOD", 1, 100), ("NC", 1, -100)], [("MOD", "PD_T"), ("NC", "IND_T")], actividades=[("X", "O")], objetos=("OT1",))
+    f = R.interno(h, PAR, {"VALUACION_PROMEDIO": []})
+    assert f["OT1"]["PD"] == D(100) and f["OT1"]["CIF"] == D(-100)
+
+
+def test_r01_3_criterio_de_ocio_respeta_el_escalonado():
+    """El criterio propio del ocio de una actividad estratégica no puede entregar a otra estratégica."""
+    reglas = [("P4A", "LUZ", "K"), ("P4E", "E1", "BAJA"), ("OCIO", "E1", "PAR"), ("P4C", "O1", "U")]
+    med = (_med("K", "ACT", [("E1", 1)]) + _med("BAJA", "ACT", [("O1", 1)]) + _med("BAJA", "CAP", [("E1", 2)])
+           + _med("PAR", "ACT", [("E2", 1)]) + _med("U", "OBJ", [("OT1", 1)]))
+    h = _base(reglas, med, [("LUZ", 1, 100)], [("LUZ", "IND_T")], actividades=[("E1", "E"), ("E2", "E"), ("O1", "O")], objetos=("OT1",))
+    with pytest.raises(R.Rechazo, match="niveles inferiores"):
+        R.correr(h, PAR, {"VALUACION_PROMEDIO": []})
+
+
+def test_r01_4_ocio_de_administracion_no_se_cuenta_dos_veces(tmp_path):
+    """Capacidad de administración 125 % del uso: el ocio de administración sigue siendo gasto de administración; el estado de
+    resultados no lo resta otra vez y el resultado operativo es el mismo que sin capacidad."""
+    from openpyxl import load_workbook
+    from reyna_local import resultados
+    raiz = Path(__file__).resolve().parents[1]
+    p = tmp_path / "f.xlsx"; shutil.copy(raiz / "casos/libros/frenosa.xlsx", p); wb = load_workbook(p); ws = wb["MEDIDA"]; cab = [c.value for c in ws[1]]
+    usados = sum(float(r[cab.index("MED_CAN")]) for r in ws.iter_rows(min_row=2, values_only=True)
+                 if r[cab.index("MED_PER")] == "2010-07" and r[cab.index("MED_CRIT")] == "KG_PRODUCIDOS" and r[cab.index("MED_NIVEL")] == "OBJ")
+    fila = dict(MED_PER="2010-07", MED_EMP="FRE", MED_CRIT="KG_PRODUCIDOS", MED_NIVEL="CAP", MED_DEST="ADM_FRE", MED_CAN=usados * 1.25)
+    ws.append([fila.get(c) for c in cab]); wb.save(p)
+    c = resultados.calcular_periodos(str(p), "FRE")
+    base = json.loads((raiz / "datos/resultados/frenosa_2010-07_CONTABLE.json").read_text(encoding="utf-8"))
+    for s in ("CONTABLE", "REAL"):
+        r = resultados.construir(str(p), periodo="2010-07", sintesis=s, _cache=c)
+        assert sum(x["importe"] for x in r["capacidad_ociosa"]) > 0 and sum(x["importe_produccion"] for x in r["capacidad_ociosa"]) == 0
+        assert r["kpi"]["margen_operativo"] == base["kpi"]["margen_operativo"]
+        assert not any("capacidad ociosa" in x["concepto"] for x in r["estado_resultados"])
+        assert all(o["ocio"] == 0 for o in r["objetos"])
+
+
+@pytest.mark.parametrize("seed", range(0, 200, 10))
+def test_r01_6_ruta_exacta_de_pérdida_y_ocio_en_varias_etapas(seed):
+    h, _ = _aleatorio(seed)
+    final, _, _ = R.correr(h, PAR, {"VALUACION_PROMEDIO": []})
+    for o, v in final.items():
+        for k, x in v.items():
+            if "|OCIO" in k:
+                raiz = sum((l["monto_atribuido"] for l in R.trazar(h, PAR, {"VALUACION_PROMEDIO": []}, "OBJETO", o, k) if l["raiz"]), D(0))
+                assert abs(raiz - x) < D("1e-15")
+
+
+def test_r01_5_costo_total_es_la_suma_exacta_de_sus_columnas():
+    """Por construcción costo_total = round(Σ columnas ya redondeadas): la diferencia es solo error de punto flotante, no céntimos."""
+    raiz = Path(__file__).resolve().parents[1]
+    for f in sorted((raiz / "datos/resultados").glob("frenosa_*.json")):
+        for o in json.loads(f.read_text(encoding="utf-8"))["objetos"]:
+            suma = sum(o[k] for k in ("md", "mod", "cif", "admin", "gasto_venta", "financiero", "perdida", "ocio"))
+            assert abs(suma - o["costo_total"]) < 1e-6, (f.name, o["codigo"])

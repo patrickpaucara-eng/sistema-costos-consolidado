@@ -178,6 +178,19 @@ def _elemento_llegada(etapa, elemento, nivel, dest, cen):
     return elemento
 
 
+def _validar_destinos(et, origen, crit, dest, lvl, act, cen):
+    """Reglas de destino de una etapa; se aplican igual al reparto normal y al criterio propio del ocio."""
+    malos = [k for k in dest if k[0] not in NIVELES[et]]
+    if malos: raise Rechazo(f"{et} {origen}: el criterio {crit} apunta a niveles no permitidos {sorted({k[0] for k in malos})}")
+    if et == "P4A" and {k[0] for k in dest if dest[k]} >= {"CEN", "ACT"}:     # R-26: nunca a centros y actividades a la vez
+        raise Rechazo(f"R-26 {et} {origen}: el criterio {crit} reparte a centros y a actividades a la vez (contaría el costo dos veces)")
+    if et == "P4E":
+        malo = sorted(k[1] for k in dest if NIVEL_ACT[act.get(k[1], "O")] <= NIVEL_ACT[lvl])
+        if malo: raise Rechazo(f"P4E {origen} (nivel {lvl}): el escalonado solo entrega a niveles inferiores; {', '.join(malo)} no lo son")
+    if et == "P4B" and any(cen.get(k[1]) != "PRO" for k in dest):
+        raise Rechazo(f"R-25: P4B {origen} reparte a un centro que no es productivo")
+
+
 def correr(hechos, parametros, previos):
     """Ejecuta ALG-04 en memoria. Devuelve (saldos finales de OBJETO por elemento, aristas, resumen de centros)."""
     per, emp = parametros["PER"], parametros["EMP"]
@@ -221,22 +234,14 @@ def correr(hechos, parametros, previos):
         antes = sum(sum(v.values()) for v in saldo.values())
         for n in sorted(nodos, key=lambda n: (n[0], n[1])):
             tot_n = sum(saldo[n].values())
-            if tot_n == 0: continue
+            if all(v == 0 for v in saldo[n].values()): continue      # revisión R01-1: un saldo mixto que suma cero también se reparte
             crit = reglas.get((et, n[1]))
             if crit is None: raise Rechazo(f"R-52: {et} {n[1]} tiene monto {red(tot_n)} y no tiene regla de reparto vigente")
             if crit == "CONSUMO":
                 dest = OrderedDict(sorted((k, v) for k, v in consumo[n[1]].items() if v > 0))
             else:
                 dest = OrderedDict(sorted((k, v) for k, v in med.get(crit, {}).items() if v > 0 and k[0] != "CAP"))
-            malos = [k for k in dest if k[0] not in NIVELES[et]]
-            if malos: raise Rechazo(f"{et} {n[1]}: el criterio {crit} apunta a niveles no permitidos {sorted({k[0] for k in malos})}")
-            if et == "P4A" and {k[0] for k in dest if dest[k]} >= {"CEN", "ACT"}:     # R-26: nunca a centros y actividades a la vez
-                raise Rechazo(f"R-26 {et} {n[1]}: el criterio {crit} reparte a centros y a actividades a la vez (contaría el costo dos veces)")
-            if et == "P4E" and any(NIVEL_ACT[act.get(k[1], "O")] <= NIVEL_ACT[lvl] for k in dest):
-                malo = sorted(k[1] for k in dest if NIVEL_ACT[act.get(k[1], "O")] <= NIVEL_ACT[lvl])
-                raise Rechazo(f"P4E {n[1]} (nivel {lvl}): el escalonado solo entrega a niveles inferiores; {', '.join(malo)} no lo son")
-            if et == "P4B" and any(cen.get(k[1]) != "PRO" for k in dest):
-                raise Rechazo(f"R-25: P4B {n[1]} reparte a un centro que no es productivo")
+            _validar_destinos(et, n[1], crit, dest, lvl, act, cen)
             T = sum(dest.values())
             if T == 0: raise Rechazo(f"I8: {et} {n[1]} tiene monto {red(tot_n)} y su criterio {crit} suma cero")
             cap = med.get(crit, {}).get(("CAP", n[1]), D(0))      # capacidad práctica del origen (MEDIDA nivel CAP)
@@ -245,10 +250,10 @@ def correr(hechos, parametros, previos):
             if f_ocio and reglas.get(("OCIO", n[1])):              # criterio propio del ocio en el libro; si no, el mismo inductor
                 c_ocio = reglas[("OCIO", n[1])]
                 dest_ocio = OrderedDict(sorted((k, v) for k, v in med.get(c_ocio, {}).items() if v > 0 and k[0] != "CAP"))
-                if not dest_ocio or any(k[0] not in NIVELES[et] for k in dest_ocio):
-                    raise Rechazo(f"OCIO {n[1]}: el criterio {c_ocio} no tiene destinos válidos para la etapa {et}")
+                if not dest_ocio: raise Rechazo(f"OCIO {n[1]}: el criterio {c_ocio} no tiene destinos")
+                _validar_destinos(et, n[1], c_ocio, dest_ocio, lvl, act, cen)   # revisión R01-3: mismas reglas que el reparto normal
             if n[0] == "CEN": distrib[n[1]] += tot_n
-            m_ocio = D(0)
+            m_ocio = defaultdict(D)                               # ocio por elemento base de llegada
             for e in sorted(saldo[n]):
                 m = saldo[n][e]
                 if m == 0: continue
@@ -256,23 +261,24 @@ def correr(hechos, parametros, previos):
                 partes = [(m, nat, dest, crit)]
                 if f_ocio and nat == "NORMAL":
                     partes = [(m - m * f_ocio, "NORMAL", dest, crit), (m * f_ocio, "OCIO", dest_ocio, c_ocio)]
-                    m_ocio += m * f_ocio
                 for mm, nn, dd, cc in partes:
                     TT = sum(dd.values())
                     for (niv, d), q in dd.items():
                         a = mm * q / TT
                         le = etiqueta(_elemento_llegada(et, base, niv, d, cen), nn)
                         saldo[(niv, d)][le] += a
+                        if nn == "OCIO" and nat == "NORMAL": m_ocio[separar(le)[0]] += a
                         if niv == "CEN":
                             (propio if et == "P4A" else recibido)[d] += a
                         aristas.append(dict(etapa=et, origen=n[1], org_tipo=n[0], org_ele=e, destino=d, nivel=niv, elemento=le, criterio=cc,
                                             medida=q, total=TT, monto=a, naturaleza=nn))
                 saldo[n][e] = D(0)
             if m_ocio:
-                ocio_gen.append(dict(origen=n[1], org_tipo=n[0], etapa=et, criterio=c_ocio, capacidad=cap, usado=T, monto=m_ocio))
+                ocio_gen.append(dict(origen=n[1], org_tipo=n[0], etapa=et, criterio=c_ocio, capacidad=cap, usado=T,
+                                     monto=sum(m_ocio.values(), D(0)), por_elemento=dict(m_ocio)))
         despues = sum(sum(v.values()) for v in saldo.values())
         if abs(despues - antes) > D("1e-12"): raise Rechazo(f"I1: la etapa {et} no conserva ({antes} → {despues})")
-    varados = [(n, sum(v.values())) for n, v in saldo.items() if n[0] in ("CEN", "ACT", "REC") and abs(sum(v.values())) > D("1e-12")]
+    varados = [(n, sum(v.values())) for n, v in saldo.items() if n[0] in ("CEN", "ACT", "REC") and any(abs(x) > D("1e-12") for x in v.values())]
     if varados: raise Rechazo("R-53: monto varado en " + ", ".join(f"{n[1]} ({red(m)})" for n, m in sorted(varados)))
     final = {n[1]: dict(v) for n, v in saldo.items() if n[0] == "OBJ"}
     return final, aristas, dict(propio=propio, recibido=recibido, distribuido=distrib, ocio=ocio_gen)

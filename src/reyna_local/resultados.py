@@ -36,7 +36,11 @@ PROD = ("MD", "PD", "SD", "CIF"); OPER = ("GAD", "GVT"); FIN = ("GFI",)
 #   REAL     → dentro del costo de la orden, en columnas propias (la gerencia ve todo).
 #   CONTABLE → fuera del inventario: gasto del periodo (NIC 2 §13 y §16 a).
 #   ESTIMADO → solo lo normal (la estimación estadística no modela pérdidas eventuales).
-# El ocio de administración, ventas o financieros sigue siendo gasto de su propio elemento.
+# El ocio de administración, ventas o financieros sigue siendo gasto de su propio elemento (nunca columna «ocio» ni línea aparte).
+# Ejemplo (MOD 1,000 con capacidad 125 % del uso; ocio 200; administración 500 con ocio 100):
+#   REAL     orden: mod 800 + ocio 200 + admin 500 → 1,500      ER: costo de ventas 800, ocio 200, administración 500
+#   CONTABLE orden: mod 800 (inventario)                         ER: costo de ventas 800, ocio 200, administración 500
+#   El resultado operativo es el mismo; solo cambia qué se carga al costo del objeto.
 POLITICA_NATURALEZA = {"REAL": {"NORMAL", "PERDIDA", "OCIO"}, "CONTABLE": {"NORMAL"}, "ESTIMADO": {"NORMAL"}}
 
 
@@ -126,9 +130,12 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
           dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-t["GFI"])]
     perd = _perdidas(libro, periodo)
     _, ar_, res_ = R.correr(h, dict(PER=periodo, EMP=emp), previos(libro))
+    # revisión R01-4: el ocio de administración, ventas o financieros ya está en su propio gasto; la línea «capacidad ociosa»
+    # del estado de resultados lleva solo el ocio de PRODUCCIÓN (el que NIC 2 §13 saca del inventario)
     ocio = [dict(origen=g["origen"], etapa=g["etapa"], criterio=g["criterio"], capacidad_no_usada=float(g["capacidad"] - g["usado"]),
-                 capacidad=float(g["capacidad"]), importe=round(float(g["monto"]), 2)) for g in res_["ocio"]]
-    to = round(sum(x["importe"] for x in ocio), 2)
+                 capacidad=float(g["capacidad"]), importe=round(float(g["monto"]), 2),
+                 importe_produccion=round(float(sum((v for b, v in g["por_elemento"].items() if b in PROD), D(0))), 2)) for g in res_["ocio"]]
+    to = round(sum(x["importe_produccion"] for x in ocio), 2)
     if to: er.insert(4, dict(categoria="OPERACION", concepto="Costo de capacidad ociosa (NIC 2 §13)", importe=-to))
     tp = round(sum(x["importe"] for x in perd), 2)
     if tp: er.insert(4, dict(categoria="OPERACION", concepto="Pérdidas anormales: merma en exceso (NIC 2 §16 a)", importe=-tp))
