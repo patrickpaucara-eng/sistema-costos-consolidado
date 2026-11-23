@@ -24,7 +24,7 @@ def validar(r):
     for o in r["objetos"]:
         e += [f"objeto {o.get('codigo')}: falta {k}" for k in OBJ if k not in o]
         if all(k in o for k in OBJ):
-            suma = sum(o[k] for k in ("md", "mod", "cif", "admin", "gasto_venta", "financiero"))
+            suma = sum(o[k] for k in ("md", "mod", "cif", "admin", "gasto_venta", "financiero")) + o.get("perdida", 0) + o.get("ocio", 0)
             if abs(suma - o["costo_total"]) > 0.01: e.append(f"objeto {o['codigo']}: elementos ≠ costo_total")
     for s in r["serie"]:
         if s.get("tipo") not in TIPOS_SERIE: e.append(f"serie {s.get('periodo')}: tipo inválido")
@@ -33,4 +33,5 @@ def validar(r):
         if x.get("categoria") not in CATEGORIAS_NIIF18: e.append(f"estado_resultados: categoría inválida {x.get('categoria')}")
     if r["sintesis"] == "CONTABLE":
         if any(o["financiero"] for o in r["objetos"]): e.append("CONTABLE: gasto financiero en el costo del objeto (NIC 2 lo prohíbe)")
+        if any(o.get("perdida") or o.get("ocio") for o in r["objetos"]): e.append("CONTABLE: pérdida u ocio en el costo del objeto (NIC 2 §13, §16 a)")
     return e

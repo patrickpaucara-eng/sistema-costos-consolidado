@@ -14,7 +14,7 @@ VERSION = "1.0-MN01"
 OBLIGATORIAS = ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "TIPO_RECURSO", "EVENTO", "LINEA", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "VENTA"]
 OPCIONALES = ["CENTRO", "ACTIVIDAD", "KARDEX", "CLIENTE"]
 COLUMNAS_OPCIONALES = {"ACT_NIVEL"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
-ETAPAS_VALIDAS = ("P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7")
+ETAPAS_VALIDAS = ("P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7", "OCIO")   # OCIO: criterio propio del ocio de un origen
 DE_DATOS = OBLIGATORIAS + OPCIONALES + ["INV_PROCESO", "ESTIMACION", "LIN_ESTIM", "RESULTADO_METODO", "ALERTA", "PARAM_CAMBIO"]
 DESCRIPCION = {
     "EMPRESA": "Una fila: código, nombre y moneda funcional.",

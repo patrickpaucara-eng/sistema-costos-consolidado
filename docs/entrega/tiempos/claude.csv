@@ -19,3 +19,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-22,01:00,01:45,Punto 9: analítica autónoma (seguimiento de propuestas aprobadas y factor de efectividad aprendido),Sistema,Claude,compuerta VERDE 121 pruebas
 2026-11-22,15:25,16:10,Modelo 3 de Oria en el motor (P4D centro→actividad; P4E escalonado E→A→O; ACT_NIVEL),Sistema,Claude,compuerta VERDE 128 pruebas
 2026-11-22,16:10,16:50,Frenosa como Modelo 3 (CA apoyo → ACA → ACO; costos por OT idénticos) y REGLA_IMPL sin RECÍPROCO,Sistema,Claude,compuerta VERDE 129 pruebas
+2026-11-23,17:10,18:40,Tareas 1.1 y 1.2: naturaleza del costo (normal/pérdida/ocio) por la misma cadena; política por síntesis; 200 casos aleatorios,Sistema,Claude,compuerta VERDE 332 pruebas

@@ -9,6 +9,11 @@ Modelos ABC de Oria (GE704W sem. 07) como DATOS, no como programas: Modelo 1 EC�
 Modelo 2 EC→CA→AC→OC (P4A a centros, P4D, P4C); Modelo 3 escalonado EC→CA→ACE→ACA→ACO→OC (P4A, P4D, P4E, P4C), con
 los costos directos que pueden entrar a la actividad operativa (P1-P3 a ACT). El nivel de la actividad (ACT_NIVEL: E, A, O;
 vacío = O) ordena el escalonado: una actividad solo entrega a niveles inferiores, nunca hacia atrás ni entre pares.
+NATURALEZA DEL COSTO (punto 1 del plan, 23-nov): cada monto viaja con su naturaleza en la clave del elemento:
+  «MD» = NORMAL · «MD|PERDIDA» = merma en exceso del estándar (va a la orden que la causó, criterio CAUSANTE)
+  «PD|OCIO» = capacidad no usada del origen (MEDIDA nivel CAP): se queda en el origen y baja por la misma cadena, con el mismo
+  inductor o con el criterio propio del libro (REGLA_REPARTO etapa OCIO). El motor NO decide si es costo o gasto: lo decide la
+  síntesis (resultados.POLITICA_NATURALEZA). Invariante: Σ recursos = Σ llegado a objetos, por naturaleza y en total.
 Monto del destino = monto del origen × medida del destino / Σ medidas (Decimal). El elemento viaja con el monto
 (MD, PD, SD, CIF, GAD, GVT). Estado en memoria; orden por código; I1 por etapa; I8 y R-53 detienen el cálculo.
 Publicación con ALG-09 (2 decimales, residuo al mayor bruto; empate, menor código)."""
@@ -39,7 +44,7 @@ CONSUME = {
 }
 DEPENDE_DE = {"VALUACION_PROMEDIO": [("SALIDA", "MONTO")]}
 PARAMETROS = [dict(id="PER", etq="Periodo", tipo="texto"), dict(id="EMP", etq="Empresa", tipo="texto")]
-ENTREGA = {"OBJETO": ["MD", "PD", "SD", "CIF", "GAD", "GVT", "GFI"],
+ENTREGA = {"OBJETO": ["MD", "PD", "SD", "CIF", "GAD", "GVT", "GFI", "PERDIDA", "OCIO"],
            "CENTRO": ["COSTO_PROPIO", "RECIBIDO", "CIF_RECIBIDO", "DISTRIBUIDO", "OCIO"], "ACTIVIDAD": ["COSTO"],
            "ORIGEN": ["ELEMENTO", "MONTO", "MEDIDA_TOTAL", "CRITERIO", "CPU_CIERRE", "PRECIO_ULTIMA_COMPRA"], "ARISTA": ["ELEMENTO", "MEDIDA", "MONTO"],
            "RECURSO": ["INEF"]}
@@ -52,6 +57,18 @@ NIVEL_ACT = {"E": 0, "A": 1, "O": 2}          # Estratégica, Apoyo, Operativa (
 ELEM = {"MD": "MD", "MAT": "MD", "PD": "PD", "MOD": "PD", "SD": "SD", "IND": "IND"}
 ELEM_ETAPA = {"MD": "P1", "PD": "P2", "SD": "P3", "IND": "P4A"}
 CENTS = D("0.01")
+NATURALEZAS = ("NORMAL", "PERDIDA", "OCIO")
+
+
+def etiqueta(base, naturaleza):
+    """«MD» + NORMAL → «MD»; «MD» + PERDIDA → «MD|PERDIDA»."""
+    return base if naturaleza == "NORMAL" else f"{base}|{naturaleza}"
+
+
+def separar(clave):
+    """«MD|PERDIDA» → («MD», «PERDIDA»); «MD» → («MD», «NORMAL»)."""
+    b, _, n = str(clave).partition("|")
+    return b, (n or "NORMAL")
 
 
 class Rechazo(ValueError):
@@ -111,8 +128,9 @@ def _clave(evento, numero):
 def _origenes(hechos, previos, ele, eventos):
     """Montos de origen por (etapa, recurso) y consumos implícitos (criterio CONSUMO) por destino."""
     monto = defaultdict(D); consumo = defaultdict(lambda: defaultdict(D)); directo_cen = defaultdict(D)
+    perdida = defaultdict(lambda: [D(0), D(0)])            # (recurso, orden) → [monto, cantidad en exceso]
     val = {}
-    exceso = {str(k): _d(v) for k, v in (previos.get("EXCESO") or {}).items()}   # merma en exceso (NIC 2 §16 a): no es costo de la orden
+    exceso = {str(k): _d(v) for k, v in (previos.get("EXCESO") or {}).items()}   # merma en exceso: naturaleza PERDIDA (NIC 2 §16 a)
     for t, k, c, v in (previos.get("VALUACION_PROMEDIO") or []):
         if t == "SALIDA" and c == "MONTO": val[str(k)] = _d(v)
     for r in hechos["(sin MCD) LINEA"]:
@@ -128,6 +146,7 @@ def _origenes(hechos, previos, ele, eventos):
             q = _d(r["CANTIDAD"]); x = exceso.get(_clave(r["EVENTO"], r["NUMERO"]), D(0))
             parte = (q - x) / q if q and x else D(1)
             monto[("P1", rec)] += val[k] * parte; consumo[rec][("OBJ", str(obj))] += q - x
+            if x: perdida[(rec, str(obj))][0] += val[k] - val[k] * parte; perdida[(rec, str(obj))][1] += x
         else:
             m = _d(r["CANTIDAD"]) * _d(r["COSTO_UNITARIO_DOCUMENTO"])
             if e == "IND" and cen and not obj:
@@ -135,7 +154,7 @@ def _origenes(hechos, previos, ele, eventos):
             else:
                 monto[(ELEM_ETAPA[e], rec)] += m
                 if obj: consumo[rec][("OBJ", str(obj))] += _d(r["CANTIDAD"])
-    return monto, consumo, directo_cen
+    return monto, consumo, directo_cen, perdida
 
 
 NIVELES = {"P1": {"OBJ", "ACT"}, "P2": {"OBJ", "ACT"}, "P3": {"OBJ", "ACT"}, "P4A": {"CEN", "ACT"}, "P4B": {"CEN"},
@@ -150,6 +169,7 @@ def nivel_actividad(v, codigo=""):
 
 
 def _elemento_llegada(etapa, elemento, nivel, dest, cen):
+    """Elemento BASE con que llega el monto (la naturaleza la agrega quien llama)."""
     if etapa == "P4A":
         if nivel == "CEN" and cen.get(dest) == "ADM": return "GAD"
         if nivel == "CEN" and cen.get(dest) == "VTA": return "GVT"
@@ -162,7 +182,7 @@ def correr(hechos, parametros, previos):
     """Ejecuta ALG-04 en memoria. Devuelve (saldos finales de OBJETO por elemento, aristas, resumen de centros)."""
     per, emp = parametros["PER"], parametros["EMP"]
     ele, cen, obj, act, reglas, med, eventos = _contexto(hechos, per, emp)
-    monto, consumo, directo_cen = _origenes(hechos, previos, ele, eventos)
+    monto, consumo, directo_cen, perdida = _origenes(hechos, previos, ele, eventos)
     saldo = defaultdict(lambda: defaultdict(D))           # (tipo_nodo, codigo) → {elemento: Decimal}
     origen_ini = {}
     for (et, rec), m in monto.items():
@@ -173,7 +193,13 @@ def correr(hechos, parametros, previos):
     for (rec, c), m in sorted(directo_cen.items()):
         e = _elemento_llegada("P4A", "IND", "CEN", c, cen)
         saldo[("CEN", c)][e] += m; propio[c] += m
-        aristas.append(dict(etapa="K3", origen=rec, org_tipo="REC", org_ele="IND", destino=c, nivel="CEN", elemento=e, criterio="DOCUMENTO", medida=D(1), total=D(1), monto=m))
+        aristas.append(dict(etapa="K3", origen=rec, org_tipo="REC", org_ele="IND", destino=c, nivel="CEN", elemento=e, criterio="DOCUMENTO", medida=D(1), total=D(1), monto=m, naturaleza="NORMAL"))
+    for (rec, o), (m, x) in sorted(perdida.items()):          # merma en exceso: directo a la orden que la causó (criterio CAUSANTE)
+        if m == 0: continue
+        saldo[("OBJ", o)]["MD|PERDIDA"] += m
+        aristas.append(dict(etapa="P1", origen=rec, org_tipo="REC", org_ele="MD|PERDIDA", destino=o, nivel="OBJ", elemento="MD|PERDIDA",
+                            criterio="CAUSANTE", medida=x, total=x, monto=m, naturaleza="PERDIDA"))
+    ocio_gen = []
     for paso in PASES:
         et, lvl = paso if isinstance(paso, tuple) else (paso, None)
         if et in ("P1", "P2", "P3", "P4A"):
@@ -214,27 +240,42 @@ def correr(hechos, parametros, previos):
             T = sum(dest.values())
             if T == 0: raise Rechazo(f"I8: {et} {n[1]} tiene monto {red(tot_n)} y su criterio {crit} suma cero")
             cap = med.get(crit, {}).get(("CAP", n[1]), D(0))      # capacidad práctica del origen (MEDIDA nivel CAP)
-            if cap > T:                                            # capacidad ociosa: no es costo del producto (NIC 2 §13)
-                dest[("OCIO", n[1])] = cap - T; T = cap
+            f_ocio = (cap - T) / cap if cap > T else D(0)          # parte del costo NORMAL que nadie usó (NIC 2 §13)
+            c_ocio, dest_ocio = crit, dest
+            if f_ocio and reglas.get(("OCIO", n[1])):              # criterio propio del ocio en el libro; si no, el mismo inductor
+                c_ocio = reglas[("OCIO", n[1])]
+                dest_ocio = OrderedDict(sorted((k, v) for k, v in med.get(c_ocio, {}).items() if v > 0 and k[0] != "CAP"))
+                if not dest_ocio or any(k[0] not in NIVELES[et] for k in dest_ocio):
+                    raise Rechazo(f"OCIO {n[1]}: el criterio {c_ocio} no tiene destinos válidos para la etapa {et}")
             if n[0] == "CEN": distrib[n[1]] += tot_n
+            m_ocio = D(0)
             for e in sorted(saldo[n]):
                 m = saldo[n][e]
                 if m == 0: continue
-                for (niv, d), q in dest.items():
-                    a = m * q / T
-                    le = "OCIO" if niv == "OCIO" else _elemento_llegada(et, e, niv, d, cen)
-                    tipo = {"OBJ": "OBJ", "ACT": "ACT", "CEN": "CEN", "OCIO": "OCIO"}[niv]
-                    saldo[(tipo, d)][le] += a
-                    if tipo == "CEN":
-                        (propio if et == "P4A" else recibido)[d] += a
-                    aristas.append(dict(etapa=et, origen=n[1], org_tipo=n[0], org_ele=e, destino=d, nivel=niv, elemento=le, criterio=crit, medida=q, total=T, monto=a))
+                base, nat = separar(e)
+                partes = [(m, nat, dest, crit)]
+                if f_ocio and nat == "NORMAL":
+                    partes = [(m - m * f_ocio, "NORMAL", dest, crit), (m * f_ocio, "OCIO", dest_ocio, c_ocio)]
+                    m_ocio += m * f_ocio
+                for mm, nn, dd, cc in partes:
+                    TT = sum(dd.values())
+                    for (niv, d), q in dd.items():
+                        a = mm * q / TT
+                        le = etiqueta(_elemento_llegada(et, base, niv, d, cen), nn)
+                        saldo[(niv, d)][le] += a
+                        if niv == "CEN":
+                            (propio if et == "P4A" else recibido)[d] += a
+                        aristas.append(dict(etapa=et, origen=n[1], org_tipo=n[0], org_ele=e, destino=d, nivel=niv, elemento=le, criterio=cc,
+                                            medida=q, total=TT, monto=a, naturaleza=nn))
                 saldo[n][e] = D(0)
+            if m_ocio:
+                ocio_gen.append(dict(origen=n[1], org_tipo=n[0], etapa=et, criterio=c_ocio, capacidad=cap, usado=T, monto=m_ocio))
         despues = sum(sum(v.values()) for v in saldo.values())
         if abs(despues - antes) > D("1e-12"): raise Rechazo(f"I1: la etapa {et} no conserva ({antes} → {despues})")
     varados = [(n, sum(v.values())) for n, v in saldo.items() if n[0] in ("CEN", "ACT", "REC") and abs(sum(v.values())) > D("1e-12")]
     if varados: raise Rechazo("R-53: monto varado en " + ", ".join(f"{n[1]} ({red(m)})" for n, m in sorted(varados)))
     final = {n[1]: dict(v) for n, v in saldo.items() if n[0] == "OBJ"}
-    return final, aristas, dict(propio=propio, recibido=recibido, distribuido=distrib)
+    return final, aristas, dict(propio=propio, recibido=recibido, distribuido=distrib, ocio=ocio_gen)
 
 
 def calcular(hechos, parametros, previos):
@@ -244,12 +285,16 @@ def calcular(hechos, parametros, previos):
     # (metodos.publicar.redondear_alg09), por grupo (método, tipo, concepto).
     for e in ENTREGA["OBJETO"]:
         for o in sorted(final):
-            x = final[o].get(e, D(0))
+            if e in ("PERDIDA", "OCIO"): x = sum((v for k, v in final[o].items() if separar(k)[1] == e), D(0))
+            else: x = final[o].get(e, D(0))
             if x != 0: res.append(("OBJETO", o, e, float(x)))
+    ocio_cen = defaultdict(D)
+    for g in cen.get("ocio", []):
+        if g["org_tipo"] == "CEN": ocio_cen[g["origen"]] += g["monto"]
     for c in sorted(set(cen["propio"]) | set(cen["recibido"])):
         res += [("CENTRO", c, "COSTO_PROPIO", float(cen["propio"][c])), ("CENTRO", c, "RECIBIDO", float(cen["recibido"][c])),
                 ("CENTRO", c, "CIF_RECIBIDO", float(cen["recibido"][c])), ("CENTRO", c, "DISTRIBUIDO", float(cen["distribuido"][c])),
-                ("CENTRO", c, "OCIO", 0.0)]   # el ocio de centros es [POSTERIOR] (método de capacidad); la ineficiencia de P2 va a INEF
+                ("CENTRO", c, "OCIO", float(ocio_cen[c]))]   # capacidad no usada del centro (MEDIDA nivel CAP)
     # ORIGEN y ARISTA: insumo de PROYECCION_OT (tarifas) y de la consulta (contrato de B0)
     org = defaultdict(lambda: [None, D(0), D(0), None]); vistos = set()
     for a in aristas:

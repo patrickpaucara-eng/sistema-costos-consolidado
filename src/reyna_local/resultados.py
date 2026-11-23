@@ -31,6 +31,24 @@ def calcular_periodos(libro, emp):
 
 
 PROD = ("MD", "PD", "SD", "CIF"); OPER = ("GAD", "GVT"); FIN = ("GFI",)
+# Qué naturalezas del costo de PRODUCCIÓN entran al costo del objeto en cada síntesis (punto 1 del plan, decisión del dueño 22-nov).
+# Pérdida (merma en exceso) y ocio (capacidad no usada) siempre viajan hasta la orden; la síntesis decide:
+#   REAL     → dentro del costo de la orden, en columnas propias (la gerencia ve todo).
+#   CONTABLE → fuera del inventario: gasto del periodo (NIC 2 §13 y §16 a).
+#   ESTIMADO → solo lo normal (la estimación estadística no modela pérdidas eventuales).
+# El ocio de administración, ventas o financieros sigue siendo gasto de su propio elemento.
+POLITICA_NATURALEZA = {"REAL": {"NORMAL", "PERDIDA", "OCIO"}, "CONTABLE": {"NORMAL"}, "ESTIMADO": {"NORMAL"}}
+
+
+def _por_naturaleza(v):
+    """{clave del motor: monto} → ({elemento base: monto normal}, pérdida de producción, ocio de producción)."""
+    norm, perd, ocio = {}, 0.0, 0.0
+    for k, x in v.items():
+        b, n = R.separar(k); x = _f(x)                     # céntimos por clave, como siempre se publicó
+        if n == "NORMAL" or b not in PROD: norm[b] = norm.get(b, 0.0) + x
+        elif n == "PERDIDA": perd += x
+        else: ocio += x
+    return norm, perd, ocio
 
 
 def _incluidos(sintesis):
@@ -66,20 +84,30 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     series = A.serie_producto(por_per, can, pro)
     est = A.estimado(series, periodo) if sintesis == "ESTIMADO" else {}
     objetos = []
+    nats = POLITICA_NATURALEZA[sintesis]
     for o, v in sorted(por_per[periodo].items()):
-        el = {e: _f(v.get(e, 0)) for e in PROD + OPER + FIN}
+        norm, perd, ocio = _por_naturaleza(v)
+        el = {e: round(norm.get(e, 0.0), 2) for e in PROD + OPER + FIN}
         if sintesis == "ESTIMADO" and pro.get(o) in est:
             el = {e: round(est[pro[o]]["cu_elementos"][e] * can[o], 2) for e in el}
         el = {e: (x if e in inc else 0.0) for e, x in el.items()}
-        ct = round(sum(el.values()), 2); ing = ingreso(periodo, o)
+        perd = round(perd, 2) if "PERDIDA" in nats else 0.0; ocio = round(ocio, 2) if "OCIO" in nats else 0.0
+        ct = round(sum(el.values()) + perd + ocio, 2); ing = ingreso(periodo, o)
         objetos.append(dict(codigo=o, producto=pro.get(o, o), cantidad=can.get(o, 0), md=el["MD"], mod=round(el["PD"] + el["SD"], 2), cif=el["CIF"],
-                            admin=el["GAD"], gasto_venta=el["GVT"], financiero=el["GFI"], costo_total=ct,
+                            admin=el["GAD"], gasto_venta=el["GVT"], financiero=el["GFI"], perdida=perd, ocio=ocio, costo_total=ct,
                             costo_unitario=round(ct / can[o], 4) if can.get(o) else 0, ingreso=ing, margen=round(ing - ct, 2)))
-    def tot_per(p): return {e: round(sum(_f(v.get(e, 0)) for v in por_per[p].values()), 2) for e in PROD + OPER + FIN}
+    def tot_per(p):
+        t = {e: 0.0 for e in PROD + OPER + FIN}; t["PERDIDA"] = t["OCIO"] = 0.0
+        for v in por_per[p].values():
+            norm, pe, oc = _por_naturaleza(v)
+            for e in PROD + OPER + FIN: t[e] += norm.get(e, 0.0)
+            t["PERDIDA"] += pe; t["OCIO"] += oc
+        return {k: round(x, 2) for k, x in t.items()}
+    extra = [k for k in ("PERDIDA", "OCIO") if k in nats]       # naturalezas que la síntesis suma al costo
     def vta_per(p): return round(sum(ingreso(p, o) for o in por_per[p]), 2)
     serie = []
     for p in [x for x in pers if x <= periodo]:
-        t = tot_per(p); ct = round(sum(t[e] for e in inc), 2); vt = vta_per(p)
+        t = tot_per(p); ct = round(sum(t[e] for e in inc) + sum(t[k] for k in extra), 2); vt = vta_per(p)
         serie.append(dict(periodo=p, tipo="ACTUAL" if p == periodo else "HISTORICO", ventas=vt, costo_total=ct, margen=round(vt - ct, 2)))
     proy, info = A.proyectar([(x["periodo"], x["ventas"], x["costo_total"]) for x in serie])
     serie += proy
@@ -97,9 +125,9 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
           dict(categoria="OPERACION", concepto="Gastos de ventas", importe=-t["GVT"]),
           dict(categoria="FINANCIACION", concepto="Gastos financieros", importe=-t["GFI"])]
     perd = _perdidas(libro, periodo)
-    _, ar_, _ = R.correr(h, dict(PER=periodo, EMP=emp), previos(libro))
-    ocio = [dict(origen=a["origen"], etapa=a["etapa"], capacidad_no_usada=float(a["medida"]), capacidad=float(a["total"]), importe=round(float(a["monto"]), 2))
-            for a in ar_ if a["nivel"] == "OCIO"]
+    _, ar_, res_ = R.correr(h, dict(PER=periodo, EMP=emp), previos(libro))
+    ocio = [dict(origen=g["origen"], etapa=g["etapa"], criterio=g["criterio"], capacidad_no_usada=float(g["capacidad"] - g["usado"]),
+                 capacidad=float(g["capacidad"]), importe=round(float(g["monto"]), 2)) for g in res_["ocio"]]
     to = round(sum(x["importe"] for x in ocio), 2)
     if to: er.insert(4, dict(categoria="OPERACION", concepto="Costo de capacidad ociosa (NIC 2 §13)", importe=-to))
     tp = round(sum(x["importe"] for x in perd), 2)
@@ -130,7 +158,9 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
              escenarios=esc, proyeccion_info=info)
     r["perdidas"] = perd; r["capacidad_ociosa"] = ocio; r["ajustes_compra"] = ajg
     if inv: r["inventarios"] = inv
-    r["trazas"] = _trazas(h, par, prev, objetos, inc, nom) if sintesis != "ESTIMADO" else []
+    r["trazas"] = _trazas(h, par, prev, objetos, list(inc) + sorted({k for v in por_per[periodo].values() for k in v
+                                                              if "|" in k and R.separar(k)[0] in inc and (R.separar(k)[1] in nats or R.separar(k)[0] not in PROD)}), nom) \
+        if sintesis != "ESTIMADO" else []
     r["kardex"] = _kardex(libro, val, periodo, nom)
     r["modelo"] = _modelo(libro)
     r["control"] = _control(aristas, r, nom)
@@ -151,7 +181,7 @@ ETAPA_NOMBRE = {"P1": "Material directo por kardex", "P2": "Mano de obra a activ
                 "P4A": "Recursos indirectos a centros y actividades", "P4B": "Apoyo a productivos",
                 "P4D": "Centros de actividad a actividades", "P4E": "Actividades estratégicas y de apoyo a operativas (escalonado)",
                 "P4C": "Actividades a órdenes",
-                "P5": "Administración a órdenes", "P6": "Ventas a órdenes", "P7": "Financieros a órdenes"}
+                "OCIO": "Criterio propio del ocio de un origen", "P5": "Administración a órdenes", "P6": "Ventas a órdenes", "P7": "Financieros a órdenes"}
 
 
 def _nombres(libro):
@@ -226,11 +256,14 @@ def _control(aristas, r, nom):
                                                                diferencia=dif, ok=abs(dif) <= tol, detalle=detalle))
     # 1. Conservación: lo que entra como recurso termina íntegro en las órdenes (P1..P7)
     entra = sum(float(a["monto"]) for a in aristas if a["org_tipo"] == "REC")
-    llega = sum(float(a["monto"]) for a in aristas if a["nivel"] in ("OBJ", "OCIO"))
+    llega = sum(float(a["monto"]) for a in aristas if a["nivel"] == "OBJ")
     sale_int = sum(float(a["monto"]) for a in aristas if a["org_tipo"] != "REC")
-    llega_int = sum(float(a["monto"]) for a in aristas if a["nivel"] not in ("OBJ", "OCIO"))
-    add("Conservación del reparto: recursos del periodo = costo llegado a las órdenes + capacidad ociosa", entra, llega,
+    llega_int = sum(float(a["monto"]) for a in aristas if a["nivel"] != "OBJ")
+    add("Conservación del reparto: recursos del periodo = costo llegado a las órdenes (normal + pérdida + ocio)", entra, llega,
         detalle="Ningún sol se pierde ni se crea al repartir por etapas (I9).")
+    ocio_gen = sum(x["importe"] for x in r.get("capacidad_ociosa") or [])
+    ocio_lleg = sum(float(a["monto"]) for a in aristas if a["nivel"] == "OBJ" and a.get("naturaleza") == "OCIO")
+    add("Ocio: la capacidad no usada llega íntegra a las órdenes con su etiqueta", ocio_gen, ocio_lleg, tol=0.05 * max(1, len(r.get("capacidad_ociosa") or [])))
     add("Centros y actividades quedan en cero (todo lo recibido se reparte)", llega_int, sale_int)
     # 2. Ruta del costo: los tramos raíz explican cada elemento de cada orden
     if r.get("trazas"):
