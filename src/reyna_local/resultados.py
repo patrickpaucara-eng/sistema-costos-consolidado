@@ -27,7 +27,49 @@ def previos(libro):
 def calcular_periodos(libro, emp):
     prev = previos(libro); h = P.leer_conceptos(libro, R.CONSUME)
     pers = sorted({str(r["CODIGO"]) for r in h.get("PERIODO", [])})
-    return {p: R.interno(h, dict(PER=p, EMP=emp), prev) for p in pers}, h
+    por = _PorPeriodo({p: R.interno(h, dict(PER=p, EMP=emp), prev) for p in pers})
+    por.rechazos = _rechazos_a_perdida(libro, emp, por)
+    return por, h
+
+
+class _PorPeriodo(dict):
+    """{periodo: {orden: {clave: monto}}} con el detalle de rechazos reclasificados (para el estado de resultados y las trazas)."""
+    rechazos = ()
+
+
+def rechazos(libro, emp):
+    """{(periodo, orden): fracción rechazada sin reproceso} desde RECHAZO (T18.7). Fracción = rechazadas / (buenas + rechazadas);
+    OBJ_CAN son las unidades buenas. Con reproceso = S no hay pérdida: el costo del reproceso ya está en la orden."""
+    t = P.leer(libro, ["RECHAZO", "OBJETO", "CAUSA_INEF"]) if "RECHAZO" in _hojas(libro) else {}
+    can = {r["OBJ_NUM"]: float(r.get("OBJ_CAN") or 0) for r in t.get("OBJETO", [])}
+    cif = {str(c["CIN_COD"]) for c in t.get("CAUSA_INEF", []) if str(c.get("CIN_DESTINO") or "").upper() == "CIF"}
+    rz = {}
+    for r in t.get("RECHAZO", []):
+        if r.get("RCZ_EMP") not in (None, emp) or str(r.get("RCZ_REPROCESA") or "N").upper().startswith("S"): continue
+        if str(r.get("RCZ_CIN") or "") in cif: continue          # causa tipificada como normal del proceso: queda en el costo
+        k = (str(r["RCZ_PER"]), str(r["RCZ_OBJ"])); rz[k] = rz.get(k, 0.0) + float(r.get("RCZ_CAN") or 0)
+    return {k: q / (can.get(k[1], 0.0) + q) for k, q in rz.items() if q > 0 and can.get(k[1], 0.0) + q > 0}
+
+
+def _hojas(libro):
+    from openpyxl import load_workbook
+    wb = load_workbook(libro, read_only=True)
+    try: return set(wb.sheetnames)
+    finally: wb.close()
+
+
+def _rechazos_a_perdida(libro, emp, por):
+    """Decisión 24-nov: el rechazo sin reproceso es costo de no calidad (falla interna). La parte rechazada del costo NORMAL de
+    producción de la orden pasa a naturaleza PERDIDA; no se crea ni se pierde dinero. Devuelve el detalle por orden."""
+    out = []
+    for (p, o), f in sorted(rechazos(libro, emp).items()):
+        v = por.get(p, {}).get(o)
+        if not v: continue
+        mov = {}
+        for k in [k for k in v if "|" not in k and k in PROD]:
+            m = v[k] * R.D(repr(f)); v[k] -= m; v[R.etiqueta(k, "PERDIDA")] = v.get(R.etiqueta(k, "PERDIDA"), R.D(0)) + m; mov[k] = m
+        out.append(dict(periodo=p, orden=o, fraccion=f, por_elemento=mov))
+    return out
 
 
 PROD = ("MD", "PD", "SD", "CIF"); OPER = ("GAD", "GVT"); FIN = ("GFI",)
@@ -139,9 +181,13 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     if to: er.insert(4, dict(categoria="OPERACION", concepto="Costo de capacidad ociosa (NIC 2 §13)", importe=-to))
     tp = round(sum(x["importe"] for x in perd), 2)
     if tp: er.insert(4, dict(categoria="OPERACION", concepto="Pérdidas anormales: merma en exceso (NIC 2 §16 a)", importe=-tp))
+    rcz = [dict(orden=x["orden"], fraccion=round(x["fraccion"], 6), importe=round(float(sum(x["por_elemento"].values(), D(0))), 2))
+           for x in getattr(por_per, "rechazos", ()) if x["periodo"] == periodo]
+    tr = round(sum(x["importe"] for x in rcz), 2)
+    if tr: er.insert(4, dict(categoria="OPERACION", concepto="Pérdidas anormales: rechazos sin reproceso (falla interna)", importe=-tr))
     ajg = _ajustes_gasto(libro, periodo); ta = round(sum(x["importe"] for x in ajg), 2)
     if ta: er.insert(4, dict(categoria="OPERACION", concepto="Ajustes de compra de material ya consumido (T14.2)", importe=-ta))
-    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp - to - ta, 2)
+    r_oper = round(vt - cventas - t["GAD"] - t["GVT"] - tp - tr - to - ta, 2)
     hall = A.diagnostico(series, periodo)
     rel = A.relevancia({e: t[e] for e in inc})
     esc = A.escenarios(dict(ventas=vt, **t))
@@ -163,10 +209,11 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
                       costo_unitario_prom=round(ct / q, 4) if q else 0, resultado_antes_impuestos=round(r_oper - t["GFI"], 2)),
              objetos=objetos, actividades=acts, serie=serie, estado_resultados=er, relevancia=rel, hallazgos=hall, propuestas=prop,
              escenarios=esc, proyeccion_info=info)
-    r["perdidas"] = perd; r["capacidad_ociosa"] = ocio; r["ajustes_compra"] = ajg
+    r["perdidas"] = perd; r["rechazos"] = rcz; r["capacidad_ociosa"] = ocio; r["ajustes_compra"] = ajg
     if inv: r["inventarios"] = inv
+    fr = {x["orden"]: x["fraccion"] for x in getattr(por_per, "rechazos", ()) if x["periodo"] == periodo}
     r["trazas"] = _trazas(h, par, prev, objetos, list(inc) + sorted({k for v in por_per[periodo].values() for k in v
-                                                              if "|" in k and R.separar(k)[0] in inc and (R.separar(k)[1] in nats or R.separar(k)[0] not in PROD)}), nom) \
+                                                              if "|" in k and R.separar(k)[0] in inc and (R.separar(k)[1] in nats or R.separar(k)[0] not in PROD)}), nom, fr) \
         if sintesis != "ESTIMADO" else []
     r["kardex"] = _kardex(libro, val, periodo, nom)
     r["modelo"] = _modelo(libro)
@@ -221,19 +268,26 @@ def _propuesta_por_causa(propuestas, variaciones, pro):
             x["causa"] = "SIN_VARIACION_DEL_MES"
 
 
-def _trazas(h, par, prev, objetos, inc, nom):
+def _trazas(h, par, prev, objetos, inc, nom, rechazo=None):
     """Ruta del costo (ALG-11): por objeto y elemento, cada tramo recurso → centro/actividad → objeto con su inductor,
     tasa y monto atribuido. Los tramos raíz (desde un recurso) suman exactamente el elemento del objeto."""
     out = []
     for o in objetos:
         for e in inc:
+            f = (rechazo or {}).get(o["codigo"]) if e in PROD else None
             for l in R.trazar(h, par, prev, "OBJETO", o["codigo"], e):
-                out.append(dict(objeto=o["codigo"], elemento=e, etapa=l["etapa"], origen=l["origen"], origen_nombre=nom.get(l["origen"], l["origen"]),
+                if f:                                   # rechazo sin reproceso: el mismo tramo se parte en normal y pérdida
+                    k = R.D(repr(f)); out.append(_tramo(o, R.etiqueta(e, "PERDIDA"), l, nom, k)); out.append(_tramo(o, e, l, nom, 1 - k))
+                else: out.append(_tramo(o, e, l, nom, 1))
+    return out
+
+
+def _tramo(o, e, l, nom, k):
+    return dict(objeto=o["codigo"], elemento=e, etapa=l["etapa"], origen=l["origen"], origen_nombre=nom.get(l["origen"], l["origen"]),
                                 destino=l["destino"], destino_nombre=nom.get(l["destino"], l["destino"]), criterio=l["criterio"],
                                 criterio_nombre=nom.get(l["criterio"], l["criterio"]), cantidad_destino=float(l["cantidad_destino"]),
                                 total_criterio=float(l["total_criterio"]), tasa=round(float(l["tasa"]), 6),
-                                monto=round(float(l["monto_atribuido"]), 2), raiz=bool(l["raiz"])))
-    return out
+                monto=round(float(l["monto_atribuido"] * k), 2), raiz=bool(l["raiz"]))
 
 
 def _kardex(libro, val, periodo, nom):

@@ -30,10 +30,21 @@ def _cu_periodo(por_per, p, pro, can, prod):
 
 
 def reparto_conjunto(costo, salidas, precios, p, base):
-    """[(producto, cantidad)] → [(producto, cantidad, costo asignado, peso)]. FISICA: por unidades; VVR: por cantidad × precio.
-    Si falta el precio de algún coproducto, VVR no es aplicable y se usan unidades físicas (se informa en la base)."""
-    if base == "VVR" and all((p, prod) in (precios or {}) for prod, _ in salidas):
-        pesos = [q * precios[(p, prod)] for prod, q in salidas]; usada = "VVR"
+    """[(producto, cantidad)] → [(producto, cantidad, costo asignado, peso)]. FISICA: por unidades; VVR: por cantidad × precio
+    (valor neto realizable sin costos posteriores registrados). Un producto que nunca tuvo valor de venta es RESIDUO: costo 0 en
+    ambas bases (no se costea la roca como el oro). Si el precio falta solo este mes, se usa el más cercano conocido."""
+    precios = precios or {}
+    def precio(prod):                                   # el del periodo; si no, el último anterior; si no, el primero posterior
+        if (p, prod) in precios: return precios[(p, prod)]
+        ks = sorted(k for k in precios if k[1] == prod); antes = [k for k in ks if k[0] <= p]
+        return precios[antes[-1]] if antes else (precios[ks[0]] if ks else None)
+    residuo = {prod for prod, _ in salidas if precio(prod) is None}
+    if residuo and len(residuo) < len(salidas):        # decisión 24-nov: lo que nunca tuvo valor de venta es residuo y no se costea
+        salidas_v = [(prod, q) for prod, q in salidas if prod not in residuo]
+        partes, usada = reparto_conjunto(costo, salidas_v, precios, p, base)
+        return partes + [(prod, q, 0.0, 0.0) for prod, q in salidas if prod in residuo], usada + "+RESIDUO"
+    if base == "VVR" and not residuo:
+        pesos = [q * precio(prod) for prod, q in salidas]; usada = "VVR"
     else:
         pesos = [q for _, q in salidas]; usada = "FISICA"
     T = sum(pesos) or 1.0
