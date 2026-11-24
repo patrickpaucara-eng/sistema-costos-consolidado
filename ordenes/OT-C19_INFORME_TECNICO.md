@@ -1,0 +1,5 @@
+# OT-C19 · Generador del informe técnico (tarea 3.1) — Codex nivel MEDIO
+Rama `codex/C19`. Nuevo tipo `informe` en `src/reyna_local/exportar.py` (Word .docx con python-docx, ya usado en el repo). Lee SOLO el contrato.
+Secciones (MN_01 lo exige): 1 Resumen ejecutivo (KPI, sello) · 2 Análisis: descriptivo (serie), diagnóstico (hallazgos con causa), relevancia (Pareto), predictivo (proyección y banda o «no estimable»), escenarios · 3 Conclusiones (una por hallazgo crítico y por elemento crítico) · 4 Propuestas (impacto anual, causa, responsable; excluir no controlables si existe `costeo_variable`) · 5 Plan de implementación (propuestas por impacto: responsable, plazo, mes de medición, indicador = costo unitario objetivo) · 6 Impacto económico futuro (suma de impactos anuales y resultado proyectado con y sin propuestas a 6 meses) · 7 Anexos (controles de calidad, ruta del costo de la orden mayor, metodología: Modelo de costeo de W. Oria, tres miradas).
+Cada cifra igual al contrato. Prueba: el .docx tiene las 7 secciones y las cifras de KPI y de la primera propuesta coinciden con el JSON de Frenosa 2010-12 REAL.
+Aceptación: COMPUERTA VERDE.
