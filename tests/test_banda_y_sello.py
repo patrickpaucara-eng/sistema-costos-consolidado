@@ -57,3 +57,10 @@ def test_r02_sello_cubre_metadatos_y_no_se_evade():
     assert verificar_sello(RAIZ / "datos", m)["estado"] == "RESULTADO_ALTERADO"
     m = copy.deepcopy(r); del m["sello"]["huella_resultado"]; m["kpi"]["ventas"] = 1
     assert verificar_sello(RAIZ / "datos", m)["estado"] == "SIN_HUELLA_RESULTADO"
+
+
+def test_pronostico_puntual_ingenuo_con_poca_historia_y_modelo_con_suficiente():
+    from reyna_local import analisis as A
+    assert A.pronostico_puntual([5, 7, 9], 3) == ([9.0, 9.0, 9.0], "INGENUO")
+    v, m = A.pronostico_puntual([float(10 + i) for i in range(12)], 2)
+    assert len(v) == 2 and m and v[0] > 15

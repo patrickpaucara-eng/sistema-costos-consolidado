@@ -80,6 +80,16 @@ def _rutas(y, horizonte, par, n, semilla):
     return det, errores, modelo, r
 
 
+def pronostico_puntual(y, horizonte, par=None):
+    """Pronóstico determinístico de una serie (factores de la proyección granular 2.4). Con historia insuficiente para
+    validar fuera de muestra: INGENUO (repite el último valor). Devuelve (valores, modelo)."""
+    par = dict(PARAM_PRON, **(par or {})); y = [float(x) for x in y]
+    if not y: return [], None
+    if len(y) <= par.get("min_validacion", 6): return [y[-1]] * horizonte, "INGENUO"
+    det, _, modelo, _ = _rutas(y, horizonte, par, 1, 0)
+    return det, modelo
+
+
 MIN_ERRORES = 3      # errores reales mínimos para estimar la banda de un horizonte
 
 
