@@ -282,12 +282,13 @@ def correr(hechos, parametros, previos):
                 dest = OrderedDict(sorted((k, v) for k, v in med.get(crit, {}).items() if v > 0 and k[0] != "CAP"))
             _validar_destinos(et, n[1], crit, dest, lvl, act, cen)
             T_uso = sum(dest.values())                        # uso del inductor original (para la capacidad)
+            crit_cap = crit                                  # R02: la capacidad se busca con el inductor original
             if n in recip: crit, dest = crit + "+RECIPROCO", recip[n]
             elif et in ("P4B", "P4E") and any(k[0] == n[0] and ((et == "P4B" and cen.get(k[1]) == "APR") or (et == "P4E" and act.get(k[1]) == lvl)) for k in dest):
                 raise Rechazo(f"{et} {n[1]}: reparte a un par pero el par no tiene regla de reparto")
             T = sum(dest.values())
             if T == 0: raise Rechazo(f"I8: {et} {n[1]} tiene monto {red(tot_n)} y su criterio {crit} suma cero")
-            cap = med.get(crit, {}).get(("CAP", n[1]), D(0))      # capacidad práctica del origen (MEDIDA nivel CAP)
+            cap = med.get(crit_cap, {}).get(("CAP", n[1]), D(0))  # capacidad práctica del origen (MEDIDA nivel CAP)
             f_ocio = (cap - T_uso) / cap if cap > T_uso else D(0)  # parte del costo NORMAL que nadie usó (NIC 2 §13)
             c_ocio, dest_ocio = crit, dest
             if f_ocio and reglas.get(("OCIO", n[1])):              # criterio propio del ocio en el libro; si no, el mismo inductor

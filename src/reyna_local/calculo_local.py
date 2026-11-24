@@ -117,6 +117,7 @@ def huella_resultado(resultado):
     """SHA-256 del resultado completo sin su propio sello (tarea 1.5): detecta cualquier cifra cambiada después de calcular."""
     import hashlib
     cuerpo = {k: v for k, v in resultado.items() if k != "sello"}
+    cuerpo["sello"] = {k: v for k, v in (resultado.get("sello") or {}).items() if k != "huella_resultado"}   # R02: metadatos también
     return hashlib.sha256(json.dumps(cuerpo, ensure_ascii=False, sort_keys=True, allow_nan=False).encode("utf-8")).hexdigest()
 
 
@@ -173,7 +174,9 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
 def verificar_sello(carpeta, resultado):
     """¿El resultado y el libro con que se calculó siguen intactos? Primero el resultado (cifras), luego el libro."""
     sello = resultado.get("sello") or {}
-    if sello.get("huella_resultado") and huella_resultado(resultado) != sello["huella_resultado"]:
+    if sello and not sello.get("huella_resultado"):
+        return dict(estado="SIN_HUELLA_RESULTADO")                  # R02: quitar la huella no evita la verificación
+    if sello and huella_resultado(resultado) != sello["huella_resultado"]:
         return dict(estado="RESULTADO_ALTERADO")
     s = Path(sello.get("libro", "")).stem; disp = libros(carpeta)
     if not sello or s not in disp:

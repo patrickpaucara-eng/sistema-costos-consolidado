@@ -169,3 +169,12 @@ def test_reciproco_entre_actividades_de_apoyo():
     h["(sin MCD) MEDIDA"] = [dict(m, NIVEL="ACT" if m["NIVEL"] == "CEN" else m["NIVEL"]) for m in h["(sin MCD) MEDIDA"]]
     f = R.interno(h, PAR, PREV)
     assert abs(f["OT1"]["CIF"] - D(6750) / 7) < D("1e-20") and abs(f["OT2"]["CIF"] - D(3750) / 7) < D("1e-20")
+
+
+def test_r02_capacidad_en_un_par_reciproco():
+    """S1 con capacidad 125 % de su uso (100 → 125): 20 % de su costo propio es ocio y conserva."""
+    h = _reciproco_caso()
+    h["(sin MCD) MEDIDA"].append(dict(PERIODO="X", EMPRESA="E", CRITERIO="D1", NIVEL="CAP", DESTINO="S1", CANTIDAD=125))
+    final, _, res = R.correr(h, PAR, PREV)
+    assert res["ocio"] and res["ocio"][0]["origen"] == "S1"
+    assert abs(sum(sum(v.values()) for v in final.values()) - D(1500)) < D("1e-18")

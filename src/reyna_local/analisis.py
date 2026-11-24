@@ -84,10 +84,12 @@ MIN_ERRORES = 3      # errores reales mínimos para estimar la banda de un horiz
 
 
 def _errores_horizonte(y, modelo, par, h, m0):
-    """Errores reales a h meses: para cada origen t ≥ m0, se ajusta con y[:t], se pronostica recursivamente h pasos y se compara
-    con y[t+h-1]."""
+    """Errores reales a h meses: para cada origen t ≥ m0, el MODELO SE ELIGE solo con y[:t] (R02: sin mirar el futuro; con historia
+    insuficiente para elegir, ingenuo), se pronostica recursivamente h pasos y se compara con y[t+h-1]."""
     out = []
     for t in range(m0, len(y) - h + 1):
+        try: modelo = PR._pronosticar_serie(list(y[:t]), par)["usado"]
+        except Exception: modelo = "INGENUO"
         yy = list(y[:t])
         for _ in range(h):
             _, f = PR.ajustar(modelo, yy, par); yy.append(f)
@@ -123,7 +125,7 @@ def proyectar(serie_meses, horizonte=6, n=2000, semilla=2010, par=None):
         det = dv[h - 1] - dc[h - 1]
         filas.append(dict(periodo=per, tipo="PROYECTADO_DET", ventas=round(dv[h - 1], 2), costo_total=round(dc[h - 1], 2), margen=round(det, 2)))
         e = _errores_horizonte(mg, mm_, par, h, m0); errores_h.append(len(e))
-        if len(e) < MIN_ERRORES:
+        if len(e) < MIN_ERRORES or not any(abs(x) > 1e-9 for x in e):   # R02: sin variación histórica tampoco se estima
             no_est.append(per); continue
         ab = sorted(abs(x) for x in e); k = math.ceil((len(ab) + 1) * 0.90)       # conformal: rango finito-muestral del 90 %
         q = ab[min(k, len(ab)) - 1]                                               # con pocos errores, el mayor observado

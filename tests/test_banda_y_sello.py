@@ -42,3 +42,18 @@ def test_sello_detecta_una_cifra_cambiada():
     assert r["sello"]["huella_resultado"] == huella_resultado(r)
     malo = copy.deepcopy(r); malo["objetos"][0]["costo_total"] += 0.01
     assert verificar_sello(RAIZ / "datos", malo)["estado"] == "RESULTADO_ALTERADO"
+
+
+# ---------- regresiones OT-R02 ----------
+def test_r02_serie_constante_no_estimable():
+    h = [(f"2010-{m:02d}", 1000.0, 600.0) for m in range(1, 13)]
+    filas, info = A.proyectar(h)
+    assert not [x for x in filas if x["tipo"] == "PROYECTADO_EST"] and len(info["banda_no_estimable"]) == 6
+
+
+def test_r02_sello_cubre_metadatos_y_no_se_evade():
+    r = PUB("2010-07")
+    m = copy.deepcopy(r); m["sello"]["semilla"] = 1
+    assert verificar_sello(RAIZ / "datos", m)["estado"] == "RESULTADO_ALTERADO"
+    m = copy.deepcopy(r); del m["sello"]["huella_resultado"]; m["kpi"]["ventas"] = 1
+    assert verificar_sello(RAIZ / "datos", m)["estado"] == "SIN_HUELLA_RESULTADO"
