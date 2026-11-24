@@ -1,0 +1,123 @@
+hoja,clase,quien_la_llena,frecuencia,motivo
+MENU,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+INSTALAR,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+EMPRESA,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Empresa que costea
+PERIODO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Periodo de costos (A = abierto)
+TIPO_CAMBIO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Tipo de cambio de contado por fecha [SUPUESTO]
+IMPUESTO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Impuesto y si es recuperable (NIC 2 §11)
+TIPO_RECURSO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Elemento de costo (MAT/IND), si consume capacidad (1/0), si es inventariable (S/N)"
+RECURSO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Recursos
+CENTRO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Centros: función (PRD/ALM/VTA/ADM) y capacidad práctica y normal en horas/mes [SUPUESTO]; SRV = servicio, CEN_ORD = orden de reparto escalonado"
+COMPONENTE,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Estándar por tonelada de fruta: 250 cajas de 4 kg (merma normal 2 %) y 9.6 horas de línea [SUPUESTO]
+OBJETO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Objeto de costo (orden). Estado A abierto, T terminado, L liquidado; avance %; costo planificado congelado y su base; real liquidado; acumulado a la fecha, proyectado y diferencia Hoja mixta: algunas columnas son calculadas o modificadas por el sistema; no supone edición directa de toda la hoja."
+ASIGNACION,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Qué algoritmo rige a cada objeto y propósito (P3)
+USUARIO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Usuarios (clave en texto: prototipo)
+PERFIL_TRX,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Perfil × transacción autorizada
+EVENTO,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Hechos registrados
+LINEA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Detalle-Q del evento
+EXISTENCIA,RESULTADO,Sistema,Al procesar o cerrar,"Cuenta de existencia: recurso × almacén, promedio móvil"
+CTA_OBJ_PER,RESULTADO,Sistema,Al procesar o cerrar,Cuenta del objeto por periodo y elemento
+CTA_OBJ_REC,RESULTADO,Sistema,Al procesar o cerrar,Cuenta objeto × recurso: estándar permitido vs real
+CONS_CAP,RESULTADO,Sistema,Al procesar o cerrar,Horas efectivas del objeto en el centro
+CTA_CENTRO,RESULTADO,Sistema,Al procesar o cerrar,"Cuenta del centro: suministrado, horas, tasa, asignado, ocio"
+CTA_GASTO,RESULTADO,Sistema,Al procesar o cerrar,"Gasto del periodo por concepto (pérdida anormal, ocio, desmedro, rebaja VNR) y si es deducible (LIR)"
+BITACORA,RESULTADO,Sistema,Al procesar o cerrar,Auditoría y reversa (DBD §4.2.4)
+MENSAJE,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Catálogo único de mensajes
+REGLA,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Reglas de clasificación de pérdidas declaradas: concepto de gasto y deducibilidad
+TARIFA,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Valores con vigencia: VNR = precio estimado de venta y costo estimado para vender (NIC 2 §28-34); EST = tarifa para estimar; REAL = tarifa vigente de mano de obra (P13); STD = precio estándar para diferencias [SUPUESTO]
+FACTOR,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Factor del entorno (El Niño costero): efecto % mínimo, más probable y máximo sobre cada recurso, y probabilidad de ocurrencia [SUPUESTO]"
+SALIDA,RESULTADO,Sistema,Al procesar o cerrar,"Resultado del objeto: producto obtenido, valor de venta en la separación y costo asignado"
+VENTA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Venta: ingreso, costo de ventas, gasto de ventas atribuido y margen Hoja mixta: algunas columnas son calculadas o modificadas por el sistema; no supone edición directa de toda la hoja."
+CTA_VTA_PER,RESULTADO,Sistema,Al procesar o cerrar,Cuenta de ventas del periodo
+CTA_FUNCION,RESULTADO,Sistema,Al procesar o cerrar,"Costo suministrado por función (PRD, VTA, ADM): presentación por función, NIIF 18"
+AJUSTE_VNR,RESULTADO,Sistema,Al procesar o cerrar,Rebaja al valor neto realizable (NIC 2 §28-34)
+ESTIMACION,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Costo estimado (cotización): base por estructura × tarifa, ajuste del entorno y estado Hoja mixta: algunas columnas son calculadas o modificadas por el sistema; no supone edición directa de toda la hoja."
+LIN_ESTIM,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Líneas de la estimación por recurso Hoja mixta: algunas columnas son calculadas o modificadas por el sistema; no supone edición directa de toda la hoja.
+DIFERENCIA,RESULTADO,Sistema,Al procesar o cerrar,"Diferencias por objeto y recurso: estándar del avance contra real, en cantidad y precio; merma normal y si es deducible"
+HIST_CENTRO,RESULTADO,Sistema,Al procesar o cerrar,Histórico mensual de horas y costo por centro (insumo de la calibración) [SUPUESTO]
+PROVEEDOR,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Actores: proveedores
+HIST_PROV,RESULTADO,Sistema,Al procesar o cerrar,"Histórico de entregas: días de atraso, % rechazado, % variación de precio y sobrecosto % que causaron [SUPUESTO]"
+PARAMETRO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Parámetros generales
+CAL_RESPALDO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Valores por defecto si la calibración no supera el umbral (P8)
+TIPOLOGIA,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Tipología por rangos del indicador (MCD pp. 25-26)
+CALIBRACION,RESULTADO,Sistema,Al procesar o cerrar,"Resultado de cada calibración con su evidencia (R², n, error estándar y t de cada coeficiente: |t| ≥ 2 indica que el factor pesa de verdad) y estado VALIDO o RESPALDO (P8)"
+CTA_ACTOR,RESULTADO,Sistema,Al procesar o cerrar,"Cuenta del actor: hechos de comportamiento, indicador y tipología"
+INV_PROCESO,RESULTADO,Sistema,Al procesar o cerrar,Producción en proceso al cierre: costo acumulado de los objetos abiertos (NIC 2)
+METODO_SRV,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,A qué centros reparte cada método: PRD siempre; SRV solo posteriores (escalonado) o todos (recíproco)
+METODO_PAS,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Pasadas de reparto: el recíproco se resuelve por distribución repetida (converge)
+ITERACION,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Contador de pasadas
+USO_SERV,RESULTADO,Sistema,Al procesar o cerrar,Uso de servicios entre centros (inductor)
+SRV_PEND,RESULTADO,Sistema,Al procesar o cerrar,Saldo pendiente de repartir de cada centro de servicio
+TRAZA,RESULTADO,Sistema,Al procesar o cerrar,Traza general: cada fórmula ejecutada con sus operandos y resultado (se activa con TRAZA = S en PARAMETRO o en la transacción)
+SRV_TRAZA,RESULTADO,Sistema,Al procesar o cerrar,"Reparto de servicios paso a paso: pasada, quién reparte a quién, pendiente, % y monto"
+CUENTA_CONC,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Cuentas que se concilian con la contabilidad
+CONCILIACION,RESULTADO,Sistema,Al procesar o cerrar,Saldo contable contra saldo según costos y diferencia
+CARGA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Puerto de carga: cada fila es un evento capturado automáticamente; se ejecuta con su usuario de captura y deja su estado Hoja mixta: algunas columnas son calculadas o modificadas por el sistema; no supone edición directa de toda la hoja.
+PRODUCTO_PT,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Producto vendible: estructura que lo produce, unidades por unidad de estructura (cajas por t) y recurso restricción (cuello de botella)"
+LOG_TRX,RESULTADO,Sistema,Al procesar o cerrar,"Registro log de transacciones (DBD §4.2.4): I iniciado, O listo, A actualizado, E abortado. Sobrevive a la reversa"
+PARAM_CAMBIO,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Cambio de parámetro como evento: propuesto (P) por quien configura, aprobado (A) o rechazado (R) por otro perfil"
+CAUSA_DIF,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Causas tipificadas de las diferencias de conciliación
+CONC_AJUSTE,RESULTADO,Sistema,Al procesar o cerrar,"Ajustes que explican la diferencia, por causa, enlazados a su evento"
+CLIENTE,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Cliente con su canal y región (dimensiones de rentabilidad)
+RENTAB,RESULTADO,Sistema,Al procesar o cerrar,"Rentabilidad por dimensión (CLIENTE, PRODUCTO, CANAL, REGION): ingreso, costo de ventas, gasto atribuido y margen"
+UMBRAL,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Umbrales de alerta [SUPUESTO]
+ALERTA,RESULTADO,Sistema,Al procesar o cerrar,"Excepciones detectadas: tipo, referencia, valor y umbral"
+USUARIO_PERFIL,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Relación usuario-perfil (DBD §4.3.1): un usuario puede tener varios perfiles; basta uno autorizado
+REGLA_OFICIAL,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,"Respuesta oficial a cada eje del costeo (E-081, B1-B2). Cambiarla = cambiar un dato, con doble control"
+REGLA_IMPL,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,"Combinaciones con algoritmo implementado en el cierre (lo demás se rechaza con mensaje, no se calcula mal)"
+CIERRE_PASO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,"Protocolo de cierre como dato (DBD p. 146): orden, obligatoriedad y tipo de cada paso"
+CIERRE_EJEC,RESULTADO,Sistema,Al procesar o cerrar,Checkpoint: qué pasos del cierre terminaron bien en cada periodo
+EST_CENTRO,RESULTADO,Sistema,Al procesar o cerrar,"Foto periódica centro × periodo, con la tasa del periodo anterior y su variación (tendencia)"
+EST_OT,RESULTADO,Sistema,Al procesar o cerrar,"Foto del objeto de costo por periodo: hechos resumidos y proyección (las hipótesis ya no se guardan en OBJETO, P29)"
+EST_COMPRA,RESULTADO,Sistema,Al procesar o cerrar,"Compras del periodo por recurso: último precio (costo de reposición, para decidir) y totales"
+EST_DECISION,RESULTADO,Sistema,Al procesar o cerrar,"Lo predicho frente a lo real de cada decisión (aprendizaje, EC-06)"
+LOTE,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Lote (productor, cosecha, calibre): trazabilidad y costo por lote como vista (EC-25)"
+ACTIVIDAD,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Actividades que se registran como hechos neutrales (inductores para cualquier método, P31)"
+CTA_OBJ_ACT,RESULTADO,Sistema,Al procesar o cerrar,Actividades realizadas por objeto y centro
+ESCENARIO_REF,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Ficha mínima del escenario decidido: la auditoría no depende del repositorio externo (EC-10)
+TRX_MODULO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Ubicación de cada transacción en la arquitectura de Tino (Fig. 1.3)
+DATO_REF,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Integridad al editar en MANT-PARM: el valor debe existir en la tabla de referencia (EC-16)
+TRX_KARDEX,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,"Cómo afecta cada transacción al kardex: almacén (origen o destino), factor de cantidad, de diferencia y de valor; tipo de operación (tabla 12 SUNAT)"
+KARDEX,RESULTADO,Sistema,Al procesar o cerrar,"Kardex valorizado por recurso y almacén, con saldo después de cada movimiento (REPORTES, EC-30)"
+KARDEX_SALDO,RESULTADO,Sistema,Al procesar o cerrar,Saldo corrido del kardex
+DIARIO,RESULTADO,Sistema,Al procesar o cerrar,Diario de operaciones: cada transacción con su estado y cuántas celdas cambió (supervisión)
+CONC_DET,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Detalle contable por comprobante (llega por puerto o se digita)
+CONC_PROP,RESULTADO,Sistema,Al procesar o cerrar,Causa propuesta de cada diferencia; T27.1 la confirma
+MOV_CIERRE,RESULTADO,Sistema,Al procesar o cerrar,"Movimientos de inventario que hace el cierre (entrada de producción, rebaja VNR), con fecha de fin de periodo"
+REAPERTURA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Solicitudes de reapertura de periodo: quién solicita, motivo, quién aprueba (doble control) y cuántas veces Hoja mixta: algunas columnas son calculadas o modificadas por el sistema; no supone edición directa de toda la hoja."
+CRITERIO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Criterios de reparto (inductores) que la empresa mide
+REGLA_REPARTO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,"Qué criterio usa cada elemento (P4A) o centro (P4B, P4C, P5, P6), con vigencia (MANT-PARM)"
+PERSONA,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Personal directo
+MEDIDA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Medidas de los criterios por centro u objeto en el periodo (hecho neutral)
+CTA_PERS_OBJ,RESULTADO,Sistema,Al procesar o cerrar,Minutos efectivos de cada persona en cada objeto
+PLANILLA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Costo de planilla y horas efectivas disponibles por persona (puerto RR.HH.)
+TARIFA_CENTRO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,Tarifa presupuestada de cada centro por periodo (antes mezclada en TARIFA)
+METODO_REGISTRADO,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Métodos aprobados que pueden entregar resultados a la base (plug-ins del almacén), con versión"
+CORRIDA_METODO,RESULTADO,Sistema,Al procesar o cerrar,"Cada entrega de resultados de un método: qué método, versión, periodo y huella de los hechos usados"
+RESULTADO_METODO,RESULTADO,Sistema,Al procesar o cerrar,"Valores calculados por un método (nunca se escriben sobre los hechos): tipo (SALIDA, EXISTENCIA, OBJETO…), clave, concepto y valor"
+CAUSA_INEF,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Causa tipificada de ineficiencia: parada o rechazo, controlable o no, destino CIF o pérdida (MCD v3.1)"
+PARADA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Parada de planta: centro, persona y objeto opcionales, inicio, fin, minutos y causa (MCD v3.1)"
+HORA_EXTRA,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Hora extra: persona, objeto, minutos, % de recargo y motivo CLIENTE o PLANTA (MCD v3.1)"
+DESECHO,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,Desecho (E-147): cantidad generada pesada o contada y cantidad recuperada con su valor neto de salvamento (MCD v3.1)
+RECHAZO,MOVIMIENTO,Operador o fuente de datos,Por hecho o periodo,"Rechazo interno: objeto, cantidad, causa y si se reprocesa (MCD v3.1)"
+EJE,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Catálogo de ejes (enmienda E-182): función MCD, capa, método base, eje de la FICHA y paso de aplicación; un eje nuevo = filas"
+EJE_PUNTO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,"Dónde corre la guarda de cada eje: transacción, bloque VALOR y momento (L línea / C cierre)"
+REGLA_ALARMA,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Reglas de alarma en línea (MCD pp. 28-34): una condición simple sobre una variable de la PROPIA transacción; solo escribe ALERTA
+PROPUESTA,CATALOGO,Responsable de maestros,Inicial y cuando cambia,"Catálogo de propuestas de la capa analítica (ESPEC_ANALITICA2 §7): regla, evaluador registrado, acción, impacto, nivel de autonomía"
+SEM_OBJETO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+SEM_CARGA,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+TRX,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+TRX_CAMPO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+TOP,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+OME,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+MET,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+MCA,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+FRM,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+CND,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+ALG,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+PAL,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+ESCENARIO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+ESPERADO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+RESULTADO,RESULTADO,Sistema,Al procesar o cerrar,Definición o soporte de la plantilla.
+TABLAS_LOGICAS,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+MODELO_FISICO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
