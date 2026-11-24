@@ -327,7 +327,8 @@ def _informe(r, destino):
         if x.get('critico'): doc.add_paragraph(f"Elemento crítico: {text(x.get('elemento'))}; importe {text(x.get('importe'))}.", style='List Bullet')
     exclusions = (r.get('costeo_variable') or {}).get('no_controlables') or []
     excluded_codes = {str(x.get('codigo') or x.get('propuesta')) for x in exclusions if isinstance(x,dict) and (x.get('codigo') or x.get('propuesta'))}
-    ambiguous = bool(exclusions) and len(excluded_codes) < len(exclusions)
+    proposal_codes = {str(p.get('codigo')) for p in r['propuestas'] if p.get('codigo')}
+    ambiguous = bool(exclusions) and (len(excluded_codes) < len(exclusions) or not excluded_codes <= proposal_codes)
     proposals = [] if ambiguous else [p for p in r['propuestas'] if str(p.get('codigo')) not in excluded_codes]
     doc.add_heading('4. Propuestas', level=1)
     if 'costeo_variable' not in r: doc.add_paragraph('Controlabilidad no informada: no se puede verificar el filtro de costos compartidos.')

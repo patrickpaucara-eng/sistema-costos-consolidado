@@ -22,7 +22,7 @@ def test_informe_frenosa_contrato_y_limitaciones(tmp_path):
 
 def test_no_muestra_propuestas_si_exclusion_no_se_puede_identificar(tmp_path):
     r = json.loads((ROOT / 'datos/resultados/frenosa_2010-12_REAL.json').read_text())
-    r['costeo_variable'] = {'no_controlables': [{'recurso': 'MAT_SW50'}]}
+    r['costeo_variable'] = {'no_controlables': [{'codigo': 'MAT_SW50'}]}
     doc = Document(exportar(r, 'informe', tmp_path))
     text = '\n'.join(p.text for p in doc.paragraphs) + '\n' + '\n'.join(c.text for t in doc.tables for row in t.rows for c in row.cells)
     assert 'Propuestas omitidas' in text
