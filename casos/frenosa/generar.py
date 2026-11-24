@@ -72,8 +72,8 @@ def generar(plantilla, salida, periodos=None):
     for c, d in MAT.items():
         rec.append([d, f"Material {d[4:]}", "MAT_DIR", "kg", None, "S"]); rr.append(["P1", d, "CONSUMO", 19000101, "Material por kardex (D-10)"])
     for p in pers:
-        a, m = p.split("-"); fin = 20000000 + 0  # placeholder
-        wb["PERIODO"].append([p, EMP, int(a + m + "01"), int(a + m + "31"), "A"])
+        a, m = p.split("-"); fin = calendar.monthrange(int(a), int(m))[1]       # R-27: último día real del mes
+        wb["PERIODO"].append([p, EMP, int(a + m + "01"), int(a + m + f"{fin:02d}"), "A"])
     for r in ot:
         if r["periodo"] in pers:
             a_, m_ = map(int, r["periodo"].split("-")); fin_mes = int(f"{a_}{m_:02d}{calendar.monthrange(a_, m_)[1]:02d}")

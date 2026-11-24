@@ -42,13 +42,21 @@ PRU usa 160 de 200 h → ocio 20 %: normal 3,040 (CIF 1,120 + PD 1,920); **ocio 
 Conservación: recursos 7,140 + 12,000 + 7,000 + 2,000 = 28,140 = 22,975 + 5,165 ✓.
 CONTABLE: pérdida 126 y ocio 760 van al estado de resultados como gasto; resultado operativo igual en REAL y CONTABLE.
 
-## Meses 2025-01 a 2025-08
-Todo igual a julio salvo: cantidades de OT, consumos de cobre, horas de P2/P4C y ventas × factor f; capacidad PRU fija en 200 h;
-compra mensual de 200 kg a precio 40 + (mes − 1) × 0.5 (julio: usar 43 como arriba); merma en exceso solo en julio.
+## Meses 2025-01 a 2025-08 (corregido 24-nov tras observación de Codex: continuidad del inventario)
+El inventario es continuo: el saldo de cierre de un mes es el saldo inicial del siguiente. Para que julio abra con 100 kg a S/ 40:
+- Saldo inicial 2025-01-01: **100 kg a S/ 40** (4,000), un solo registro SALDO.
+- Enero a junio: cada mes se compra **exactamente lo que se consume, a S/ 40** (compra el día 05, consumos después) → el promedio
+  sigue en 40 y el saldo de cierre vuelve a 100 kg. Así julio abre con 100 kg a 40, como exige la tabla de esperados.
+- Julio: compra 200 kg a S/ 43 y consumos REB 150 / MPR 20, como arriba → cierra 130 kg a S/ 42.
+- Agosto: compra 200 kg a S/ 43.50; consumos según la regla de abajo.
+
+Motores por mes (enteros) y factor f (horas de P2 y P4C × f, ventas × f; capacidad PRU fija en 200 h):
 | mes | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 |
 |---|---|---|---|---|---|---|---|---|
-| f | 0.80 | 0.85 | 0.90 | 0.95 | 1.00 | 1.05 | 1.00 | 1.10 |
-(Si f·160 > 200 en PRU, la capacidad se usa entera: no hay ocio ese mes.)
+| f | 0.8 | 0.9 | 0.9 | 1.0 | 1.0 | 1.1 | 1.0 | 1.1 |
+| motores REB y MPR (cada uno) | 8 | 9 | 9 | 10 | 10 | 11 | 10 | 11 |
+Consumo de cobre fuera de julio = estándar con merma normal: REB 14.7 kg × motores, MPR 2 kg × motores (sin exceso). La merma en exceso solo existe en julio.
+(PRU usa 160·f h ≤ 176 < 200: hay ocio todos los meses.)
 
 ## Aceptación (OT-C13)
 `tests/test_segundo_caso.py`: el libro valida; julio da exactamente la tabla (±0.01) en REAL y CONTABLE; los 8 meses conservan;
