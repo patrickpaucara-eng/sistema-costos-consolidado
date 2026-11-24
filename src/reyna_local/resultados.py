@@ -176,6 +176,7 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     cn = N.costeo_normal(por_per, periodo, libro, P)
     if cn: r["costeo_normal"] = cn
     r["variaciones"] = N.variaciones_material(r["kardex"], periodo, libro, P, val)
+    _propuesta_por_causa(r["propuestas"], r["variaciones"], pro)
     if est:
         r["estimacion"] = {k: dict(cu_total=round(v["cu_total"], 4), p05=round(v["p05"], 4), p95=round(v["p95"], 4), metodo=v["metodo"],
                                    mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
@@ -199,6 +200,25 @@ def _nombres(libro):
     for r in t.get("CENTRO", []): n.setdefault(r["CEN_COD"], f"Centro {r['CEN_COD']} ({r.get('CEN_TIPO') or r.get('CEN_FUN') or ''})")
     for r in t.get("CRITERIO", []): n.setdefault(r["CRI_COD"], r.get("CRI_DES") or r["CRI_COD"])
     return n
+
+
+def _propuesta_por_causa(propuestas, variaciones, pro):
+    """Tarea 2.7 (decisión del dueño 23-nov): la propuesta de material se dirige según la causa medida en las variaciones del
+    periodo: precio → negociar con el proveedor (Compras); cantidad → reducir consumo y merma (Producción)."""
+    vp, vq = {}, {}
+    for v in variaciones or []:
+        p = pro.get(v["orden"], v["orden"]); vp[p] = vp.get(p, 0.0) + v["var_precio"]; vq[p] = vq.get(p, 0.0) + v["var_cantidad"]
+    for x in propuestas:
+        if x.get("elemento") != "MD": continue
+        p, q = vp.get(x["producto"], 0.0), vq.get(x["producto"], 0.0)
+        if p > 0 and p >= q:
+            x.update(causa="PRECIO", responsable="Compras", descripcion=f"Material de {x['producto']}: negociar precio y flete con el proveedor "
+                     f"(variación de precio del mes S/ {p:,.2f}); objetivo: costo unitario promedio de 6 meses")
+        elif q > 0:
+            x.update(causa="CANTIDAD", responsable="Producción", descripcion=f"Material de {x['producto']}: reducir consumo y merma por unidad "
+                     f"(variación de cantidad del mes S/ {q:,.2f}); objetivo: costo unitario promedio de 6 meses")
+        else:
+            x["causa"] = "SIN_VARIACION_DEL_MES"
 
 
 def _trazas(h, par, prev, objetos, inc, nom):

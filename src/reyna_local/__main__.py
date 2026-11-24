@@ -313,6 +313,22 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 raise Problem(422, "Los resultados disponibles no se pueden mostrar. Revisa el archivo de resultados.") from None
             self._json(HTTPStatus.OK, resultado)
             return
+        if target.path == "/api/periodos" and method == "GET":     # tarea 2.6: periodos por fecha libre
+            from .periodos import desde_archivos, GRANOS
+            from .calculo_local import ruta_libro
+            q = {k: v[0] for k, v in parse_qs(target.query).items()}
+            empresa, sintesis, grano = q.get("empresa", "frenosa"), q.get("sintesis", "REAL"), q.get("grano", "mes")
+            if (not re.fullmatch(r"[a-z0-9_]{1,60}", empresa) or sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or grano not in GRANOS
+                    or not all(re.fullmatch(r"\d{4}-\d{2}-\d{2}", q.get(k, "")) for k in ("desde", "hasta"))):
+                raise Problem(400, "Elige empresa, síntesis, grano y fechas válidas (AAAA-MM-DD).")
+            try:
+                libro = ruta_libro(self.server.store.root, empresa)
+                out = desde_archivos(libro, [self.server.store.root / "resultados", Path(__file__).resolve().parents[2] / "datos" / "resultados"],
+                                     empresa, sintesis, q["desde"], q["hasta"], grano)
+            except ValueError as exc:
+                raise Problem(400, str(exc)) from None
+            self._json(HTTPStatus.OK, out)
+            return
         if target.path == "/api/sello" and method == "POST":
             from .calculo_local import verificar_sello
             self._json(HTTPStatus.OK, verificar_sello(store.root, self._body().get("resultados") or {}))

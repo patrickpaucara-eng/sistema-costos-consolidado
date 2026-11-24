@@ -23,3 +23,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-23,17:45,18:30,Correcciones de la revisión OT-R01 (Codex): saldo mixto, reglas del criterio de ocio, ocio administrativo; 5 regresiones,Sistema,Claude,compuerta VERDE 356 pruebas
 2026-11-23,19:25,20:20,Órdenes C11-C13 para Codex; tarea 1.3 recíproco entre pares (centros y actividades) con pesos efectivos exactos,Sistema,Claude,compuerta VERDE
 2026-11-23,20:20,21:10,Tareas 1.4 (banda conformal por horizonte y no estimable) y 1.5 (sello cubre el resultado),Sistema,Claude,compuerta VERDE 363 pruebas
+2026-11-23,19:50,20:50,Tareas 1.6 (diseño SERVITEC), 2.6 (periodos por fecha libre + /api/periodos), 2.7 (propuestas según causa); registro de decisiones del dueño,Sistema,Claude,compuerta VERDE 368 pruebas
