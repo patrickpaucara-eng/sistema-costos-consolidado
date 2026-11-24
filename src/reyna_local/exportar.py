@@ -291,7 +291,10 @@ def _informe(r, destino):
     doc.add_paragraph(f"{r['empresa'].get('nombre', '')} · {r['periodo_actual']} · {r['sintesis']} · {r['moneda']}")
     def text(value):
         if value is None: return 'No disponible'
-        if isinstance(value, float): return f'{value:,.2f}'
+        if isinstance(value, float):
+            from decimal import Decimal
+            precision = max(2, -Decimal(str(value)).as_tuple().exponent)
+            return f'{value:,.{precision}f}'
         return str(value)
     def rows(items, fields):
         if not items:

@@ -14,6 +14,8 @@ def test_informe_frenosa_contrato_y_limitaciones(tmp_path):
         assert heading in text
     assert f"{r['kpi']['ventas']:,.2f}" in text
     assert f"{r['propuestas'][0]['impacto_anual']:,.2f}" in text
+    assert str(r['propuestas'][0]['cu_objetivo']) in text
+    assert str(r['kpi']['rentabilidad']) in text
     assert 'Resultado con propuestas: no disponible' in text
     assert 'Controlabilidad no informada' in text
 
