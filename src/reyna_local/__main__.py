@@ -15,7 +15,7 @@ import webbrowser
 
 from .receipt_audit import audit_receipts
 from .exportar import exportar, TIPOS
-from .store import Problem, Store
+from .store import Problem, Store, load_data, content_bytes, metadata, TRANSACTIONS
 from .contrato import validar
 
 
@@ -269,6 +269,60 @@ class ReynaHandler(BaseHTTPRequestHandler):
             except OSError:
                 raise Problem(404, "El reporte no está disponible.") from None
             self._send(HTTPStatus.OK, contenido, "application/octet-stream")
+            return
+        if target.path == "/api/trx-campos" and method == "GET":
+            try:
+                params = parse_qs(target.query, keep_blank_values=True, max_num_fields=2)
+                if set(params) != {"id", "trx"} or any(len(v) != 1 for v in params.values()):
+                    raise ValueError
+                identifier, trx = params["id"][0], params["trx"][0]
+                if trx not in TRANSACTIONS:
+                    raise ValueError
+            except ValueError:
+                raise Problem(400, "Elige un espacio y una transacción habilitada.") from None
+            tables, _ = load_data(content_bytes(store.path(identifier)))
+            info = metadata(tables)
+            company = info.get("company_code")
+            if info.get("id") != identifier or not company:
+                raise Problem(409, "El espacio no tiene una empresa válida.")
+            fields = []
+            sensitive = {"USUARIO", "USUARIO_PERFIL", "PERFIL_TRX", "_ReynaMeta", "_ReynaRecibos"}
+            configuration = tables["TRX_CAMPO"]
+            names = ("TCA_TRX", "TCA_SEC", "TCA_VAR", "TCA_ETQ", "TCA_NIVEL", "TCA_LISTA")
+            if any(configuration["h"].count(name) != 1 for name in names):
+                raise Problem(422, "La configuración de campos del libro es incompatible.")
+            positions = [configuration["h"].index(name) for name in names]
+            for row in configuration["r"]:
+                code, sequence, variable, label, level, reference = (row[index] for index in positions)
+                if code != trx:
+                    continue
+                if level not in ("C", "L"):
+                    continue
+                options = []
+                if reference:
+                    if not isinstance(reference, str) or not re.fullmatch(r"[A-Z_]+\.[A-Z_]+", reference):
+                        raise Problem(422, "La lista del campo no está configurada correctamente.")
+                    name, column = reference.split(".")
+                    if name.upper() in {x.upper() for x in sensitive} or any(x in column for x in ("CLAVE", "PASSWORD", "TOKEN")):
+                        raise Problem(422, "La lista del campo no está disponible.")
+                    tabla = tables.get(name)
+                    if tabla is None or tabla['h'].count(column) != 1:
+                        raise Problem(422, "La lista del campo no existe en el libro.")
+                    ci = tabla['h'].index(column)
+                    emp_cols = [i for i, col in enumerate(tabla['h']) if isinstance(col, str) and col.endswith('_EMP')]
+                    if len(emp_cols) > 1:
+                        raise Problem(422, "La lista tiene una empresa ambigua.")
+                    for item in tabla['r']:
+                        if name == 'EMPRESA' and item[ci] != company:
+                            continue
+                        if emp_cols and item[emp_cols[0]] not in (company, '*'):
+                            continue
+                        value = item[ci]
+                        if value not in (None, '') and isinstance(value, (str, int, float)) and value not in options:
+                            options.append(value)
+                fields.append(dict(secuencia=sequence, variable=variable, etiqueta=label, nivel=level, lista=reference, valores=options))
+            fields.sort(key=lambda field: int(field['secuencia']))
+            self._json(200, {"transaccion": trx, "campos": fields, "transacciones": [r[0] for r in tables.get("TRX", {}).get("r", []) if r and isinstance(r[0], str)]})
             return
         if target.path == "/api/exportar" and method == "POST":
             try:

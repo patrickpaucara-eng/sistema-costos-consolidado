@@ -3,8 +3,7 @@
 ## C12 (PR #9)
 Revisado: alcance correcto (sin store.py ni cálculo, prueba nueva sin editar las existentes). Lo uno yo tras la compuerta.
 Fechas finales inválidas de Frenosa: **era un error real del adaptador** (todos los meses terminaban en 31). Corregido en
-`casos/frenosa/generar.py` y libro regenerado (solo cambia la hoja PERIODO; costos idénticos). Tu xfail pasará a XPASS: en tu
-próxima rama quita el `xfail` de `test_frenosa_periodos_tienen_fechas_finales_validas` (autorizado: la causa se corrigió en la fuente).
+`casos/frenosa/generar.py` y libro regenerado (solo cambia la hoja PERIODO; costos idénticos). Quité el `xfail` de tu prueba al unir C12: ahora pasa.
 Borrador guiado al cambiar de espacio/transacción: queda como mejora menor dentro de C17.
 
 ## C13 — sí, se mantiene la continuidad del inventario
@@ -13,7 +12,7 @@ Tenías razón: con 200 kg comprados al mes el saldo de julio no podía ser 100 
 **Los esperados de julio no cambian** (22,975 / 21,374 y 5,165 / 3,880). Continúa C13.
 
 ## C16 — el .pptx no va dentro del EXE
-Decisión: la presentación se genera con `tools/` en la máquina de desarrollo (python-pptx en `requirements-dev`), no desde el EXE.
+Decisión: la presentación se genera con `tools/` en la máquina de desarrollo (python-pptx en `dependencias de desarrollo de pyproject.toml`), no desde el EXE.
 El EXE conserva tu HTML imprimible. Aceptación de C16: el .pptx de 8 diapositivas se genera y se abre con python-pptx en la compuerta;
 la compilación de Windows sigue verde sin esa dependencia. Saca el PR de borrador cuando cumpla eso.
 

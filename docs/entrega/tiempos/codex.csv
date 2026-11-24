@@ -8,3 +8,6 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-21,14:17,14:19,OT-C05 empaquetado y humo Linux,Monografía,Codex,Binario equivalente calcula y exporta; Windows pendiente
 2026-11-21,14:25,14:33,OT-C06 generadores Word y pruebas,Monografía,Codex,Cinco documentos generados y verificación de estructura
 2026-11-24,15:23,15:31,OT-C11 taxonomía de hojas y prueba,Monografía,Codex,122 hojas clasificadas; prueba focalizada aprobada
+2026-11-24,15:32,15:56,OT-C12 formulario guiado y pruebas,Monografía,Codex,Seis transacciones en copia temporal; configuración de producto terminado sintética
+2026-11-24,15:56,16:07,OT-C12 verificación y evidencia,Monografía,Codex,Prueba visual y defectos de fuente documentados; compuerta en ejecución
+2026-11-24,16:07,16:11,OT-C12 compuerta y entrega,Monografía,Codex,VERDE 373 pruebas 26 subpruebas y 1 fallo esperado por datos fuente
