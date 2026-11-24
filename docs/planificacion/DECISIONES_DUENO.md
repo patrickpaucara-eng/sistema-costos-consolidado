@@ -14,3 +14,10 @@
 | 23-nov | Presupuestos operativo, financiero y de inversión pertenecen al futuro «sistema de planeamiento financiero», que leerá este sistema por el puerto de lectura | fuera de alcance |
 | 23-nov | SQLite después; no se omite funcionalidad para la monografía, solo lo no funcional (rendimiento, seguridad avanzada) | plan |
 | 23-nov | Codex y otras IAs: solo tareas de bajo contexto con orden escrita y prueba de aceptación, o revisión independiente | `ordenes/` |
+| 24-nov | Un inductor único por actividad, definido una vez por causa-efecto; se reparte el saldo REAL sobre lo realmente entregado (la tasa predeterminada es solo para costeo normal y cotizaciones) | ya vigente (una regla por etapa y origen) |
+| 24-nov | La regresión NO define el inductor: sirve para separar fijo y variable (decisiones); R² solo valida una vez la causa-efecto | tareas 2.5 y 2.9 |
+| 24-nov | Retrabajo y rechazos internos = pérdida (costo de no calidad), aparte del costo normal | extender naturaleza PERDIDA a T18.4–T18.7 (tarea 2.9b) |
+| 24-nov | Actividad conjunta (coproductos/residuo): valor neto realizable; el residuo no se costea como producto | coproductos D-9 (VVR); ajustar a VNR con costos posteriores (2.9b) |
+| 24-nov | Pedidos especiales: costo = Σ consumo estimado de cada actividad × costo unitario de su capacidad (TDABC); consumo sugerido por plantilla/OT parecida/checklist | tarea 2.4b (cotizador por actividades) |
+| 24-nov | Costos escalonados: el bloque se define una vez en el RECURSO que crece por escalones (operario, máquina, turno): capacidad por bloque y costo por bloque | tarea 2.4 (proyección y sensibilidad) |
+| 24-nov | Costeo por componentes con estado de cada transformación (BOM multinivel, rutas, costo por estado intermedio) | después de la entrega (R2); en la monografía: estándares por componente generados de la historia (2.5) |
