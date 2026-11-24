@@ -9,9 +9,9 @@
 2. El formulario arma los campos desde esa respuesta: `TCA_LISTA` con valor → `<select>`; sin lista → `<input>`; las líneas en una tabla con «agregar línea». Etiqueta = `TCA_ETQ`.
 3. Al enviar, construye el mismo JSON que hoy y usa el mismo endpoint de ejecución (no cambies el motor).
 4. Campo «documento de soporte»: nombre de archivo y su huella SHA-256 calculada en el navegador; se envía en la cabecera como `DOC` y `DOC_SHA` (solo si `TRX_CAMPO` los declara; si no, se muestran pero no se envían).
-5. Habilitar solo T14, T14.1, T15, T16, T17, T18, T19 y T20 (las que tienen prueba); las demás se ven deshabilitadas con «sin prueba».
+5. Habilitar solo las transacciones que el servicio acepta hoy y tienen prueba: T14, T15, T17, T18, T19 y T20. T14.1 y T16 quedan deshabilitadas con «pendiente» (las habilita Claude en el servicio; NO modificar `store.py`). Las demás: «sin prueba».
 6. Mantén el modo JSON como «avanzado» (oculto por defecto).
 
-**Pruebas:** `tests/test_formulario_guiado.py`. Por cada transacción habilitada: arma el JSON desde el formulario (o desde el endpoint) con datos de `casos/libros/frenosa.xlsx` en una copia temporal, ejecuta y verifica código 200 y que el evento quedó en el libro.
+**Pruebas:** `tests/test_formulario_guiado.py`. Por cada transacción habilitada (T14, T15, T17, T18, T19, T20): arma el JSON desde el formulario (o desde el endpoint) con datos de `casos/libros/frenosa.xlsx` en una copia temporal, ejecuta y verifica código 200 y que el evento quedó en el libro.
 
 **Aceptación:** `python tools/verificar.py` → COMPUERTA: VERDE.
