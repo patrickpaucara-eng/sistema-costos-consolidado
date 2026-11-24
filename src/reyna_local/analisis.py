@@ -80,6 +80,21 @@ def _rutas(y, horizonte, par, n, semilla):
     return det, errores, modelo, r
 
 
+MIN_ERRORES = 3      # errores reales mínimos para estimar la banda de un horizonte
+
+
+def _errores_horizonte(y, modelo, par, h, m0):
+    """Errores reales a h meses: para cada origen t ≥ m0, se ajusta con y[:t], se pronostica recursivamente h pasos y se compara
+    con y[t+h-1]."""
+    out = []
+    for t in range(m0, len(y) - h + 1):
+        yy = list(y[:t])
+        for _ in range(h):
+            _, f = PR.ajustar(modelo, yy, par); yy.append(f)
+        out.append(y[t + h - 1] - yy[-1])
+    return out
+
+
 def proyectar(serie_meses, horizonte=6, n=2000, semilla=2010, par=None):
     """serie_meses: [(periodo, ventas, costo_total)] históricos → filas PROYECTADO_DET y PROYECTADO_EST del contrato.
     Determinístico: ventas y costo con el método que menos se equivoca fuera de muestra (cada uno el suyo).
@@ -92,25 +107,32 @@ def proyectar(serie_meses, horizonte=6, n=2000, semilla=2010, par=None):
         return [], dict(aviso=f"Historia insuficiente para proyectar ({len(pers)} meses; se requieren al menos 7)")
     v = [x for _, x, _ in serie_meses]; c = [x for _, _, x in serie_meses]; mg = [a - b for a, b in zip(v, c)]
     dv, _, mv, _ = _rutas(v, horizonte, par, n, semilla); dc, _, mc, _ = _rutas(c, horizonte, par, n, semilla)
-    _, em, mm_, rm = _rutas(mg, horizonte, par, n, semilla)
-    sesgo = sum(em) / len(em); em = [e - sesgo for e in em]           # RA-17: la banda mide dispersión alrededor del DET, no el sesgo de otro modelo
-    rng = random.Random(semilla)
-    sims = [[0.0] * horizonte for _ in range(n)]
-    for k in range(n):
-        ac = 0.0
-        for h in range(horizonte):
-            ac += em[rng.randrange(len(em))]; sims[k][h] = (dv[h] - dc[h]) + ac
+    _, _, mm_, rm = _rutas(mg, horizonte, par, n, semilla)
+    # Banda calibrada por horizonte (tarea 1.4): para cada h, errores reales del pronóstico del MARGEN hecho h meses antes
+    # (origen móvil, recursivo). Intervalo conformal: margen ± el error absoluto de rango ⌈(n+1)·0.9⌉ (incluye el sesgo real del
+    # modelo; centrarlo subestimaba: 0 de 5 meses cubiertos). Con menos de MIN_ERRORES errores: «no estimable», no se publica.
+    # La incertidumbre no disminuye con el horizonte: cada banda contiene a la anterior.
+    m0 = max(3, par["min_entrenamiento"] - 2)
+    lo_prev = hi_prev = 0.0; errores_h, no_est = [], []
     a, mm = map(int, pers[-1].split("-"))
-    filas, info = [], dict(modelo_ventas=mv, modelo_costo=mc, modelo_margen=mm_, mase_margen=None if rm["mase"] in (None, math.inf) else round(rm["mase"], 3),
-                          semilla=semilla, simulaciones=n)
-    for h in range(horizonte):
+    filas = []
+    for h in range(1, horizonte + 1):
         mm += 1
         if mm > 12: a, mm = a + 1, 1
         per = f"{a}-{mm:02d}"
-        filas.append(dict(periodo=per, tipo="PROYECTADO_DET", ventas=round(dv[h], 2), costo_total=round(dc[h], 2), margen=round(dv[h] - dc[h], 2)))
-        col = sorted(x[h] for x in sims)
-        filas.append(dict(periodo=per, tipo="PROYECTADO_EST", ventas=round(dv[h], 2), costo_total=round(dc[h], 2), margen=round(dv[h] - dc[h], 2),
-                          p05=round(PR.cuantil(col, 0.05), 2), p50=round(PR.cuantil(col, 0.50), 2), p95=round(PR.cuantil(col, 0.95), 2)))
+        det = dv[h - 1] - dc[h - 1]
+        filas.append(dict(periodo=per, tipo="PROYECTADO_DET", ventas=round(dv[h - 1], 2), costo_total=round(dc[h - 1], 2), margen=round(det, 2)))
+        e = _errores_horizonte(mg, mm_, par, h, m0); errores_h.append(len(e))
+        if len(e) < MIN_ERRORES:
+            no_est.append(per); continue
+        ab = sorted(abs(x) for x in e); k = math.ceil((len(ab) + 1) * 0.90)       # conformal: rango finito-muestral del 90 %
+        q = ab[min(k, len(ab)) - 1]                                               # con pocos errores, el mayor observado
+        lo, hi = min(-q, lo_prev), max(q, hi_prev); lo_prev, hi_prev = lo, hi
+        filas.append(dict(periodo=per, tipo="PROYECTADO_EST", ventas=round(dv[h - 1], 2), costo_total=round(dc[h - 1], 2), margen=round(det, 2),
+                          p05=round(det + lo, 2), p50=round(det, 2), p95=round(det + hi, 2)))
+    info = dict(modelo_ventas=mv, modelo_costo=mc, modelo_margen=mm_, mase_margen=None if rm["mase"] in (None, math.inf) else round(rm["mase"], 3),
+                semilla=semilla, simulaciones=n, metodo_banda="conformal por horizonte (origen móvil, 90 %)",
+                errores_por_horizonte=errores_h, banda_no_estimable=no_est)
     return filas, info
 
 

@@ -113,6 +113,13 @@ def ruta_libro(carpeta, s):
     return p
 
 
+def huella_resultado(resultado):
+    """SHA-256 del resultado completo sin su propio sello (tarea 1.5): detecta cualquier cifra cambiada después de calcular."""
+    import hashlib
+    cuerpo = {k: v for k, v in resultado.items() if k != "sello"}
+    return hashlib.sha256(json.dumps(cuerpo, ensure_ascii=False, sort_keys=True, allow_nan=False).encode("utf-8")).hexdigest()
+
+
 def _sello(libro, resultado):
     info = resultado.get("proyeccion_info") or {}
     return dict(libro=Path(libro).name, huella_libro=B.huella(libro), version_sistema=B.VERSION,
@@ -145,6 +152,7 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
         from .autonomia import aplicar
         aplicar(resultado, carpeta, s)                    # seguimiento de propuestas aprobadas y aprendizaje (punto 9)
         resultado["sello"] = _sello(libro, resultado)
+        resultado["sello"]["huella_resultado"] = huella_resultado(resultado)
         if validar(resultado) or resultado['periodo_actual'] != periodo or resultado['sintesis'] != sintesis:
             raise ValueError('El resultado no cumple el contrato solicitado.')
         destino = carpeta / 'resultados' / f'{s}_{periodo}_{sintesis}.json'
@@ -163,8 +171,10 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
 
 
 def verificar_sello(carpeta, resultado):
-    """¿El libro con que se calculó sigue intacto? Compara la huella guardada con la del libro actual."""
+    """¿El resultado y el libro con que se calculó siguen intactos? Primero el resultado (cifras), luego el libro."""
     sello = resultado.get("sello") or {}
+    if sello.get("huella_resultado") and huella_resultado(resultado) != sello["huella_resultado"]:
+        return dict(estado="RESULTADO_ALTERADO")
     s = Path(sello.get("libro", "")).stem; disp = libros(carpeta)
     if not sello or s not in disp:
         return dict(estado="SIN_SELLO" if not sello else "LIBRO_NO_DISPONIBLE")
