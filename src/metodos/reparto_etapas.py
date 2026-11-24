@@ -28,8 +28,8 @@ FICHA = dict(nombre="REPARTO_ETAPAS", version="2.0", vigente_desde="2026-01-01",
     formula="destino = origen × medida(destino) / Σ medidas; el elemento viaja con el monto; ALG-09 al publicar",
     fuente="ARQUITECTURA_V4_1 ALG-04; Oria (2026) procesos P1-P6 y ABC; Horngren caps. 4 y 15; NIC 2 §13",
     supuestos="Medidas del periodo cargadas; un criterio vigente por (etapa, origen); costo de material valorizado por el eje VALUACION",
-    limites="Centros: apoyo → productivo por método directo (P4B). Actividades: escalonado E → A → O (P4E, Modelo 3 de Oria). "
-            "El recíproco no está implementado en este motor")
+    limites="Directo, escalonado y recíproco salen de los datos: sin servicios entre pares es directo/escalonado; con servicios "
+            "entre pares del mismo nivel (P4B centros de apoyo, P4E actividades) se resuelve el recíproco exacto")
 CONSUME = {
     "(sin MCD) REGLA_REPARTO": ["ETAPA", "ORIGEN", "CRITERIO", "DESDE"],
     "(sin MCD) MEDIDA": ["PERIODO", "EMPRESA", "CRITERIO", "NIVEL", "DESTINO", "CANTIDAD"],
@@ -178,17 +178,44 @@ def _elemento_llegada(etapa, elemento, nivel, dest, cen):
     return elemento
 
 
-def _validar_destinos(et, origen, crit, dest, lvl, act, cen):
+def _validar_destinos(et, origen, crit, dest, lvl, act, cen, pares=True):
     """Reglas de destino de una etapa; se aplican igual al reparto normal y al criterio propio del ocio."""
     malos = [k for k in dest if k[0] not in NIVELES[et]]
     if malos: raise Rechazo(f"{et} {origen}: el criterio {crit} apunta a niveles no permitidos {sorted({k[0] for k in malos})}")
     if et == "P4A" and {k[0] for k in dest if dest[k]} >= {"CEN", "ACT"}:     # R-26: nunca a centros y actividades a la vez
         raise Rechazo(f"R-26 {et} {origen}: el criterio {crit} reparte a centros y a actividades a la vez (contaría el costo dos veces)")
-    if et == "P4E":
-        malo = sorted(k[1] for k in dest if NIVEL_ACT[act.get(k[1], "O")] <= NIVEL_ACT[lvl])
+    if any(k[1] == origen for k in dest): raise Rechazo(f"{et} {origen}: el criterio {crit} se reparte a sí mismo")
+    if et == "P4E":                                          # escalonado: solo baja; entre pares del mismo nivel, recíproco
+        malo = sorted(k[1] for k in dest if NIVEL_ACT[act.get(k[1], "O")] < NIVEL_ACT[lvl] + (0 if pares else 1))
         if malo: raise Rechazo(f"P4E {origen} (nivel {lvl}): el escalonado solo entrega a niveles inferiores; {', '.join(malo)} no lo son")
-    if et == "P4B" and any(cen.get(k[1]) != "PRO" for k in dest):
-        raise Rechazo(f"R-25: P4B {origen} reparte a un centro que no es productivo")
+    if et == "P4B" and any(cen.get(k[1]) not in (("PRO", "APR") if pares else ("PRO",)) for k in dest):
+        raise Rechazo(f"R-25: P4B {origen} reparte a un centro que no es productivo ni de apoyo")
+
+
+def _reciproco(pares, dests):
+    """Método recíproco (Horngren cap. 15; Oria: «el ideal y el mejor»). pares: orígenes del mismo nivel; dests: {par: {destino: peso}}.
+    Resuelve X = propio + Pᵀ X y devuelve, por origen, pesos EFECTIVOS sobre destinos finales (sin pares) que suman 1:
+    efectivo[j][k] = Σ_i N[j][i] · s[i][k], N = (I − P)⁻¹, P[j][i] = parte de j que va al par i. Sin servicios mutuos coincide con el
+    escalonado; así la ruta del costo queda sin ciclos y el reparto conserva exacto."""
+    idx = {p: i for i, p in enumerate(pares)}; n = len(pares)
+    sh = {p: {k: v / sum(dests[p].values()) for k, v in dests[p].items()} for p in pares}
+    M = [[(D(1) if i == j else D(0)) - (sh[pares[i]].get(pares[j], D(0))) for j in range(n)] + [D(1) if i == j else D(0) for j in range(n)] for i in range(n)]
+    for c in range(n):                                       # Gauss-Jordan en Decimal
+        f = max(range(c, n), key=lambda r: abs(M[r][c]))
+        if abs(M[f][c]) < D("1e-20"): raise Rechazo("Recíproco: los servicios entre pares forman un ciclo cerrado (nada sale a los destinos finales)")
+        M[c], M[f] = M[f], M[c]; piv = M[c][c]; M[c] = [x / piv for x in M[c]]
+        for r in range(n):
+            if r != c and M[r][c] != 0:
+                k = M[r][c]; M[r] = [a - k * b for a, b in zip(M[r], M[c])]
+    N = [row[n:] for row in M]
+    efectivo = {}
+    for p in pares:
+        acc = defaultdict(D)
+        for q in pares:
+            for k, v in sh[q].items():
+                if k not in idx: acc[k] += N[idx[p]][idx[q]] * v
+        efectivo[p] = OrderedDict(sorted((k, v) for k, v in acc.items() if v != 0))
+    return efectivo
 
 
 def correr(hechos, parametros, previos):
@@ -232,6 +259,18 @@ def correr(hechos, parametros, previos):
         else:
             nodos = [n for n in saldo if n[0] == "CEN" and cen.get(n[1]) == "FIN"]
         antes = sum(sum(v.values()) for v in saldo.values())
+        recip = {}
+        if et in ("P4B", "P4E"):                                # pares del mismo nivel que se prestan servicios → recíproco
+            if et == "P4B": elig = [("CEN", c) for c, t in cen.items() if t == "APR" and (et, c) in reglas and ("P4D", c) not in reglas]
+            else: elig = [("ACT", a) for a, nv in act.items() if nv == lvl and (et, a) in reglas]
+            dd = {}
+            for n in elig:
+                c0 = reglas[(et, n[1])]
+                dd[n] = OrderedDict(sorted((k, v) for k, v in med.get(c0, {}).items() if v > 0 and k[0] != "CAP"))
+                _validar_destinos(et, n[1], c0, dd[n], lvl, act, cen)
+            if any(k in dd for n in dd for k in dd[n]):
+                recip = _reciproco(sorted(dd), dd)
+                for n in [x for x in recip if x not in nodos and any(saldo[x].values())]: nodos.append(n)
         for n in sorted(nodos, key=lambda n: (n[0], n[1])):
             tot_n = sum(saldo[n].values())
             if all(v == 0 for v in saldo[n].values()): continue      # revisión R01-1: un saldo mixto que suma cero también se reparte
@@ -242,16 +281,20 @@ def correr(hechos, parametros, previos):
             else:
                 dest = OrderedDict(sorted((k, v) for k, v in med.get(crit, {}).items() if v > 0 and k[0] != "CAP"))
             _validar_destinos(et, n[1], crit, dest, lvl, act, cen)
+            T_uso = sum(dest.values())                        # uso del inductor original (para la capacidad)
+            if n in recip: crit, dest = crit + "+RECIPROCO", recip[n]
+            elif et in ("P4B", "P4E") and any(k[0] == n[0] and ((et == "P4B" and cen.get(k[1]) == "APR") or (et == "P4E" and act.get(k[1]) == lvl)) for k in dest):
+                raise Rechazo(f"{et} {n[1]}: reparte a un par pero el par no tiene regla de reparto")
             T = sum(dest.values())
             if T == 0: raise Rechazo(f"I8: {et} {n[1]} tiene monto {red(tot_n)} y su criterio {crit} suma cero")
             cap = med.get(crit, {}).get(("CAP", n[1]), D(0))      # capacidad práctica del origen (MEDIDA nivel CAP)
-            f_ocio = (cap - T) / cap if cap > T else D(0)          # parte del costo NORMAL que nadie usó (NIC 2 §13)
+            f_ocio = (cap - T_uso) / cap if cap > T_uso else D(0)  # parte del costo NORMAL que nadie usó (NIC 2 §13)
             c_ocio, dest_ocio = crit, dest
             if f_ocio and reglas.get(("OCIO", n[1])):              # criterio propio del ocio en el libro; si no, el mismo inductor
                 c_ocio = reglas[("OCIO", n[1])]
                 dest_ocio = OrderedDict(sorted((k, v) for k, v in med.get(c_ocio, {}).items() if v > 0 and k[0] != "CAP"))
                 if not dest_ocio: raise Rechazo(f"OCIO {n[1]}: el criterio {c_ocio} no tiene destinos")
-                _validar_destinos(et, n[1], c_ocio, dest_ocio, lvl, act, cen)   # revisión R01-3: mismas reglas que el reparto normal
+                _validar_destinos(et, n[1], c_ocio, dest_ocio, lvl, act, cen, pares=False)   # R01-3: el ocio solo baja (sin pares)
             if n[0] == "CEN": distrib[n[1]] += tot_n
             m_ocio = defaultdict(D)                               # ocio por elemento base de llegada
             for e in sorted(saldo[n]):
@@ -274,7 +317,7 @@ def correr(hechos, parametros, previos):
                                             medida=q, total=TT, monto=a, naturaleza=nn))
                 saldo[n][e] = D(0)
             if m_ocio:
-                ocio_gen.append(dict(origen=n[1], org_tipo=n[0], etapa=et, criterio=c_ocio, capacidad=cap, usado=T,
+                ocio_gen.append(dict(origen=n[1], org_tipo=n[0], etapa=et, criterio=c_ocio, capacidad=cap, usado=T_uso,
                                      monto=sum(m_ocio.values(), D(0)), por_elemento=dict(m_ocio)))
         despues = sum(sum(v.values()) for v in saldo.values())
         if abs(despues - antes) > D("1e-12"): raise Rechazo(f"I1: la etapa {et} no conserva ({antes} → {despues})")
