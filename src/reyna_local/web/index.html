@@ -336,20 +336,23 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
                 <input id="operator" name="user" type="text" autocomplete="off" spellcheck="false" required placeholder="Código de usuario">
               </div>
             </div>
-            <details>
-              <summary>Ver la estructura del JSON</summary>
+            <div id="guided-form" class="fields"><p>Elige una transacción para mostrar sus campos.</p></div>
+            <button id="add-line" class="secondary" type="button" hidden>Agregar línea</button>
+            <div class="field"><label for="support-document">Documento de soporte</label><input id="support-document" type="file"><p id="support-hash" class="helper">El archivo permanece en este equipo. Se muestra su nombre y huella SHA-256.</p></div>
+            <details id="advanced-json">
+              <summary>Modo avanzado: editar JSON</summary>
               <p class="helper">La cabecera es un objeto, por ejemplo <code>{"FECHA": 20261118}</code>. Las líneas forman una lista de objetos, por ejemplo <code>[{"CANT": 1}]</code>. Completa la estructura con los campos y códigos que requiere tu libro.</p>
-            </details>
             <div class="fields split">
               <div class="field">
                 <label for="json-header">Cabecera en JSON</label>
-                <textarea id="json-header" name="header" spellcheck="false" required>{}</textarea>
+                <textarea id="json-header" name="header" spellcheck="false">{}</textarea>
               </div>
               <div class="field">
                 <label for="json-lines">Líneas en JSON</label>
-                <textarea id="json-lines" name="lines" spellcheck="false" required>[{}]</textarea>
+                <textarea id="json-lines" name="lines" spellcheck="false">[{}]</textarea>
               </div>
             </div>
+            </details>
             <div class="field">
               <label for="request-id">Identificador de solicitud</label>
               <input id="request-id" name="request_id" class="mono" type="text" autocomplete="off" spellcheck="false" required aria-describedby="request-help">
@@ -571,9 +574,17 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     function restoreDraft(space) {
       const draft = formDrafts.get(space.id);
       const draftTransaction = draft?.transaction;
-      const operations = space.result_port_enabled ? [...space.transactions, "T25.4"] : space.transactions;
+      const operations = space.transactions;
       transaction.replaceChildren(makeOption("", "Selecciona una transacción"), ...operations.map((entry) => makeOption(entry)));
+      for (const code of ["T14.1", "T16"]) { const option = makeOption(code, `${code} — pendiente`); option.disabled = true; transaction.add(option); }
       transaction.value = operations.includes(draftTransaction) ? draftTransaction : "";
+      byId("guided-form").replaceChildren();
+      guidedFields = [];
+      support = null;
+      byId("support-document").value = "";
+      byId("support-hash").textContent = "Sin documento de soporte.";
+      if (transaction.value) loadGuidedFields();
+      else loadTransactionCatalog(space);
       operator.value = draft?.operator ?? "";
       headerInput.value = draft?.header ?? "{}";
       linesInput.value = draft?.lines ?? "[{}]";
@@ -666,13 +677,93 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       return data;
     }
 
+    let guidedFields = [];
+    let guidedRevision = 0;
+    let support = null;
+    const guided = byId("guided-form");
+    const addLine = byId("add-line");
+    function fieldControl(field) {
+      const el = document.createElement(field.lista ? "select" : "input");
+      el.dataset.variable = field.variable;
+      el.setAttribute("aria-label", field.etiqueta || field.variable);
+      if (field.lista) el.replaceChildren(makeOption("", "Selecciona"), ...field.valores.map(value => makeOption(String(value))));
+      return el;
+    }
+    function appendLine() {
+      const row = document.createElement("tr");
+      for (const field of guidedFields.filter(f => f.nivel === "L")) {
+        const cell = document.createElement("td"); cell.append(fieldControl(field)); row.append(cell);
+      }
+      guided.querySelector("tbody").append(row);
+    }
+    function addUnavailableTransactions(codes) {
+      for (const tx of codes || []) {
+        if ([...transaction.options].some(option => option.value === tx)) continue;
+        const option = makeOption(tx, `${tx} — sin prueba`); option.disabled = true; transaction.add(option);
+      }
+    }
+    async function loadTransactionCatalog(space) {
+      if (!space.transactions.length) return;
+      try {
+        const data = await api(`/api/trx-campos?id=${encodeURIComponent(space.id)}&trx=${encodeURIComponent(space.transactions[0])}`);
+        if (selectedWorkspace?.id === space.id) addUnavailableTransactions(data.transacciones);
+      } catch (error) {
+        if (selectedWorkspace?.id === space.id) notice(executeStatus, `No se pudo cargar el catálogo. ${error.message}`, "error");
+      }
+    }
+    async function loadGuidedFields() {
+      const revision = ++guidedRevision, code = transaction.value, id = selectedWorkspace?.id;
+      guidedFields = []; guided.replaceChildren(); addLine.hidden = true;
+      if (!code || !id) return;
+      try {
+        const data = await api(`/api/trx-campos?id=${encodeURIComponent(id)}&trx=${encodeURIComponent(code)}`);
+        if (revision !== guidedRevision || selectedWorkspace?.id !== id) return;
+        guidedFields = data.campos;
+        addUnavailableTransactions(data.transacciones);
+        for (const field of guidedFields.filter(f => f.nivel === "C")) {
+          const label = document.createElement("label"); label.textContent = field.etiqueta || field.variable;
+          label.append(fieldControl(field)); guided.append(label);
+        }
+        const fields = guidedFields.filter(f => f.nivel === "L");
+        if (fields.length) {
+          const table = document.createElement("table"), head = document.createElement("thead"), row = document.createElement("tr");
+          fields.forEach(field => { const th = document.createElement("th"); th.textContent = field.etiqueta || field.variable; row.append(th); });
+          head.append(row); table.append(head, document.createElement("tbody")); guided.append(table); addLine.hidden = false; appendLine();
+        }
+      } catch (error) { if (revision === guidedRevision) notice(executeStatus, `No se pudieron cargar los campos. ${error.message}`, "error"); }
+    }
+    transaction.addEventListener("change", loadGuidedFields);
+    addLine.addEventListener("click", appendLine);
+    byId("support-document").addEventListener("change", async event => {
+      const file = event.target.files[0]; support = null;
+      if (!file) { byId("support-hash").textContent = "Sin documento de soporte."; return; }
+      try {
+        const bytes = await file.arrayBuffer(), digest = await crypto.subtle.digest("SHA-256", bytes);
+        if (event.target.files[0] !== file) return;
+        support = { name: file.name, hash: [...new Uint8Array(digest)].map(x => x.toString(16).padStart(2, "0")).join("") };
+        byId("support-hash").textContent = `${support.name} · SHA-256: ${support.hash}`;
+      } catch { byId("support-hash").textContent = "No se pudo calcular la huella del documento."; }
+    });
+    function collectFields(container) {
+      const result = {};
+      container.querySelectorAll("[data-variable]").forEach(el => { if (el.value !== "") result[el.dataset.variable] = el.value; });
+      return result;
+    }
     function readExecution() {
       const payload = {
         transaction: transaction.value,
         user: operator.value.trim(),
         request_id: requestId.value.trim()
       };
-      for (const [input, key] of [[headerInput, "header"], [linesInput, "lines"]]) {
+      if (!byId("advanced-json").open) {
+        if (!guidedFields.length) throw new Error("Espera a que se carguen los campos de la transacción.");
+        payload.header = {};
+        for (const field of guidedFields.filter(f => f.nivel === "C")) {
+          const control = [...guided.querySelectorAll(":scope > label [data-variable]")].find(el => el.dataset.variable === field.variable);
+          if (control && control.value !== "") payload.header[field.variable] = control.value;
+        }
+        payload.lines = [...guided.querySelectorAll("tbody tr")].map(collectFields);
+      } else for (const [input, key] of [[headerInput, "header"], [linesInput, "lines"]]) {
         try {
           payload[key] = parseField(input, key === "header");
           input.removeAttribute("aria-invalid");
@@ -682,6 +773,9 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
           throw error;
         }
       }
+      if (byId("support-document").files.length && !support) throw new Error("Espera o vuelve a seleccionar el documento para calcular su huella.");
+      if (support && guidedFields.some(f => f.nivel === "C" && f.variable === "DOC")) payload.header.DOC = support.name;
+      if (support && guidedFields.some(f => f.nivel === "C" && f.variable === "DOC_SHA")) payload.header.DOC_SHA = support.hash;
       if (!payload.user || !payload.request_id) {
         throw new Error("Completa el usuario y el identificador de solicitud.");
       }
