@@ -90,3 +90,7 @@ E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos.
 - A: pendiente pronóstico granular único y retiro de ESTIMADO.
 - B/G: pendientes integración de intervalos, familias y casos estadísticos obligatorios.
 - F/C/E: pendientes los alcances funcionales de pantallas, niveles y laboratorio.
+
+## OT-C29 · avance parcial
+
+La vista de sensibilidad sitúa los cambios a ambos lados de cero. Una prueba Chromium confirma aprobar y rechazar calibraciones usando el servidor real y datos temporales. E4 (nodos enlazados) y E7 (detalle por persona SERVITEC) siguen pendientes; no se consideran aceptados.
