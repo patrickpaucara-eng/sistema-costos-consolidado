@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from .contrato import validar
 
-TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'informe': '.docx', 'entrada': '.xlsx', 'sistema': '.html'}
+TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'informe': '.docx', 'presentacion': '.html', 'entrada': '.xlsx', 'sistema': '.html'}
 SIN_RESULTADOS = ('codigo', 'entrada')          # se generan desde el repositorio, no desde un contrato
 from .raiz import RAIZ
 SECCIONES = {
@@ -356,6 +356,33 @@ def _informe(r, destino):
     doc.save(destino)
 
 
+def _presentacion_html(r, destino):
+    """Alternativa imprimible mientras no se compruebe python-pptx en Windows."""
+    def fmt(v):
+        if v is None: return 'No disponible'
+        if isinstance(v, (int, float)) and not isinstance(v, bool): return f'{v:,.2f}'
+        return str(v)
+    def rows(data, fields):
+        if not data: return '<p>Sin datos disponibles.</p>'
+        head = ''.join('<th>' + escape(label) + '</th>' for _, label in fields)
+        body = ''.join('<tr>' + ''.join('<td>' + escape(fmt(row.get(key))) + '</td>' for key, _ in fields) + '</tr>' for row in data)
+        return '<table><thead><tr>' + head + '</tr></thead><tbody>' + body + '</tbody></table>'
+    slides = []
+    def slide(title, body): slides.append('<section><h1>' + escape(title) + '</h1>' + body + '</section>')
+    slide('Presentación ejecutiva', '<p>' + escape(fmt(r['empresa'].get('nombre'))) + ' · ' + escape(fmt(r['periodo_actual'])) + ' · ' + escape(fmt(r['sintesis'])) + '</p><p>Sello: ' + escape(fmt(r.get('sello'))) + '</p>')
+    slide('Indicadores', rows([r['kpi']], [('ventas','Ventas'),('costo_total','Costo total'),('margen_operativo','Margen operativo'),('rentabilidad','Rentabilidad')]))
+    slide('Costo por producto', rows(r['objetos'], [('producto','Producto'),('cantidad','Cantidad'),('costo_total','Costo total'),('costo_unitario','Costo unitario')]))
+    slide('Relevancia (Pareto)', rows(r['relevancia'], [('elemento','Elemento'),('importe','Importe'),('porcentaje','Participación'),('acumulado','Acumulado'),('critico','Crítico')]))
+    slide('Hallazgos y causa', rows(r['hallazgos'], [('mensaje','Hallazgo'),('causa','Causa'),('impacto','Impacto')]))
+    projected = [x for x in r['serie'] if x.get('tipo') == 'PROYECTADO_EST']
+    slide('Proyección a seis meses', rows(projected, [('periodo','Periodo'),('margen','Margen'),('p05','P05'),('p50','P50'),('p95','P95')]) if projected else '<p>Banda no estimable o no disponible.</p>')
+    slide('Propuestas', rows(r['propuestas'], [('descripcion','Propuesta'),('impacto_anual','Impacto anual'),('responsable','Responsable')]))
+    proposals = sorted(r['propuestas'], key=lambda p:float(p.get('impacto_anual') or 0), reverse=True)
+    slide('Plan de implementación', rows(proposals, [('descripcion','Propuesta'),('impacto_anual','Impacto anual'),('responsable','Responsable'),('plazo','Plazo')]))
+    page = '<!doctype html><html lang="es"><meta charset="utf-8"><title>Presentación ejecutiva</title><style>body{font:16px sans-serif;color:#17202b}section{min-height:85vh;padding:2rem;break-after:page}table{border-collapse:collapse;width:100%}th,td{border:1px solid #aaa;padding:.4rem;text-align:left}@media print{section{min-height:0;page-break-after:always}}</style><body>' + ''.join(slides) + '</body></html>'
+    destino.write_text(page, encoding='utf-8')
+
+
 def exportar(resultados, tipo, carpeta):
     if tipo not in TIPOS:
         raise ValueError('El tipo de reporte no existe.')
@@ -378,6 +405,8 @@ def exportar(resultados, tipo, carpeta):
             _html(resultados, destino)
         elif tipo == 'informe':
             _informe(resultados, destino)
+        elif tipo == 'presentacion':
+            _presentacion_html(resultados, destino)
         elif tipo == 'sistema':
             _sistema_desde_carpeta(resultados, destino)
         elif tipo == 'entrada':

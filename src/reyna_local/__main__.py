@@ -262,7 +262,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
         if target.path == "/api/descargar" and method == "GET":
             params = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
             nombre = params.get("archivo", [""])[0]
-            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo|entrada|sistema|informe)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
+            if set(params) != {"archivo"} or len(params["archivo"]) != 1 or not re.fullmatch(r"(?:resultados|analitica|proyeccion|html|codigo|entrada|sistema|informe|presentacion)-[0-9a-f]{32}\.(?:xlsx|html|docx)", nombre):
                 raise Problem(400, "Elige un reporte válido.")
             try:
                 contenido = (store.root / "exportaciones" / nombre).read_bytes()

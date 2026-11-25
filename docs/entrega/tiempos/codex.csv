@@ -15,3 +15,5 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-24,16:13,16:19,OT-C14 pantalla de periodos y prueba,Monografía,Codex,Consulta por rango y síntesis con advertencias; prueba bimestral aprobada
 2026-11-24,16:19,16:22,OT-C15 modelo de costeo y prueba visual,Monografía,Codex,Vista basada en contrato y trazas; julio comprobado en Chromium
 2026-11-24,16:22,16:25,OT-C19 informe técnico y pruebas,Monografía,Codex,Word desde contrato con límites de proyección y controlabilidad explícitos
+2026-11-24,16:22,16:25,OT-C16 alternativa HTML imprimible,Monografía,Codex,Prototipo alternativo de ocho páginas; PPTX y compilación Windows de la rama pendientes
+2026-11-24,22:10,22:15,OT-C16 generador PPTX de desarrollo,Monografía,Codex,Ocho diapositivas con contrato y pruebas focalizadas verdes; HTML queda en EXE
