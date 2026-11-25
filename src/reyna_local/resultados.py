@@ -231,7 +231,8 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     r['costeo_variable'], r['propuestas'] = CV.analizar_libro(libro, r, h, par, prev, por_per, est, inc, nats)
     from reyna_local import estrategico as E
     r['estrategico'] = E.desde_libro(r, libro)
-    return r
+    from reyna_local.aprendizaje import aplicar as aplicar_aprendizaje
+    return aplicar_aprendizaje(r, libro, series, pro, h, par, prev, por_per, est, inc, nats)
 
 
 ELEMENTO_NOMBRE = {"MD": "Material directo", "PD": "Mano de obra directa", "SD": "Servicios directos", "CIF": "Costos indirectos de fabricación",

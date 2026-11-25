@@ -149,7 +149,9 @@ def calcular(carpeta, periodo, sintesis, empresa=None):
         clave = (s, "C" if sintesis == "CONTABLE" else "R")
         if _cache.get(clave, (None,))[0] != h:
             cod, _ = B.empresa(libro); _cache[clave] = (h, calcular_periodos(costeo, cod))
-        resultado = construir(costeo, periodo=periodo, sintesis=sintesis, _cache=_cache[clave][1])
+        from .aprendizaje import contexto as contexto_aprendizaje
+        with contexto_aprendizaje(carpeta, s):
+            resultado = construir(costeo, periodo=periodo, sintesis=sintesis, _cache=_cache[clave][1])
         from .autonomia import aplicar
         aplicar(resultado, carpeta, s)                    # seguimiento de propuestas aprobadas y aprendizaje (punto 9)
         resultado["sello"] = _sello(libro, resultado)

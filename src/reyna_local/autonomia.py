@@ -50,6 +50,6 @@ def aplicar(resultado, base, empresa):
         pr["impacto_esperado"] = round(pr["impacto_anual"] * (f if f is not None else 1.0), 2)
         pr["base_aprendizaje"] = (f"factor {f:.2f} de {factor[pr['elemento']]['mediciones']} mediciones" if f is not None
                                   else "sin historia medida (factor 1)")
-    resultado["propuestas"] = sorted(resultado.get("propuestas") or [], key=lambda p: -p.get("impacto_esperado", p["impacto_anual"]))
+    resultado["propuestas"] = sorted(resultado.get("propuestas") or [], key=lambda p: -p.get("prioridad", p.get("impacto_esperado", p["impacto_anual"])))
     resultado["seguimiento"] = seg; resultado["aprendizaje"] = factor
     return resultado

@@ -10,7 +10,8 @@ def _number(value, label):
     return result
 
 
-def cotizar(resultado, medidas, actividades, materiales, precio_mercado, margen_objetivo):
+def cotizar(resultado, medidas, actividades, materiales, precio_mercado, margen_objetivo, producto=None, carpeta_aprendizaje=None, empresa_aprendizaje=None):
+    if producto is not None and (not isinstance(producto,str) or not producto.strip()): raise ValueError('Producto inválido')
     if not isinstance(actividades,dict) or not isinstance(materiales,dict): raise ValueError('Las actividades y materiales deben ser mapas de cantidades')
     price = _number(precio_mercado,'Precio de mercado'); margin = _number(margen_objetivo,'Margen objetivo')
     if margin > 1: raise ValueError('El margen objetivo debe estar entre 0 y 1')
@@ -43,7 +44,14 @@ def cotizar(resultado, medidas, actividades, materiales, precio_mercado, margen_
         if not candidates: raise ValueError(f'Material sin costo unitario disponible: {code}')
         latest = max(enumerate(candidates), key=lambda x:(str(x[1].get('fecha') or ''),x[0]))[1]
         rate = _number(latest['costo_unitario'],f'Costo unitario de {code}')
-        lines.append({'tipo':'material','codigo':code,'cantidad':qty,'tasa':rate,'importe':round(rate*qty,2)})
+        line = {'tipo':'material','codigo':code,'cantidad':qty,'tasa':rate,'importe':round(rate*qty,2)}
+        if producto:
+            from .aprendizaje import estandar_vigente, mes_siguiente
+            standard = estandar_vigente(empresa_aprendizaje or emp, producto, code, mes_siguiente(period), carpeta_aprendizaje)
+            if standard is not None:
+                line['estandar_aprendido'] = {'consumo':standard[0], 'merma':standard[1]}
+                warnings.append(f'{code}: existe un estándar aprendido vigente para {producto}; la cantidad solicitada se conserva.')
+        lines.append(line)
     total = round(sum(x['importe'] for x in lines),2); target = round(price*(1-margin),2)
     return {'periodo_base':period,'lineas':lines,'costo_pedido':total,'precio_mercado':price,'margen_objetivo':margin,
             'costo_objetivo':target,'brecha':round(total-target,2),'avisos':warnings}
