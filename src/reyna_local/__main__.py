@@ -15,7 +15,7 @@ import webbrowser
 
 from .receipt_audit import audit_receipts
 from .exportar import exportar, TIPOS
-from .store import Problem, Store, load_data, content_bytes, metadata, TRANSACTIONS
+from .store import Problem, Store, load_data, content_bytes, metadata, TRANSACTIONS, TRANSACCIONES_E26
 from .contrato import validar
 
 
@@ -362,7 +362,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 if set(params) != {"id", "trx"} or any(len(v) != 1 for v in params.values()):
                     raise ValueError
                 identifier, trx = params["id"][0], params["trx"][0]
-                if trx not in TRANSACTIONS:
+                if trx not in TRANSACTIONS and trx not in TRANSACCIONES_E26:
                     raise ValueError
             except ValueError:
                 raise Problem(400, "Elige un espacio y una transacción habilitada.") from None

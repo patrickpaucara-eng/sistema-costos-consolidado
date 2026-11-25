@@ -90,3 +90,5 @@ E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos.
 - A: pendiente pronóstico granular único y retiro de ESTIMADO.
 - B/G: pendientes integración de intervalos, familias y casos estadísticos obligatorios.
 - F/C/E: pendientes los alcances funcionales de pantallas, niveles y laboratorio.
+
+**E26 (Claude, 25-nov 17:20):** habilitadas por libro T18.2–T18.7, T20.1, T21, T26, T29, T29.1 (prueba `tests/test_registro_completo.py`). T09/T12/T13 dependen de TARIFA/ESTIMACION: se conectan al aceptar una cotización del cotizador nuevo (C28).

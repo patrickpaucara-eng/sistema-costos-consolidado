@@ -35,7 +35,7 @@ TRANSACCIONES_E26 = ("T09", "T12", "T13", "T18.2", "T18.3", "T18.4", "T18.5", "T
 
 
 def detectar_transacciones_e26(tables):
-    """Inspección preliminar; no habilita ejecución ni modifica las ocho operaciones base."""
+    """Transacciones adicionales que el libro define completas (E26, decisión del dueño 25-nov): se habilitan por libro."""
     presentes = []
     for codigo in TRANSACCIONES_E26:
         if all(any(row and row[0] == codigo for row in tables.get(tabla, {}).get('r', []))
@@ -76,7 +76,7 @@ def text_field(obj, key, limit):
 
 def validate_execution(body):
     txn = text_field(body, "transaction", 8)
-    if txn not in (*TRANSACTIONS, "T25.4"):
+    if txn not in (*TRANSACTIONS, *TRANSACCIONES_E26, "T25.4"):
         raise Problem(400, "La transacción no está habilitada en el piloto.")
     user = text_field(body, "user", 100)
     key = text_field(body, "request_id", 160)
@@ -584,7 +584,7 @@ def summary(tables, path):
     info = metadata(tables)
     return {**info, "company_code": info.get("company_code"),
             "close_month_enabled": bool(info.get("close_month_enabled", 0)),
-            "tables": permitted_tables(tables), "transactions": list(TRANSACTIONS),
+            "tables": permitted_tables(tables), "transactions": list(TRANSACTIONS) + detectar_transacciones_e26(tables),
             "workbook_path": str(path)}
 
 
@@ -658,7 +658,7 @@ class Store:
         except BaseException:
             shutil.rmtree(directory)
             raise
-        return {**info, "workbook_path": str(path), "tables": permitted_tables(tables), "transactions": list(TRANSACTIONS)}
+        return {**info, "workbook_path": str(path), "tables": permitted_tables(tables), "transactions": list(TRANSACTIONS) + detectar_transacciones_e26(tables)}
 
     def list(self):
         result = [self.get(p.name) for p in self.root.iterdir()
@@ -716,6 +716,8 @@ class Store:
                         raise Problem(409, "El identificador ya corresponde a otra operación.")
                     return record[2], json.loads(record[3])
             same_workbook(path, raw)
+            if txn in TRANSACCIONES_E26 and txn not in detectar_transacciones_e26(tables):
+                raise Problem(409, f"El libro no define la transacción {txn} (TRX, TRX_CAMPO y TOP).")
             if txn == "T25.4":
                 validate_vnr_delivery(tables, header, lines)
             declared = [r for r in tables["TRX_CAMPO"]["r"] if r[0] == txn]
