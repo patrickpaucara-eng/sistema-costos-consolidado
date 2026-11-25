@@ -59,3 +59,27 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 | C26-E4 | Planta de costo | Grafo enlazado por bloques | Bloques filtran trazas observadas | No se construyó navegación encadenada por nodo | Completar interacción y verificar relaciones entre nodos | Parcial |
 | C26-E15 | Cotizador | Varias actividades y materiales en un pedido | Un selector de actividad y uno de material por petición | Interfaz mínima de captura | Añadir varias líneas sin perder cantidades | Parcial |
 | C26-E7 | Detalle por trabajador | Mostrar ejemplo de técnicos de SERVITEC | Se muestra el aviso de disponibilidad | Falta vista individual para el ejemplo | Incorporar detalle si el contrato lo identifica | Parcial |
+
+## OT-C27 · bloque D: registro y MOD (pendiente)
+
+`tests/test_capacidad_inicial.py` exige una lista exacta de ocho transacciones. Habilitar T09/T12/T13/T18.2–T18.7/T20.1/T21/T26/T29/T29.1 contradice esa prueba, que no está entre las autorizadas para modificación. No se habilitaron transacciones ni se cambió la semántica MOD sin completar sus casos por operación y la verificación de costos REAL/CONTABLE. E27 queda pendiente de prueba integrada.
+
+## OT-C27 · bloque A: pronóstico único (pendiente)
+
+El pronóstico granular completo, la precisión retrospectiva y las trazas por recurso/centro/actividad/OT requieren adaptar el motor de proyección y el contrato de forma integrada y demostrar que REAL y CONTABLE son idénticos. Retirar la síntesis histórica antes de contar con ese reemplazo dejaría sin servicio a consumidores y reportes; se mantiene pendiente el bloque completo. La compuerta de banda MASE en la vista también sigue pendiente.
+
+## OT-C27 · bloque B: cotización por intervalos (parcial)
+
+Están comprobadas como funciones aisladas la suma de intervalos, la sugerencia según rangos móviles y las variaciones de tasa y cantidad, con los tres casos manuales. No están conectadas al cotizador ni implementan aún curvas, contratos, persistencia/aprobación de intervalos, bloques, P05–P95 o apertura T13. No es una capacidad activa de usuario.
+
+## OT-C27 · bloque C: suficiencia (parcial)
+
+Se dispone de un inventario de tablas y encabezados del DBD sin alterar el libro. No detecta niveles, no genera plantillas o reglas, no importa datos y no etiqueta procedencia: no debe presentarse como suficiencia operativa. Falta el caso sintético de nivel 0 y la clasificación de Frenosa/SERVITEC.
+
+## OT-C27 · bloque E: laboratorio (parcial)
+
+Una prueba confirma que el mecanismo existente crea una copia físicamente separada y que modificarla no altera el SHA del original. No existen todavía edición de hechos en pantalla, recálculo controlado ni comparación original/copia por orden y elemento. No se anuncia un laboratorio funcional.
+
+## OT-C27 · bloque F: pantallas (parcial)
+
+E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos. La prueba existente se actualizó con autorización expresa en OT-C27. E4, E15, E21, E7 y E13 conservan los límites identificados en OT-C26; falta probar decisiones de aprendizaje con calibraciones pendientes y verificar el sello en un EXE recién instalado en Windows.

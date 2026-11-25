@@ -26,12 +26,13 @@ def test_recorrido_y_borrador(tmp_path):
             page.on('console',lambda message:errors.append(message.text) if message.type=='error' else None)
             page.goto(base);page.get_by_text('Resultados actualizados.').wait_for(timeout=30000)
             assert page.get_by_role('heading',name='¿Qué necesitas?').is_visible()
-            assert page.locator('#global-desde').is_visible() and page.locator('#sello-global').is_visible()
+            # DECISIONES_DUENO.md, fila 25-nov «APROBADO en OT-C27: E2»: fechas solo en Periodos.
+            assert page.locator('#global-desde').count()==0 and page.locator('#sello-global').is_visible()
             links=page.locator('nav a').evaluate_all('(els) => els.map(e => e.getAttribute("href"))')
             for href in links:
                 page.locator(f'nav a[href="{href}"]').click()
                 page.locator(href).wait_for(state='visible', timeout=5000)
-                assert page.locator('#global-desde').is_visible()
+                assert page.locator('#global-desde').count()==0
             page.locator('nav a[href="#espacios"]').click()
             page.locator(f'button[data-workspace-id="{wid}"]').click()
             page.locator('nav a[href="#operar"]').click()
@@ -49,7 +50,9 @@ def test_recorrido_y_borrador(tmp_path):
             page.locator(f'button[data-workspace-id="{wid}"]').click();page.locator('nav a[href="#operar"]').click()
             sync.expect(page.locator('#guided-form [data-variable=FECHA]')).to_have_value('20101228')   # sin eval: la CSP del servidor lo prohíbe
             assert 'huella conservada' in page.locator('#support-hash').inner_text()
-            page.locator('#global-desde').fill('2010-03-01');page.locator('#global-desde').dispatch_event('change')
+            page.locator('nav a[href="#periodos"]').click()
+            sync.expect(page.locator('#periodos-desde')).to_be_visible(timeout=5000)
+            page.locator('#periodos-desde').fill('2010-03-01')
             assert page.locator('#periodos-desde').input_value()=='2010-03-01'
             assert not errors,errors
             browser.close()
