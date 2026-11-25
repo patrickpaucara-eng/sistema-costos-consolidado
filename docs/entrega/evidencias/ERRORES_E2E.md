@@ -96,3 +96,7 @@ E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos.
 La vista de sensibilidad sitúa los cambios a ambos lados de cero. Una prueba Chromium confirma aprobar y rechazar calibraciones usando el servidor real y datos temporales. E4 (nodos enlazados) y E7 (detalle por persona SERVITEC) siguen pendientes; no se consideran aceptados.
 ## OT-C30 · avance parcial
 Se probó una comparación aislada de resultados por orden y elemento. No existe aún la copia y recálculo desde una pantalla, ni detección de suficiencia o plantillas por nivel. La función no constituye un laboratorio operativo.
+
+## C28 · avance parcial del cotizador
+
+Se probó el caso de seis meses con intervalos parejos y tasas suministradas. Falta integrar tasas proyectadas y parámetros aprobados, curvas, familias, bandas, pantalla y aceptación T09→T13. No es una capacidad activa.

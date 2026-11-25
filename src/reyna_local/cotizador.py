@@ -55,3 +55,25 @@ def cotizar(resultado, medidas, actividades, materiales, precio_mercado, margen_
     total = round(sum(x['importe'] for x in lines),2); target = round(price*(1-margin),2)
     return {'periodo_base':period,'lineas':lines,'costo_pedido':total,'precio_mercado':price,'margen_objetivo':margin,
             'costo_objetivo':target,'brecha':round(total-target,2),'avisos':warnings}
+
+
+def cotizar_intervalos_parejos(cantidades, tasas_por_intervalo, meses, intervalo):
+    """Prototipo explícito: intervalos uniformes y tasas ya suministradas.
+
+    No registra ni acepta órdenes. Las tasas deben venir de una fuente validada.
+    """
+    from decimal import Decimal
+    from .intervalos_proyectados import importe_intervalos
+    if isinstance(meses, bool) or isinstance(intervalo, bool) or not isinstance(meses, int) or not isinstance(intervalo, int) or meses <= 0 or intervalo <= 0 or meses % intervalo:
+        raise ValueError('Los meses deben formar intervalos completos.')
+    if not isinstance(cantidades, dict) or not cantidades or len(tasas_por_intervalo) != meses // intervalo:
+        raise ValueError('Faltan cantidades o tasas por intervalo.')
+    partes = len(tasas_por_intervalo)
+    filas = []
+    for tasas in tasas_por_intervalo:
+        if set(tasas) != set(cantidades):
+            raise ValueError('Cada intervalo requiere una tasa por recurso.')
+        filas.append([{'cantidad': Decimal(str(_number(cantidad, codigo))) / partes,
+                       'tasa': _number(tasas[codigo], codigo)} for codigo, cantidad in cantidades.items()])
+    importes, total = importe_intervalos(filas)
+    return {'intervalos': importes, 'total': total}
