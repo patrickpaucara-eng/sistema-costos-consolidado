@@ -33,3 +33,4 @@
 | 25-nov | APROBADO: intervalo = parámetro de la empresa por grupo de recursos, sugerido por el sistema desde la volatilidad de precios (tolerancia 2 %), aprobado por el dueño; el cotizador solo puede acortarlo, con motivo; la OT elige contrato con reajuste o precio cerrado | — |
 | 25-nov | APROBADO: cotizar por familias de componentes (lógica de bloques DBCA): receta aprendida, pertenencia por intervalo de predicción 95 %, fusionar por ANOVA, separar por normalidad; parámetros obligatorios por familia | C27 bloque G |
 | 25-nov | APROBADO en OT-C27: E2; controles Desde/Hasta/Agrupar solo en Periodos y actualización de su prueba de navegación | `ordenes/OT-C27_OLA2_COMPLETA.md`, bloque F |
+| 25-nov | E6: criterio MIN_STD → MIN_REAL en dos pruebas de capacidad (mismo dato, nuevo inductor de minuto real) | tests/test_naturaleza_costo.py, tests/test_capacidad_y_merma.py |

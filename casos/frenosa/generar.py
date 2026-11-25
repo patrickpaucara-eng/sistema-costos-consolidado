@@ -114,7 +114,7 @@ def generar(plantilla, salida, periodos=None):
     SOPORTE = [("MANT", "Mantenimiento", "SOP_MANT"), ("CC", "Control de calidad", "SOP_CC"), ("ING", "Ingeniería y desarrollo", "SOP_ING")]
     for c, nom, k in SOPORTE:
         wb["ACTIVIDAD"].append(dict(ACT_COD="A-" + c, ACT_DES=nom, ACT_UNI="S/", ACT_NIVEL="A"))
-    rec.append(["MOD", "Personal directo (operarios)", "PERS_DIR", "S/", None, "S"]); rr.append(["P2", "MOD", "MIN_STD", 19000101, "Minutos estándar Te×kg"]); cri.append(["MIN_STD", "Minutos estándar", "min", "S"])
+    rec.append(["MOD", "Personal directo (operarios)", "PERS_DIR", "S/", None, "S"]); rr.append(["P2", "MOD", "MIN_REAL", 19000101, "Minutos reales (E6)"]); cri.append(["MIN_REAL", "Minutos reales (ESTIMADO: horas reales repartidas por Te × kg)", "min", "S"])
     otros = {r["codigo_recurso"]: r["nombre_recurso"] for r in leer("costo_otros_recursos(CI).csv")}
     for c, nom in otros.items():
         rec.append([c, nom, "INDIRECTO", "S/", None, "S"]); rr.append(["P4A", c, "EC_" + c, 19000101, "Cuadro 6"]); cri.append(["EC_" + c, "Inductor de " + nom, "%", "S"])
@@ -135,10 +135,15 @@ def generar(plantilla, salida, periodos=None):
         pd = [r for r in leer("Personal_directos.csv") if r["periodo"] == p]
         total = num(pd[0]["cantidad_operarios"]) * num(pd[0]["salario_mensual_operario_soles"])
         e = evento("T25.3", p, int(p.replace("-", "") + "28")); lin.append([e, 1, "MOD", 1, total, None, None, total, None, None])
+        std = {}
         for r in pd:
             ts = sum(num(r[k]) for k in ("tolerancia_personal_pct", "tolerancia_fatiga_pct", "tolerancia_pie_pct", "tolerancia_encorvado_pct"))
             te = round(num(r["tiempo_normal_min_kg"]) * (1 + ts), int(num(r["redondear_te_decimales"])))
-            med.append([p, EMP, "MIN_STD", "ACT", r["codigo_actividad"], te * num(r["kg_producidos_periodo"])])
+            std[r["codigo_actividad"]] = te * num(r["kg_producidos_periodo"])
+        # E6 (decisión 25-nov): el inductor es el minuto REAL. La fuente solo trae las horas reales totales del mes; se reparten
+        # entre actividades según Te × kg (dato ESTIMADO). El dinero por orden no cambia: es la misma proporción.
+        real = num(pd[0]["horas_reales_trabajadas_periodo"]) * 60; tot = sum(std.values())
+        for a, m in std.items(): med.append([p, EMP, "MIN_REAL", "ACT", a, real * m / tot if tot else 0])
         for r in [r for r in leer("costo_otros_recursos(CI).csv") if r["periodo"] == p]:
             e = evento("T17", p, int(p.replace("-", "") + "28")); lin.append([e, 1, r["codigo_recurso"], 1, num(r["importe_soles"]), None, None, num(r["importe_soles"]), None, None])
         for r in [r for r in leer("EC_AC_Inductores.csv") if r["periodo"] == p]:

@@ -116,8 +116,8 @@ def test_real_lleva_el_ocio_en_columna_y_contable_lo_deja_fuera(tmp_path):
     raiz = Path(__file__).resolve().parents[1]
     p = tmp_path / "f.xlsx"; shutil.copy(raiz / "casos/libros/frenosa.xlsx", p); wb = load_workbook(p); ws = wb["MEDIDA"]; cab = [c.value for c in ws[1]]
     usados = sum(float(r[cab.index("MED_CAN")]) for r in ws.iter_rows(min_row=2, values_only=True)
-                 if r[cab.index("MED_PER")] == "2010-12" and r[cab.index("MED_CRIT")] == "MIN_STD")
-    fila = dict(MED_PER="2010-12", MED_EMP="FRE", MED_CRIT="MIN_STD", MED_NIVEL="CAP", MED_DEST="MOD", MED_CAN=usados * 1.25)
+                 if r[cab.index("MED_PER")] == "2010-12" and r[cab.index("MED_CRIT")] == "MIN_REAL")
+    fila = dict(MED_PER="2010-12", MED_EMP="FRE", MED_CRIT="MIN_REAL", MED_NIVEL="CAP", MED_DEST="MOD", MED_CAN=usados * 1.25)
     ws.append([fila.get(c) for c in cab]); wb.save(p)
     c = resultados.calcular_periodos(str(p), "FRE")
     real = resultados.construir(str(p), periodo="2010-12", sintesis="REAL", _cache=c)

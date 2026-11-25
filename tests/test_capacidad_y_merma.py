@@ -16,8 +16,8 @@ def test_capacidad_ociosa_no_se_carga_al_producto(tmp_path):
     """MOD de diciembre con capacidad práctica = 125 % de los minutos usados: 20 % del costo de MOD es ocio del periodo."""
     p = tmp_path / 'f.xlsx'; shutil.copy(LIBRO, p); wb = load_workbook(p); ws = wb['MEDIDA']; cab = [c.value for c in ws[1]]
     usados = sum(float(r[cab.index('MED_CAN')]) for r in ws.iter_rows(min_row=2, values_only=True)
-                 if r[cab.index('MED_PER')] == '2010-12' and r[cab.index('MED_CRIT')] == 'MIN_STD')
-    fila = dict(MED_PER='2010-12', MED_EMP='FRE', MED_CRIT='MIN_STD', MED_NIVEL='CAP', MED_DEST='MOD', MED_CAN=usados * 1.25)
+                 if r[cab.index('MED_PER')] == '2010-12' and r[cab.index('MED_CRIT')] == 'MIN_REAL')
+    fila = dict(MED_PER='2010-12', MED_EMP='FRE', MED_CRIT='MIN_REAL', MED_NIVEL='CAP', MED_DEST='MOD', MED_CAN=usados * 1.25)
     ws.append([fila.get(c) for c in cab]); wb.save(p)
     c = resultados.calcular_periodos(str(p), 'FRE'); r = resultados.construir(str(p), periodo='2010-12', sintesis='REAL', _cache=c)
     mod_total = sum(o['mod'] for o in PUB('2010-12')['objetos'])            # todo el costo de MOD del mes (publicado)
