@@ -30,3 +30,18 @@
 | Soporte: mantenimiento, calidad, ingeniería | P4D/P4E | Distribución del caso entre actividades | Sí (escalonado entre niveles) |
 | Actividades → órdenes | P4C | «Peso de producción/soporte» en % publicado por el caso | **Revisar**: es un % de la fuente, no una cantidad medida; aceptable si el caso no trae la cantidad |
 | Administración / ventas / financieros | P5–P7 | Kg producidos, kg vendidos, ventas, kg de material | Sí |
+
+## Brecha mayor detectada (25-nov 12:50): funciones calculadas que NO tienen pantalla
+Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario puede usar. Corrección del criterio: una función cuenta solo si se usa desde la pantalla.
+| # | Función (pedida por el dueño) | Cálculo | Pantalla |
+|---|---|---|---|
+| E12 | Proyección por hechos (granular) | Sí, solo por producto | **No**. Falta además el desglose por recurso, centro, actividad y OT |
+| E13 | Sensibilidad (tornado ±10 %) | Sí | **No** |
+| E14 | Bloques (costo escalonado) | Solo por recurso | **No**; «por familia / proveedor de actividad» no está hecho |
+| E15 | Cotizador de OT / pedido especial (TDABC + costo objetivo) | Sí | **No** |
+| E16 | Aprendizaje (calibraciones, aprobar/rechazar) | Sí | **No conectada** («Lo que aprendió» no lee la capa) |
+| E17 | Costeo variable, punto de equilibrio, no controlables | Sí (en el contrato) | **No** |
+| E18 | Costo de calidad y gobierno del dato | Sí (en el contrato) | **No** |
+| E19 | Rechazos como pérdida | Sí | **No** (solo en el estado de resultados) |
+| E20 | Mensajes a departamentos (paquete sellado por área) | **No** | **No** |
+| E21 | Tabla de tramos: «Tasa» muestra el total del recurso cuando el inductor es directo (1/1) y el monto es la parte de la orden | — | Confunde; mostrar «monto del tramo» y «parte de esta orden» por separado y explicar la tasa CIF en P4C |
