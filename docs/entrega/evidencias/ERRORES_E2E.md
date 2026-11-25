@@ -63,3 +63,7 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 ## OT-C27 · bloque D: registro y MOD (pendiente)
 
 `tests/test_capacidad_inicial.py` exige una lista exacta de ocho transacciones. Habilitar T09/T12/T13/T18.2–T18.7/T20.1/T21/T26/T29/T29.1 contradice esa prueba, que no está entre las autorizadas para modificación. No se habilitaron transacciones ni se cambió la semántica MOD sin completar sus casos por operación y la verificación de costos REAL/CONTABLE. E27 queda pendiente de prueba integrada.
+
+## OT-C27 · bloque A: pronóstico único (pendiente)
+
+El pronóstico granular completo, la precisión retrospectiva y las trazas por recurso/centro/actividad/OT requieren adaptar el motor de proyección y el contrato de forma integrada y demostrar que REAL y CONTABLE son idénticos. Retirar la síntesis histórica antes de contar con ese reemplazo dejaría sin servicio a consumidores y reportes; se mantiene pendiente el bloque completo. La compuerta de banda MASE en la vista también sigue pendiente.
