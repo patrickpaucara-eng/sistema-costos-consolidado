@@ -12,7 +12,7 @@ VERSION = "1.0-MN01"
 
 # tablas que la empresa debe llenar (las demás son configuración del método o salidas del sistema)
 OBLIGATORIAS = ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "TIPO_RECURSO", "EVENTO", "LINEA", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "VENTA"]
-OPCIONALES = ["CENTRO", "ACTIVIDAD", "KARDEX", "CLIENTE"]
+OPCIONALES = ["CENTRO", "ACTIVIDAD", "KARDEX", "CLIENTE", "BLOQUE"]
 COLUMNAS_OPCIONALES = {"ACT_NIVEL", "REC_COMPORT", "REC_PCT_VAR", "REC_CTRL", "REC_COQ", "CRI_RESP", "CRI_EVID"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
 ETAPAS_VALIDAS = ("P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7", "OCIO")   # OCIO: criterio propio del ocio de un origen
 DE_DATOS = OBLIGATORIAS + OPCIONALES + ["INV_PROCESO", "ESTIMACION", "LIN_ESTIM", "RESULTADO_METODO", "ALERTA", "PARAM_CAMBIO"]
@@ -32,6 +32,7 @@ DESCRIPCION = {
     "ACTIVIDAD": "Actividades del modelo ABC; ACT_NIVEL = E estratégica, A apoyo u O operativa (Modelo 3 de Oria, vacío = O).",
     "VENTA": "Ventas del periodo por producto: cantidad e ingreso neto.",
     "CLIENTE": "Clientes o mercados (opcional).",
+    "BLOQUE": "Capacidad y costo de bloques escalonados para proyecciones (opcional).",
 }
 
 

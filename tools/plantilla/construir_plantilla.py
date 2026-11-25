@@ -42,6 +42,8 @@ def construir():
         ws = wb[sheet]
         for name in names:
             if name not in [c.value for c in ws[1]]: ws.cell(1, ws.max_column + 1, name)
+    if "BLOQUE" not in wb.sheetnames:
+        wb.create_sheet("BLOQUE").append(["BLQ_REC", "BLQ_DESDE", "BLQ_CAP", "BLQ_COSTO", "BLQ_UNI"])
     tc = wb["TIPO_CAMBIO"]; tc.append(["PEN", 19000101, 1])              # moneda funcional por defecto
     for u in wb["USUARIO"].iter_rows(min_row=2):                          # los usuarios se asignan a la empresa al cargarla
         u[3].value = None

@@ -394,6 +394,21 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 raise Problem(422, "Los resultados disponibles no se pueden mostrar. Revisa el archivo de resultados.") from None
             self._json(HTTPStatus.OK, resultado)
             return
+        if target.path == "/api/proyeccion" and method == "GET":
+            from .calculo_local import ruta_libro
+            from .proyeccion import proyectar_granular
+            try:
+                q = parse_qs(target.query, keep_blank_values=True, max_num_fields=2)
+                if set(q) - {'empresa','meses'} or any(len(v) != 1 for v in q.values()): raise ValueError('Parámetros inválidos.')
+                company = q.get('empresa',['frenosa'])[0]
+                if not re.fullmatch(r'[a-z0-9_]{1,60}',company): raise ValueError('Empresa inválida.')
+                months = int(q.get('meses',['6'])[0])
+                from .libro_dbd import empresa as leer_empresa
+                path = ruta_libro(store.root, company)
+                result = proyectar_granular(path, leer_empresa(path)[0], months)
+            except (ValueError, KeyError) as exc: raise Problem(422,str(exc)) from None
+            self._json(200,result)
+            return
         if target.path == "/api/periodos" and method == "GET":     # tarea 2.6: periodos por fecha libre
             from .periodos import desde_archivos, GRANOS
             from .calculo_local import ruta_libro
