@@ -1,5 +1,4 @@
-# Errores y límites observados en el recorrido C24
-
-| Paso | Esperado | Obtenido | Causa probable |
-|---|---|---|---|
-| Abrir HTML local en Chromium de este entorno | Abrir el archivo directamente sin red | `ERR_BLOCKED_BY_ADMINISTRATOR` para `file://` | Política del Chromium administrado; falta confirmar apertura mediante doble clic en el equipo del usuario. |
+# Errores de la prueba de punta a punta (para corrección en lote; sin parches)
+| # | Paso | Esperado | Obtenido | Causa probable | Corrección propuesta |
+|---|---|---|---|---|---|
+| E1 | Cotizar pedido especial (Frenosa y SERVITEC) | Cotización con tasas del último mes | 422 «No hay un periodo cerrado para cotizar» | Los libros de demostración no tienen meses con PER_EST = C; la API exige cierre | Si no hay mes cerrado, usar el último mes calculado y devolver `aviso: «tasas provisionales: mes no cerrado»`; prueba con ambos casos |
