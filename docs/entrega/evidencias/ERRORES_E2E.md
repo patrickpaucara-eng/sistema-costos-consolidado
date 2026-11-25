@@ -79,3 +79,7 @@ Se dispone de un inventario de tablas y encabezados del DBD sin alterar el libro
 ## OT-C27 · bloque E: laboratorio (parcial)
 
 Una prueba confirma que el mecanismo existente crea una copia físicamente separada y que modificarla no altera el SHA del original. No existen todavía edición de hechos en pantalla, recálculo controlado ni comparación original/copia por orden y elemento. No se anuncia un laboratorio funcional.
+
+## OT-C27 · bloque F: pantallas (parcial)
+
+E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos. La prueba existente se actualizó con autorización expresa en OT-C27. E4, E15, E21, E7 y E13 conservan los límites identificados en OT-C26; falta probar decisiones de aprendizaje con calibraciones pendientes y verificar el sello en un EXE recién instalado en Windows.

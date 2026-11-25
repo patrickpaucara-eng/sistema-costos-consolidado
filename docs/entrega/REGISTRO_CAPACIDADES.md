@@ -78,3 +78,7 @@ Si no existen periodos cerrados, la API usa el último periodo del libro con res
 ### OT-C26 · Vistas de analítica (parcial)
 
 La interfaz consulta cotización, aprendizaje y sensibilidad; presenta bloques de trazas, costeo variable, calidad, rechazos y propuestas por responsable. `tests/test_c26_interaccion.py` recorre las pantallas en Chromium y la evidencia está en `evidencias/C26/`. La aceptación sigue parcial por E2, E21 y los límites de E4 y E15; consultar `evidencias/ERRORES_E2E.md`. No acredita las funciones expresamente diferidas ni validación metodológica.
+
+### OT-C27 · adelantos parciales
+
+E2 mueve los controles de rango a Periodos y se verifica en Chromium. Los casos aislados de intervalos y el inventario DBD son prototipos sin conexión a pantallas; la separación física de una copia de espacio no constituye un laboratorio. Los bloques D, A, B, C, E y F no se declaran completos; ver `evidencias/ERRORES_E2E.md`.

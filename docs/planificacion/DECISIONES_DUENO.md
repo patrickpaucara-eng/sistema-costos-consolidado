@@ -31,3 +31,4 @@
 | 25-nov | APROBADO: síntesis REAL, CONTABLE y PROYECTADO; ESTIMADO se retira como síntesis y pasa a «precisión de la proyección» (Aprender). Sin la palabra «estimado» en pantallas | autoriza actualizar pruebas que esperan ESTIMADO |
 | 25-nov | APROBADO: costo proyectado de la OT (cotizador, T09/T13) = cantidades previstas repartidas por intervalo × tasas proyectadas por grupo de recursos al punto medio del intervalo; bloques por intervalo; rango P05–P95; base de variaciones (tasa, cantidad, ocio) | — |
 | 25-nov | APROBADO: intervalo = parámetro de la empresa por grupo de recursos, sugerido por el sistema desde la volatilidad de precios (tolerancia 2 %), aprobado por el dueño; el cotizador solo puede acortarlo, con motivo; la OT elige contrato con reajuste o precio cerrado | — |
+| 25-nov | APROBADO en OT-C27: E2; controles Desde/Hasta/Agrupar solo en Periodos y actualización de su prueba de navegación | `ordenes/OT-C27_OLA2_COMPLETA.md`, bloque F |
