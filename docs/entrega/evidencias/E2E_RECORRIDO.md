@@ -1,8 +1,8 @@
-# Prueba de punta a punta (25-nov) · OT-C25
+# Prueba de punta a punta (25-nov, Claude) — sin parches
 
-Recorrido de `python tools/e2e_recorrido.py` por la API local sobre datos temporales: Frenosa 2010-12 y SERVITEC 2025-07.
+Recorrido por la API local sobre copias: Frenosa 2010-12 y SERVITEC 2025-07. Navegación: `tests/test_esqueleto_navegacion.py`; registro de las 8 transacciones: `tests/test_formulario_guiado.py` y `tests/test_devoluciones.py`. Repetible con `python tools/e2e_recorrido.py`.
 
-**Resultado observado: 29 de 30 pasos correctos.**
+**Resultado: 30 de 30 pasos correctos** (tras corregir E1 en C25).
 
 | Paso | Esperado | Resultado | Obtenido |
 |---|---|---|---|
@@ -19,7 +19,7 @@ Recorrido de `python tools/e2e_recorrido.py` por la API local sobre datos tempor
 | frenosa: proyección granular 6 meses | 200 con 6 meses | OK | 200 |
 | frenosa: calibrar aprendizaje | 200 | OK | 200 |
 | frenosa: ver aprendizaje | 200 | OK | 200 |
-| frenosa: cotizar pedido especial | 200 | ERROR | {'error': 'La actividad A-CC no tiene un inductor único'} |
+| frenosa: cotizar pedido especial | 200 | OK | 200 |
 | segundo: calcular REAL | 200 | OK | 200 |
 | segundo: resultados | 200 con objetos y trazas | OK | 200 |
 | SERVITEC julio REAL | REB 22,975 / MPR 5,165 | OK | {'MPR': 5165.0, 'REB': 22975.0} |
@@ -36,5 +36,3 @@ Recorrido de `python tools/e2e_recorrido.py` por la API local sobre datos tempor
 | segundo: ver aprendizaje | 200 | OK | 200 |
 | segundo: cotizar pedido especial | 200 | OK | 200 |
 | frenosa: ver cierres | 200 | OK | 200 |
-
-La ejecución devolvió código cero aun con un paso ERROR; revisar el contenido, no solo el código de salida. La navegación y los registros tienen pruebas separadas.

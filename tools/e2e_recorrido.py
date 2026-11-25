@@ -34,9 +34,10 @@ for emp in ("frenosa", "segundo"):
     s, r = q("GET", f"/api/proyeccion?empresa={emp}&meses=6"); paso(f"{emp}: proyección granular 6 meses", "200 con 6 meses", s == 200 and len(r.get("meses", [])) == 6, s if s == 200 else r)
     s, r = q("POST", "/api/aprendizaje/calibrar", {"empresa": emp}); paso(f"{emp}: calibrar aprendizaje", "200", s == 200, s if s == 200 else r)
     s, r = q("GET", f"/api/aprendizaje?empresa={emp}"); paso(f"{emp}: ver aprendizaje", "200", s == 200, s if s == 200 else r)
-    acts = [a["codigo"] for a in res.get("actividades", [])][:2]
+    acts = [a["codigo"] for a in res.get("actividades", []) if not str(a.get("inductor") or "").startswith("Distribución")][:2]   # solo operativas (llegan a la orden)
     s, r = q("POST", "/api/cotizar", {"empresa": emp, "actividades": {a: 1 for a in acts}, "materiales": {}, "precio_mercado": 5000, "margen_objetivo": 0.3})
     paso(f"{emp}: cotizar pedido especial", "200", s == 200, s if s == 200 else r)
 s, r = q("GET", "/api/cierres?empresa=frenosa&usuario=COSTOS1"); paso("frenosa: ver cierres", "200", s == 200, s if s == 200 else r)
 print(json.dumps(LOG, ensure_ascii=False, indent=0))
 srv.shutdown(); shutil.rmtree(tmp, ignore_errors=True)
+sys.exit(1 if any(x[2] != "OK" for x in LOG) else 0)
