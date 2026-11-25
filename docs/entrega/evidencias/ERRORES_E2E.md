@@ -67,3 +67,7 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 ## OT-C27 · bloque A: pronóstico único (pendiente)
 
 El pronóstico granular completo, la precisión retrospectiva y las trazas por recurso/centro/actividad/OT requieren adaptar el motor de proyección y el contrato de forma integrada y demostrar que REAL y CONTABLE son idénticos. Retirar la síntesis histórica antes de contar con ese reemplazo dejaría sin servicio a consumidores y reportes; se mantiene pendiente el bloque completo. La compuerta de banda MASE en la vista también sigue pendiente.
+
+## OT-C27 · bloque B: cotización por intervalos (parcial)
+
+Están comprobadas como funciones aisladas la suma de intervalos, la sugerencia según rangos móviles y las variaciones de tasa y cantidad, con los tres casos manuales. No están conectadas al cotizador ni implementan aún curvas, contratos, persistencia/aprobación de intervalos, bloques, P05–P95 o apertura T13. No es una capacidad activa de usuario.
