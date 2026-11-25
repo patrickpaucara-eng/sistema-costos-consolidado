@@ -35,6 +35,9 @@ def validar(r):
         cv = r['costeo_variable']
         if not isinstance(cv, dict) or any(k not in cv for k in ('productos', 'fijos_periodo', 'punto_equilibrio_ventas', 'regresiones', 'no_controlables')):
             e.append('costeo_variable: estructura incompleta')
+    if 'estrategico' in r:
+        data = r['estrategico']
+        if not isinstance(data, dict) or not isinstance(data.get('coq'), dict) or not isinstance(data.get('gobierno_dato'), dict): e.append('estrategico: estructura incompleta')
     if r["sintesis"] == "CONTABLE":
         if any(o["financiero"] for o in r["objetos"]): e.append("CONTABLE: gasto financiero en el costo del objeto (NIC 2 lo prohíbe)")
         if any(o.get("perdida") or o.get("ocio") for o in r["objetos"]): e.append("CONTABLE: pérdida u ocio en el costo del objeto (NIC 2 §13, §16 a)")

@@ -229,6 +229,8 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
                                    mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
     from reyna_local import variable as CV
     r['costeo_variable'], r['propuestas'] = CV.analizar_libro(libro, r, h, par, prev, por_per, est, inc, nats)
+    from reyna_local import estrategico as E
+    r['estrategico'] = E.desde_libro(r, libro)
     return r
 
 

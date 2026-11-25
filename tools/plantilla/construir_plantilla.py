@@ -38,6 +38,10 @@ def construir():
     rec = wb["RECURSO"]
     for name in ("REC_COMPORT", "REC_PCT_VAR", "REC_CTRL"):
         if name not in [c.value for c in rec[1]]: rec.cell(1, rec.max_column + 1, name)
+    for sheet, names in (("RECURSO", ("REC_COQ",)), ("CRITERIO", ("CRI_RESP", "CRI_EVID"))):
+        ws = wb[sheet]
+        for name in names:
+            if name not in [c.value for c in ws[1]]: ws.cell(1, ws.max_column + 1, name)
     tc = wb["TIPO_CAMBIO"]; tc.append(["PEN", 19000101, 1])              # moneda funcional por defecto
     for u in wb["USUARIO"].iter_rows(min_row=2):                          # los usuarios se asignan a la empresa al cargarla
         u[3].value = None

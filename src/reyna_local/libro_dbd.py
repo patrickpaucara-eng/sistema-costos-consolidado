@@ -13,7 +13,7 @@ VERSION = "1.0-MN01"
 # tablas que la empresa debe llenar (las demás son configuración del método o salidas del sistema)
 OBLIGATORIAS = ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "TIPO_RECURSO", "EVENTO", "LINEA", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "VENTA"]
 OPCIONALES = ["CENTRO", "ACTIVIDAD", "KARDEX", "CLIENTE"]
-COLUMNAS_OPCIONALES = {"ACT_NIVEL", "REC_COMPORT", "REC_PCT_VAR", "REC_CTRL"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
+COLUMNAS_OPCIONALES = {"ACT_NIVEL", "REC_COMPORT", "REC_PCT_VAR", "REC_CTRL", "REC_COQ", "CRI_RESP", "CRI_EVID"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
 ETAPAS_VALIDAS = ("P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7", "OCIO")   # OCIO: criterio propio del ocio de un origen
 DE_DATOS = OBLIGATORIAS + OPCIONALES + ["INV_PROCESO", "ESTIMACION", "LIN_ESTIM", "RESULTADO_METODO", "ALERTA", "PARAM_CAMBIO"]
 DESCRIPCION = {
@@ -97,6 +97,8 @@ def validar(libro):
         if behavior not in ("", "F", "V", "M"): err.append(f"Hoja RECURSO, fila {i + 2}: REC_COMPORT debe ser F, V o M.")
         if control not in ("S", "N"): err.append(f"Hoja RECURSO, fila {i + 2}: REC_CTRL debe ser S o N.")
         if behavior == "M" and (not _num(r.get("REC_PCT_VAR")) or not 0 <= float(r["REC_PCT_VAR"]) <= 100): err.append(f"Hoja RECURSO, fila {i + 2}: REC_PCT_VAR debe estar entre 0 y 100.")
+        if str(r.get("REC_COQ") or "").strip().upper() not in ("", "PREVENCION", "EVALUACION"):
+            err.append(f"Hoja RECURSO, fila {i + 2}: REC_COQ debe ser PREVENCION o EVALUACION.")
     eventos = {r["EVE_NUM"] for r in g("EVENTO")}
     for i, r in enumerate(g("EVENTO")): ref("EVENTO", i, "EVE_PER", str(r.get("EVE_PER")), pers, "PERIODO")
     for i, r in enumerate(g("LINEA")):
