@@ -1,5 +1,6 @@
 # OT-C24 · Entregables generados desde el sistema (3, 4, 6, 7, 8, 10, 12) — Codex nivel MEDIO
 Rama `codex/C24` desde `desarrollo/mono`; PR contra `desarrollo/mono`. Solo lees el contrato de resultados; no tocas cálculo ni motor.
+**Regla del dueño (25-nov): brevedad 80/20.** Solo lo mínimo que exige la monografía: sin texto de relleno, una captura por pantalla, una línea por paso. Si encuentras un error del sistema, NO lo corrijas: anótalo en `docs/entrega/evidencias/ERRORES_E2E.md` (paso, esperado, obtenido) y sigue.
 Lista oficial: `docs/planificacion/PLAN_MONOGRAFIA_Y_SISTEMA.md` (Etapa 5). Salida en `entregables/` vía `tools/entrega/armar.py`.
 
 1. **6, 7, 8 (Excel):** que los exportadores incluyan lo nuevo del contrato: rechazos, costeo variable (MC, punto de equilibrio,
@@ -9,7 +10,7 @@ Lista oficial: `docs/planificacion/PLAN_MONOGRAFIA_Y_SISTEMA.md` (Etapa 5). Sali
    periodos → proyección → aprendizaje → cotizar → exportar. Para cada paso: esperado vs obtenido. Incluye los dos casos a mano
    (SERVITEC julio: 22,975 / 21,374 y 5,165 / 3,880; MINI de proyección; cotizador 3,720).
 3. **10 Manual de usuario (Word):** pantalla por pantalla según el menú de C17 (Definir · Estimar · Registrar · Entregar · Aprender),
-   con captura, para qué sirve y qué hacer. T14.1 y T16 se marcan «en habilitación» (Claude las cierra; actualizas al final).
+   con captura y 2–3 líneas: para qué sirve y qué hacer. Máximo ~15 páginas. T14.1 y T16 se marcan «en habilitación» (Claude las cierra; actualizas al final).
 4. **12 HTML sin conexión:** regenerar con todos los bloques nuevos; prueba que abre sin red.
 5. **3 Código fuente (Word):** regenerar con el script existente (índice + archivos nuevos).
 No generes 1, 2, 5, 9, 11 ni 13 (son de Claude o del dueño).
