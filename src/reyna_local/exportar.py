@@ -59,9 +59,45 @@ def _libro(resultados, tipo, destino):
             hoja.cell(hoja.max_row, 1).font = Font(bold=True)
     if tipo == 'resultados':
         _hojas_ruta_y_modelo(libro, resultados)
+    # Cada hoja transcribe hojas escalares del bloque, sin cálculos ni redondeos.
+    bloques = {
+        'resultados': [('Rechazos', 'rechazos')],
+        'analitica': [('Costeo variable', 'costeo_variable'),
+                      ('Estratégico COQ', 'estrategico.coq'),
+                      ('Gobierno del dato', 'estrategico.gobierno_dato'),
+                      ('Aprendizaje', 'aprendizaje')],
+        'proyeccion': [('Proyección granular', 'proyeccion_granular'),
+                       ('Sensibilidad', 'sensibilidad'), ('Aprendizaje', 'aprendizaje')],
+    }
+    for nombre, ruta in bloques[tipo]:
+        dato = resultados
+        for parte in ruta.split('.'):
+            dato = dato.get(parte) if isinstance(dato, dict) else None
+        hoja = libro.create_sheet(nombre)
+        hoja.append(['Campo del contrato', 'Valor'])
+        filas = list(_hojas_valores(dato, ruta))
+        if not filas:
+            hoja.append(['Sin datos disponibles', None])
+        for campo, valor in filas:
+            # Excel/openpyxl almacena 16 cifras significativas; texto exacto si perdería precisión.
+            exacto = repr(valor) if isinstance(valor, float) and float(format(valor, '.16g')) != valor else valor
+            hoja.append([campo, _celda(exacto)])
+        hoja.freeze_panes = 'A2'
     libro.save(destino)
     libro.close()
 
+
+
+def _hojas_valores(valor, ruta):
+    """Aplana el JSON de manera reversible: números permanecen como números."""
+    if isinstance(valor, dict):
+        for clave, item in valor.items():
+            yield from _hojas_valores(item, ruta + '.' + str(clave))
+    elif isinstance(valor, list):
+        for i, item in enumerate(valor):
+            yield from _hojas_valores(item, ruta + '[' + str(i) + ']')
+    elif valor is not None:
+        yield ruta, valor
 
 def _tabla_en_hoja(hoja, rows):
     columnas = _columnas(rows)

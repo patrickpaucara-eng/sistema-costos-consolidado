@@ -98,19 +98,40 @@ def armar(periodo, salida, junit=None):
     return hechos
 
 
+
+def armar_c24(periodo, salida):
+    """Genera solo los entregables asignados a C24, sin recalcular resultados."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('documentos_c24', ROOT / 'tools/entrega/documentos_c24.py')
+    doc = importlib.util.module_from_spec(spec); spec.loader.exec_module(doc)
+    salida = Path(salida); salida.mkdir(parents=True, exist_ok=True)
+    with __import__('tempfile').TemporaryDirectory(prefix='c24-export-') as temporal:
+        tmp = Path(temporal)
+        hechos = doc.generar(salida)
+        hechos.append(mover(exportar(None, 'codigo', tmp), salida / '03_codigo_fuente.docx'))
+        for sintesis in SINTESIS:
+            r = cargar(periodo, sintesis)
+            for tipo, nombre in (('resultados','06_resultados_{s}.xlsx'),
+                                 ('analitica','07_analitica_{s}.xlsx'),
+                                 ('proyeccion','08_proyeccion_propuestas_{s}.xlsx')):
+                hechos.append(mover(exportar(r, tipo, tmp), salida / nombre.format(s=sintesis)))
+        from reyna_local.exportar import sistema_html
+        from reyna_local.calculo_local import catalogo
+        lib = next(l for l in catalogo(tmp) if l['id'] == 'frenosa')
+        todos = {}
+        for per in lib['periodos']:
+            for sintesis in SINTESIS:
+                try: todos[f'frenosa_{per}_{sintesis}'] = cargar(per, sintesis)
+                except SystemExit: pass
+        hechos.append(sistema_html(todos, lib, salida / '12_sistema_sin_conexion.html'))
+    return hechos
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--periodo', default='2010-12'); p.add_argument('--salida', type=Path, default=ROOT / 'entrega_MN01')
     p.add_argument('--junit', type=Path)
     a = p.parse_args()
-    junit = a.junit
-    if junit is None:
-        junit = a.salida / '_pruebas.xml'; a.salida.mkdir(parents=True, exist_ok=True)
-        subprocess.run([sys.executable, '-m', 'pytest', 'tests', '-q', '--junitxml=' + str(junit),
-                        '--ignore=tests/test_documentos_generados.py', '--ignore=tests/test_entrega_armar.py'],
-                       cwd=ROOT, check=False, env={**__import__('os').environ, 'PYTHONPATH': str(ROOT / 'src')})
-    for h in armar(a.periodo, a.salida, junit): print(h.name)
-    if a.junit is None: junit.unlink(missing_ok=True)
+    for h in armar_c24(a.periodo, a.salida): print(h.name)
     print('Listo:', a.salida)
 
 

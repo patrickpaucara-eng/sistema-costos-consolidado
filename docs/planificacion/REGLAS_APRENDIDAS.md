@@ -50,3 +50,4 @@
 | RA-35 | Una aprobación tardía podía hacer aparecer aplicado un estándar en meses anteriores a la decisión | Una aprobación manual comienza como pronto en el periodo siguiente a la decisión | `tests/test_aprendizaje.py` comprueba que no se aplica retroactivamente |
 | RA-36 | Resultados repetidos del mismo mes podrían aparentar seis meses de evidencia | Rechazar periodos duplicados antes de calibrar; no contar publicaciones repetidas como historia adicional | `tests/test_aprendizaje.py` verifica el rechazo |
 | RA-30 | La prueba de navegación de C17 usaba wait_for_function con texto, que la CSP del servidor (sin unsafe-eval) bloquea | Esperar con expect(locator).to_have_value; nunca evaluar texto en pruebas de navegador | `tests/test_esqueleto_navegacion.py` |
+| RA-C24 | Excel limita la precisión numérica de valores decimales; exportar como texto los decimales que perderían cifras y cotejarlos con el contrato. | `tests/test_c24_exportacion.py` |
