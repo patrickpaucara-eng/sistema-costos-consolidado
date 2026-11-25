@@ -235,6 +235,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
 <style>
 :root{--canvas:#eeeeee;--paper:#fff;--ink:#222;--soft:#555;--rail:#333;--rail-ink:#f2f2f2;--line:#ccc;--accent:#505050;--accent-dark:#222;--accent-light:#eee;--focus:#555;--radius:8px}
 .selector-global{background:#ededed}.kpi,.paso div{background:#f1f1f1;border-color:#777}.data-badge{background:#eee;color:#333}.ok{color:#333}.xx{color:#a32117}.inicio-tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem}.inicio-tarjetas a{display:block;background:#f4f4f4;padding:1rem;border:1px solid #bbb;border-radius:8px;text-decoration:none}.inicio-tarjetas a:hover{background:#e4e4e4}#result-line svg,#result-bars svg,#result-pareto svg,#result-rangos svg{filter:grayscale(1)}
+.nav-menu summary{cursor:pointer;padding:.6rem;border-radius:6px;font-weight:700}.nav-menu summary:hover{background:#505050}.nav-menu>div{display:grid;padding-left:.55rem}
 </style></head>
 <body>
   <a class="skip" href="#principal">Ir al contenido</a>
@@ -242,11 +243,12 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     <aside class="rail">
       <div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>Sistema de Costos Reyna</span></div>
       <nav aria-label="Secciones del sistema">
-        <p class="nav-grupo">Definir</p><a href="#modelo">Modelo de costeo</a><a href="#datos">Datos del libro</a><a href="#cargar-libro">Cargar empresa</a>
-        <p class="nav-grupo">Estimar</p><a href="#proyeccion">Futuro</a><a href="#simulacion">Simulación</a><a href="#comparar">Comparar síntesis</a>
-        <p class="nav-grupo">Registrar</p><a href="#importar">Importar libro</a><a href="#espacios">Espacios de trabajo</a><a href="#operar">Registrar movimiento</a><a href="#consultar">Consultar tablas</a><a href="#cierre">Cierre y aprobación</a>
-        <p class="nav-grupo">Entregar</p><a href="#portada">Inicio</a><a href="#dashboard">Planta del costo</a><a href="#costos">Órdenes</a><a href="#ruta">Ruta de la orden</a><a href="#periodos">Periodos</a><a href="#reportes">Reportes</a><a href="#inventarios">Inventarios y pérdidas</a><a href="#normal">Costeo normal</a><a href="#control">Calidad y cuadre</a>
-        <p class="nav-grupo">Aprender</p><a href="#propuestas">Propuestas</a><a href="#aprendido">Lo que aprendió</a><a href="#analisis">Relevancia</a>
+        <details class="nav-menu" open><summary>⚙ Definir</summary><div><a href="#modelo">Modelo de costeo</a><a href="#datos">Datos del libro</a><a href="#cargar-libro">Cargar empresa</a></div></details>
+        <details class="nav-menu" open><summary>◷ Estimar</summary><div><a href="#proyeccion">Futuro</a><a href="#simulacion">Simulación</a><a href="#comparar">Comparar síntesis</a></div></details>
+        <details class="nav-menu" open><summary>✎ Registrar</summary><div><a href="#importar">Importar libro</a><a href="#espacios">Espacios de trabajo</a><a href="#operar">Registrar movimiento</a><a href="#consultar">Consultar tablas</a><a href="#cierre">Cierre y aprobación</a></div></details>
+        <details class="nav-menu" open><summary>▤ Entregar</summary><div><a href="#portada">Inicio</a><a href="#dashboard">Planta del costo</a><a href="#costos">Órdenes</a><a href="#ruta">Ruta de la orden</a><a href="#periodos">Periodos</a><a href="#reportes">Reportes</a><a href="#inventarios">Inventarios y pérdidas</a><a href="#normal">Costeo normal</a><a href="#control">Calidad y cuadre</a></div></details>
+        <details class="nav-menu" open><summary>✦ Aprender</summary><div><a href="#propuestas">Propuestas</a><a href="#aprendido">Lo que aprendió</a><a href="#analisis">Relevancia</a></div></details>
+        
       </nav>
       <p>Servidor y datos locales</p>
     </aside>
