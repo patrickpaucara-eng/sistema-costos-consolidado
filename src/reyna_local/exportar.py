@@ -8,7 +8,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from .contrato import validar
 
-TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'entrada': '.xlsx', 'sistema': '.html'}
+TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'informe': '.docx', 'entrada': '.xlsx', 'sistema': '.html'}
 SIN_RESULTADOS = ('codigo', 'entrada')          # se generan desde el repositorio, no desde un contrato
 from .raiz import RAIZ
 SECCIONES = {
@@ -283,6 +283,79 @@ def _html(resultados, destino):
     destino.write_text(documento, encoding='utf-8')
 
 
+def _informe(r, destino):
+    """Informe fiel al contrato; no completa datos ni supone efectos futuros."""
+    from docx import Document
+    doc = Document()
+    doc.add_heading('Informe técnico de costos', 0)
+    doc.add_paragraph(f"{r['empresa'].get('nombre', '')} · {r['periodo_actual']} · {r['sintesis']} · {r['moneda']}")
+    def text(value):
+        if value is None: return 'No disponible'
+        if isinstance(value, float):
+            from decimal import Decimal
+            precision = max(2, -Decimal(str(value)).as_tuple().exponent)
+            return f'{value:,.{precision}f}'
+        return str(value)
+    def rows(items, fields):
+        if not items:
+            doc.add_paragraph('Sin información disponible en el contrato.')
+            return
+        table = doc.add_table(rows=1, cols=len(fields)); table.style = 'Table Grid'
+        for cell, (_, label) in zip(table.rows[0].cells, fields): cell.text = label
+        for item in items:
+            cells = table.add_row().cells
+            for cell, (key, _) in zip(cells, fields): cell.text = text(item.get(key))
+    doc.add_heading('1. Resumen ejecutivo', level=1)
+    rows([r['kpi']], [('ventas','Ventas'),('costo_total','Costo total'),('margen_operativo','Margen operativo'),('rentabilidad','Rentabilidad')])
+    doc.add_paragraph('Sello: ' + text(r.get('sello')))
+    doc.add_heading('2. Análisis', level=1)
+    doc.add_heading('Descriptivo', level=2)
+    rows([x for x in r['serie'] if x.get('tipo') in ('HISTORICO','ACTUAL')], [('periodo','Periodo'),('ventas','Ventas'),('costo_total','Costo'),('margen','Margen')])
+    doc.add_heading('Diagnóstico y causa', level=2)
+    rows(r['hallazgos'], [('mensaje','Hallazgo'),('causa','Causa'),('impacto','Impacto')])
+    doc.add_heading('Relevancia (Pareto)', level=2)
+    rows(r['relevancia'], [('elemento','Elemento'),('importe','Importe'),('porcentaje','Participación'),('critico','Crítico')])
+    doc.add_heading('Predictivo y banda', level=2)
+    projected = [x for x in r['serie'] if x.get('tipo') == 'PROYECTADO_EST']
+    if not projected: doc.add_paragraph('Banda no estimable o no disponible en el contrato.')
+    rows(projected, [('periodo','Periodo'),('margen','Margen'),('p05','P05'),('p50','P50'),('p95','P95')])
+    doc.add_heading('Escenarios', level=2)
+    rows(r['escenarios'], [('nombre','Escenario'),('margen','Margen'),('margen_p05','P05'),('margen_p95','P95')])
+    doc.add_heading('3. Conclusiones', level=1)
+    for h in r['hallazgos']: doc.add_paragraph(str(h.get('mensaje') or 'Hallazgo sin descripción.'), style='List Bullet')
+    for x in r['relevancia']:
+        if x.get('critico'): doc.add_paragraph(f"Elemento crítico: {text(x.get('elemento'))}; importe {text(x.get('importe'))}.", style='List Bullet')
+    exclusions = (r.get('costeo_variable') or {}).get('no_controlables') or []
+    excluded_codes = {str(x.get('codigo') or x.get('propuesta')) for x in exclusions if isinstance(x,dict) and (x.get('codigo') or x.get('propuesta'))}
+    proposal_codes = {str(p.get('codigo')) for p in r['propuestas'] if p.get('codigo')}
+    ambiguous = bool(exclusions) and (len(excluded_codes) < len(exclusions) or not excluded_codes <= proposal_codes)
+    proposals = [] if ambiguous else [p for p in r['propuestas'] if str(p.get('codigo')) not in excluded_codes]
+    doc.add_heading('4. Propuestas', level=1)
+    if 'costeo_variable' not in r: doc.add_paragraph('Controlabilidad no informada: no se puede verificar el filtro de costos compartidos.')
+    if ambiguous: doc.add_paragraph('Propuestas omitidas: hay exclusiones sin código de propuesta y no se pueden cotejar con seguridad.')
+    rows(proposals, [('codigo','Código'),('descripcion','Propuesta'),('impacto_anual','Impacto anual'),('causa','Causa'),('responsable','Responsable')])
+    doc.add_heading('5. Plan de implementación', level=1)
+    ordered = sorted(proposals, key=lambda p: float(p.get('impacto_anual') or 0), reverse=True)
+    rows(ordered, [('codigo','Propuesta'),('impacto_anual','Impacto anual'),('responsable','Responsable'),('plazo','Plazo'),('mes_medicion','Mes de medición'),('cu_objetivo','Costo unitario objetivo')])
+    doc.add_heading('6. Impacto económico futuro', level=1)
+    doc.add_paragraph(f"Suma de impactos anuales informados: {sum(float(p.get('impacto_anual') or 0) for p in proposals):,.2f} {r['moneda']}.")
+    doc.add_paragraph('Proyección sin aplicar propuestas:')
+    rows([x for x in r['serie'] if x.get('tipo') == 'PROYECTADO_DET'], [('periodo','Periodo'),('ventas','Ventas'),('costo_total','Costo'),('margen','Margen')])
+    doc.add_paragraph('Resultado con propuestas: no disponible en el contrato; no se supone una distribución mensual de impactos.')
+    doc.add_heading('6b. Gestión estratégica del costo', level=1)
+    doc.add_paragraph('Ciclo de referencia: costea → diagnostica → propone → decide → aprende. Costo objetivo: precio de mercado menos margen objetivo; kaizen: seguimiento medido de las mejoras.')
+    doc.add_paragraph('Costo de calidad y gobierno del dato: usar categorías, responsables y evidencia cuando el contrato los informe; no se infieren datos faltantes.')
+    doc.add_paragraph('Arquitectura objetivo futura: captura MES/IoT mediante adaptador, MFCA ISO 14051, flujo de valor y benchmarking. No implica que estén implementados.')
+    doc.add_heading('7. Anexos', level=1)
+    doc.add_paragraph('Modelo de costeo de W. Oria; miradas REAL, CONTABLE y ESTIMADO.')
+    rows(r.get('control') or [], [('control','Control'),('ok','Cumple'),('detalle','Detalle')])
+    biggest = max(r['objetos'], key=lambda o: o.get('costo_total',0), default=None)
+    if biggest:
+        doc.add_heading('Ruta de la orden de mayor costo', level=2)
+        rows([t for t in r.get('trazas',[]) if t.get('objeto') == biggest['codigo']], [('etapa','Etapa'),('origen_nombre','Origen'),('destino_nombre','Destino'),('monto','Monto')])
+    doc.save(destino)
+
+
 def exportar(resultados, tipo, carpeta):
     if tipo not in TIPOS:
         raise ValueError('El tipo de reporte no existe.')
@@ -303,6 +376,8 @@ def exportar(resultados, tipo, carpeta):
             _libro(resultados, tipo, destino)
         elif tipo == 'html':
             _html(resultados, destino)
+        elif tipo == 'informe':
+            _informe(resultados, destino)
         elif tipo == 'sistema':
             _sistema_desde_carpeta(resultados, destino)
         elif tipo == 'entrada':
