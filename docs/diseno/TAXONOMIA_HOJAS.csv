@@ -121,3 +121,4 @@ ESPERADO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Defini
 RESULTADO,RESULTADO,Sistema,Al procesar o cerrar,Definición o soporte de la plantilla.
 TABLAS_LOGICAS,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
 MODELO_FISICO,CONFIGURACION,Administrador o diseñador,Inicial y cuando cambia,Definición o soporte de la plantilla.
+BLOQUE,CONFIGURACION,Responsable de costos,Al definir o cambiar capacidad,Reglas de capacidad y costo escalonado para proyecciones.
