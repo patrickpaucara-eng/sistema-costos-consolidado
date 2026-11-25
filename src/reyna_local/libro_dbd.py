@@ -13,7 +13,7 @@ VERSION = "1.0-MN01"
 # tablas que la empresa debe llenar (las demás son configuración del método o salidas del sistema)
 OBLIGATORIAS = ["EMPRESA", "PERIODO", "OBJETO", "RECURSO", "TIPO_RECURSO", "EVENTO", "LINEA", "REGLA_REPARTO", "CRITERIO", "MEDIDA", "VENTA"]
 OPCIONALES = ["CENTRO", "ACTIVIDAD", "KARDEX", "CLIENTE"]
-COLUMNAS_OPCIONALES = {"ACT_NIVEL"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
+COLUMNAS_OPCIONALES = {"ACT_NIVEL", "REC_COQ", "CRI_RESP", "CRI_EVID"}     # Modelo 3 (Oria): vacío = actividad operativa; los libros anteriores siguen válidos
 ETAPAS_VALIDAS = ("P1", "P2", "P3", "P4A", "P4B", "P4D", "P4E", "P4C", "P5", "P6", "P7", "OCIO")   # OCIO: criterio propio del ocio de un origen
 DE_DATOS = OBLIGATORIAS + OPCIONALES + ["INV_PROCESO", "ESTIMACION", "LIN_ESTIM", "RESULTADO_METODO", "ALERTA", "PARAM_CAMBIO"]
 DESCRIPCION = {
@@ -90,7 +90,10 @@ def validar(libro):
     for i, r in enumerate(g("OBJETO")):
         if not r.get("OBJ_PRO"): err.append(f"Hoja OBJETO, fila {i + 2}: falta el producto (OBJ_PRO).")
         if not _num(r.get("OBJ_CAN")) or float(r["OBJ_CAN"]) <= 0: err.append(f"Hoja OBJETO, fila {i + 2}: la cantidad (OBJ_CAN) debe ser mayor que cero.")
-    for i, r in enumerate(g("RECURSO")): ref("RECURSO", i, "REC_TRE", r.get("REC_TRE"), tipos, "TIPO_RECURSO")
+    for i, r in enumerate(g("RECURSO")):
+        ref("RECURSO", i, "REC_TRE", r.get("REC_TRE"), tipos, "TIPO_RECURSO")
+        if str(r.get("REC_COQ") or "").strip().upper() not in ("", "PREVENCION", "EVALUACION"):
+            err.append(f"Hoja RECURSO, fila {i + 2}: REC_COQ debe ser PREVENCION o EVALUACION.")
     eventos = {r["EVE_NUM"] for r in g("EVENTO")}
     for i, r in enumerate(g("EVENTO")): ref("EVENTO", i, "EVE_PER", str(r.get("EVE_PER")), pers, "PERIODO")
     for i, r in enumerate(g("LINEA")):

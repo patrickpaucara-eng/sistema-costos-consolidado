@@ -11,3 +11,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-24,15:32,15:56,OT-C12 formulario guiado y pruebas,Monografía,Codex,Seis transacciones en copia temporal; configuración de producto terminado sintética
 2026-11-24,15:56,16:07,OT-C12 verificación y evidencia,Monografía,Codex,Prueba visual y defectos de fuente documentados; compuerta en ejecución
 2026-11-24,16:07,16:11,OT-C12 compuerta y entrega,Monografía,Codex,VERDE 373 pruebas 26 subpruebas y 1 fallo esperado por datos fuente
+2026-11-24,22:26,22:32,OT-C20 costo de calidad y gobierno del dato,Monografía,Codex,Caso manual y conservación de costos verificados con pruebas focalizadas

@@ -31,6 +31,9 @@ def validar(r):
         if s.get("tipo") == "PROYECTADO_EST" and not all(k in s for k in ("p05", "p50", "p95")): e.append(f"serie {s.get('periodo')}: estocástico sin P05/P50/P95")
     for x in r["estado_resultados"]:
         if x.get("categoria") not in CATEGORIAS_NIIF18: e.append(f"estado_resultados: categoría inválida {x.get('categoria')}")
+    if 'estrategico' in r:
+        data = r['estrategico']
+        if not isinstance(data, dict) or not isinstance(data.get('coq'), dict) or not isinstance(data.get('gobierno_dato'), dict): e.append('estrategico: estructura incompleta')
     if r["sintesis"] == "CONTABLE":
         if any(o["financiero"] for o in r["objetos"]): e.append("CONTABLE: gasto financiero en el costo del objeto (NIC 2 lo prohíbe)")
         if any(o.get("perdida") or o.get("ocio") for o in r["objetos"]): e.append("CONTABLE: pérdida u ocio en el costo del objeto (NIC 2 §13, §16 a)")

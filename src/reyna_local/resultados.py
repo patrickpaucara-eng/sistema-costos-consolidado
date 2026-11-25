@@ -227,6 +227,8 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     if est:
         r["estimacion"] = {k: dict(cu_total=round(v["cu_total"], 4), p05=round(v["p05"], 4), p95=round(v["p95"], 4), metodo=v["metodo"],
                                    mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
+    from reyna_local import estrategico as E
+    r['estrategico'] = E.desde_libro(r, libro)
     return r
 
 
