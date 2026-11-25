@@ -47,7 +47,7 @@ def test_recorrido_y_borrador(tmp_path):
             assert page.locator('#guided-form [data-variable=FECHA]').input_value()=='20101228'
             page.locator('nav a[href="#espacios"]').click();page.locator(f'button[data-workspace-id="{wid2}"]').click()
             page.locator(f'button[data-workspace-id="{wid}"]').click();page.locator('nav a[href="#operar"]').click()
-            page.wait_for_function("document.querySelector('#guided-form [data-variable=FECHA]')?.value === '20101228'")
+            sync.expect(page.locator('#guided-form [data-variable=FECHA]')).to_have_value('20101228')   # sin eval: la CSP del servidor lo prohíbe
             assert 'huella conservada' in page.locator('#support-hash').inner_text()
             page.locator('#global-desde').fill('2010-03-01');page.locator('#global-desde').dispatch_event('change')
             assert page.locator('#periodos-desde').input_value()=='2010-03-01'

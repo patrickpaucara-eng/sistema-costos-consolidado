@@ -26,3 +26,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-23,19:50,20:50,Tareas 1.6 (diseño SERVITEC), 2.6 (periodos por fecha libre + /api/periodos), 2.7 (propuestas según causa); registro de decisiones del dueño,Sistema,Claude,compuerta VERDE 368 pruebas
 2026-11-24,,,2.9b rechazos→pérdida y residuo; diseños 2.4/2.5; órdenes C20–C23,2,Claude,VERDE 376
 2026-11-25,,,Integración C13-C20/C23 (PR #10-#17), guardas de C22,2,Claude,VERDE 398
+2026-11-25,,,Integración C21/C17/C22 y conexión estándar aprendido→proyección,1.5,Claude,VERDE 416

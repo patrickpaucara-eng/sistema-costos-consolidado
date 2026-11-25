@@ -30,7 +30,7 @@ def _pronosticar(serie, meses):
     return [max(0.0, float(x)/float(serie[-1])) for x in forecast]
 
 
-def proyectar_hechos(hechos, previos, empresa, periodo_base, objetos, recursos, criterios, ventas, factores, h=1, bloques=()):
+def proyectar_hechos(hechos, previos, empresa, periodo_base, objetos, recursos, criterios, ventas, factores, h=1, bloques=(), estandares=None):
     """Proyecta un mes desde hechos y retorna los resultados del motor; no altera los argumentos."""
     future = _mes(periodo_base,h); source = deepcopy(hechos); previous = deepcopy(previos)
     obj_info = {str(o['OBJ_NUM']):o for o in objetos}
@@ -68,13 +68,19 @@ def proyectar_hechos(hechos, previos, empresa, periodo_base, objetos, recursos, 
             if oid not in ids: continue
             new['OBJETO']=ids[oid]
         source['EVENTO'].append(new)
-    clone_lines=[]; factors_line={}
+    clone_lines=[]; factors_line={}; q_tot=defaultdict(float)          # consumo base por (orden, recurso), para el estándar aprendido
+    for line in hechos['(sin MCD) LINEA']:
+        ev=events.get(str(line['EVENTO']))
+        if ev and ev.get('OBJETO') is not None: q_tot[(str(ev['OBJETO']),str(line['RECURSO']))]+=float(line.get('CANTIDAD') or 0)
     for line in hechos['(sin MCD) LINEA']:
         old=str(line['EVENTO'])
         if old not in eid: continue
         ev=events[old]; oid=str(ev['OBJETO']) if ev.get('OBJETO') is not None else None
         if oid is not None and oid not in ids: continue
         rec=str(line['RECURSO']); mix=frac(rec); scale=1-mix+mix*(vol(products[oid]) if oid else g)
+        std=(estandares or {}).get((products[oid],rec)) if oid else None      # C22: consumo aprendido (APLICADO y vigente) por unidad buena
+        q0=q_tot.get((oid,rec),0.0) if oid else 0.0
+        if std and q0: scale=float(std)*float(obj_info[oid].get('OBJ_CAN') or 0)*vol(products[oid])/q0
         new=deepcopy(line);new['EVENTO']=eid[old];new['CANTIDAD']=float(line.get('CANTIDAD') or 0)*scale
         if line.get('COSTO_UNITARIO_DOCUMENTO') is not None: new['COSTO_UNITARIO_DOCUMENTO']=float(line['COSTO_UNITARIO_DOCUMENTO'])*pre(rec)
         clone_lines.append(new); factors_line[(old,str(line['NUMERO']))]=(scale*pre(rec),rec)
@@ -146,7 +152,7 @@ def proyectar_hechos(hechos, previos, empresa, periodo_base, objetos, recursos, 
     return {'periodo':future,'factores':allf,'productos':items,'total':{'costo_total':round(sum(x['costo_total'] for x in items),2),'ingreso':round(sum(x['ingreso'] for x in items),2),'margen':round(sum(x['margen'] for x in items),2)},'bloques':block_info}
 
 
-def proyectar_granular(libro, emp, meses=6, factores=None):
+def proyectar_granular(libro, emp, meses=6, factores=None, carpeta_aprendizaje=None):
     """Calcula escenarios futuros sobre copias temporales en memoria del último periodo."""
     import puerto_lectura as P
     from openpyxl import load_workbook
@@ -192,7 +198,14 @@ def proyectar_granular(libro, emp, meses=6, factores=None):
     for kind,rows in (factores or {}).items():
         if kind not in defaults or not isinstance(rows,dict):raise ValueError('Factores inválidos')
         defaults[kind].update(rows)
-    def run(factors,h):return proyectar_hechos(hh,prev,emp,last,data['OBJETO'],data['RECURSO'],data['CRITERIO'],data['VENTA'],factors,h,blocks)
+    from .aprendizaje import estandar_vigente, mes_siguiente
+    stds={}
+    for prod in {str(o['OBJ_PRO']) for o in objects.values()}:
+        for rec in price_hist:
+            try: x=estandar_vigente(emp,prod,rec,mes_siguiente(last),carpeta_aprendizaje)
+            except (OSError,ValueError): x=None
+            if x and x[0] is not None: stds[(prod,rec)]=x[0]
+    def run(factors,h):return proyectar_hechos(hh,prev,emp,last,data['OBJETO'],data['RECURSO'],data['CRITERIO'],data['VENTA'],factors,h,blocks,stds)
     hh=h
     outputs=[run(defaults,i) for i in range(1,meses+1)]
     base=outputs[0]['total']['margen']; sensitivity=[]
