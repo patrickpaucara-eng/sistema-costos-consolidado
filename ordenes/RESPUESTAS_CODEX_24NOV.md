@@ -32,3 +32,11 @@ cuando se unan, el informe los toma del contrato. Abre el PR como está, con los
 
 ## Orden para mañana
 C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18 → C20 → C21 → C22 → C23 → C17 al final.
+
+# 25-nov (Claude)
+- Unidos a `desarrollo/mono`: C13, C14, C15, C19, C16, C18, C20 y C23 (PR #10–#17). Conflictos resueltos por Claude (exportar: informe + presentación; columnas opcionales de C18 y C20 juntas; plantilla y DBD reconstruidos con ambas).
+- **C21:** desbloqueada (C18 ya está en la base).
+- **C22:** guarda por calibrador definida en `docs/diseno/APRENDIZAJE.md` (sección «Guarda por calibrador»). Solo los estándares pueden quedar PENDIENTES.
+  Expón `aprendizaje.estandar_vigente(...)` y conéctala en `cotizador.py` (C23) y en `proyeccion.py` (C21).
+- **C17:** desbloqueada (C12, C14 y C15 integradas).
+- Orden: C21 → C22 → C17.

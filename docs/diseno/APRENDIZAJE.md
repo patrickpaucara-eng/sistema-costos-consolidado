@@ -19,6 +19,18 @@ real**: solo calibra estimaciones, umbrales, prioridades, la proyección (2.4) y
 - Vigencia: desde el periodo siguiente al cálculo; nunca retroactivo. El libro no se modifica: la capa vive en `datos/aprendizaje/<empresa>.json`
   (id, calibrador, objeto, valor_libro, valor_aprendido, cambio_pct, mae_libro, mae_aprendido, estado, vigente_desde, decidido_por, fecha).
 
+## Guarda por calibrador (aclaración 25-nov a pedido de Codex)
+| Calibrador | Referencia | Error fuera de muestra | Estado |
+|---|---|---|---|
+| Consumo estándar | COMPONENTE.CMP_CAN_EST | MAE de un paso (mes t con la historia hasta t−1, desde t = 3) del aprendido vs. el del libro | APLICADO si mejora y \|cambio\| ≤ 20 %; si no, PENDIENTE |
+| Merma normal | COMPONENTE.CMP_MERMA | igual | igual |
+| Umbral del diagnóstico | 5 % (valor actual del sistema) | no aplica (regla estadística, no toca costos) | APLICADO automático con ≥ 6 meses |
+| Probabilidad de éxito | previa Beta(1,1) | no aplica | APLICADO automático (solo ordena propuestas) |
+| Modelo de pronóstico / R² del inductor | — | ya validado por PRONÓSTICO / no aplica | INFORMATIVO (solo se registra o alerta) |
+Solo los estándares pueden quedar PENDIENTES, porque son los únicos que cambian cifras de proyección y cotización.
+Interfaz para otros módulos: `aprendizaje.estandar_vigente(empresa, producto, recurso, periodo) → (valor, merma) | None` (solo APLICADO y vigente).
+C23 la llama si existe; sin capa, usa el libro.
+
 ## Casos a mano (pruebas obligatorias)
 1. Consumo [10, 10.2, 9.9, 10.1, 15, 10] contra libro 12 → mediana **10.05**, 15 marcado atípico, cambio −16.25 %, mejora fuera de muestra → **APLICADO**.
 2. Misma historia contra libro 20 → cambio −49.75 % → **PENDIENTE**.
