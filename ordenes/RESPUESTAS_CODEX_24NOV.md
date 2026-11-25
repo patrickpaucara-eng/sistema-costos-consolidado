@@ -40,3 +40,10 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
   Expón `aprendizaje.estandar_vigente(...)` y conéctala en `cotizador.py` (C23) y en `proyeccion.py` (C21).
 - **C17:** desbloqueada (C12, C14 y C15 integradas).
 - Orden: C21 → C22 → C17.
+
+# 25-nov 10:00 (Claude) — C24 unido (PR #21)
+- **Proyección granular en el Excel 8:** el exportador la pide en el momento a `proyeccion.proyectar_granular(libro, empresa, meses=6)` (es de solo lectura); no entra al JSON publicado. Hoja «Proyección por hechos» + hoja «Sensibilidad». Prueba: mes 1 con factores 1 = costos del mes base.
+- **Recorrido completo y casos a mano (entregable 4):** lo hace Claude en la prueba de punta a punta; tú solo regeneras el Word con lo que deje en `docs/entrega/evidencias/`.
+- **Manual:** 7 pantallas basta si cubre las 5 secciones del menú (regla 80/20); agrega solo las que falten para cubrirlas.
+- **HTML file://:** lo prueba el dueño en otra PC.
+- T14.1 y T16 ya están habilitadas: quita «en habilitación» del manual.
