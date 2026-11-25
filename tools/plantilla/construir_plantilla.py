@@ -35,6 +35,9 @@ def construir():
     # REGLA_IMPL: el motor Python ejecuta DIRECTO, ESCALONADO y RECIPROCO (tarea 1.3, 23-nov)
     act = wb["ACTIVIDAD"]                                                  # Modelo 3 (Oria): nivel E/A/O de la actividad
     if "ACT_NIVEL" not in [c.value for c in act[1]]: act.cell(1, act.max_column + 1, "ACT_NIVEL")
+    rec = wb["RECURSO"]
+    for name in ("REC_COMPORT", "REC_PCT_VAR", "REC_CTRL"):
+        if name not in [c.value for c in rec[1]]: rec.cell(1, rec.max_column + 1, name)
     tc = wb["TIPO_CAMBIO"]; tc.append(["PEN", 19000101, 1])              # moneda funcional por defecto
     for u in wb["USUARIO"].iter_rows(min_row=2):                          # los usuarios se asignan a la empresa al cargarla
         u[3].value = None
