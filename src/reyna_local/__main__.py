@@ -292,10 +292,20 @@ class ReynaHandler(BaseHTTPRequestHandler):
             try:
                 libro = ruta_libro(store.root, empresa)
                 data = P.leer(libro, ['PERIODO','MEDIDA','EMPRESA'])
-                closed = sorted(str(row['PER_COD']) for row in data['PERIODO'] if str(row.get('PER_EST') or '').strip().upper() == 'C')
-                if not closed: raise Problem(422, 'No hay un periodo cerrado para cotizar.')
-                per = closed[-1]
-                paths = [store.root / 'resultados' / f'{empresa}_{per}_REAL.json', RAIZ / 'datos' / 'resultados' / f'{empresa}_{per}_REAL.json']
+                periods = {str(row['PER_COD']) for row in data['PERIODO'] if row.get('PER_COD')}
+                closed = sorted(str(row['PER_COD']) for row in data['PERIODO'] if row.get('PER_COD') and str(row.get('PER_EST') or '').strip().upper() == 'C')
+                folders = (store.root / 'resultados', RAIZ / 'datos' / 'resultados')
+                provisional = not closed
+                if closed:
+                    per = closed[-1]
+                else:
+                    # Solo periodos existentes en el libro y con resultados REAL publicados.
+                    calculados = sorted(p for p in periods if re.fullmatch(r'\d{4}-(0[1-9]|1[0-2])', p)
+                                        and any((folder / f'{empresa}_{p}_REAL.json').is_file() for folder in folders))
+                    if not calculados:
+                        raise Problem(404, 'No hay un resultado REAL calculado para cotizar.')
+                    per = calculados[-1]
+                paths = [folder / f'{empresa}_{per}_REAL.json' for folder in folders]
                 published = next((path for path in paths if path.is_file()), None)
                 if published is None: raise Problem(404, 'No hay un resultado REAL publicado para el último periodo cerrado.')
                 result = json.loads(published.read_text(encoding='utf-8'))
@@ -303,6 +313,9 @@ class ReynaHandler(BaseHTTPRequestHandler):
                         or len(data['EMPRESA']) != 1 or result['empresa'].get('codigo') != data['EMPRESA'][0].get('EMP_COD')):
                     raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
                 quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'), producto=body.get('producto'), carpeta_aprendizaje=store.root, empresa_aprendizaje=empresa)
+                if provisional:
+                    quote['aviso'] = 'tasas provisionales: mes no cerrado'
+                    quote['avisos'].append(quote['aviso'])
             except ValueError as exc: raise Problem(422, str(exc)) from None
             except (OSError, KeyError): raise Problem(422, 'No se pudo leer el libro o el resultado publicado.') from None
             self._json(200, quote)

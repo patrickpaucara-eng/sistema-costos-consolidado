@@ -70,3 +70,7 @@ Las pruebas de `tests/test_aprendizaje.py` cubren la mediana y los cinco casos m
 ### OT-C24b · Excel de proyección y manual breve
 
 El botón de exportación y el comando de entregables consultan la proyección granular C21 del libro cuya empresa y huella coinciden con el resultado; las hojas identifican la base y la proyección integral REAL aunque se exporte otra síntesis. `tests/test_c24b_proyeccion.py` comprueba la identidad del primer mes con factores 1, la sensibilidad, seis meses mediante API, que el libro no cambia y el rechazo de libro distinto. El manual cubre las cinco secciones con siete capturas. La aceptación metodológica y el recorrido E2E completo siguen pendientes de revisión independiente y del responsable correspondiente.
+
+### OT-C25 · Cotización con tasas provisionales
+
+Si no existen periodos cerrados, la API usa el último periodo del libro con resultado REAL disponible y añade «tasas provisionales: mes no cerrado». Si hay un periodo cerrado, mantiene su prioridad. Las pruebas cubren Frenosa y SERVITEC, ausencia de resultados y rechazo de una actividad de apoyo sin inductor P4C. El recorrido integrado permanece en 29/30 por E2; no acredita todavía el objetivo de todos los pasos OK. Ver `evidencias/ERRORES_E2E.md`.
