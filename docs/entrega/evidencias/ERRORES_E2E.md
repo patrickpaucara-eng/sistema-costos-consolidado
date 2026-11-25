@@ -75,3 +75,7 @@ Están comprobadas como funciones aisladas la suma de intervalos, la sugerencia 
 ## OT-C27 · bloque C: suficiencia (parcial)
 
 Se dispone de un inventario de tablas y encabezados del DBD sin alterar el libro. No detecta niveles, no genera plantillas o reglas, no importa datos y no etiqueta procedencia: no debe presentarse como suficiencia operativa. Falta el caso sintético de nivel 0 y la clasificación de Frenosa/SERVITEC.
+
+## OT-C27 · bloque E: laboratorio (parcial)
+
+Una prueba confirma que el mecanismo existente crea una copia físicamente separada y que modificarla no altera el SHA del original. No existen todavía edición de hechos en pantalla, recálculo controlado ni comparación original/copia por orden y elemento. No se anuncia un laboratorio funcional.
