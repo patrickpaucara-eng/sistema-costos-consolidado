@@ -48,3 +48,4 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 | E22 | Barra lateral | Lista larga de enlaces | Pedido del dueño: menú por grupos (Definir, Estimar, Registrar, Entregar, Aprender) con ícono característico y nombre, que se despliega al hacer clic (estilo botones de Odoo) | Codex |
 | E23 | Menú «Simulación» | Sigue visible | El dueño descartó la simulación que edita el pasado (23-nov); se reemplaza por Futuro (proyección por hechos) y por el modo laboratorio (E10) | Codex |
 | E24 | Propuestas | Una sola lista | Mensajes a departamentos = solo filtrar: propuestas agrupadas por decisor (Compras, Producción, Ventas, Gerencia…) con su paquete descargable; sin envío ni API | Codex |
+| E25 | ESTIMADO | Se estima sobre el costo final, sin pasar por el motor (sin ruta) | Rehacer: pronóstico por recurso → motor (decisión 25-nov) | Claude |
