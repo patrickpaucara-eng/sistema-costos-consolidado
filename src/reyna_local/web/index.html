@@ -1233,7 +1233,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     cell(box,'h3','Sello del resultado');
     [['Libro de datos',s.libro],['Huella del libro (SHA-256)',s.huella_libro],['Versión del sistema',s.version_sistema],['Método',s.metodo],['Semilla / simulaciones',`${s.semilla} / ${s.simulaciones}`],['Calculado',s.calculado]].forEach(([k,v])=>{const p=cell(box,'p','');cell(p,'b',k+': ');p.append(String(v));});
     const est=cell(box,'p','Verificando…'); $('sello-global').textContent='Sello: verificando…';
-    try{ const x=await fetch('/api/sello',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:{sello:s}})}); const j=await x.json();
+    try{ const x=await fetch('/api/sello',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:r})}); const j=await x.json();
       if(revision!==selloRevision)return;
       est.textContent={RESULTADO_ALTERADO:'✗ Alguna cifra del resultado cambió después del cálculo: no es el resultado sellado.',VIGENTE:'✓ Sello vigente: el resultado y el libro con que se calculó no han cambiado.',LIBRO_MODIFICADO:'✗ El libro cambió después del cálculo: vuelve a calcular para emitir un resultado nuevo.',LIBRO_NO_DISPONIBLE:'El libro de origen no está en este equipo.',SIN_VERIFICAR_OFFLINE:'Sello incluido. La comparación con el libro de datos se hace en el programa (EXE).'}[j.estado]||j.estado; est.className=j.estado==='VIGENTE'?'ok':'xx'; $('sello-global').textContent='Sello: '+j.estado; }catch{ if(revision===selloRevision){est.textContent='No se pudo verificar el sello.'; $('sello-global').textContent='Sello: no verificado';} }
   }

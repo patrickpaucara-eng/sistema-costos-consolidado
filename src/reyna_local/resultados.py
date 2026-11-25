@@ -292,7 +292,8 @@ def _tramo(o, e, l, nom, k):
                                 destino=l["destino"], destino_nombre=nom.get(l["destino"], l["destino"]), criterio=l["criterio"],
                                 criterio_nombre=nom.get(l["criterio"], l["criterio"]), cantidad_destino=float(l["cantidad_destino"]),
                                 total_criterio=float(l["total_criterio"]), tasa=round(float(l["tasa"]), 6),
-                monto=round(float(l["monto_atribuido"] * k), 2), raiz=bool(l["raiz"]))
+                monto=round(float(l["monto_atribuido"] * k), 2), raiz=bool(l["raiz"]),
+                monto_tramo=round(float(l["tasa"] * l["cantidad_destino"]), 2))   # E21: lo que fluye por el tramo completo (todas las órdenes)
 
 
 def _kardex(libro, val, periodo, nom):

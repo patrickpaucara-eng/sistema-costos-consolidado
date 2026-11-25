@@ -64,3 +64,18 @@ def test_pronostico_puntual_ingenuo_con_poca_historia_y_modelo_con_suficiente():
     assert A.pronostico_puntual([5, 7, 9], 3) == ([9.0, 9.0, 9.0], "INGENUO")
     v, m = A.pronostico_puntual([float(10 + i) for i in range(12)], 2)
     assert len(v) == 2 and m and v[0] > 15
+
+
+def test_e5_la_pantalla_verifica_el_resultado_completo():
+    """E5 (25-nov): la pantalla enviaba solo el bloque «sello»; como la huella cubre todo el resultado, siempre salía RESULTADO_ALTERADO."""
+    from pathlib import Path
+    html = (Path(__file__).resolve().parents[1] / "src/reyna_local/web/index.html").read_text(encoding="utf-8")
+    assert "JSON.stringify({resultados:{sello:s}})" not in html and "JSON.stringify({resultados:r})" in html
+
+
+def test_e21_cada_tramo_informa_su_monto_completo():
+    import json
+    from pathlib import Path
+    r = json.loads((Path(__file__).resolve().parents[1] / "datos/resultados/frenosa_2010-12_REAL.json").read_text(encoding="utf-8"))
+    t = [x for x in r["trazas"] if x["etapa"] == "P4A" and x["destino"] == "CA_CC"][0]
+    assert t["monto_tramo"] == 5241.0 and t["monto"] < t["monto_tramo"]          # el tramo entero vs la parte de esta orden
