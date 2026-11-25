@@ -71,3 +71,7 @@ El pronóstico granular completo, la precisión retrospectiva y las trazas por r
 ## OT-C27 · bloque B: cotización por intervalos (parcial)
 
 Están comprobadas como funciones aisladas la suma de intervalos, la sugerencia según rangos móviles y las variaciones de tasa y cantidad, con los tres casos manuales. No están conectadas al cotizador ni implementan aún curvas, contratos, persistencia/aprobación de intervalos, bloques, P05–P95 o apertura T13. No es una capacidad activa de usuario.
+
+## OT-C27 · bloque C: suficiencia (parcial)
+
+Se dispone de un inventario de tablas y encabezados del DBD sin alterar el libro. No detecta niveles, no genera plantillas o reglas, no importa datos y no etiqueta procedencia: no debe presentarse como suficiencia operativa. Falta el caso sintético de nivel 0 y la clasificación de Frenosa/SERVITEC.
