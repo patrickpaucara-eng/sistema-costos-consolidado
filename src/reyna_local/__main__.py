@@ -234,6 +234,33 @@ class ReynaHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Disposition", 'attachment; filename="plantilla_dbd_reyna.xlsx"')
             self.send_header("Content-Length", str(len(contenido))); self.end_headers(); self.wfile.write(contenido)
             return
+        if target.path == "/api/cotizar" and method == "POST":
+            from .calculo_local import ruta_libro
+            from .cotizador import cotizar
+            from .raiz import RAIZ
+            import puerto_lectura as P
+            body = self._body()
+            empresa = body.get('empresa')
+            if not isinstance(empresa, str) or not re.fullmatch(r'[a-z0-9_]{1,60}', empresa):
+                raise Problem(400, 'Elige una empresa válida.')
+            try:
+                libro = ruta_libro(store.root, empresa)
+                data = P.leer(libro, ['PERIODO','MEDIDA','EMPRESA'])
+                closed = sorted(str(row['PER_COD']) for row in data['PERIODO'] if str(row.get('PER_EST') or '').strip().upper() == 'C')
+                if not closed: raise Problem(422, 'No hay un periodo cerrado para cotizar.')
+                per = closed[-1]
+                paths = [store.root / 'resultados' / f'{empresa}_{per}_REAL.json', RAIZ / 'datos' / 'resultados' / f'{empresa}_{per}_REAL.json']
+                published = next((path for path in paths if path.is_file()), None)
+                if published is None: raise Problem(404, 'No hay un resultado REAL publicado para el último periodo cerrado.')
+                result = json.loads(published.read_text(encoding='utf-8'))
+                if (validar(result) or result.get('periodo_actual') != per or result.get('sintesis') != 'REAL'
+                        or len(data['EMPRESA']) != 1 or result['empresa'].get('codigo') != data['EMPRESA'][0].get('EMP_COD')):
+                    raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
+                quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'))
+            except ValueError as exc: raise Problem(422, str(exc)) from None
+            except (OSError, KeyError): raise Problem(422, 'No se pudo leer el libro o el resultado publicado.') from None
+            self._json(200, quote)
+            return
         if target.path == "/api/calcular" and method == "POST":
             try:
                 params = parse_qs(target.query, keep_blank_values=True, max_num_fields=3)
