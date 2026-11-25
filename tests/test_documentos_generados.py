@@ -21,7 +21,7 @@ def test_cinco_documentos_con_junit_controlado(tmp_path):
     pruebas = '\n'.join(p.text for p in documentos[2].paragraphs)
     assert 'test_muestra' in pruebas and 'APROBADA' in pruebas and 'FALLIDA' in pruebas
     descriptivo = '\n'.join(p.text for p in documentos[3].paragraphs)
-    assert descriptivo.count('[CLAUDE]') == 6
+    assert '[CLAUDE]' not in descriptivo and 'Síntesis' in descriptivo   # contenido completado por Claude (25-nov)
     manual = '\n'.join(p.text for p in documentos[4].paragraphs)
     assert all(x in manual for x in ('Cargar', 'Importar', 'Cerrar', 'Calcular', 'Dashboard', 'Reportes'))
     assert len(documentos[1].tables) > 0

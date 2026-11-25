@@ -82,10 +82,7 @@ def chats(doc):
 
 
 def etapas(doc):
-    for rel in ('docs/planificacion/PLAN_MONOGRAFIA_Y_SISTEMA.md', 'docs/planificacion/ESTADO.md', 'docs/planificacion/REGLAS_APRENDIDAS.md'):
-        incorporar_md(doc, ROOT / rel)
-    for p in sorted((ROOT / 'docs/entrega/evidencias').rglob('*.md')):
-        incorporar_md(doc, p)
+    incorporar_md(doc, ROOT / 'docs/entrega/ETAPAS_DESARROLLO.md')   # versión breve 80/20 (decisión 25-nov)
 
 
 def proposito(nombre):
@@ -135,8 +132,7 @@ def manual(doc):
 
 
 def descriptivo(doc):
-    for title in ('Arquitectura', 'DBD y MCD', 'Métodos', 'Síntesis REAL, CONTABLE y ESTIMADO', 'Analítica', 'Seguridad'):
-        doc.add_heading(title, 2); doc.add_paragraph('[CLAUDE] Completar y validar el contenido técnico de esta sección.')
+    incorporar_md(doc, ROOT / 'docs/entrega/MANUAL_DESCRIPTIVO.md')
 
 
 def generar(destino, junit=None):
