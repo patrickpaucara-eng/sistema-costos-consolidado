@@ -59,3 +59,7 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 | C26-E4 | Planta de costo | Grafo enlazado por bloques | Bloques filtran trazas observadas | No se construyó navegación encadenada por nodo | Completar interacción y verificar relaciones entre nodos | Parcial |
 | C26-E15 | Cotizador | Varias actividades y materiales en un pedido | Un selector de actividad y uno de material por petición | Interfaz mínima de captura | Añadir varias líneas sin perder cantidades | Parcial |
 | C26-E7 | Detalle por trabajador | Mostrar ejemplo de técnicos de SERVITEC | Se muestra el aviso de disponibilidad | Falta vista individual para el ejemplo | Incorporar detalle si el contrato lo identifica | Parcial |
+
+## OT-C27 · bloque D: registro y MOD (pendiente)
+
+`tests/test_capacidad_inicial.py` exige una lista exacta de ocho transacciones. Habilitar T09/T12/T13/T18.2–T18.7/T20.1/T21/T26/T29/T29.1 contradice esa prueba, que no está entre las autorizadas para modificación. No se habilitaron transacciones ni se cambió la semántica MOD sin completar sus casos por operación y la verificación de costos REAL/CONTABLE. E27 queda pendiente de prueba integrada.
