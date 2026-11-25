@@ -49,3 +49,13 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 | E23 | Menú «Simulación» | Sigue visible | El dueño descartó la simulación que edita el pasado (23-nov); se reemplaza por Futuro (proyección por hechos) y por el modo laboratorio (E10) | Codex |
 | E24 | Propuestas | Una sola lista | Mensajes a departamentos = solo filtrar: propuestas agrupadas por decisor (Compras, Producción, Ventas, Gerencia…) con su paquete descargable; sin envío ni API | Codex |
 | E25 | ESTIMADO | Se estima sobre el costo final, sin pasar por el motor (sin ruta) | Rehacer: pronóstico por recurso → motor (decisión 25-nov) | Claude |
+
+## OT-C26 · límites de integración
+| # | Paso | Esperado | Obtenido | Causa probable | Corrección propuesta | Estado |
+|---|---|---|---|---|---|---|
+| C26-E2 | Controles Desde/Hasta/Agrupar | Solo en Periodos | Siguen visibles en barra | `tests/test_esqueleto_navegacion.py` exige visibilidad global y sincronización | Actualizar la prueba de aceptación por cambio de requisito con autorización expresa | Bloqueado; no se editó prueba existente |
+| C26-E21 | Tramos | Monto total y parte de la orden | Solo parte de orden disponible | `trazas` no publica monto total del tramo | Ampliar contrato y fuente por responsable de cálculo | Parcial: se explica tasa y límite |
+| C26-E4 | Planta de costo | Grafo enlazado por bloques | Bloques filtran trazas observadas | No se construyó navegación encadenada por nodo | Completar interacción y verificar relaciones entre nodos | Parcial |
+| C26-E15 | Cotizador | Varias actividades y materiales en un pedido | Un selector de actividad y uno de material por petición | Interfaz mínima de captura | Añadir varias líneas sin perder cantidades | Parcial |
+
+| C26-E7 | Detalle por trabajador | Mostrar ejemplo de técnicos de SERVITEC | Se muestra el aviso de disponibilidad | Falta vista individual para el ejemplo | Incorporar detalle si el contrato lo identifica | Parcial |
