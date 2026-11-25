@@ -24,3 +24,7 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-25,08:15,08:30,OT-C21 proyección granular y pruebas,Monografía,Codex,Caso MINI bloques identidad y sensibilidad verificados sobre copias en memoria
 2026-11-24,22:46,22:47,OT-C17 dependencia de pantallas,Monografía,Codex,Esperando integración externa de C14 y C15
 2026-11-25,08:40,08:52,OT-C17 navegación y borrador,Monografía,Codex,Recorrido visual y conservación del borrador comprobados; aviso común de proyección validado
+2026-11-24,22:33,22:38,OT-C22 calibradores numéricos y bloqueo,Monografía,Codex,Mediana guardas umbral y probabilidad comprobados; faltan decisiones de evaluación para otros calibradores
+2026-11-24,22:47,22:51,OT-C22 persistencia y rechazo,Monografía,Codex,Rechazo no reaparece con evidencia idéntica y vigencia no retroactiva
+2026-11-24,22:51,22:55,OT-C22 lectura de componentes,Monografía,Codex,Calibración mensual de consumo y merma probada sobre libro temporal; integración aún bloqueada
+2026-11-25,08:30,08:50,OT-C22 guardas y estándar vigente,Monografía,Codex,Calibración API y cotizador probados; conexión a C21 pendiente de integración

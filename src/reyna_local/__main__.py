@@ -234,6 +234,52 @@ class ReynaHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Disposition", 'attachment; filename="plantilla_dbd_reyna.xlsx"')
             self.send_header("Content-Length", str(len(contenido))); self.end_headers(); self.wfile.write(contenido)
             return
+        if target.path == "/api/aprendizaje" and method == "GET":
+            from .aprendizaje import leer_capa
+            try:
+                q = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
+                if set(q) != {'empresa'} or len(q['empresa']) != 1 or not re.fullmatch(r'[a-z0-9_]{1,60}',q['empresa'][0]): raise ValueError('Empresa inválida.')
+                data = leer_capa(q['empresa'][0],store.root)
+            except (ValueError, OSError) as exc: raise Problem(422,str(exc)) from None
+            self._json(200,{'empresa':q['empresa'][0],'calibraciones':data})
+            return
+        if target.path == "/api/aprendizaje/calibrar" and method == "POST":
+            from datetime import date
+            from .aprendizaje import calibrar, registrar
+            from .calculo_local import ruta_libro
+            from .libro_dbd import empresa as leer_empresa
+            from .raiz import RAIZ
+            body=self._body(); name=body.get('empresa')
+            if not isinstance(name,str) or not re.fullmatch(r'[a-z0-9_]{1,60}',name): raise Problem(400,'Empresa inválida.')
+            try:
+                book=ruta_libro(store.root,name); code,_=leer_empresa(book); published={}
+                for folder in (store.root/'resultados',RAIZ/'datos'/'resultados'):
+                    for path in sorted(folder.glob(f'{name}_????-??_REAL.json')):
+                        row=json.loads(path.read_text(encoding='utf-8')); period=row.get('periodo_actual')
+                        if period not in published: published[period]=row
+                candidates=calibrar(book,code,published)
+                saved=registrar(store.root/'aprendizaje'/f'{name}.json',candidates,date.today().isoformat())
+            except (ValueError, OSError, KeyError) as exc: raise Problem(422,str(exc)) from None
+            self._json(200,{'empresa':name,'calibraciones':saved})
+            return
+        if target.path == "/api/aprendizaje/decidir" and method == "POST":
+            from datetime import date
+            from .aprendizaje import decidir
+            body=self._body(); identifier=body.get('id'); decision=body.get('decision')
+            if not isinstance(identifier,str) or not re.fullmatch(r'[0-9a-f]{64}',identifier) or decision not in ('APROBAR','RECHAZAR'):
+                raise Problem(400,'Identificador o decisión inválidos.')
+            try:
+                matches=[]
+                if (store.root/'aprendizaje').is_symlink(): raise ValueError('Directorio de aprendizaje inválido.')
+                for path in (store.root/'aprendizaje').glob('*.json'):
+                    if path.is_symlink(): continue
+                    data=json.loads(path.read_text(encoding='utf-8'))
+                    if any(x.get('id')==identifier for x in data): matches.append(path)
+                if len(matches)!=1: raise ValueError('Calibración inexistente o ambigua.')
+                result=decidir(matches[0],identifier,decision,date.today().isoformat(),actor=None)
+            except (ValueError, OSError, KeyError, TypeError) as exc: raise Problem(422,str(exc)) from None
+            self._json(200,result)
+            return
         if target.path == "/api/cotizar" and method == "POST":
             from .calculo_local import ruta_libro
             from .cotizador import cotizar
@@ -256,7 +302,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 if (validar(result) or result.get('periodo_actual') != per or result.get('sintesis') != 'REAL'
                         or len(data['EMPRESA']) != 1 or result['empresa'].get('codigo') != data['EMPRESA'][0].get('EMP_COD')):
                     raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
-                quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'))
+                quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'), producto=body.get('producto'), carpeta_aprendizaje=store.root, empresa_aprendizaje=empresa)
             except ValueError as exc: raise Problem(422, str(exc)) from None
             except (OSError, KeyError): raise Problem(422, 'No se pudo leer el libro o el resultado publicado.') from None
             self._json(200, quote)

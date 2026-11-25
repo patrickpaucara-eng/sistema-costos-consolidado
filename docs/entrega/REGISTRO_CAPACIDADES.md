@@ -62,3 +62,7 @@ El endpoint `POST /api/exportar?tipo=...` genera libros de resultados, analític
 ## OT-C01 · Visualización del contrato de resultados
 
 La navegación y el dashboard leen el contrato validado por `/api/resultados`; el ejemplo de reemplazo está rotulado. Frenosa julio 2010 REAL se distribuye como una captura académica: compras y cantidades vendidas simuladas, sujeta a validación. Las listas vacías se muestran como información no disponible. Ver [entrega y capturas](evidencias/OT-C01/ENTREGA.md); la salida aún no acredita un costo empresarial oficial.
+
+### OT-C22 · Aprendizaje con guardas (revisión parcial)
+
+Las pruebas de `tests/test_aprendizaje.py` cubren la mediana y los cinco casos manuales, rechazo persistente, vigencia sin cambios retroactivos y estabilidad de costos REAL/CONTABLE. El cotizador consulta el estándar vigente cuando se indica producto y conserva la cantidad explícita. La conexión de proyección queda pendiente hasta integrar C21; la evidencia y límites están en `evidencias/C22_APRENDIZAJE.md`. Esta capacidad no acredita autonomía comercial ni valida estándares con las fuentes de Tino.
