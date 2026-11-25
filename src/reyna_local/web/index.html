@@ -1276,7 +1276,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
   document.querySelectorAll('[data-exportar]').forEach(button=>button.addEventListener('click',async()=>{
     $('export-status').textContent=MSG.preparando; button.disabled=true;
     try { if(button.dataset.exportar!=='codigo' && (!resultadoActual || resultadoActual.periodo_actual!==$('result-periodo').value || resultadoActual.sintesis!==$('result-sintesis').value)) throw Error();
-      const r=await fetch('/api/exportar?tipo='+button.dataset.exportar,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:resultadoActual})}); if(!r.ok) throw Error();
+      const r=await fetch('/api/exportar?tipo='+button.dataset.exportar,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resultados:resultadoActual,empresa:$('result-empresa').value})}); if(!r.ok) throw Error();
       const x=await r.json(); const a=document.createElement('a'); a.href='/api/descargar?archivo='+encodeURIComponent(x.ruta.split(/[\\/]/).pop()); a.download=''; document.body.appendChild(a); a.click(); a.remove();
       $('export-status').textContent='Reporte listo: revisa tus descargas.'; }
     catch { $('export-status').textContent=MSG.reporteMal; } finally {button.disabled=false;}

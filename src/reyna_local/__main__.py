@@ -403,7 +403,11 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 if set(params) != {"tipo"} or len(params["tipo"]) != 1 or params["tipo"][0] not in TIPOS:
                     raise ValueError("Elige un tipo de reporte válido.")
                 body = self._body()
-                ruta = exportar(body.get("resultados"), params["tipo"][0], store.root / "exportaciones")
+                granular = None
+                if params["tipo"][0] == "proyeccion":
+                    from .exportar import obtener_proyeccion
+                    granular = obtener_proyeccion(body.get("resultados") or {}, store.root, body.get("empresa"))
+                ruta = exportar(body.get("resultados"), params["tipo"][0], store.root / "exportaciones", proyeccion_granular=granular)
             except ValueError as exc:
                 raise Problem(HTTPStatus.BAD_REQUEST, str(exc)) from None
             self._json(HTTPStatus.CREATED, {"ruta": str(ruta), "tipo": params["tipo"][0]})

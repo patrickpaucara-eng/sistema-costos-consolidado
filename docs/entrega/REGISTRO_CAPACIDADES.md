@@ -66,3 +66,7 @@ La navegación y el dashboard leen el contrato validado por `/api/resultados`; e
 ### OT-C22 · Aprendizaje con guardas (revisión parcial)
 
 Las pruebas de `tests/test_aprendizaje.py` cubren la mediana y los cinco casos manuales, rechazo persistente, vigencia sin cambios retroactivos y estabilidad de costos REAL/CONTABLE. El cotizador consulta el estándar vigente cuando se indica producto y conserva la cantidad explícita. La conexión de proyección queda pendiente hasta integrar C21; la evidencia y límites están en `evidencias/C22_APRENDIZAJE.md`. Esta capacidad no acredita autonomía comercial ni valida estándares con las fuentes de Tino.
+
+### OT-C24b · Excel de proyección y manual breve
+
+El botón de exportación y el comando de entregables consultan la proyección granular C21 del libro cuya empresa y huella coinciden con el resultado; las hojas identifican la base y la proyección integral REAL aunque se exporte otra síntesis. `tests/test_c24b_proyeccion.py` comprueba la identidad del primer mes con factores 1, la sensibilidad, seis meses mediante API, que el libro no cambia y el rechazo de libro distinto. El manual cubre las cinco secciones con siete capturas. La aceptación metodológica y el recorrido E2E completo siguen pendientes de revisión independiente y del responsable correspondiente.

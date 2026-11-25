@@ -32,7 +32,7 @@ def _columnas(rows):
     return list(dict.fromkeys(key for row in rows for key in row))
 
 
-def _libro(resultados, tipo, destino):
+def _libro(resultados, tipo, destino, proyeccion_granular=None):
     libro = Workbook()
     resumen = libro.active
     resumen.title = 'Identificación'
@@ -83,6 +83,23 @@ def _libro(resultados, tipo, destino):
             exacto = repr(valor) if isinstance(valor, float) and float(format(valor, '.16g')) != valor else valor
             hoja.append([campo, _celda(exacto)])
         hoja.freeze_panes = 'A2'
+    if tipo == 'proyeccion' and proyeccion_granular is not None:
+        # C21 devuelve proyección integral REAL sobre el último periodo del libro.
+        # No debe confundirse con la síntesis o periodo histórico seleccionado.
+        for nombre in ('Proyección granular', 'Sensibilidad'):
+            del libro[nombre]
+        hoja = libro.create_sheet('Proyección por hechos')
+        hoja.append(['Base del libro', proyeccion_granular['base'], 'Síntesis proyectada', 'REAL integral'])
+        filas = []
+        for mes in proyeccion_granular['meses']:
+            for producto in mes['productos']:
+                fila = {'periodo': mes['periodo'], **{k: v for k, v in producto.items() if k != 'elementos'}}
+                fila.update({'elemento_' + k: v for k, v in producto.get('elementos', {}).items()})
+                filas.append(fila)
+        _tabla_en_hoja(hoja, filas); hoja.freeze_panes = 'A3'
+        hoja = libro.create_sheet('Sensibilidad')
+        hoja.append(['Base del libro', proyeccion_granular['base'], 'Unidad', 'Variación del margen'])
+        _tabla_en_hoja(hoja, proyeccion_granular['sensibilidad']); hoja.freeze_panes = 'A3'
     libro.save(destino)
     libro.close()
 
@@ -419,7 +436,34 @@ def _presentacion_html(r, destino):
     destino.write_text(page, encoding='utf-8')
 
 
-def exportar(resultados, tipo, carpeta):
+
+def obtener_proyeccion(resultados, carpeta, empresa_id=None):
+    """Invoca C21 para el libro de la empresa sellado en el resultado, sin modificarlo."""
+    from .calculo_local import ruta_libro
+    from .libro_dbd import empresa, huella
+    from .proyeccion import proyectar_granular
+    import re
+    if not isinstance(resultados, dict):
+        raise ValueError('Se requieren resultados para proyectar.')
+    sello = resultados.get('sello') or {}
+    if not isinstance(sello, dict):
+        raise ValueError('El sello del resultado no es válido.')
+    if not empresa_id:
+        nombre = sello.get('libro', '')
+        if not isinstance(nombre, str) or Path(nombre).name != nombre:
+            raise ValueError('El resultado no identifica un libro válido para proyectar.')
+        empresa_id = Path(nombre).stem
+    if not isinstance(empresa_id, str) or not re.fullmatch(r'[a-z0-9_]{1,60}', empresa_id):
+        raise ValueError('La empresa elegida no es válida.')
+    libro = ruta_libro(carpeta, empresa_id)
+    codigo, _ = empresa(libro)
+    if codigo != (resultados.get('empresa') or {}).get('codigo'):
+        raise ValueError('La empresa del resultado no coincide con el libro de proyección.')
+    if not sello.get('huella_libro') or sello['huella_libro'] != huella(libro):
+        raise ValueError('El libro cambió o el resultado no tiene huella: vuelve a calcular antes de proyectar.')
+    return proyectar_granular(libro, codigo, meses=6, carpeta_aprendizaje=carpeta)
+
+def exportar(resultados, tipo, carpeta, proyeccion_granular=None):
     if tipo not in TIPOS:
         raise ValueError('El tipo de reporte no existe.')
     if tipo not in SIN_RESULTADOS:
@@ -436,7 +480,7 @@ def exportar(resultados, tipo, carpeta):
     destino = carpeta / (tipo + '-' + uuid4().hex + TIPOS[tipo])
     try:
         if tipo in SECCIONES:
-            _libro(resultados, tipo, destino)
+            _libro(resultados, tipo, destino, proyeccion_granular=proyeccion_granular)
         elif tipo == 'html':
             _html(resultados, destino)
         elif tipo == 'informe':

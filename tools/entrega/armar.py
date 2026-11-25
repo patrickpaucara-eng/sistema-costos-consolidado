@@ -107,6 +107,8 @@ def armar_c24(periodo, salida):
     salida = Path(salida); salida.mkdir(parents=True, exist_ok=True)
     with __import__('tempfile').TemporaryDirectory(prefix='c24-export-') as temporal:
         tmp = Path(temporal)
+        from reyna_local.exportar import obtener_proyeccion
+        granular = obtener_proyeccion(cargar(periodo, 'REAL'), tmp, 'frenosa')
         hechos = doc.generar(salida)
         hechos.append(mover(exportar(None, 'codigo', tmp), salida / '03_codigo_fuente.docx'))
         for sintesis in SINTESIS:
@@ -114,7 +116,7 @@ def armar_c24(periodo, salida):
             for tipo, nombre in (('resultados','06_resultados_{s}.xlsx'),
                                  ('analitica','07_analitica_{s}.xlsx'),
                                  ('proyeccion','08_proyeccion_propuestas_{s}.xlsx')):
-                hechos.append(mover(exportar(r, tipo, tmp), salida / nombre.format(s=sintesis)))
+                hechos.append(mover(exportar(r, tipo, tmp, proyeccion_granular=granular if tipo == 'proyeccion' else None), salida / nombre.format(s=sintesis)))
         from reyna_local.exportar import sistema_html
         from reyna_local.calculo_local import catalogo
         lib = next(l for l in catalogo(tmp) if l['id'] == 'frenosa')

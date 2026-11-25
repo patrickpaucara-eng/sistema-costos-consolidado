@@ -63,7 +63,7 @@ def generar(salida):
             evidencia = False
             aviso = f'Capturas pendientes: {type(exc).__name__}: {exc}'
         doc = nuevo('Manual de usuario')
-        doc.add_paragraph('Seleccione empresa, período y síntesis en la barra superior. T14.1 y T16: en habilitación.')
+        doc.add_paragraph('Seleccione empresa, período y síntesis en la barra superior.')
         for titulo, section, accion in PANTALLAS:
             doc.add_heading(titulo, 1); doc.add_paragraph(accion)
             imagen = carpeta/(section+'.png')
