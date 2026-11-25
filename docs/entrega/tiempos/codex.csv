@@ -22,3 +22,5 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-24,22:38,22:46,OT-C23 cotizador TDABC y pruebas,Monografía,Codex,Caso manual API y lectura sin modificar libro; aprendizaje C22 pendiente
 2026-11-24,22:32,22:33,OT-C21 dependencia de C18,Monografía,Codex,Esperando integración externa de C18 exigida por la orden
 2026-11-25,08:15,08:30,OT-C21 proyección granular y pruebas,Monografía,Codex,Caso MINI bloques identidad y sensibilidad verificados sobre copias en memoria
+2026-11-24,22:46,22:47,OT-C17 dependencia de pantallas,Monografía,Codex,Esperando integración externa de C14 y C15
+2026-11-25,08:40,08:52,OT-C17 navegación y borrador,Monografía,Codex,Recorrido visual y conservación del borrador comprobados; aviso común de proyección validado
