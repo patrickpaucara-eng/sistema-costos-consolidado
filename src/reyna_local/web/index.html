@@ -1107,6 +1107,16 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     grupos.forEach(([nombre, filtro])=>{const b=cell(root,'button',nombre); b.type='button';b.addEventListener('click',()=>{
       const filas=trazas.filter(filtro); table('planta-detalle',filas,[['etapa','Etapa'],['origen_nombre','Origen'],['destino_nombre','Destino'],['objeto','Orden'],['monto','Parte de la orden S/']]);
     });});
+    const grafo=cell(root,'div','');grafo.id='planta-nodos';const salida=cell(root,'div','');salida.id='planta-enlaces';
+    function nodo(codigo,nombre){const b=cell(grafo,'button',nombre||codigo);b.type='button';b.dataset.nodo=codigo;b.addEventListener('click',()=>{
+      salida.replaceChildren();const vecinos=trazas.filter(t=>t.origen===codigo||t.destino===codigo);
+      const vistos=new Set();vecinos.forEach(t=>{const clave=JSON.stringify([t.origen,t.destino,t.etapa,t.monto_tramo]);if(vistos.has(clave))return;vistos.add(clave);
+        const fila=cell(salida,'p','');cell(fila,'span',`${t.origen_nombre} → ${t.destino_nombre} · ${t.etapa} · monto del tramo: ${value(t.monto_tramo)} · `);
+        const siguiente=t.origen===codigo?t.destino:t.origen;const etiqueta=t.origen===codigo?t.destino_nombre:t.origen_nombre;
+        const boton=cell(fila,'button','Ver '+etiqueta);boton.type='button';boton.addEventListener('click',()=>{grafo.querySelectorAll('button').forEach(x=>{if(x.dataset.nodo===siguiente)x.click();});});
+      });
+    });}
+    const nodos=new Map();trazas.forEach(t=>{if(t.origen)nodos.set(t.origen,t.origen_nombre);if(t.destino)nodos.set(t.destino,t.destino_nombre);});nodos.forEach((nombre,codigo)=>nodo(codigo,nombre));
     if(!trazas.length) cell(details,'p','No hay trazas disponibles para esta síntesis.');
   }
   function opcionesCotizador(r) {

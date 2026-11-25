@@ -96,3 +96,7 @@ E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos.
 La vista de sensibilidad sitúa los cambios a ambos lados de cero. Una prueba Chromium confirma aprobar y rechazar calibraciones usando el servidor real y datos temporales. E4 (nodos enlazados) y E7 (detalle por persona SERVITEC) siguen pendientes; no se consideran aceptados.
 ## OT-C30 · avance parcial
 Se probó una comparación aislada de resultados por orden y elemento. No existe aún la copia y recálculo desde una pantalla, ni detección de suficiencia o plantillas por nivel. La función no constituye un laboratorio operativo.
+
+## OT-C29b · alcance parcial
+
+La planta permite seleccionar nodos y consultar las conexiones presentes en las trazas, con el monto del tramo. La interacción y la clasificación completa por niveles requieren revisión visual. E7 pendiente: el resultado publicado de SERVITEC contiene el recurso agregado «Técnicos», sin identificar personas en `modelo.recursos`; falta una fuente o contrato de detalle individual. No se atribuyeron importes a trabajadores ficticios.
