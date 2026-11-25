@@ -92,3 +92,5 @@ E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos.
 - F/C/E: pendientes los alcances funcionales de pantallas, niveles y laboratorio.
 
 **E26 (Claude, 25-nov 17:20):** habilitadas por libro T18.2–T18.7, T20.1, T21, T26, T29, T29.1 (prueba `tests/test_registro_completo.py`). T09/T12/T13 dependen de TARIFA/ESTIMACION: se conectan al aceptar una cotización del cotizador nuevo (C28).
+## OT-C29 · avance parcial
+La vista de sensibilidad sitúa los cambios a ambos lados de cero. Una prueba Chromium confirma aprobar y rechazar calibraciones usando el servidor real y datos temporales. E4 (nodos enlazados) y E7 (detalle por persona SERVITEC) siguen pendientes; no se consideran aceptados.

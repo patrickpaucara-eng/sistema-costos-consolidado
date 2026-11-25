@@ -236,7 +236,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
 :root{--canvas:#eeeeee;--paper:#fff;--ink:#222;--soft:#555;--rail:#333;--rail-ink:#f2f2f2;--line:#ccc;--accent:#505050;--accent-dark:#222;--accent-light:#eee;--focus:#555;--radius:8px}
 .selector-global{background:#ededed}.kpi,.paso div{background:#f1f1f1;border-color:#777}.data-badge{background:#eee;color:#333}.ok{color:#333}.xx{color:#a32117}.inicio-tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem}.inicio-tarjetas a{display:block;background:#f4f4f4;padding:1rem;border:1px solid #bbb;border-radius:8px;text-decoration:none}.inicio-tarjetas a:hover{background:#e4e4e4}
 .nav-menu summary{cursor:pointer;padding:.6rem;border-radius:6px;font-weight:700}.nav-menu summary:hover{background:#505050}.nav-menu>div{display:grid;padding-left:.55rem}
-.sens-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 1fr;gap:.5rem;align-items:center}.sens-track{display:flex;gap:2px}.sens-track span{display:block;height:12px}
+.sens-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 1fr;gap:.5rem;align-items:center}.sens-track{position:relative;height:28px;border-left:1px solid transparent;background:linear-gradient(to right,transparent 49.8%,#333 49.8%,#333 50.2%,transparent 50.2%)}.sens-track span{position:absolute;display:block;height:10px}
 </style></head>
 <body>
   <a class="skip" href="#principal">Ir al contenido</a>
@@ -1135,7 +1135,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     try {const response=await fetch('/api/proyeccion?'+new URLSearchParams({empresa,meses:'6'})); const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo consultar.');if(serial!==sensibilidadSerial)return;
       const rows=data.sensibilidad||[];estado.textContent=rows.length?`Base: ${data.base}. Cambios en el margen del primer mes.`:'Sensibilidad no disponible.';
       const max=Math.max(1,...rows.flatMap(x=>[Math.abs(Number(x.mas)||0),Math.abs(Number(x.menos)||0)]));
-      rows.forEach(x=>{const row=cell(root,'div','');row.className='sens-row';cell(row,'span',x.factor);const track=cell(row,'div','');track.className='sens-track';for(const [v,color] of [[x.menos,'#b85142'],[x.mas,'#116b61']]){const bar=cell(track,'span','');bar.style.width=(Math.abs(v)/max*45)+'%';bar.style.background=color;bar.title=number(v);}cell(row,'span',`${number(x.menos)} / ${number(x.mas)}`);});
+      rows.forEach(x=>{const row=cell(root,'div','');row.className='sens-row';cell(row,'span',x.factor);const track=cell(row,'div','');track.className='sens-track';for(const [i,[v,color]] of [[x.menos,'#b85142'],[x.mas,'#116b61']].entries()){const bar=cell(track,'span','');const ancho=Math.abs(v)/max*48;bar.style.width=ancho+'%';bar.style.left=(v<0?50-ancho:50)+'%';bar.style.top=(i*13)+'px';bar.style.background=color;bar.title=number(v);bar.setAttribute('aria-label',(i?'Aumento':'Disminución')+': '+number(v));}cell(row,'span',`${number(x.menos)} / ${number(x.mas)}`);});
     }catch(e){if(serial===sensibilidadSerial)estado.textContent=e.message;}
   }
   function propuestasPorDecisor(r){
