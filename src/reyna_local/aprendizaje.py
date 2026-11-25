@@ -124,5 +124,5 @@ def calibrar_componentes(libro, empresa):
         for kind, field in [('consumo','CMP_CAN_EST'),('merma','CMP_MERMA')]:
             observations = values[kind]
             if len(observations) < 2 or base.get(field) is None: continue
-            out.append(calibrar_mediana([value for _,value in observations],base[field],observations[-1][0],kind,{'producto':key[0],'recurso':key[1]}))
+            out.append(calibrar_mediana([value for _,value in observations],base[field],observations[-1][0],kind,{'empresa':empresa,'producto':key[0],'recurso':key[1]}))
     return out
