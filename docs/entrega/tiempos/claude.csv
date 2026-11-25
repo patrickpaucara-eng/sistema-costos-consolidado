@@ -27,3 +27,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-24,,,2.9b rechazos→pérdida y residuo; diseños 2.4/2.5; órdenes C20–C23,2,Claude,VERDE 376
 2026-11-25,,,Integración C13-C20/C23 (PR #10-#17), guardas de C22,2,Claude,VERDE 398
 2026-11-25,,,Integración C21/C17/C22 y conexión estándar aprendido→proyección,1.5,Claude,VERDE 416
+2026-11-25,,,T14.1 y T16 habilitadas,1,Claude,VERDE 417

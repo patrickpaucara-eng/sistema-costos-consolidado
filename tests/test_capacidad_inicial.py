@@ -206,7 +206,7 @@ class CapacidadInicial(unittest.TestCase):
         workspace, _ = self.import_workspace("Costo de centro por API")
         status, detail = self.request("GET", workspace)
         self.assertEqual(status, 200, detail)
-        self.assertEqual(detail["transactions"], ["T14", "T15", "T17", "T18", "T19", "T20"])
+        self.assertEqual(detail["transactions"], ["T14", "T14.1", "T15", "T16", "T17", "T18", "T19", "T20"])   # T14.1 y T16 habilitadas (plan 2.2, 25-nov)
         result = self.execute(workspace, {
             "transaction": "T17", "user": "CONTAB1", "request_id": "api-t17",
             "header": {"FECHA": 20260430, "PER": "2026-04", "EMP": "B", "CEN": "LINEA1", "MON": "PEN"},
@@ -217,8 +217,8 @@ class CapacidadInicial(unittest.TestCase):
             "transaction": "T16", "user": "SUPERV1", "request_id": "api-t16",
             "header": {"FECHA": 20260430, "PER": "2026-04", "EMP": "B"}, "lines": [],
         })
-        self.assertEqual(status, 400, result)
-        self.assertIn("no está habilitada", result["error"])
+        self.assertEqual(status, 422, result)                 # T16 ya habilitada (25-nov): sin orden de origen la rechaza el motor
+        self.assertIn("OBJ", result["error"])
 
     def test_importacion_rechaza_dos_empresas_operativas(self):
         book = load_workbook(self.workbook)

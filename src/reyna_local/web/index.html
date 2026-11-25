@@ -592,7 +592,6 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       const draftTransaction = draft?.transaction;
       const operations = space.transactions;
       transaction.replaceChildren(makeOption("", "Selecciona una transacción"), ...operations.map((entry) => makeOption(entry)));
-      for (const code of ["T14.1", "T16"]) { const option = makeOption(code, `${code} — pendiente`); option.disabled = true; transaction.add(option); }
       transaction.value = operations.includes(draftTransaction) ? draftTransaction : "";
       currentGuidedCode = transaction.value;
       byId("guided-form").replaceChildren();
