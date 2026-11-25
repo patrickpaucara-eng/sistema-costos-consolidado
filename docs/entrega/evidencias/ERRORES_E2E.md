@@ -83,3 +83,10 @@ Una prueba confirma que el mecanismo existente crea una copia físicamente separ
 ## OT-C27 · bloque F: pantallas (parcial)
 
 E2 implementado y verificado en Chromium: fechas y agrupación solo en Periodos. La prueba existente se actualizó con autorización expresa en OT-C27. E4, E15, E21, E7 y E13 conservan los límites identificados en OT-C26; falta probar decisiones de aprendizaje con calibraciones pendientes y verificar el sello en un EXE recién instalado en Windows.
+
+## OT-C27b · continuación parcial
+
+- D: autorización E26 recibida. Se agregó únicamente una inspección preliminar que identifica operaciones con TRX, TRX_CAMPO y TOP; aún no habilita ejecución, formulario, pruebas de operaciones ni E6/E27. La prueba histórica de lista permanece intacta.
+- A: pendiente pronóstico granular único y retiro de ESTIMADO.
+- B/G: pendientes integración de intervalos, familias y casos estadísticos obligatorios.
+- F/C/E: pendientes los alcances funcionales de pantallas, niveles y laboratorio.

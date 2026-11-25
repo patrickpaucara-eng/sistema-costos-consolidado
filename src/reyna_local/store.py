@@ -30,6 +30,19 @@ ENGINE_SHA256 = "8c962583170cbb200c564bef8edfd95ae931602b82fa2f89f2bb48bcd9ce2a1
 # Explicit API capability boundary. The engine has more configured transactions,
 # but these are the event operations currently covered by the active MVP scope.
 TRANSACTIONS = ("T14", "T14.1", "T15", "T16", "T17", "T18", "T19", "T20")
+# E26: catálogo permitido; una operación adicional requiere sus tres definiciones.
+TRANSACCIONES_E26 = ("T09", "T12", "T13", "T18.2", "T18.3", "T18.4", "T18.5", "T18.6", "T18.7", "T20.1", "T21", "T26", "T29", "T29.1")
+
+
+def detectar_transacciones_e26(tables):
+    """Inspección preliminar; no habilita ejecución ni modifica las ocho operaciones base."""
+    presentes = []
+    for codigo in TRANSACCIONES_E26:
+        if all(any(row and row[0] == codigo for row in tables.get(tabla, {}).get('r', []))
+               for tabla in ('TRX', 'TRX_CAMPO', 'TOP')):
+            presentes.append(codigo)
+    return presentes
+
 PUBLIC = ("EVENTO", "LINEA", "EXISTENCIA", "KARDEX", "RECURSO", "PERIODO", "OBJETO", "CENTRO")
 REQUIRED = {
     "USUARIO", "USUARIO_PERFIL", "PERFIL_TRX", "LOG_TRX", "BITACORA", "EMPRESA",
