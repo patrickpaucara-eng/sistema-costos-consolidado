@@ -18,8 +18,8 @@ Regla de diseño: las pantallas y documentos **solo leen el contrato**; nunca re
 | P1 | Material → orden | Kardex promedio ponderado; merma en exceso aparte |
 | P2/P3 | Mano de obra y servicios directos → actividad u orden | Horas u otro inductor |
 | P4A | Indirectos → centros | m², kWh, % |
-| P4B | Centros de apoyo ↔ entre sí → centros productivos | Recíproco exacto (N = (I − P)⁻¹) |
-| P4D/P4E | Centros → actividades; estratégicas → apoyo → operativas | Inductor único por actividad |
+| P4B | Centros de apoyo del mismo nivel ↔ entre sí → centros productivos | Recíproco exacto entre pares (N = (I − P)⁻¹) |
+| P4D/P4E | Centros → actividades; entre niveles: estratégicas → apoyo → operativas (escalonado, solo hacia abajo); dentro de un mismo nivel: recíproco | Inductor único por actividad |
 | P4C | Actividades operativas → órdenes | Inductor de la actividad; capacidad (CAP) separa el ocio |
 | P5–P7 | Administración, ventas, financieros → órdenes | Inductor del gasto |
 
