@@ -20,3 +20,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-24,22:15,22:29,OT-C18 costeo variable y controlabilidad,Monografía,Codex,Caso manual y tres síntesis comprobadas; pruebas específicas verdes
 2026-11-24,22:26,22:32,OT-C20 costo de calidad y gobierno del dato,Monografía,Codex,Caso manual y conservación de costos verificados con pruebas focalizadas
 2026-11-24,22:38,22:46,OT-C23 cotizador TDABC y pruebas,Monografía,Codex,Caso manual API y lectura sin modificar libro; aprendizaje C22 pendiente
+2026-11-24,22:46,22:47,OT-C17 dependencia de pantallas,Monografía,Codex,Esperando integración externa de C14 y C15
