@@ -38,3 +38,18 @@ Copia del libro en un espacio «laboratorio»; editar hechos en pantalla; recalc
 
 ## F. Pantallas pendientes de la ola 1
 E2 (fechas solo en Periodos; prueba autorizada), E4 (planta con nodos enlazados), E15 (cotizador con varias actividades y materiales), E21 (`monto_tramo` en el contrato + vista), E7 (detalle por persona con SERVITEC), E13 (tornado completo), prueba en navegador de aprobar/rechazar aprendizaje. E5: sello VIGENTE en un EXE recién instalado.
+
+## G. Familias de componentes con lógica de bloques (DBCA) — decisión 25-nov
+Idea del dueño: como en el Diseño de Bloques Completos al Azar, la familia es el «bloque»; dentro de ella las cantidades varían al azar
+(distribución normal) pero el efecto es el mismo. El cotizador habla en componentes reconocibles; el sistema explota la receta de la familia.
+- **Tabla FAMILIA** (FAM_COD, FAM_DES, FAM_UNI) + **FAMILIA_RECETA** (FAM_COD, ACT o REC, cantidad por unidad) + **FAMILIA_PARAM** (parámetros obligatorios).
+- **Receta aprendida:** con las OT reales de la familia, cantidad por unidad de cada inductor → media y desviación. Pasa por las guardas de C22.
+- **Pertenencia:** un componente pertenece a la familia si cada inductor cae en su intervalo de predicción al 95 %: media ± t(0.975, n−1) · s · √(1 + 1/n).
+  Si no cae en ninguna familia → «componente no reconocido»: el sistema obliga a detallar sus actividades.
+- **Mismo efecto (fusionar):** ANOVA de un factor entre dos familias por inductor; p > 0.05 en todos → sugerir fusionar (aprobación del dueño).
+- **Separar:** si dentro de una familia falla la normalidad (Shapiro-Wilk p < 0.05) con n ≥ 8 → sugerir dividirla.
+- **Cotización:** componentes × receta → cantidades por actividad → tasas por intervalo (bloque B) → costo; el rango P05–P95 usa el intervalo de predicción de la receta.
+- **Casos a mano (pruebas obligatorias):**
+  1. Familia A, horas por unidad [10, 11, 9, 10, 10] → media 10, s = 0.7071, intervalo **[7.85, 12.15]** (10 ± 2.15). Componente con 11.5 h → pertenece; con 14 h → no reconocido.
+  2. Familia B [10.2, 9.8, 10.5, 9.9, 10.1] contra A → ANOVA F = 0.087, p = **0.776** > 0.05 → sugerir fusionar.
+- Después del 9-dic (arquitectura objetivo): detección de familia por agrupamiento automático y lectura de familias desde BIM.
