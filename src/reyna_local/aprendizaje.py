@@ -94,3 +94,35 @@ def decidir(ruta, identificador, decision, hoy, actor=None):
     finally:
         if temp and os.path.exists(temp): os.unlink(temp)
     return row
+
+
+def calibrar_componentes(libro, empresa):
+    """Candidatos de consumo y merma a partir de observaciones mensuales del libro."""
+    from collections import defaultdict
+    import puerto_lectura as P
+    data = P.leer(libro, ['DIFERENCIA','COMPONENTE','OBJETO'])
+    objects = {str(o['OBJ_NUM']):o for o in data['OBJETO'] if o.get('OBJ_EMP') in (None,'',empresa)}
+    components = {(str(c['CMP_PRO']),str(c['CMP_REC'])):c for c in data['COMPONENTE'] if c.get('CMP_EMP') in (None,'',empresa)}
+    monthly = defaultdict(lambda: {'real':0.0,'merma':0.0,'orders':set()})
+    for d in data['DIFERENCIA']:
+        if d.get('DIF_EMP') not in (None,'',empresa): continue
+        obj = objects.get(str(d.get('DIF_OBJ')))
+        if not obj or not d.get('DIF_PER') or not d.get('DIF_REC'): continue
+        key = (str(obj.get('OBJ_PRO')),str(d['DIF_REC']),str(d['DIF_PER']))
+        monthly[key]['real'] += float(d.get('DIF_QREAL') or 0)
+        monthly[key]['merma'] += float(d.get('DIF_QMER') or 0)
+        monthly[key]['orders'].add(str(d['DIF_OBJ']))
+    series = defaultdict(lambda: {'consumo':[],'merma':[]})
+    for (prod,rec,per), data_row in sorted(monthly.items()):
+        good = sum(float(objects[o].get('OBJ_CAN') or 0) for o in data_row['orders'])
+        if good > 0: series[(prod,rec)]['consumo'].append((per,data_row['real']/good))
+        if data_row['real'] > 0: series[(prod,rec)]['merma'].append((per,100*data_row['merma']/data_row['real']))
+    out = []
+    for key, values in sorted(series.items()):
+        base = components.get(key)
+        if not base: continue
+        for kind, field in [('consumo','CMP_CAN_EST'),('merma','CMP_MERMA')]:
+            observations = values[kind]
+            if len(observations) < 2 or base.get(field) is None: continue
+            out.append(calibrar_mediana([value for _,value in observations],base[field],observations[-1][0],kind,{'producto':key[0],'recurso':key[1]}))
+    return out
