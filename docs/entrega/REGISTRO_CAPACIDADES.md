@@ -74,3 +74,7 @@ El botón de exportación y el comando de entregables consultan la proyección g
 ### OT-C25 · Cotización con tasas provisionales
 
 Si no existen periodos cerrados, la API usa el último periodo del libro con resultado REAL disponible y añade «tasas provisionales: mes no cerrado». Si hay un periodo cerrado, mantiene su prioridad. Las pruebas cubren Frenosa y SERVITEC, ausencia de resultados y rechazo de una actividad de apoyo sin inductor P4C. El recorrido integrado permanece en 29/30 por E2; no acredita todavía el objetivo de todos los pasos OK. Ver `evidencias/ERRORES_E2E.md`.
+
+### OT-C26 · Vistas de analítica (parcial)
+
+La interfaz consulta cotización, aprendizaje y sensibilidad; presenta bloques de trazas, costeo variable, calidad, rechazos y propuestas por responsable. `tests/test_c26_interaccion.py` recorre las pantallas en Chromium y la evidencia está en `evidencias/C26/`. La aceptación sigue parcial por E2, E21 y los límites de E4 y E15; consultar `evidencias/ERRORES_E2E.md`. No acredita las funciones expresamente diferidas ni validación metodológica.
