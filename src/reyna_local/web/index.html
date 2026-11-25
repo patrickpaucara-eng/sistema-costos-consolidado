@@ -236,6 +236,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
 :root{--canvas:#eeeeee;--paper:#fff;--ink:#222;--soft:#555;--rail:#333;--rail-ink:#f2f2f2;--line:#ccc;--accent:#505050;--accent-dark:#222;--accent-light:#eee;--focus:#555;--radius:8px}
 .selector-global{background:#ededed}.kpi,.paso div{background:#f1f1f1;border-color:#777}.data-badge{background:#eee;color:#333}.ok{color:#333}.xx{color:#a32117}.inicio-tarjetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.8rem}.inicio-tarjetas a{display:block;background:#f4f4f4;padding:1rem;border:1px solid #bbb;border-radius:8px;text-decoration:none}.inicio-tarjetas a:hover{background:#e4e4e4}
 .nav-menu summary{cursor:pointer;padding:.6rem;border-radius:6px;font-weight:700}.nav-menu summary:hover{background:#505050}.nav-menu>div{display:grid;padding-left:.55rem}
+.sens-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 1fr;gap:.5rem;align-items:center}.sens-track{display:flex;gap:2px}.sens-track span{display:block;height:12px}
 </style></head>
 <body>
   <a class="skip" href="#principal">Ir al contenido</a>
@@ -268,7 +269,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       <section id="costos" class="panel stack section-link"><h2>Órdenes del periodo</h2><p class="legend">Busca por producto u orden y haz clic en una fila para ver su ficha (Masiva → Detalle).</p><input id="buscar-orden" class="buscador" type="search" placeholder="Buscar producto u orden…" aria-label="Buscar orden"><p id="result-sintesis-nota"></p><div id="result-estimacion"></div><div id="result-objetos" class="result-table"></div></section>
       <section id="analisis" class="panel stack section-link"><h2>Análisis y relevancia</h2><div id="result-relevancia" class="result-table"></div></section>
       <section id="cotizador" class="panel stack section-link"><h2>Cotizador de pedido</h2><p>Elige actividades operativas y materiales; escribe las cantidades, el precio y el margen deseado.</p><form id="cotizar-form" class="fields"><label>Actividades <select id="cot-actividad"></select></label><label>Cantidad actividad <input id="cot-actividad-cantidad" type="number" min="0" step="any" value="1"></label><label>Material opcional <select id="cot-material"></select></label><label>Cantidad material <input id="cot-material-cantidad" type="number" min="0" step="any" value="0"></label><label>Precio <input id="cot-precio" type="number" min="0" step="any" required></label><label>Margen objetivo (%) <input id="cot-margen" type="number" min="0" max="100" step="any" value="30" required></label><button type="submit">Cotizar</button></form><p id="cot-estado" role="status"></p><div id="cot-resultado" class="result-table"></div></section>
-      <section id="proyeccion" class="panel stack section-link"><h2>Proyección a 6 meses</h2><p class="legend">Determinística: una cifra por mes con el modelo que menos se equivocó fuera de muestra. Estocástica: 2,000 simulaciones Monte Carlo; hay 90 % de probabilidad de que el margen caiga entre P05 y P95.</p><div id="result-proyeccion" class="result-table"></div></section>
+      <section id="proyeccion" class="panel stack section-link"><h2>Proyección a 6 meses</h2><p class="legend">Determinística: una cifra por mes con el modelo que menos se equivocó fuera de muestra. Estocástica: 2,000 simulaciones Monte Carlo; hay 90 % de probabilidad de que el margen caiga entre P05 y P95.</p><div id="result-proyeccion" class="result-table"></div><h3>Sensibilidad del margen (±10 %)</h3><p id="sensibilidad-estado" role="status"></p><div id="sensibilidad-tornado"></div></section>
       <section id="simulacion" class="panel stack section-link"><h2>Simulación y escenarios</h2><p class="legend">Cada barra va del P05 al P95 del margen simulado; el punto es la mediana; la línea roja es margen cero (a su izquierda hay pérdida).</p><div id="result-rangos"></div><div id="result-escenarios" class="result-table"></div></section>
       <section id="propuestas" class="panel stack section-link"><h2>Propuestas</h2><div id="result-propuestas" class="result-table"></div><p id="result-propuestas-total"></p></section><section id="aprendido" class="panel stack section-link"><h2>Lo que aprendió</h2><p class="legend">Seguimiento de propuestas aprobadas y resultados medidos en meses posteriores.</p><div id="aprendizaje" class="kpi-grid"></div><button id="ap-actualizar" type="button">Actualizar calibraciones</button><p id="ap-estado" role="status"></p><div id="ap-calibraciones"></div><div id="seguimiento" class="result-table"></div></section>
       <section id="ruta" class="panel stack section-link"><h2>Ficha de la orden</h2><div id="ficha-cab" class="ficha-cab"></div><div id="ficha-elementos" class="kpi-grid"></div><h3>Hoja de costos por orden</h3><div id="ficha-costos" class="result-table"></div><div id="ficha-sintesis" class="result-table"></div><h3>Ruta del costo</h3><p class="legend">De dónde sale cada sol: recurso → centro o actividad → orden, con el inductor, la tasa y el monto que llega. Los tramos «origen» suman exactamente el costo del elemento (algoritmo de trazabilidad ALG-11).</p>
@@ -1128,11 +1129,21 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     }catch(e){estado.textContent=e.message;}
   }
   $('ap-actualizar').addEventListener('click',cargarAprendizaje);
+  let sensibilidadSerial=0;
+  async function cargarSensibilidad(){
+    const serial=++sensibilidadSerial, empresa=$('result-empresa').value, estado=$('sensibilidad-estado'), root=$('sensibilidad-tornado'); root.replaceChildren(); estado.textContent='Consultando sensibilidad…';
+    try {const response=await fetch('/api/proyeccion?'+new URLSearchParams({empresa,meses:'6'})); const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo consultar.');if(serial!==sensibilidadSerial)return;
+      const rows=data.sensibilidad||[];estado.textContent=rows.length?`Base: ${data.base}. Cambios en el margen del primer mes.`:'Sensibilidad no disponible.';
+      const max=Math.max(1,...rows.flatMap(x=>[Math.abs(Number(x.mas)||0),Math.abs(Number(x.menos)||0)]));
+      rows.forEach(x=>{const row=cell(root,'div','');row.className='sens-row';cell(row,'span',x.factor);const track=cell(row,'div','');track.className='sens-track';for(const [v,color] of [[x.menos,'#b85142'],[x.mas,'#116b61']]){const bar=cell(track,'span','');bar.style.width=(Math.abs(v)/max*45)+'%';bar.style.background=color;bar.title=number(v);}cell(row,'span',`${number(x.menos)} / ${number(x.mas)}`);});
+    }catch(e){if(serial===sensibilidadSerial)estado.textContent=e.message;}
+  }
   function render(r) {
     resultadoActual = r;
     planta(r);
     opcionesCotizador(r);
     cargarAprendizaje();
+    cargarSensibilidad();
     $('result-sintesis-nota').textContent = r.sintesis === 'CONTABLE' ? 'Financieros fuera del inventario (NIC 2 / NIIF 18)' : r.sintesis === 'ESTIMADO' ? 'Estimación estadística fuera de muestra (no es un estándar)' : '';
     const estimados = Object.entries(r.estimacion || {}).map(([producto, datos]) => ({producto, ...datos}));
     if (!estimados.length) $('result-estimacion').replaceChildren(); else table('result-estimacion', estimados, [['producto','Producto'],['cu_total','Costo unitario'],['p05','P05'],['p95','P95'],['metodo','Método'],['mase','MASE']]);
