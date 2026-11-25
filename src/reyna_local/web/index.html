@@ -240,7 +240,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       <div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>Sistema de Costos Reyna</span></div>
       <nav aria-label="Secciones del sistema">
         <p class="nav-grupo">Gerencial · Consultas</p>
-        <a href="#dashboard">Resumen</a><a href="#costos">Órdenes</a><a href="#ruta">Ficha de la orden</a><a href="#inventarios">Inventarios, pérdidas y ocio</a><a href="#normal">Costeo normal y variaciones</a><a href="#comparar">Comparar síntesis</a><a href="#analisis">Relevancia</a><a href="#proyeccion">Proyección</a><a href="#simulacion">Simulación</a><a href="#propuestas">Propuestas</a><a href="#control">Calidad y cuadre</a><a href="#cierre">Cierre y aprobación</a><a href="#modelo">Modelo ABC</a><a href="#datos">Datos del libro</a><a href="#reportes">Reportes</a>
+        <a href="#dashboard">Resumen</a><a href="#periodos">Periodos</a><a href="#costos">Órdenes</a><a href="#ruta">Ficha de la orden</a><a href="#inventarios">Inventarios, pérdidas y ocio</a><a href="#normal">Costeo normal y variaciones</a><a href="#comparar">Comparar síntesis</a><a href="#analisis">Relevancia</a><a href="#proyeccion">Proyección</a><a href="#simulacion">Simulación</a><a href="#propuestas">Propuestas</a><a href="#control">Calidad y cuadre</a><a href="#cierre">Cierre y aprobación</a><a href="#modelo">Modelo ABC</a><a href="#datos">Datos del libro</a><a href="#reportes">Reportes</a>
         <p class="nav-grupo nav-erp">Operativo · Mantenimiento</p>
         <a class="nav-erp" href="#cargar-libro">Cargar empresa (libro DBD)</a><a class="nav-erp" href="#importar">Importar libro de operación</a><a class="nav-erp" href="#espacios">Espacios de trabajo</a><a class="nav-erp" href="#operar">Registrar movimiento</a><a class="nav-erp" href="#consultar">Consultar tablas</a>
       </nav>
@@ -248,6 +248,16 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     </aside>
     <main id="principal"><div id="inicio" class="selector-global"><div class="field"><label for="result-empresa">Empresa</label><select id="result-empresa"><option value="frenosa">Frenosa</option></select></div><div class="field"><label for="result-sintesis">Síntesis</label><select id="result-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></div><div class="field"><label for="result-periodo">Periodo</label><input id="result-periodo" type="month" value="2010-07"></div><button id="result-cargar" type="button">Consultar resultados</button><button id="result-calcular" type="button">Calcular</button><span id="result-status" role="status"></span></div>
       <section id="dashboard" class="panel stack section-link"><h2>Dashboard</h2><p id="result-origin" class="data-badge">Cargando resultados…</p><div id="result-kpis" class="kpi-grid"></div><h3>Evolución de ventas, costos y margen</h3><p id="result-method"></p><p id="result-short"></p><p class="legend"><i class="sw" style="background:#315d6f"></i>Ventas <i class="sw" style="background:#ce8334"></i>Costo total <i class="sw" style="background:#118067"></i>Margen <i class="sw" style="background:#c1e4db"></i>Rango 90 % del margen (P05–P95). Línea sólida: histórico · punteada: proyección determinística · punto: mes actual.</p><div id="result-line"></div><h3>Composición de costos por objeto</h3><div id="result-bars"></div><p class="legend"><i class="sw" style="background:#116b61"></i>Material directo <i class="sw" style="background:#47988b"></i>Mano de obra <i class="sw" style="background:#82bdb1"></i>CIF <i class="sw" style="background:#d0a35c"></i>Administración <i class="sw" style="background:#dc7650"></i>Ventas <i class="sw" style="background:#845a78"></i>Financiero</p><h3>Relevancia</h3><p class="legend">Barras: importe de cada elemento · línea: % acumulado · <i class="sw" style="background:#b85142"></i>crítico (forma el 80 % del costo) <i class="sw" style="background:#47988b"></i>no crítico</p><div id="result-pareto"></div><h3>Hallazgos</h3><div id="result-hallazgos" class="result-table"></div></section>
+      <section id="periodos" class="panel stack section-link">
+        <h2>Periodos</h2><p>Consulta los hechos y los costos disponibles para un rango de fechas.</p>
+        <form id="periodos-form" class="fields split">
+          <label>Desde <input id="periodos-desde" type="date" value="2010-07-01" required></label>
+          <label>Hasta <input id="periodos-hasta" type="date" value="2010-08-31" required></label>
+          <label>Agrupar por <select id="periodos-grano"><option value="dia">Día</option><option value="quincena">Quincena</option><option value="mes">Mes</option><option value="bimestre" selected>Bimestre</option><option value="trimestre">Trimestre</option><option value="semestre">Semestre</option><option value="anio">Año</option></select></label>
+          <label>Síntesis <select id="periodos-sintesis"><option>REAL</option><option>CONTABLE</option><option>ESTIMADO</option></select></label>
+          <button type="submit">Consultar periodos</button>
+        </form><p id="periodos-estado" role="status"></p><div id="periodos-resultados"></div>
+      </section>
       <section id="costos" class="panel stack section-link"><h2>Órdenes del periodo</h2><p class="legend">Busca por producto u orden y haz clic en una fila para ver su ficha (Masiva → Detalle).</p><input id="buscar-orden" class="buscador" type="search" placeholder="Buscar producto u orden…" aria-label="Buscar orden"><p id="result-sintesis-nota"></p><div id="result-estimacion"></div><div id="result-objetos" class="result-table"></div></section>
       <section id="analisis" class="panel stack section-link"><h2>Análisis y relevancia</h2><div id="result-relevancia" class="result-table"></div></section>
       <section id="proyeccion" class="panel stack section-link"><h2>Proyección a 6 meses</h2><p class="legend">Determinística: una cifra por mes con el modelo que menos se equivocó fuera de muestra. Estocástica: 2,000 simulaciones Monte Carlo; hay 90 % de probabilidad de que el margen caiga entre P05 y P95.</p><div id="result-proyeccion" class="result-table"></div></section>
@@ -990,6 +1000,38 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     columns.forEach(([key, label]) => cell(head, 'th', label));
     const body = t.createTBody(); rows.forEach(row => { const tr = body.insertRow(); columns.forEach(([key]) => cell(tr, 'td', value(row[key]))); }); root.appendChild(t);
   }
+  let consultaPeriodos = 0;
+  $('periodos-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const serial = ++consultaPeriodos, root = $('periodos-resultados'), estado = $('periodos-estado');
+    root.replaceChildren(); estado.textContent = 'Consultando…';
+    const params = new URLSearchParams({empresa: $('result-empresa').value, sintesis: $('periodos-sintesis').value,
+      desde: $('periodos-desde').value, hasta: $('periodos-hasta').value, grano: $('periodos-grano').value});
+    try {
+      const response = await fetch('/api/periodos?' + params); const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'No se pudo consultar.');
+      if (serial !== consultaPeriodos) return;
+      for (const bucket of data.cubetas) {
+        const article = document.createElement('article'); root.append(article);
+        cell(article, 'h3', `${bucket.etiqueta} (${bucket.inicio} a ${bucket.fin})`);
+        if (bucket.nota || (bucket.costo && !bucket.costo.completo)) {
+          const note = cell(article, 'p', bucket.nota || 'Costo incompleto para este periodo.');
+          note.style.cssText = 'background:#fff4d6;color:#704600;padding:.6rem;border-left:4px solid #c38300';
+          note.setAttribute('role', 'status');
+        }
+        const hechos = document.createElement('div'); article.append(hechos); hechos.id = `hechos-${serial}-${root.children.length}`;
+        table(hechos.id, Object.entries(bucket.hechos).map(([trx, item]) => ({trx, ...item})),
+          [['trx','Transacción'],['eventos','Eventos'],['cantidad','Cantidad'],['importe','Importe']]);
+        if (bucket.costo !== null) {
+          const summary = document.createElement('div'); article.append(summary); summary.id = `costo-${serial}-${root.children.length}`;
+          table(summary.id, [bucket.costo], [['ventas','Ventas'],['costo_total','Costo total'],['margen_operativo','Margen']]);
+          const products = document.createElement('div'); article.append(products); products.id = `productos-${serial}-${root.children.length}`;
+          table(products.id, bucket.costo.productos || [], [['producto','Producto'],['cantidad','Cantidad'],['costo','Costo'],['costo_unitario','Costo unitario']]);
+        }
+      }
+      estado.textContent = data.cubetas.length ? 'Consulta actualizada.' : 'No hay periodos para mostrar.';
+    } catch (error) { if (serial === consultaPeriodos) estado.textContent = `No se pudo consultar: ${error.message}`; }
+  });
   const svg = (tag, attrs, parent) => { const e = document.createElementNS('http://www.w3.org/2000/svg', tag); Object.entries(attrs).forEach(([k,v]) => e.setAttribute(k, v)); parent.appendChild(e); return e; };
   function graph(id, list, draw) { const root=$(id); root.replaceChildren(); if (!list.length) { cell(root,'p','Información aún no disponible para esta selección.'); return; } const s=svg('svg',{viewBox:'0 0 800 240',class:'chart',role:'img','aria-label':'Gráfico de resultados'},root); draw(s); }
   function lineChart(series, currentPeriod) {
