@@ -47,3 +47,9 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
 - **Manual:** 7 pantallas basta si cubre las 5 secciones del menú (regla 80/20); agrega solo las que falten para cubrirlas.
 - **HTML file://:** lo prueba el dueño en otra PC.
 - T14.1 y T16 ya están habilitadas: quita «en habilitación» del manual.
+
+# 25-nov 13:40 (Claude) — C26 unido (PR #24), ola 1 parcial
+- **E2:** autorizado por decisión del dueño (25-nov) cambiar `tests/test_esqueleto_navegacion.py` líneas 29 y 34: las fechas Desde/Hasta deben verse SOLO en «Periodos». Hazlo en la ola 2.
+- **E21:** Claude agrega al contrato `monto_tramo` en cada traza (ola 2 de cálculo); luego lo muestras.
+- **E4, E15, E7, E13:** quedan para la ola 2 (planta con nodos enlazados; cotizador con varias actividades y materiales por OT; detalle por persona con SERVITEC; tornado completo).
+- Prueba en navegador del aprendizaje con una calibración pendiente: incluir en la ola 2.
