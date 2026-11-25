@@ -19,3 +19,17 @@ def test_probabilidad_y_umbral():
     assert p == .6 and p*1000 == 600
     assert abs(umbral([-.04,.04])-.08) < 1e-12
     assert umbral([-.01,.01]) == .05
+
+
+def test_rechazo_persiste_y_no_reaparece(tmp_path):
+    from reyna_local.aprendizaje import registrar, decidir
+    c = calibrar_mediana([10,10.2,9.9,10.1,15,10],20,'2010-06','consumo','A')
+    ruta = tmp_path / 'aprendizaje.json'
+    registrar(ruta,[c],hoy='2010-06-30')
+    decision = decidir(ruta,c['id'],'RECHAZAR',hoy='2010-07-01',actor='usuario local')
+    assert decision['estado'] == 'RECHAZADO'
+    same = calibrar_mediana([10,10.2,9.9,10.1,15,10],20,'2010-07','consumo','A')
+    assert same['id'] == c['id']
+    again = registrar(ruta,[same],hoy='2010-07-02')
+    assert len(again)==1 and again[0]['estado']=='RECHAZADO'
+    assert not vigente(again[0],'2010-07')

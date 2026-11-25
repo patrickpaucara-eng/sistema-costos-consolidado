@@ -23,7 +23,7 @@ def calibrar_mediana(valores, valor_libro, periodo, calibrador, objeto):
     mae_new = sum(abs(data[i]-median(data[:i])) for i in range(1,len(data)))/(len(data)-1)
     change = (learned-baseline)/abs(baseline) if baseline else None
     status = 'APLICADO' if change is not None and abs(change)<=.20 and mae_new<mae_book else 'PENDIENTE'
-    evidence = json.dumps([calibrador,objeto,periodo,baseline,data], ensure_ascii=False, separators=(',',':'))
+    evidence = json.dumps([calibrador,objeto,baseline,data], ensure_ascii=False, separators=(',',':'))
     return {'id':sha256(evidence.encode()).hexdigest(), 'calibrador':calibrador, 'objeto':objeto,
             'valor_libro':baseline, 'valor_aprendido':learned, 'cambio_pct':change,
             'mae_libro':mae_book, 'mae_aprendido':mae_new, 'estado':status,
@@ -44,3 +44,53 @@ def umbral(variaciones):
 
 def vigente(calibracion, periodo):
     return calibracion.get('estado') == 'APLICADO' and str(calibracion.get('vigente_desde','9999-99')) <= periodo
+
+
+def registrar(ruta, candidatos, hoy):
+    """Persistencia idempotente: conserva decisiones tomadas con la misma evidencia."""
+    import os
+    from pathlib import Path
+    from tempfile import NamedTemporaryFile
+    path = Path(ruta)
+    current = json.loads(path.read_text(encoding='utf-8')) if path.exists() else []
+    if not isinstance(current,list): raise ValueError('Archivo de aprendizaje inválido')
+    by_id = {x['id']:x for x in current}
+    for row in candidatos:
+        if row['id'] in by_id: continue
+        by_id[row['id']] = {**row, 'fecha':str(hoy), 'decidido_por':None}
+    result = sorted(by_id.values(), key=lambda x: (x['vigente_desde'],x['id']))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = None
+    try:
+        with NamedTemporaryFile('w', encoding='utf-8', dir=path.parent, delete=False) as file:
+            temp = file.name
+            json.dump(result,file,ensure_ascii=False,sort_keys=True,indent=2)
+            file.flush(); os.fsync(file.fileno())
+        os.replace(temp,path)
+    finally:
+        if temp and os.path.exists(temp): os.unlink(temp)
+    return result
+
+
+def decidir(ruta, identificador, decision, hoy, actor=None):
+    """Decisiones explícitas; un rechazo no se convierte después en aprobación."""
+    from pathlib import Path
+    path = Path(ruta)
+    if decision not in ('APROBAR','RECHAZAR'): raise ValueError('Decisión inválida')
+    data = json.loads(path.read_text(encoding='utf-8'))
+    matches = [x for x in data if x.get('id') == identificador]
+    if len(matches) != 1: raise ValueError('Calibración inexistente o ambigua')
+    row = matches[0]
+    if row.get('estado') != 'PENDIENTE': raise ValueError('La calibración ya fue decidida')
+    row.update(estado='APLICADO' if decision == 'APROBAR' else 'RECHAZADO', decidido_por=actor, fecha_decision=str(hoy))
+    # Reutiliza la escritura atómica sin reinterpretar decisiones.
+    import os
+    from tempfile import NamedTemporaryFile
+    temp = None
+    try:
+        with NamedTemporaryFile('w', encoding='utf-8', dir=path.parent, delete=False) as file:
+            temp=file.name; json.dump(data,file,ensure_ascii=False,sort_keys=True,indent=2);file.flush();os.fsync(file.fileno())
+        os.replace(temp,path)
+    finally:
+        if temp and os.path.exists(temp): os.unlink(temp)
+    return row
