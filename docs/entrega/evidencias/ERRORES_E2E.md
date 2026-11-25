@@ -45,3 +45,5 @@ Claude declaró «100 % funcional» midiendo el cálculo, no lo que el usuario p
 | E19 | Rechazos como pérdida | Sí | **No** (solo en el estado de resultados) |
 | E20 | Mensajes a departamentos (paquete sellado por área) | **No** | **No** |
 | E21 | Tabla de tramos: «Tasa» muestra el total del recurso cuando el inductor es directo (1/1) y el monto es la parte de la orden | — | Confunde; mostrar «monto del tramo» y «parte de esta orden» por separado y explicar la tasa CIF en P4C |
+| E22 | Barra lateral | Lista larga de enlaces | Pedido del dueño: menú por grupos (Definir, Estimar, Registrar, Entregar, Aprender) con ícono característico y nombre, que se despliega al hacer clic (estilo botones de Odoo) | Codex |
+| E23 | Menú «Simulación» | Sigue visible | El dueño descartó la simulación que edita el pasado (23-nov); se reemplaza por Futuro (proyección por hechos) y por el modo laboratorio (E10) | Codex |
