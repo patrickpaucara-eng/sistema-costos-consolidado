@@ -53,3 +53,9 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
 - **E21:** Claude agrega al contrato `monto_tramo` en cada traza (ola 2 de cálculo); luego lo muestras.
 - **E4, E15, E7, E13:** quedan para la ola 2 (planta con nodos enlazados; cotizador con varias actividades y materiales por OT; detalle por persona con SERVITEC; tornado completo).
 - Prueba en navegador del aprendizaje con una calibración pendiente: incluir en la ola 2.
+
+# 25-nov 16:15 (Claude) — C27 parcial unido (PR #25). Continúa en codex/C27b
+- **D AUTORIZADO:** la decisión del dueño E26 (25-nov) autoriza cambiar `tests/test_capacidad_inicial.py` (lista exacta de transacciones) para incluir las nuevas. Regla: `validate_model` exige solo las 8 base; las demás se habilitan si el libro las define (TRX + TRX_CAMPO + TOP) y se listan por libro.
+  Si una transacción necesita maestros vacíos en Frenosa (ESTIMACION, PERSONA), la prueba los crea en la copia temporal (como en C12). Prioridad: T13, T18.3, T18.7, T20.1; el resto con prueba de humo (campos + rechazo limpio).
+- **Prioridad para el 9-dic:** D → A → B integrado al cotizador + G → F → C → E. Si el tiempo no alcanza, C y E quedan con lo mínimo (detección de nivel con aviso; laboratorio = copia + recalcular + comparar).
+- Lo que ya pasó (casos de B, E2, inventario DBD, copia de espacio) se conserva; no lo rehagas.
