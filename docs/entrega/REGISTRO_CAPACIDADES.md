@@ -27,6 +27,7 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 | CAP-15 | Recibir y seleccionar una corrida VNR externa mediante T25.4/T23.5 | Verificada con método sintético en XLSX temporal | 26 pruebas distinguen huellas textuales (`001`/`1`), método y versión vigentes, aíslan existencias por empresa, aplican permisos y vigencia, persisten `RESULTADO_METODO`, concilian el periodo completo (existencia, CPU, `AJUSTE_VNR` y `CTA_GASTO`) y revierten cuando falta un escritor o la rebaja excede el saldo. La revisión independiente confirmó que T25.4 recibe un método aprobado y efectivo y T23.5 consume la versión vigente al inicio del periodo. No valida proveedor comercial, método ORIA ni toda la conciliación D9. |
 
 | CAP-16 | Calcular y descargar reportes del caso Frenosa | Verificada en entorno Linux y navegador local | Conecta el productor existente a REAL, CONTABLE y ESTIMADO; guarda el contrato y permite descargar exportaciones. Faltan empaquetado Windows y aceptación con datos de operación. Ver [OT-C04](evidencias/OT-C04/ENTREGA.md). |
+| CAP-17 | Exportar un modelo de mezcla para Solver desde resultados REAL | Verificada por pruebas Python | El libro incluye objetivo, restricciones, rangos de demanda SUPUESTO y nombres definidos `solver_*`; el caso manual A/B arroja 20/60 unidades y S/ 1,800 con `linprog`. No se probó el complemento Solver en Excel nativo. Frenosa 2010-07 no declara medidas CAP; el libro informa que queda sin restricción de capacidad. Ver [OT-C32 punto 3](evidencias/C32_3_SOLVER.md). |
 
 ## Evidencia de este incremento
 

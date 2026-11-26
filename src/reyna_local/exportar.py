@@ -5,10 +5,10 @@ from pathlib import Path
 from uuid import uuid4
 
 from openpyxl import Workbook
-from openpyxl.styles import Font
+from openpyxl.styles import Alignment, Font, PatternFill
 from .contrato import validar
 
-TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'html': '.html', 'codigo': '.docx', 'informe': '.docx', 'presentacion': '.html', 'entrada': '.xlsx', 'sistema': '.html'}
+TIPOS = {'resultados': '.xlsx', 'analitica': '.xlsx', 'proyeccion': '.xlsx', 'solver': '.xlsx', 'html': '.html', 'codigo': '.docx', 'informe': '.docx', 'presentacion': '.html', 'entrada': '.xlsx', 'sistema': '.html'}
 SIN_RESULTADOS = ('codigo', 'entrada')          # se generan desde el repositorio, no desde un contrato
 from .raiz import RAIZ
 SECCIONES = {
@@ -100,6 +100,223 @@ def _libro(resultados, tipo, destino, proyeccion_granular=None):
         hoja = libro.create_sheet('Sensibilidad')
         hoja.append(['Base del libro', proyeccion_granular['base'], 'Unidad', 'Variación del margen'])
         _tabla_en_hoja(hoja, proyeccion_granular['sensibilidad']); hoja.freeze_panes = 'A3'
+    libro.save(destino)
+    libro.close()
+
+
+def _modelo_solver(resultados):
+    """Prepara datos de Solver desde el contrato REAL, sin volver a calcular costos."""
+    if resultados.get('sintesis') != 'REAL':
+        raise ValueError('El modelo de Solver requiere un resultado REAL.')
+    decidir = resultados.get('decidir') or {}
+    er = (decidir.get('er_gerencial') or {}).get('productos') or []
+    objetos = resultados.get('objetos') or []
+    cantidades = {}
+    codigos_producto = {}
+    for objeto in objetos:
+        codigo = str(objeto.get('codigo') or '')
+        producto = str(objeto.get('producto') or '')
+        if codigo and producto:
+            codigos_producto[codigo] = producto
+            cantidades[producto] = cantidades.get(producto, 0.0) + float(objeto.get('cantidad') or 0)
+    ventas = {}
+    for venta in (resultados.get('datos_libro') or {}).get('ventas') or []:
+        producto = str(venta.get('producto') or '')
+        ventas[producto] = ventas.get(producto, 0.0) + float(venta.get('cantidad') or 0)
+    productos = []
+    for fila in sorted(er, key=lambda x: str(x.get('producto') or '')):
+        producto = str(fila.get('producto') or '')
+        q = float(fila.get('cantidad') or cantidades.get(producto, 0.0))
+        if not producto or q <= 0:
+            continue
+        mc = float(fila.get('margen_contribucion') or 0.0)
+        productos.append({
+            'producto': producto,
+            'mc_unitario': mc / q,
+            'vendido': ventas.get(producto, 0.0),
+            'minimo': 0.0,
+            'maximo': ventas.get(producto, 0.0) * 1.5,
+            'cantidad_objeto': cantidades.get(producto, q),
+        })
+    if not productos:
+        raise ValueError('El resultado REAL no contiene productos con cantidad para el modelo Solver.')
+
+    medidas = (resultados.get('datos_libro') or {}).get('medidas') or []
+    inductores = {str(i.get('codigo')): i for i in ((resultados.get('modelo') or {}).get('inductores') or [])}
+    traza_llaves = {
+        (str(t.get('criterio') or ''), str(t.get('origen') or ''), str(t.get('destino') or ''))
+        for t in resultados.get('trazas') or []
+    }
+    medidas_obj = {}
+    for medida in medidas:
+        if str(medida.get('nivel') or '').upper() != 'OBJ':
+            continue
+        clave = (str(medida.get('inductor') or ''), str(medida.get('destino') or ''))
+        medidas_obj[clave] = medidas_obj.get(clave, 0.0) + float(medida.get('cantidad') or 0.0)
+
+    capacidades = []
+    avisos = []
+    seen = set()
+    for medida in medidas:
+        if str(medida.get('nivel') or '').upper() != 'CAP':
+            continue
+        criterio, destino = str(medida.get('inductor') or ''), str(medida.get('destino') or '')
+        clave = (criterio, destino)
+        if clave in seen:
+            raise ValueError(f'La capacidad {criterio}/{destino} está duplicada en el resultado REAL.')
+        seen.add(clave)
+        capacidad = float(medida.get('cantidad') or 0.0)
+        relacionada = any(c == criterio and (o == destino or d == destino) for c, o, d in traza_llaves)
+        if not relacionada:
+            avisos.append(f'{criterio}/{destino}: no hay una traza que vincule la capacidad con el costo del periodo; se excluyó.')
+            continue
+        filas_por_producto = {}
+        completos = True
+        for codigo, producto in codigos_producto.items():
+            key = (criterio, codigo)
+            if key not in medidas_obj:
+                completos = False
+                break
+            filas_por_producto[producto] = filas_por_producto.get(producto, 0.0) + medidas_obj[key]
+        if not completos:
+            avisos.append(f'{criterio}/{destino}: faltan medidas OBJ por orden; se excluyó para no suponer consumos.')
+            continue
+        coeficientes = {}
+        for producto in productos:
+            cantidad = producto['cantidad_objeto']
+            coeficientes[producto['producto']] = filas_por_producto.get(producto['producto'], 0.0) / cantidad if cantidad else 0.0
+        info = inductores.get(criterio) or {}
+        capacidades.append({
+            'inductor': criterio,
+            'destino': destino,
+            'nombre': medida.get('destino_nombre') or destino,
+            'unidad': info.get('unidad') or '',
+            'capacidad': capacidad,
+            'coeficientes': coeficientes,
+        })
+    if not capacidades:
+        if not any('faltan medidas OBJ' in aviso or 'no hay una traza' in aviso for aviso in avisos):
+            avisos.append('El resultado REAL no trae medidas CAP; el modelo queda limitado por demanda y no representa capacidad escasa.')
+        else:
+            avisos.append('No se pudo construir una restricción de capacidad completa; revisa MEDIDA CAP, medidas OBJ y trazas del periodo.')
+    return {'productos': productos, 'capacidades': capacidades, 'avisos': avisos}
+
+
+def _solver_libro(resultados, destino):
+    """Libro de programación lineal listo para configurar/ejecutar con Solver de Excel."""
+    from openpyxl.workbook.defined_name import DefinedName
+
+    modelo = _modelo_solver(resultados)
+    productos = modelo['productos']
+    capacidades = modelo['capacidades']
+    libro = Workbook()
+    hoja = libro.active
+    hoja.title = 'Modelo'
+    hoja['A1'] = 'Mezcla óptima de producción · resultado REAL'
+    hoja['A1'].font = Font(bold=True, size=14)
+    hoja['A2'] = 'Margen de contribución total (S/) · objetivo'
+    hoja['B2'] = '=SUMPRODUCT(B6:B' + str(5 + len(productos)) + ',C6:C' + str(5 + len(productos)) + ')'
+    hoja['B2'].number_format = '#,##0.00'
+    headers = ['Producto', 'MC unitario REAL (S/)', 'Unidades [solver_adj]', 'Mínimo (SUPUESTO)', 'Máximo (SUPUESTO)', 'Vendido REAL']
+    for col, value in enumerate(headers, 1):
+        c = hoja.cell(5, col, value); c.font = Font(bold=True)
+    amarillo = PatternFill('solid', fgColor='FFF2CC')
+    first = 6
+    for i, producto in enumerate(productos):
+        row = first + i
+        hoja.cell(row, 1, producto['producto'])
+        hoja.cell(row, 2, producto['mc_unitario'])
+        hoja.cell(row, 3, 0.0)
+        hoja.cell(row, 4, producto['minimo'])
+        hoja.cell(row, 5, producto['maximo'])
+        hoja.cell(row, 6, producto['vendido'])
+        for col in (4, 5): hoja.cell(row, col).fill = amarillo
+        for col in (2, 4, 5, 6): hoja.cell(row, col).number_format = '#,##0.00'
+    last = first + len(productos) - 1
+    hoja['A3'] = 'Las celdas amarillas son supuestos editables; las unidades de la columna C son variables de decisión.'
+
+    seccion = last + 3
+    hoja.cell(seccion, 1, 'Restricciones del modelo')
+    hoja.cell(seccion, 1).font = Font(bold=True)
+    restriccion_header = seccion + 1
+    columnas_producto = list(range(2, 2 + len(productos)))
+    lhs_col = 2 + len(productos)
+    rel_col, rhs_col = lhs_col + 1, lhs_col + 2
+    hoja.cell(restriccion_header, 1, 'Recurso / demanda')
+    for j, producto in enumerate(productos): hoja.cell(restriccion_header, columnas_producto[j], producto['producto'])
+    hoja.cell(restriccion_header, lhs_col, 'Uso calculado')
+    hoja.cell(restriccion_header, rel_col, 'solver_rel (1 ≤, 2 =, 3 ≥)')
+    hoja.cell(restriccion_header, rhs_col, 'Límite')
+    for cell in hoja[restriccion_header]: cell.font = Font(bold=True)
+    restricciones = []
+    for cap in capacidades:
+        restricciones.append((f"{cap['nombre']} · {cap['inductor']} ({cap['unidad']})".strip(),
+                              [cap['coeficientes'].get(p['producto'], 0.0) for p in productos], '<=', cap['capacidad']))
+    for j, producto in enumerate(productos):
+        vector = [1.0 if i == j else 0.0 for i in range(len(productos))]
+        restricciones.append((f"Mínimo de {producto['producto']} (SUPUESTO)", vector, '>=', producto['minimo']))
+        restricciones.append((f"Máximo de {producto['producto']} (SUPUESTO)", vector, '<=', producto['maximo']))
+    for n, (nombre, coef, relation, rhs) in enumerate(restricciones, 1):
+        row = restriccion_header + n
+        hoja.cell(row, 1, nombre)
+        for j, value in enumerate(coef): hoja.cell(row, columnas_producto[j], value)
+        start_var = f'$C${first}:$C${last}'
+        start_coef = f'${hoja.cell(1, columnas_producto[0]).column_letter}${row}:${hoja.cell(1, columnas_producto[-1]).column_letter}${row}'
+        hoja.cell(row, lhs_col, f'=SUMPRODUCT({start_var},{start_coef})')
+        hoja.cell(row, rel_col, {'<=': 1, '=': 2, '>=': 3}[relation])
+        hoja.cell(row, rhs_col, rhs)
+        hoja.cell(row, rhs_col).number_format = '#,##0.00'
+
+    # Solver conserva su configuración como nombres definidos; el complemento Excel
+    # guarda fórmulas OOXML en inglés aunque la interfaz las muestre como SUMAPRODUCTO.
+    col_lhs, col_rel, col_rhs = (hoja.cell(1, col).column_letter for col in (lhs_col, rel_col, rhs_col))
+    first_constraint, last_constraint = restriccion_header + 1, restriccion_header + len(restricciones)
+    names = {
+        'solver_opt': '=$B$2',
+        'solver_adj': f'=$C${first}:$C${last}',
+        # Los rangos completos son cómodos para inspección; el complemento usa además
+        # los nombres numerados de cada restricción.
+        'solver_rel': f'=${col_rel}${first_constraint}:${col_rel}${last_constraint}',
+        'solver_rhs': f'=${col_rhs}${first_constraint}:${col_rhs}${last_constraint}',
+        'solver_num': f'={len(restricciones)}',
+        'solver_typ': '=1',       # maximizar
+        'solver_lin': '=1',       # modelo lineal
+        'solver_neg': '=1',       # variables no negativas
+        'solver_eng': '=2',       # Simplex LP
+    }
+    for i in range(len(restricciones)):
+        row = first_constraint + i
+        names[f'solver_lhs{i + 1}'] = f'=${col_lhs}${row}'
+        names[f'solver_rhs{i + 1}'] = f'=${col_rhs}${row}'
+        names[f'solver_rel{i + 1}'] = f'=${col_rel}${row}'
+    for name, reference in names.items():
+        hoja.defined_names.add(DefinedName(name, attr_text=reference, hidden=True))
+    hoja.freeze_panes = 'A6'
+    for col, width in {'A': 38, 'B': 21, 'C': 23, 'D': 23, 'E': 23, 'F': 18}.items(): hoja.column_dimensions[col].width = width
+    for col in range(lhs_col, rhs_col + 1): hoja.column_dimensions[hoja.cell(1, col).column_letter].width = 20
+
+    instrucciones = libro.create_sheet('Instrucciones')
+    instrucciones.append(['Cómo resolver en Excel Solver'])
+    instrucciones['A1'].font = Font(bold=True, size=14)
+    instrucciones.append(['1', 'Abra Datos > Solver. El modelo queda guardado en los nombres internos del complemento: objetivo solver_opt, variables solver_adj y restricciones solver_lhsN/solver_relN/solver_rhsN.'])
+    instrucciones.append(['2', 'Compruebe que el método sea Simplex LP y pulse Resolver. El libro guarda maximización, linealidad y no negatividad.'])
+    instrucciones.append(['3', 'Conserve la solución y marque Informe de sensibilidad en el cuadro de resultados.'])
+    instrucciones.append([])
+    instrucciones.append(['Las fórmulas se guardan en formato de Excel (SUMPRODUCT); Excel en español las presenta como SUMAPRODUCTO.'])
+    instrucciones.column_dimensions['A'].width = 12; instrucciones.column_dimensions['B'].width = 112
+    for row in instrucciones.iter_rows():
+        for cell in row: cell.alignment = Alignment(wrap_text=True, vertical='top')
+    lectura = libro.create_sheet('Lectura')
+    lectura.append(['Cómo leer la solución'])
+    lectura['A1'].font = Font(bold=True, size=14)
+    lectura.append(['Precio sombra', 'Valor marginal de una unidad adicional del recurso, dentro del rango válido.'])
+    lectura.append(['Rango permitido', 'La solución sigue siendo óptima solo dentro de los rangos de aumento/disminución permitidos del informe de sensibilidad; fuera de ellos, vuelva a resolver.'])
+    lectura.append(['Supuestos', 'Los límites de demanda min./máx. son editables. El máximo inicial equivale a 1.5 veces lo vendido en el periodo REAL; el mínimo inicial es cero.'])
+    if modelo['avisos']:
+        lectura.append(['Advertencia', ' '.join(modelo['avisos'])])
+    lectura.column_dimensions['A'].width = 24; lectura.column_dimensions['B'].width = 115
+    for row in lectura.iter_rows():
+        for cell in row: cell.alignment = Alignment(wrap_text=True, vertical='top')
     libro.save(destino)
     libro.close()
 
@@ -479,7 +696,9 @@ def exportar(resultados, tipo, carpeta, proyeccion_granular=None):
     carpeta.mkdir(parents=True, exist_ok=True, mode=0o700)
     destino = carpeta / (tipo + '-' + uuid4().hex + TIPOS[tipo])
     try:
-        if tipo in SECCIONES:
+        if tipo == 'solver':
+            _solver_libro(resultados, destino)
+        elif tipo in SECCIONES:
             _libro(resultados, tipo, destino, proyeccion_granular=proyeccion_granular)
         elif tipo == 'html':
             _html(resultados, destino)
