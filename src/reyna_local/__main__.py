@@ -280,6 +280,38 @@ class ReynaHandler(BaseHTTPRequestHandler):
             except (ValueError, OSError, KeyError, TypeError) as exc: raise Problem(422,str(exc)) from None
             self._json(200,result)
             return
+        if target.path == "/api/familias/analizar" and method == "POST":
+            from .familias import receta, pertenece, anova
+            import math
+            body = self._body()
+            try:
+                historia = body.get('historia')
+                if not isinstance(historia, dict) or not historia or len(historia) > 100:
+                    raise ValueError('Indica la historia por actividad o recurso.')
+                def validar_historia(datos):
+                    if not isinstance(datos, dict) or not datos or len(datos) > 100: raise ValueError('Historia inválida.')
+                    for key, valores in datos.items():
+                        if not isinstance(key, str) or not key or not isinstance(valores, list) or not 3 <= len(valores) <= 1000: raise ValueError('Cada historia requiere entre 3 y 1000 observaciones.')
+                        if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0 for v in valores): raise ValueError('Las observaciones deben ser números finitos no negativos.')
+                validar_historia(historia)
+                recetas = {k: receta(v) for k, v in historia.items()}
+                salida = {'receta': recetas}
+                componente = body.get('componente')
+                if componente is not None:
+                    if not isinstance(componente, dict) or set(componente) != set(recetas): raise ValueError('El componente debe incluir todos los inductores de la familia.')
+                    if any(isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0 for v in componente.values()): raise ValueError('Cantidades inválidas.')
+                    salida['pertenencia'] = pertenece(componente, recetas)
+                otra = body.get('comparar')
+                if otra is not None:
+                    validar_historia(otra)
+                    if set(otra) != set(historia): raise ValueError('Las familias deben tener los mismos inductores.')
+                    resultados = {k: anova(historia[k], otra[k]) for k in historia}
+                    if any(not math.isfinite(v['F']) for v in resultados.values()): raise ValueError('No se puede comparar con variación nula.')
+                    salida['comparacion'] = resultados
+                    salida['sugerir_fusion'] = all(x['mismo_efecto'] for x in resultados.values())
+                self._json(200, salida)
+            except (ValueError, TypeError, KeyError, ZeroDivisionError) as exc: raise Problem(422, str(exc)) from None
+            return
         if target.path == "/api/cotizar" and method == "POST":
             from .calculo_local import ruta_libro
             from .cotizador import cotizar
@@ -312,12 +344,24 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 if (validar(result) or result.get('periodo_actual') != per or result.get('sintesis') != 'REAL'
                         or len(data['EMPRESA']) != 1 or result['empresa'].get('codigo') != data['EMPRESA'][0].get('EMP_COD')):
                     raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
+                if body.get('familia') is not None:
+                    import math
+                    familia=body['familia']; unidades=body.get('unidades')
+                    if not body.get('meses') or not isinstance(familia,dict) or not familia or len(familia)>100:
+                        raise ValueError('La familia requiere cotización proyectada y receta válida.')
+                    if isinstance(unidades,bool) or not isinstance(unidades,(int,float)) or not math.isfinite(unidades) or unidades<=0:
+                        raise ValueError('Indica unidades positivas y finitas.')
+                    for codigo, valores in familia.items():
+                        if not isinstance(codigo,str) or not codigo or not isinstance(valores,dict): raise ValueError('Receta inválida.')
+                        vs=[valores.get(k) for k in ('media','minimo','maximo')]
+                        if any(isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) for v in vs) or vs[0]<0 or vs[1]>vs[0] or vs[2]<vs[0]:
+                            raise ValueError('Receta inválida.')
                 if body.get('meses'):
                     from .cotizador import cotizar_proyectado
                     from .libro_dbd import empresa as leer_empresa
                     quote = cotizar_proyectado(libro, leer_empresa(libro)[0], result, data['MEDIDA'], body.get('actividades') or {}, body.get('materiales') or {},
                                                body.get('precio_mercado'), body.get('margen_objetivo'), int(body['meses']), int(body.get('intervalo') or 3),
-                                               body.get('curva') or 'pareja', body.get('contrato') or 'CERRADO')
+                                               body.get('curva') or 'pareja', body.get('contrato') or 'CERRADO', familia=body.get('familia'), unidades=body.get('unidades'))
                 else:
                     quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'), producto=body.get('producto'), carpeta_aprendizaje=store.root, empresa_aprendizaje=empresa)
                 if provisional:

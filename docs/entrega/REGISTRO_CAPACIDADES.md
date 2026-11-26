@@ -82,3 +82,7 @@ La interfaz consulta cotización, aprendizaje y sensibilidad; presenta bloques d
 ### OT-C27 · adelantos parciales
 
 E2 mueve los controles de rango a Periodos y se verifica en Chromium. Los casos aislados de intervalos y el inventario DBD son prototipos sin conexión a pantallas; la separación física de una copia de espacio no constituye un laboratorio. Los bloques D, A, B, C, E y F no se declaran completos; ver `evidencias/ERRORES_E2E.md`.
+
+### OT-C31 punto 4 · Análisis de familias (alcance acotado)
+
+La pantalla acepta historia JSON por actividad o recurso, presenta la receta y su intervalo, comprueba pertenencia y compara dos familias con ANOVA. La receta puede enviarse a una cotización proyectada por unidades. `tests/test_c31_4_familias.py` prueba los casos manuales, entrada incompleta, la vista en Chromium y la API real de cotización. La historia y selección son temporales de la sesión; no se guardan ni representan aprobación de una familia o fusión. La aceptación de una cotización y la persistencia de historia quedan fuera de esta entrega; el uso metodológico requiere revisión.
