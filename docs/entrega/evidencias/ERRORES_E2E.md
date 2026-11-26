@@ -111,3 +111,7 @@ Se probó el caso de seis meses con intervalos parejos y tasas suministradas. Fa
 La vista representa aristas observadas con flechas y botones de detalle; no es todavía un diagrama por capas consolidado. Falta revisión visual de legibilidad con todo el caso y trazas repetidas.
 | C31-3 | (cerrado 26-nov, Claude) Aceptar cotización → T09 + T13 en una sola escritura atómica; el sistema completa la TARIFA EST con el costo del saldo sin pisar tarifas cargadas; no duplica OT; idempotente. Pantalla en el cotizador. | Claude |
 | C31-LAB-1 | Registrar FECHA como texto y recalcular | Calcular sin error | Al mezclar fechas texto y numéricas, el orden de KARDEX falla | Los campos guiados envían texto aunque el libro usa fechas numéricas | Normalización de FECHA numérica en el formulario del laboratorio; revisar los demás formularios con Claude | Parcial |
+
+## C32-1 · avance parcial
+
+La aceptación de cotización asigna el código dentro del bloqueo de escritura y registra el código en el recibo idempotente. La prueba conserva fallo T13, costo proyectado y comprueba dos códigos consecutivos. Pendiente: precarga del código en la pantalla y protección del formulario guiado T13 y de otras transacciones creadoras; aún no cumple poka-yoke integral.

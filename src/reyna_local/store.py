@@ -756,7 +756,7 @@ class Store:
         completa la TARIFA de estimación (TAR_TIPO = EST) de los componentes del producto con el costo promedio del saldo (EXISTENCIA),
         sin pisar tarifas ya cargadas: la T09 del MCD la lee y no la escribe ninguna transacción."""
         user = text_field(body, "user", 100); key = text_field(body, "request_id", 160)
-        per = text_field(body, "periodo", 20); prod = text_field(body, "producto", 60); obj = text_field(body, "objeto", 80)
+        per = text_field(body, "periodo", 20); prod = text_field(body, "producto", 60)
         cli = text_field(body, "cliente", 80); fecha = text_field(body, "fecha", 8)
         try:
             can = float(body.get("cantidad")); monto = float(body.get("monto"))
@@ -765,7 +765,7 @@ class Store:
         if not (math.isfinite(can) and can > 0 and math.isfinite(monto) and monto > 0):
             raise Problem(400, "Cantidad y monto deben ser positivos.")
         huella = str(body.get("huella") or "")[:64]
-        command = encode({"operation": "aceptar_cotizacion", "user": user, "periodo": per, "producto": prod, "objeto": obj,
+        command = encode({"operation": "aceptar_cotizacion", "user": user, "periodo": per, "producto": prod,
                           "cliente": cli, "fecha": fecha, "cantidad": can, "monto": monto, "huella": huella})
         digest = sha256(command.encode()).hexdigest(); path = self.path(identifier)
         with writer_lock(path.parent):
@@ -780,8 +780,14 @@ class Store:
             same_workbook(path, raw)
             if any(t not in detectar_transacciones_e26(tables) for t in ("T09", "T13")):
                 raise Problem(409, "El libro no define T09 y T13.")
-            if any(str(r[0]) == obj for r in tables["OBJETO"]["r"]):
-                raise Problem(409, f"La orden {obj} ya existe: elige otro código.")
+            prefijo = f"OT-{company}-{prod}-"
+            if len(prefijo) + 4 > 80:
+                raise Problem(422, "El código generado supera el límite permitido.")
+            usados = {str(r[0]) for r in tables["OBJETO"]["r"] if r}
+            numero = next((n for n in range(1, 10000) if f"{prefijo}{n:04d}" not in usados), None)
+            if numero is None:
+                raise Problem(422, "Se agotaron los códigos de orden para este producto.")
+            obj = f"{prefijo}{numero:04d}"
             motor = Motor.__new__(Motor)
             motor.T = {n: {"h": s["h"], "r": [list(r) for r in s["r"]]} for n, s in tables.items() if n not in (META, RECEIPTS)}
             motor.usr = motor.perfil = ""; motor.pend = None
@@ -798,7 +804,7 @@ class Store:
                     else: outcome = "ERROR en T09 (no se registró nada): " + outcome
                 except (ValueError, ArithmeticError, KeyError, IndexError, TypeError):
                     outcome = "ERROR: La operación contiene valores incompatibles con el libro."
-            return self._persistir(path, raw, tables, positions, info, motor, outcome, "T09+T13", key, digest, command)
+            return self._persistir(path, raw, tables, positions, info, motor, outcome, "T09+T13", key, digest, command, objeto=obj if outcome == "OK" else None)
 
     @staticmethod
     def _tarifas_estimacion(T, company, per, prod):
@@ -820,12 +826,14 @@ class Store:
             T["TARIFA"]["r"].append([fila.get(c) for c in th])
         return "OK"
 
-    def _persistir(self, path, raw, tables, positions, info, motor, outcome, txn, key, digest, command):
+    def _persistir(self, path, raw, tables, positions, info, motor, outcome, txn, key, digest, command, objeto=None):
         """Escritura única y atómica de lo que el motor dejó en memoria (una o varias transacciones), con recibo y respaldo."""
         ok = outcome == "OK"
         status = 200 if ok else 422
         version = info["version"] + int(ok)
         response = {"result": "OK" if ok else "ERROR", "transaction": txn, "request_id": key, "version": version}
+        if objeto is not None:
+            response["objeto"] = objeto
         if not ok:
             response["error"] = outcome
         edits = motor_changes(tables, motor, positions) if ok else {}

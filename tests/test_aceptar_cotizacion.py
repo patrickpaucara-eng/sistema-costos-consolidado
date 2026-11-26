@@ -30,8 +30,7 @@ def test_aceptar_abre_ot_con_costo_proyectado_y_es_atomico(tmp_path, monkeypatch
         _, sp = _q(B, "POST", "/api/workspaces", {"name": "c", "workbook_path": str(ROOT / "casos/libros/frenosa.xlsx")}); w = sp["id"]
         libro = tmp_path / "e" / w / "libro.xlsx"
         base = dict(user="JCOSTOS", periodo="2010-12", fecha="20101228", producto="SW50", cantidad=100, cliente="MERCADO", monto=1234.5, huella="abc")
-        s, r = _q(B, "POST", f"/api/workspaces/{w}/aceptar-cotizacion", {**base, "request_id": "a0", "objeto": "OT-FRENOSA-SW50-2010-12"})
-        assert s == 409                                                  # no se duplica una OT existente
+        # Decisión del dueño 26-nov: el código lo asigna el sistema, ignorando objeto.
         from reyna_local import motor_espejo as M
         original = M.Motor.ejecutar
         monkeypatch.setattr(M.Motor, "ejecutar", lambda self, trx, *a, **k: "ERROR: simulado" if trx == "T13" else original(self, trx, *a, **k))
@@ -39,13 +38,16 @@ def test_aceptar_abre_ot_con_costo_proyectado_y_es_atomico(tmp_path, monkeypatch
         assert s == 422 and "T13" in r["error"]                          # T09 pasó, T13 falló → nada se escribe
         assert not _filas(libro, "ESTIMACION") and not [x for x in _filas(libro, "TARIFA") if x["TAR_TIPO"] == "EST"]
         monkeypatch.setattr(M.Motor, "ejecutar", original)
-        s, r = _q(B, "POST", f"/api/workspaces/{w}/aceptar-cotizacion", {**base, "request_id": "a2", "objeto": "OT-NUEVA-001"})
+        s, r = _q(B, "POST", f"/api/workspaces/{w}/aceptar-cotizacion", {**base, "request_id": "a2", "objeto": "IGNORAR"})
         assert s == 200, r
-        est = _filas(libro, "ESTIMACION"); ot = [o for o in _filas(libro, "OBJETO") if o["OBJ_NUM"] == "OT-NUEVA-001"]
-        assert len(est) == 1 and est[0]["EST_ESTADO"] == "ACEPTADA" and est[0]["EST_OBJ"] == "OT-NUEVA-001"
+        assert r["objeto"] == "OT-FRE-SW50-0001"
+        est = _filas(libro, "ESTIMACION"); ot = [o for o in _filas(libro, "OBJETO") if o["OBJ_NUM"] == "OT-FRE-SW50-0001"]
+        assert len(est) == 1 and est[0]["EST_ESTADO"] == "ACEPTADA" and est[0]["EST_OBJ"] == "OT-FRE-SW50-0001"
         assert len(ot) == 1 and ot[0]["OBJ_PRO"] == "SW50" and float(ot[0]["OBJ_CST_PLAN"]) == 1234.5 and ot[0]["OBJ_EST"] == "A"
         assert [x["TAR_REC"] for x in _filas(libro, "TARIFA") if x["TAR_TIPO"] == "EST"] == ["MAT_SW50"]
-        s2, r2 = _q(B, "POST", f"/api/workspaces/{w}/aceptar-cotizacion", {**base, "request_id": "a2", "objeto": "OT-NUEVA-001"})
+        s2, r2 = _q(B, "POST", f"/api/workspaces/{w}/aceptar-cotizacion", {**base, "request_id": "a2", "objeto": "OT-FRE-SW50-0001"})
         assert s2 == 200 and r2 == r                                     # idempotente por identificador
+        s3, r3 = _q(B, "POST", f"/api/workspaces/{w}/aceptar-cotizacion", {**base, "request_id": "a3"})
+        assert s3 == 200 and r3["objeto"] == "OT-FRE-SW50-0002"
     finally:
         srv.shutdown(); t.join(); srv.server_close()
