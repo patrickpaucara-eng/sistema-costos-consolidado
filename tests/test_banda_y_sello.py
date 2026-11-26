@@ -70,7 +70,7 @@ def test_e5_la_pantalla_verifica_el_resultado_completo():
     """E5 (25-nov): la pantalla enviaba solo el bloque «sello»; como la huella cubre todo el resultado, siempre salía RESULTADO_ALTERADO."""
     from pathlib import Path
     html = (Path(__file__).resolve().parents[1] / "src/reyna_local/web/index.html").read_text(encoding="utf-8")
-    assert "JSON.stringify({resultados:{sello:s}})" not in html and "JSON.stringify({resultados:r})" in html
+    assert "JSON.stringify({resultados:{sello:s}})" not in html and "window.__resultadoCrudo" in html   # se verifica el texto tal como llegó
 
 
 def test_e21_cada_tramo_informa_su_monto_completo():

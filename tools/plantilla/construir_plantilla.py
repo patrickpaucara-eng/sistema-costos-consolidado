@@ -36,7 +36,7 @@ def construir():
     act = wb["ACTIVIDAD"]                                                  # Modelo 3 (Oria): nivel E/A/O de la actividad
     if "ACT_NIVEL" not in [c.value for c in act[1]]: act.cell(1, act.max_column + 1, "ACT_NIVEL")
     rec = wb["RECURSO"]
-    for name in ("REC_COMPORT", "REC_PCT_VAR", "REC_CTRL"):
+    for name in ("REC_COMPORT", "REC_PCT_VAR", "REC_CTRL", "REC_EVIT"):
         if name not in [c.value for c in rec[1]]: rec.cell(1, rec.max_column + 1, name)
     for sheet, names in (("RECURSO", ("REC_COQ",)), ("CRITERIO", ("CRI_RESP", "CRI_EVID"))):
         ws = wb[sheet]

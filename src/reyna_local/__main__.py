@@ -425,6 +425,26 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 raise Problem(HTTPStatus.BAD_REQUEST, str(exc)) from None
             self._json(HTTPStatus.CREATED, {"ruta": str(ruta), "tipo": params["tipo"][0]})
             return
+        if target.path == "/api/decidir" and method == "POST":
+            from . import decidir as DEC
+            body = self._body()
+            try:
+                empresa, periodo, caso, producto = body.get("empresa"), body.get("periodo"), body.get("caso"), body.get("producto")
+                if not (isinstance(empresa, str) and re.fullmatch(r"[a-z0-9_]{1,60}", empresa) and isinstance(periodo, str)
+                        and re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo) and caso in ("tercerizar", "eliminar", "pedido")):
+                    raise ValueError("Parámetros inválidos.")
+                nombre = f"{empresa}_{periodo}_REAL.json"
+                archivo = next((x for x in (self.server.store.root / "resultados" / nombre, Path(__file__).resolve().parents[2] / "datos" / "resultados" / nombre) if x.is_file()), None)
+                if archivo is None: raise ValueError("No hay resultado REAL calculado para ese periodo.")
+                fila = next((f for f in json.loads(archivo.read_text(encoding="utf-8")).get("decidir", {}).get("er_gerencial", {}).get("productos", []) if f["producto"] == producto), None)
+                if fila is None: raise ValueError("Producto sin datos en el panel Decidir.")
+                num = lambda k, d=0.0: float(body.get(k, d) or 0)
+                if caso == "tercerizar": out = DEC.producir_o_tercerizar(fila, num("unidades"), num("precio_compra"), num("costo_mantener"), num("costo_transicion"))
+                elif caso == "eliminar": out = DEC.eliminar_linea(fila)
+                else: out = DEC.pedido_especial(fila, num("unidades"), num("precio"), num("cf_incremental"), bool(body.get("capacidad_ociosa", True)), num("unidades_desplazadas"))
+            except (ValueError, TypeError) as exc: raise Problem(422, str(exc)) from None
+            self._json(200, out)
+            return
         if target.path == "/api/resultados" and method == "GET":
             try:
                 params = parse_qs(target.query, keep_blank_values=True, max_num_fields=3)

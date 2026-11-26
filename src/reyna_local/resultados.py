@@ -227,6 +227,10 @@ def construir(libro, emp=None, nombre=None, periodo=None, ventas_csv=None, sinte
     if est:
         r["estimacion"] = {k: dict(cu_total=round(v["cu_total"], 4), p05=round(v["p05"], 4), p95=round(v["p95"], 4), metodo=v["metodo"],
                                    mase=None if v["mase"] in (None, math.inf) else round(v["mase"], 3)) for k, v in est.items()}
+    if sintesis == "REAL":                               # panel Decidir (sección H): estructura de costos para decidir
+        from reyna_local import decidir as DEC
+        t_ = P.leer(libro, ["RECURSO", "TIPO_RECURSO"]); ele_ = {str(x["TRE_COD"]): str(x.get("TRE_ELE") or "") for x in t_.get("TIPO_RECURSO", [])}
+        r["decidir"] = DEC.panel(r, [dict(x, elemento=ele_.get(str(x.get("REC_TRE")), "")) for x in t_.get("RECURSO", [])])
     from reyna_local import variable as CV
     r['costeo_variable'], r['propuestas'] = CV.analizar_libro(libro, r, h, par, prev, por_per, est, inc, nats)
     from reyna_local import estrategico as E
