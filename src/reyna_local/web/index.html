@@ -1118,6 +1118,14 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       });
     });}
     const nodos=new Map();trazas.forEach(t=>{if(t.origen)nodos.set(t.origen,t.origen_nombre);if(t.destino)nodos.set(t.destino,t.destino_nombre);});nodos.forEach((nombre,codigo)=>nodo(codigo,nombre));
+    const conexiones=cell(root,'div','');conexiones.id='planta-grafo';cell(conexiones,'p','Conexiones registradas (el importe corresponde a cada tramo; no sumar rutas repetidas):');
+    const unicas=new Set();trazas.forEach(t=>{const clave=JSON.stringify([t.origen,t.destino,t.etapa,t.monto_tramo]);if(unicas.has(clave))return;unicas.add(clave);
+      const linea=cell(conexiones,'div','');linea.className='planta-arista';
+      for(const [codigo,nombre] of [[t.origen,t.origen_nombre],[t.destino,t.destino_nombre]]){
+        if(codigo===t.destino)cell(linea,'span',` → ${t.etapa}: S/ ${value(t.monto_tramo)} → `);
+        const b=cell(linea,'button',nombre||codigo);b.type='button';b.dataset.codigo=codigo;b.addEventListener('click',()=>{const n=[...grafo.querySelectorAll('button')].find(x=>x.dataset.nodo===codigo);if(n)n.click();});
+      }
+    });
     if(!trazas.length) cell(details,'p','No hay trazas disponibles para esta síntesis.');
   }
   function opcionesCotizador(r) {
