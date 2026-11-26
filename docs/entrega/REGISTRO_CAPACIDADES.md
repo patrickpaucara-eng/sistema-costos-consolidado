@@ -82,3 +82,7 @@ La interfaz consulta cotización, aprendizaje y sensibilidad; presenta bloques d
 ### OT-C27 · adelantos parciales
 
 E2 mueve los controles de rango a Periodos y se verifica en Chromium. Los casos aislados de intervalos y el inventario DBD son prototipos sin conexión a pantallas; la separación física de una copia de espacio no constituye un laboratorio. Los bloques D, A, B, C, E y F no se declaran completos; ver `evidencias/ERRORES_E2E.md`.
+
+### OT-C31 punto 5 · Laboratorio
+
+La interfaz crea una copia de un espacio, permite registrar transacciones en ella y comparar resultados por orden y elemento. La prueba de API y navegador registra un consumo T15 y verifica que el SHA-256 del libro original no cambia. La comparación se rechaza si el original cambió desde la copia. Alcance: REAL y CONTABLE; edición mediante transacciones habilitadas, no edición libre de celdas. Evidencia: `evidencias/C31/PUNTO5_LABORATORIO.md`.
