@@ -798,7 +798,8 @@ class Store:
                     outcome = motor.ejecutar("T09", {**c, "CLI": cli, "PRO": prod, "CAN": can}, user)
                     if outcome == "OK":
                         est = motor.T["ESTIMACION"]["r"][-1][0]
-                        outcome = motor.ejecutar("T13", {**c, "EST": est, "OBJ": obj, "MONTO": monto, "REF": "COTIZADOR",
+                        referencia_escenario = f"COT-{est}"  # ESR_REF es PK (DBD); la estima ya tiene número único.
+                        outcome = motor.ejecutar("T13", {**c, "EST": est, "OBJ": obj, "MONTO": monto, "REF": referencia_escenario,
                                                          "ALG": "COSTO_PROYECTADO", "VER": 1, "HUELLA": huella or digest[:16]}, user)
                         if outcome != "OK": outcome = "ERROR en T13 (no se registró nada): " + outcome
                     else: outcome = "ERROR en T09 (no se registró nada): " + outcome
