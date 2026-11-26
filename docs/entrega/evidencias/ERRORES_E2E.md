@@ -115,3 +115,7 @@ La vista representa aristas observadas con flechas y botones de detalle; no es t
 ## C32-1 · avance parcial
 
 La aceptación de cotización asigna el código dentro del bloqueo de escritura y registra el código en el recibo idempotente. La prueba conserva fallo T13, costo proyectado y comprueba dos códigos consecutivos. Pendiente: precarga del código en la pantalla y protección del formulario guiado T13 y de otras transacciones creadoras; aún no cumple poka-yoke integral.
+
+## C32-2 · revisión de clave de creación
+
+La guarda preliminar comprueba las columnas K de MCA o la primera columna. Pendiente comprobar la transacción T13 directa y revisar posibles creaciones legítimas con claves repetidas antes de aceptar el cambio.

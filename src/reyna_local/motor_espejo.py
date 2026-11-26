@@ -658,6 +658,10 @@ class Motor:
             if x[5] == "SIS" and x[6] == "#SIG":
                 nv = max([num(r[i]) for r in self.T[tabla]["r"] if r is not row] + [0]) + 1; row[i] = nv; self.tr[x[2]] = nv
             else: row[i] = self.val(x[5], x[6])
+        claves = [self.col(tabla, x[2]) for x in mca if x[3] == "K"] or [0]
+        if any(all(otro[i] == row[i] for i in claves) for otro in self.T[tabla]["r"] if otro is not row):
+            clave = tuple(row[i] for i in claves)
+            raise Error(f"ya existe {tabla} {clave}")
         if tabla in CLAVES_EMPRESA:
             columna = CLAVES_EMPRESA[tabla][0]
             if row[self.col(tabla, columna)] != self.get("EMP"):
