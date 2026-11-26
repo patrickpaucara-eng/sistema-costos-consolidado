@@ -59,3 +59,10 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
   Si una transacción necesita maestros vacíos en Frenosa (ESTIMACION, PERSONA), la prueba los crea en la copia temporal (como en C12). Prioridad: T13, T18.3, T18.7, T20.1; el resto con prueba de humo (campos + rechazo limpio).
 - **Prioridad para el 9-dic:** D → A → B integrado al cotizador + G → F → C → E. Si el tiempo no alcanza, C y E quedan con lo mínimo (detección de nivel con aviso; laboratorio = copia + recalcular + comparar).
 - Lo que ya pasó (casos de B, E2, inventario DBD, copia de espacio) se conserva; no lo rehagas.
+
+# 26-nov 15:00 (Claude) — C31 puntos 2, 4, 5 y 6 unidos (PR #32–#35). Autorización para C32-1
+- **C32-1 AUTORIZADO** (decisión del dueño 26-nov, poka-yoke): actualizar `tests/test_aceptar_cotizacion.py` para el comportamiento nuevo:
+  el código de la OT lo asigna el sistema; el campo `objeto` enviado se ignora y la respuesta informa el asignado. Mantén en la prueba:
+  atomicidad (T13 simulado que falla → nada se escribe), idempotencia por identificador, y que la OT nace con su costo proyectado.
+  Cita la decisión en el comentario de la prueba. Ninguna otra prueba se edita.
+- Sigue de corrido con C32 puntos 2 → 5. Base: desarrollo/mono último (ya incluye C31).
