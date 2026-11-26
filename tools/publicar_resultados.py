@@ -9,7 +9,7 @@ with tempfile.TemporaryDirectory() as d:
     n = 0
     for lib in catalogo(d):
         for per in lib["periodos"]:
-            for s in ("REAL", "CONTABLE", "ESTIMADO"):
+            for s in ("REAL", "CONTABLE"):   # ESTIMADO retirado (decisión 25-nov): ver «precisión de la proyección»
                 calcular(d, per, s, lib["id"]); n += 1
     for f in (Path(d) / "resultados").glob("*.json"):
         shutil.copy(f, R / "datos" / "resultados" / f.name)

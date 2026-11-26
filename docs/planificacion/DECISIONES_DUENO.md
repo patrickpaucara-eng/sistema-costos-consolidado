@@ -35,3 +35,4 @@
 | 25-nov | APROBADO en OT-C27: E2; controles Desde/Hasta/Agrupar solo en Periodos y actualización de su prueba de navegación | `ordenes/OT-C27_OLA2_COMPLETA.md`, bloque F |
 | 25-nov | E6: criterio MIN_STD → MIN_REAL en dos pruebas de capacidad (mismo dato, nuevo inductor de minuto real) | tests/test_naturaleza_costo.py, tests/test_capacidad_y_merma.py |
 | 25-nov | Panel Decidir (sección H): ER gerencial, PE preciso por ABC (ponderado solo como respaldo, Oria), relevancia por regla del 10 %, producir/tercerizar, eliminar línea, pedido especial con y sin capacidad ociosa; atributo CF evitable | Claude |
+| 25-nov | A3: se retira ESTIMADO de la API, la publicación y las pantallas; pruebas de API/exportación ajustadas citando la decisión. resultados.construir conserva el camino interno solo por compatibilidad (no expuesto) | tests/test_c04, c07, costeo_variable, estrategico, entrega_armar, api_resultados |

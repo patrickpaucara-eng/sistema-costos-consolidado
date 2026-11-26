@@ -36,7 +36,7 @@ def test_frenosa_mismos_costos_en_tres_sintesis():
     from pathlib import Path
     from reyna_local.resultados import construir
     root = Path(__file__).resolve().parents[1]
-    for synthesis in ('REAL','CONTABLE','ESTIMADO'):
+    for synthesis in ('REAL','CONTABLE'):  # ESTIMADO retirado como síntesis (DECISIONES_DUENO 25-nov)
         expected = json.loads((root / f'datos/resultados/frenosa_2010-07_{synthesis}.json').read_text())
         actual = construir(root / 'casos/libros/frenosa.xlsx', periodo='2010-07', sintesis=synthesis)
         assert actual['kpi']['costo_total'] == expected['kpi']['costo_total']

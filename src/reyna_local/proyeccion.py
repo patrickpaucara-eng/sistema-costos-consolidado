@@ -134,7 +134,7 @@ def proyectar_hechos(hechos, previos, empresa, periodo_base, objetos, recursos, 
     source['(sin MCD) LINEA'].extend(clone_lines)
     previous['VALUACION_PROMEDIO']=list(previos.get('VALUACION_PROMEDIO',[]))+cloned_valuation
     # La merma en exceso pasada no se proyecta.
-    result = R.interno(source, {'PER':future,'EMP':empresa}, previous)
+    result, aristas, estado = R.correr(source, {'PER':future,'EMP':empresa}, previous)
     output={}
     for old,new in ids.items():
         prod=products[old]; out=output.setdefault(prod,{'producto':prod,'cantidad':0.0,'costo_total':0.0,'ingreso':0.0,'elementos':defaultdict(float)})
@@ -149,10 +149,33 @@ def proyectar_hechos(hechos, previos, empresa, periodo_base, objetos, recursos, 
         o['elementos']={k:round(v,2) for k,v in o['elementos'].items()};o['costo_total']=round(sum(o['elementos'].values()),2)
         o['cantidad']=round(o['cantidad'],4);o['ingreso']=round(o['ingreso'],2);o['margen']=round(o['ingreso']-o['costo_total'],2)
     items=sorted(output.values(),key=lambda x:x['producto'])
-    return {'periodo':future,'factores':allf,'productos':items,'total':{'costo_total':round(sum(x['costo_total'] for x in items),2),'ingreso':round(sum(x['ingreso'] for x in items),2),'margen':round(sum(x['margen'] for x in items),2)},'bloques':block_info}
+    inverso={new:old for old,new in ids.items()}
+    return {'periodo':future,'factores':allf,'productos':items,'desglose':desglose(result,aristas,estado,inverso,products),'total':{'costo_total':round(sum(x['costo_total'] for x in items),2),'ingreso':round(sum(x['ingreso'] for x in items),2),'margen':round(sum(x['margen'] for x in items),2)},'bloques':block_info}
 
 
-def proyectar_granular(libro, emp, meses=6, factores=None, carpeta_aprendizaje=None):
+def desglose(final, aristas, estado, nombres=None, productos=None):
+    """Costo por recurso, centro, actividad y OT de un mes, desde lo que entregó el motor (A1, decisión 25-nov:
+    se pronostican los recursos y el motor arma el resto). Sirve igual para un mes real que para uno proyectado."""
+    nombres = nombres or {}; productos = productos or {}
+    rec, act = defaultdict(float), defaultdict(float)
+    for a in aristas:
+        if a.get('org_tipo') == 'REC': rec[str(a['origen'])] += float(a['monto'])
+        if a.get('nivel') == 'ACT': act[str(a['destino'])] += float(a['monto'])
+    cen = {}
+    for clave in ('propio', 'recibido', 'distribuido'):
+        for c, v in (estado.get(clave) or {}).items():
+            cen.setdefault(str(c), {'propio': 0.0, 'recibido': 0.0, 'distribuido': 0.0})[clave] = round(float(sum(v.values()) if hasattr(v, 'values') else v), 2)
+    ots = []
+    for o, el in final.items():
+        cod = nombres.get(o, o); elementos = {k: round(float(v), 2) for k, v in el.items()}
+        ots.append({'orden': cod, 'producto': productos.get(cod), 'elementos': elementos, 'costo_total': round(sum(elementos.values()), 2)})
+    return {'recursos': [{'recurso': k, 'monto': round(v, 2)} for k, v in sorted(rec.items())],
+            'centros': [{'centro': k, **v} for k, v in sorted(cen.items())],
+            'actividades': [{'actividad': k, 'monto': round(v, 2)} for k, v in sorted(act.items())],
+            'ordenes': sorted(ots, key=lambda x: x['orden'])}
+
+
+def proyectar_granular(libro, emp, meses=6, factores=None, carpeta_aprendizaje=None, hasta=None, _cache=None):
     """Calcula escenarios futuros sobre copias temporales en memoria del último periodo."""
     import puerto_lectura as P
     from openpyxl import load_workbook
@@ -168,7 +191,9 @@ def proyectar_granular(libro, emp, meses=6, factores=None, carpeta_aprendizaje=N
     finally: wb.close()
     per=sorted(str(p['PER_COD']) for p in data['PERIODO'] if p.get('PER_EMP') in (None,'',emp))
     if not per: raise ValueError('La empresa no tiene periodos')
-    last=per[-1]; por,h=calcular_periodos(book,emp); prev=previos(book)
+    if hasta is not None: per=[x for x in per if x<=hasta]          # A2: proyectar como si estuviéramos en «hasta»
+    if not per: raise ValueError('No hay historia hasta ese periodo')
+    last=per[-1]; por,h=_cache or calcular_periodos(book,emp); prev=previos(book)
     objects={str(o['OBJ_NUM']):o for o in data['OBJETO'] if o.get('OBJ_EMP') in (None,'',emp)}
     vol_hist=defaultdict(lambda:defaultdict(float)); price_hist=defaultdict(lambda:defaultdict(list)); sale_hist=defaultdict(lambda:defaultdict(lambda:[0.0,0.0]))
     for p in per:
@@ -218,3 +243,29 @@ def proyectar_granular(libro, emp, meses=6, factores=None, carpeta_aprendizaje=N
             sensitivity.append({'factor':f'{kind}:{name}','mas':delta[0],'menos':delta[1]})
     sensitivity.sort(key=lambda x:max(abs(x['mas']),abs(x['menos'])),reverse=True)
     return {'base':last,'meses':outputs,'sensibilidad':sensitivity,'bloques':outputs[0]['bloques']}
+
+
+def precision(libro, emp, minimo=4):
+    """A2 (decisión 25-nov, reemplaza la síntesis ESTIMADO): para cada mes pasado t, lo que el sistema habría proyectado con la
+    historia hasta t−1 (mismo motor, recursos pronosticados) contra el costo real de t, por producto y total.
+    Mide qué tan bien proyecta el sistema; es la base del aprendizaje."""
+    import puerto_lectura as P
+    from .resultados import calcular_periodos
+    book=Path(libro); cache=calcular_periodos(book,emp); por=cache[0]
+    objs={str(o['OBJ_NUM']):str(o['OBJ_PRO']) for o in P.leer(book,['OBJETO'])['OBJETO']}
+    per=sorted(por); filas=[]
+    for i in range(minimo, len(per)):
+        t=per[i]; pr=proyectar_granular(book, emp, 1, hasta=per[i-1], _cache=cache)['meses'][0]
+        real=defaultdict(float)
+        for o,v in por[t].items():
+            real[objs.get(str(o),str(o))]+=sum(float(x) for k,x in v.items() if k.split('|')[0] in ('MD','PD','SD','CIF','GAD','GVT','GFI'))
+        for p in pr['productos']:
+            r=real.get(p['producto'],0.0)
+            filas.append({'periodo':t,'producto':p['producto'],'proyectado':p['costo_total'],'real':round(r,2),
+                          'error_pct':round((p['costo_total']-r)/r*100,2) if r else None})
+    tot=defaultdict(lambda:[0.0,0.0])
+    for f in filas: tot[f['periodo']][0]+=f['proyectado']; tot[f['periodo']][1]+=f['real']
+    resumen=[{'periodo':k,'proyectado':round(a,2),'real':round(b,2),'error_pct':round((a-b)/b*100,2) if b else None} for k,(a,b) in sorted(tot.items())]
+    errs=[abs(x['error_pct']) for x in resumen if x['error_pct'] is not None]
+    return {'por_producto':filas,'por_mes':resumen,'error_medio_abs_pct':round(sum(errs)/len(errs),2) if errs else None,
+            'metodo':'proyección de un mes con la historia hasta el mes anterior, por el mismo motor ABC'}

@@ -32,7 +32,7 @@ def test_armar_entregables(tmp_path, monkeypatch):
         html = (salida / f'12b_informe_{s}.html').read_text(encoding='utf-8')
         assert 'http://' not in html and 'https://' not in html                 # sin conexión de verdad
     sistema = (salida / '12_sistema_sin_conexion.html').read_text(encoding='utf-8')
-    assert 'window.__DATOS=' in sistema and 'frenosa_2010-12_ESTIMADO' in sistema
+    assert 'window.__DATOS=' in sistema and 'frenosa_2010-12_CONTABLE' in sistema
     assert 'src="http' not in sistema and 'href="http' not in sistema          # ningún recurso externo
     entrada = load_workbook(salida / '05_datos_entrada.xlsx', read_only=True)          # el libro DBD con que se calcula
     assert entrada.sheetnames[0] == 'LEEME' and {'EMPRESA', 'KARDEX', 'REGLA_REPARTO', 'VENTA'} <= set(entrada.sheetnames)

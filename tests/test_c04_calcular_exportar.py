@@ -15,7 +15,7 @@ def test_calcular_consultar_exportar():
         thread.start()
         base = f'http://127.0.0.1:{server.server_port}'
         try:
-            for sintesis in ('REAL', 'CONTABLE', 'ESTIMADO'):
+            for sintesis in ('REAL', 'CONTABLE'):  # ESTIMADO retirado como síntesis (DECISIONES_DUENO 25-nov)
                 query = f'?sintesis={sintesis}&periodo=2010-07'
                 request = Request(base + '/api/calcular' + query, data=b'{}', headers={'Content-Type':'application/json'}, method='POST')
                 with urlopen(request, timeout=120) as response:

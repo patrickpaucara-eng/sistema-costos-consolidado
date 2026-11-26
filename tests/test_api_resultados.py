@@ -21,7 +21,7 @@ def test_api_resultados_reales_ejemplo_y_parametros_invalidos():
             assert validar(real) == []
             assert real['empresa']['nombre'] == 'Frenosa'
             assert real['kpi']['ventas'] == 888730
-            with urlopen(url + '?sintesis=ESTIMADO&periodo=2011-08') as response:
+            with urlopen(url + '?sintesis=CONTABLE&periodo=2011-08') as response:
                 ejemplo = json.load(response)
             assert validar(ejemplo) == []
             assert 'EJEMPLO' in ejemplo['_nota']  # [ARQ] Etapa 3 ya publica 2010-08; el ejemplo se prueba con un periodo sin datos

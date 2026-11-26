@@ -9,7 +9,7 @@ sys.path.insert(0, str(ROOT / 'src'))
 from reyna_local.exportar import exportar                      # noqa: E402
 from reyna_local.contrato import validar                       # noqa: E402
 
-SINTESIS = ('REAL', 'CONTABLE', 'ESTIMADO')
+SINTESIS = ('REAL', 'CONTABLE')
 INDICE = [
     ('01', 'Cadena de chats (Word)', '01_cadena_chats.docx'),
     ('02', 'Etapas del desarrollo (Word)', '02_etapas.docx'),
@@ -91,7 +91,7 @@ def armar(periodo, salida, junit=None):
     hechos.append(Path(shutil.copy(ROOT / 'docs/entrega/REGISTRO_TIEMPOS.xlsx', salida / '13_registro_tiempos.xlsx')))
     shutil.rmtree(tmp, ignore_errors=True)
     lineas = [f'MONOGRAFÍA MN_01 · Sistema de Costos Reyna · Caso Frenosa · periodo {periodo}', '',
-              'Síntesis: REAL (costo integral), CONTABLE (NIC 2 / NIIF 18), ESTIMADO (estadístico fuera de muestra).', '']
+              'Síntesis: REAL (costo integral), CONTABLE (NIC 2 / NIIF 18), PROYECTADO (recursos pronosticados por el mismo motor) y su precisión.', '']
     for n, desc, arch in INDICE:
         lineas.append(f'{n}. {desc}: ' + ', '.join(dict.fromkeys(a.format(s=s) for s in SINTESIS for a in arch.split(', '))))
     (salida / 'LEEME.txt').write_text('\n'.join(lineas) + '\n', encoding='utf-8')

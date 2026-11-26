@@ -327,7 +327,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
                     raise ValueError
                 sintesis, periodo = params["sintesis"][0], params["periodo"][0]
                 empresa = params.get("empresa", [None])[0]
-                if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
+                if sintesis not in {"REAL", "CONTABLE"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
                     raise ValueError
                 if empresa is not None and not re.fullmatch(r"[a-z0-9_]{1,60}", empresa):
                     raise ValueError
@@ -432,7 +432,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
                     raise ValueError
                 sintesis, periodo = params["sintesis"][0], params["periodo"][0]
                 empresa = params.get("empresa", ["frenosa"])[0]
-                if sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
+                if sintesis not in {"REAL", "CONTABLE"} or not re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo):
                     raise ValueError
                 if not re.fullmatch(r"[a-z0-9_]{1,60}", empresa):
                     raise ValueError
@@ -457,6 +457,18 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 raise Problem(422, "Los resultados disponibles no se pueden mostrar. Revisa el archivo de resultados.") from None
             self._json(HTTPStatus.OK, resultado)
             return
+        if target.path == "/api/precision" and method == "GET":
+            from .calculo_local import ruta_libro
+            from .proyeccion import precision
+            from .libro_dbd import empresa as leer_empresa
+            try:
+                q = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
+                company = q.get('empresa', ['frenosa'])[0]
+                if set(q) - {'empresa'} or not re.fullmatch(r'[a-z0-9_]{1,60}', company): raise ValueError('Parámetros inválidos.')
+                path = ruta_libro(store.root, company); result = precision(path, leer_empresa(path)[0])
+            except (ValueError, KeyError) as exc: raise Problem(422, str(exc)) from None
+            self._json(200, result)
+            return
         if target.path == "/api/proyeccion" and method == "GET":
             from .calculo_local import ruta_libro
             from .proyeccion import proyectar_granular
@@ -477,7 +489,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
             from .calculo_local import ruta_libro
             q = {k: v[0] for k, v in parse_qs(target.query).items()}
             empresa, sintesis, grano = q.get("empresa", "frenosa"), q.get("sintesis", "REAL"), q.get("grano", "mes")
-            if (not re.fullmatch(r"[a-z0-9_]{1,60}", empresa) or sintesis not in {"REAL", "CONTABLE", "ESTIMADO"} or grano not in GRANOS
+            if (not re.fullmatch(r"[a-z0-9_]{1,60}", empresa) or sintesis not in {"REAL", "CONTABLE"} or grano not in GRANOS
                     or not all(re.fullmatch(r"\d{4}-\d{2}-\d{2}", q.get(k, "")) for k in ("desde", "hasta"))):
                 raise Problem(400, "Elige empresa, síntesis, grano y fechas válidas (AAAA-MM-DD).")
             try:

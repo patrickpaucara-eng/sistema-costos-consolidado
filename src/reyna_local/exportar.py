@@ -400,7 +400,7 @@ def _informe(r, destino):
     doc.add_paragraph('Costo de calidad y gobierno del dato: usar categorías, responsables y evidencia cuando el contrato los informe; no se infieren datos faltantes.')
     doc.add_paragraph('Arquitectura objetivo futura: captura MES/IoT mediante adaptador, MFCA ISO 14051, flujo de valor y benchmarking. No implica que estén implementados.')
     doc.add_heading('7. Anexos', level=1)
-    doc.add_paragraph('Modelo de costeo de W. Oria; miradas REAL, CONTABLE y ESTIMADO.')
+    doc.add_paragraph('Modelo de costeo de W. Oria; miradas REAL y CONTABLE; costo PROYECTADO por el mismo motor y su precisión.')
     rows(r.get('control') or [], [('control','Control'),('ok','Cumple'),('detalle','Detalle')])
     biggest = max(r['objetos'], key=lambda o: o.get('costo_total',0), default=None)
     if biggest:

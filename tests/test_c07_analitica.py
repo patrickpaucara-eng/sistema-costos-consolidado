@@ -24,7 +24,7 @@ def test_pantallas_analitica_y_proyeccion(tmp_path):
             page.goto(f'http://127.0.0.1:{server.server_port}/')
             page.locator('#result-periodo').fill('2010-12')
             root = Path(__file__).resolve().parents[1]
-            for synthesis in ('REAL', 'CONTABLE', 'ESTIMADO'):
+            for synthesis in ('REAL', 'CONTABLE'):  # ESTIMADO retirado como síntesis (DECISIONES_DUENO 25-nov)
                 page.locator('#result-sintesis').select_option(synthesis)
                 with page.expect_response(lambda r: '/api/resultados?' in r.url and '2010-12' in r.url and f'sintesis={synthesis}' in r.url):
                     page.locator('#result-cargar').click()
@@ -50,7 +50,7 @@ def test_pantallas_analitica_y_proyeccion(tmp_path):
 def test_html_autonomo_preserva_banda_escenarios_y_estimacion(tmp_path):
     from reyna_local.exportar import exportar
     root = Path(__file__).resolve().parents[1]
-    for synthesis in ('REAL', 'CONTABLE', 'ESTIMADO'):
+    for synthesis in ('REAL', 'CONTABLE'):  # ESTIMADO retirado como síntesis (DECISIONES_DUENO 25-nov)
         data = json.loads((root / 'datos/resultados' / f'frenosa_2010-12_{synthesis}.json').read_text())
         text = exportar(data, 'html', tmp_path).read_text(encoding='utf-8')
         assert 'data-banda="p05-p95"' in text
