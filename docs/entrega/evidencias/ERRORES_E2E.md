@@ -119,3 +119,7 @@ La aceptación de cotización asigna el código dentro del bloqueo de escritura 
 ## C32-2 · revisión de clave de creación
 
 La guarda preliminar comprueba las columnas K de MCA o la primera columna. Pendiente comprobar la transacción T13 directa y revisar posibles creaciones legítimas con claves repetidas antes de aceptar el cambio.
+
+## OT-C32 punto 2 · compuerta roja
+
+La guarda por primera columna rechaza una creación legítima de LINEA: T20 usa varias líneas con el mismo `LIN_EVE` y `LIN_NUM` diferente; MCA no marca esas columnas con K. `tests/test_d9_event_accounts.py::D9EventAccounts::test_t20_acumula_ingreso_costo_y_respeta_saldo_de_otra_empresa` falla con «ya existe LINEA (1,)». Debe incorporarse la clave compuesta de LINEA sin debilitar la guarda de OBJETO y volver a verificar; no se modificó la prueba existente.
