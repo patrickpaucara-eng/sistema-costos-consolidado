@@ -539,6 +539,9 @@ class ReynaHandler(BaseHTTPRequestHandler):
             self._json(HTTPStatus.CREATED, store.create(self._body()))
         elif len(parts) == 4 and method == "GET" and parts[3]:
             self._json(HTTPStatus.OK, store.get(unquote(parts[3])))
+        elif len(parts) == 5 and method == "POST" and parts[3] and parts[4] == "aceptar-cotizacion":
+            status, payload = store.aceptar_cotizacion(unquote(parts[3]), self._body())
+            self._json(status, payload)
         elif len(parts) == 5 and method == "POST" and parts[3] and parts[4] == "execute":
             status, payload = store.execute(unquote(parts[3]), self._body())
             self._json(status, payload)

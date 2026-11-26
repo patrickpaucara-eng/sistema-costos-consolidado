@@ -747,35 +747,110 @@ class Store:
                     verify_vnr_result_delivery(tables, motor.T, header, user, lines)
                 except Problem as error:
                     outcome = f"ERROR: {error}"
-            ok = outcome == "OK"
-            status = 200 if ok else 422
-            version = info["version"] + int(ok)
-            response = {"result": "OK" if ok else "ERROR", "transaction": txn, "request_id": key, "version": version}
-            if not ok:
-                response["error"] = outcome
-            edits = motor_changes(tables, motor, positions) if ok else {}
-            if ok:
-                version_row = next(n for n, row in zip(positions[META], tables[META]["r"]) if row[0] == "version")
-                edits[META] = [(version_row, 2, version)]
-            nr = (positions[RECEIPTS][-1] if positions[RECEIPTS] else 1) + 1
-            record = (key, digest, status, encode(response), command, now())
-            edits[RECEIPTS] = [(nr, j, val) for j, val in enumerate(record, 1)]
-            with ZipFile(BytesIO(raw)) as z:
-                parts = sheet_parts(z)
-                patches = {parts[n]: patch_cells(z.read(parts[n]), cells) for n, cells in edits.items()}
-            with temporary(path.parent) as temp, temporary(path.parent) as backup:
-                write_archive(temp, raw, patches)
-                with backup.open("wb") as f:
-                    f.write(raw)
-                    f.flush()
-                    os.fsync(f.fileno())
-                same_workbook(path, raw)
-                os.replace(backup, path.parent / "respaldo.xlsx")
-                sync_dir(path.parent)
-                same_workbook(path, raw)
-                os.replace(temp, path)
-                sync_dir(path.parent)
-            return status, response
+            return self._persistir(path, raw, tables, positions, info, motor, outcome, txn, key, digest, command)
+
+
+    def aceptar_cotizacion(self, identifier, body):
+        """Aceptar una cotización = T09 (estimación) + T13 (abrir la OT con el costo proyectado congelado) en UNA sola escritura:
+        si cualquiera falla, el libro no cambia (decisión 25-nov, OT-C31 punto 3). Antes, como responsable de maestros, el sistema
+        completa la TARIFA de estimación (TAR_TIPO = EST) de los componentes del producto con el costo promedio del saldo (EXISTENCIA),
+        sin pisar tarifas ya cargadas: la T09 del MCD la lee y no la escribe ninguna transacción."""
+        user = text_field(body, "user", 100); key = text_field(body, "request_id", 160)
+        per = text_field(body, "periodo", 20); prod = text_field(body, "producto", 60); obj = text_field(body, "objeto", 80)
+        cli = text_field(body, "cliente", 80); fecha = text_field(body, "fecha", 8)
+        try:
+            can = float(body.get("cantidad")); monto = float(body.get("monto"))
+        except (TypeError, ValueError):
+            raise Problem(400, "Cantidad y monto deben ser numéricos.") from None
+        if not (math.isfinite(can) and can > 0 and math.isfinite(monto) and monto > 0):
+            raise Problem(400, "Cantidad y monto deben ser positivos.")
+        huella = str(body.get("huella") or "")[:64]
+        command = encode({"operation": "aceptar_cotizacion", "user": user, "periodo": per, "producto": prod, "objeto": obj,
+                          "cliente": cli, "fecha": fecha, "cantidad": can, "monto": monto, "huella": huella})
+        digest = sha256(command.encode()).hexdigest(); path = self.path(identifier)
+        with writer_lock(path.parent):
+            raw = content_bytes(path); tables, positions = load_data(raw); info = metadata(tables)
+            if info["id"] != identifier or info["engine_sha256"] != ENGINE_SHA256:
+                raise Problem(409, "La identidad o versión del motor del espacio es incompatible.")
+            company = info.get("company_code")
+            for record in tables[RECEIPTS]["r"]:
+                if record[0] == key:
+                    if record[1] != digest: raise Problem(409, "El identificador ya corresponde a otra operación.")
+                    return record[2], json.loads(record[3])
+            same_workbook(path, raw)
+            if any(t not in detectar_transacciones_e26(tables) for t in ("T09", "T13")):
+                raise Problem(409, "El libro no define T09 y T13.")
+            if any(str(r[0]) == obj for r in tables["OBJETO"]["r"]):
+                raise Problem(409, f"La orden {obj} ya existe: elige otro código.")
+            motor = Motor.__new__(Motor)
+            motor.T = {n: {"h": s["h"], "r": [list(r) for r in s["r"]]} for n, s in tables.items() if n not in (META, RECEIPTS)}
+            motor.usr = motor.perfil = ""; motor.pend = None
+            outcome = self._tarifas_estimacion(motor.T, company, per, prod)
+            if outcome == "OK":
+                c = {"FECHA": fecha, "PER": per, "EMP": company}
+                try:
+                    outcome = motor.ejecutar("T09", {**c, "CLI": cli, "PRO": prod, "CAN": can}, user)
+                    if outcome == "OK":
+                        est = motor.T["ESTIMACION"]["r"][-1][0]
+                        outcome = motor.ejecutar("T13", {**c, "EST": est, "OBJ": obj, "MONTO": monto, "REF": "COTIZADOR",
+                                                         "ALG": "COSTO_PROYECTADO", "VER": 1, "HUELLA": huella or digest[:16]}, user)
+                        if outcome != "OK": outcome = "ERROR en T13 (no se registró nada): " + outcome
+                    else: outcome = "ERROR en T09 (no se registró nada): " + outcome
+                except (ValueError, ArithmeticError, KeyError, IndexError, TypeError):
+                    outcome = "ERROR: La operación contiene valores incompatibles con el libro."
+            return self._persistir(path, raw, tables, positions, info, motor, outcome, "T09+T13", key, digest, command)
+
+    @staticmethod
+    def _tarifas_estimacion(T, company, per, prod):
+        h = T["COMPONENTE"]["h"]; comp = [dict(zip(h, r)) for r in T["COMPONENTE"]["r"]]
+        recs = [str(c["CMP_REC"]) for c in comp if str(c.get("CMP_PRO")) == prod and c.get("CMP_EMP") in (None, "", company)]
+        if not recs: return f"ERROR: el producto {prod} no tiene componentes (COMPONENTE)"
+        th = T["TARIFA"]["h"]; tar = [dict(zip(th, r)) for r in T["TARIFA"]["r"]]
+        kh = T["KARDEX"]["h"]; kdx = [dict(zip(kh, r)) for r in T["KARDEX"]["r"]]
+        for rec in recs:
+            if any(str(t.get("TAR_REC")) == rec and t.get("TAR_TIPO") == "EST" and str(t.get("TAR_PER")) == per and t.get("TAR_EMP") in (None, "", company) for t in tar):
+                continue                                         # tarifa cargada por el responsable: se respeta
+            eh = T["EXISTENCIA"]["h"]; exi = [dict(zip(eh, r)) for r in T["EXISTENCIA"]["r"]]
+            cpus = [float(e["EXI_CPU"]) for e in exi if str(e.get("EXI_REC")) == rec and e.get("EXI_EMP") in (None, "", company) and float(e.get("EXI_CPU") or 0) > 0]
+            compras = [k for k in kdx if str(k.get("KDX_REC")) == rec and float(k.get("KDX_CAN") or 0) > 0 and float(k.get("KDX_VAL") or 0) > 0]
+            if cpus: cpu = cpus[0]                               # costo promedio del saldo (ALG-01)
+            elif compras: cpu = float(compras[-1]["KDX_VAL"]) / float(compras[-1]["KDX_CAN"])   # última compra
+            else: return f"ERROR: sin costo vigente en el kardex para {rec}"
+            fila = {"TAR_REC": rec, "TAR_TIPO": "EST", "TAR_PER": per, "TAR_VAL": round(cpu, 6), "TAR_GAS": None, "TAR_INDICE": None, "TAR_EMP": company}
+            T["TARIFA"]["r"].append([fila.get(c) for c in th])
+        return "OK"
+
+    def _persistir(self, path, raw, tables, positions, info, motor, outcome, txn, key, digest, command):
+        """Escritura única y atómica de lo que el motor dejó en memoria (una o varias transacciones), con recibo y respaldo."""
+        ok = outcome == "OK"
+        status = 200 if ok else 422
+        version = info["version"] + int(ok)
+        response = {"result": "OK" if ok else "ERROR", "transaction": txn, "request_id": key, "version": version}
+        if not ok:
+            response["error"] = outcome
+        edits = motor_changes(tables, motor, positions) if ok else {}
+        if ok:
+            version_row = next(n for n, row in zip(positions[META], tables[META]["r"]) if row[0] == "version")
+            edits[META] = [(version_row, 2, version)]
+        nr = (positions[RECEIPTS][-1] if positions[RECEIPTS] else 1) + 1
+        record = (key, digest, status, encode(response), command, now())
+        edits[RECEIPTS] = [(nr, j, val) for j, val in enumerate(record, 1)]
+        with ZipFile(BytesIO(raw)) as z:
+            parts = sheet_parts(z)
+            patches = {parts[n]: patch_cells(z.read(parts[n]), cells) for n, cells in edits.items()}
+        with temporary(path.parent) as temp, temporary(path.parent) as backup:
+            write_archive(temp, raw, patches)
+            with backup.open("wb") as f:
+                f.write(raw)
+                f.flush()
+                os.fsync(f.fileno())
+            same_workbook(path, raw)
+            os.replace(backup, path.parent / "respaldo.xlsx")
+            sync_dir(path.parent)
+            same_workbook(path, raw)
+            os.replace(temp, path)
+            sync_dir(path.parent)
+        return status, response
 
     def close_month(self, identifier, body):
         """Ejecuta la cadena oficial en memoria y persiste una sola versión del libro."""
