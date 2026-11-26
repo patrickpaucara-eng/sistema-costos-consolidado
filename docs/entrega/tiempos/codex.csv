@@ -41,3 +41,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-26,08:11,08:19,OT-C31 punto 5 laboratorio,Monografía,Codex,Copia y comparación verificadas con T15 y SHA
 2026-11-26,08:10,08:16,OT-C31 punto 6,Monografía,Codex,Diagnóstico preliminar y plantillas con guía por nivel; pruebas propias aprobadas
 2026-11-26,15:00,15:10,OT-C32 punto 1,Monografía,Codex,Asignación en aceptación; formularios pendientes
+2026-11-26,16:58,17:19,OT-C32 punto 4 asignación de recurso escaso y compuerta,Monografía,Codex,3 pruebas propias en Python API y Chromium; COMPUERTA VERDE: 489 pruebas, 1 advertencia y 26 subpruebas
