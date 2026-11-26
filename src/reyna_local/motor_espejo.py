@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Motor espejo: interpreta la configuración del LIBRO (no de poc_config) con la misma semántica que motor.bas."""
 import sys, os
+from functools import lru_cache
 from decimal import Decimal as D, ROUND_HALF_UP
 from openpyxl import load_workbook
+from .raiz import RAIZ
 
 import math
 VNR_ABS_TOL = 1e-9
@@ -31,6 +33,32 @@ def texto_valor(v):   # vacio -> "", numero -> texto_num, texto -> tal cual
     return str(v)
 
 class Error(Exception): pass
+
+@lru_cache(maxsize=1)
+def claves_primarias_dbd():
+    """Claves físicas declaradas por el DBD fuente; una tabla sin PK no se valida por heurística."""
+    ruta = RAIZ / "fuente" / "DBD_Fuente.xlsx"
+    if not ruta.is_file():
+        raise Error("No se encuentra fuente/DBD_Fuente.xlsx para validar claves primarias.")
+    libro = load_workbook(ruta, read_only=True, data_only=True)
+    try:
+        hoja = libro["DBD_4_Modelo_Interno"]
+        filas = hoja.iter_rows(values_only=True)
+        cabecera = next((tuple(f) for f in filas if f and {"Tabla", "Columna", "Clave"}.issubset(set(f))), None)
+        if cabecera is None:
+            raise Error("El modelo interno del DBD no declara las columnas de clave primaria.")
+        it, ic, ik = (cabecera.index(c) for c in ("Tabla", "Columna", "Clave"))
+        claves = {}
+        for fila in filas:
+            if not fila or len(fila) <= max(it, ic, ik) or str(fila[ik] or "").strip().upper() != "PK":
+                continue
+            tabla, columna = str(fila[it] or "").strip(), str(fila[ic] or "").strip()
+            if tabla and columna:
+                claves.setdefault(tabla, []).append(columna)
+        return {tabla: tuple(columnas) for tabla, columnas in claves.items()}
+    finally:
+        libro.close()
+
 PROF_MAX = 32   # OT-052: niveles máximos de operaciones anidadas (SI/PARACADA/operación); idéntico en motor.bas
 
 def clave_cifrada(u, clave):
@@ -49,7 +77,6 @@ CLAVES_EMPRESA = {
     "RESULTADO_METODO": ("RES_EMP", "RES_METODO", "RES_VER", "RES_PER", "RES_HUELLA",
                          "RES_TIPO", "RES_CLAVE", "RES_CONC"),
 }
-
 
 class Motor:
     def __init__(self, ruta):
@@ -652,16 +679,21 @@ class Motor:
             else: nv = v
             self.setc(tabla, row, c, nv)
     def m_CREAR(self, cod, tabla, sub, obl, orden, mca):
-        row = [None] * len(self.T[tabla]["h"]); self.T[tabla]["r"].append(row); self.creados.append((tabla, row))
+        row = [None] * len(self.T[tabla]["h"])
         for x in mca:
             i = self.col(tabla, x[2])
             if x[5] == "SIS" and x[6] == "#SIG":
-                nv = max([num(r[i]) for r in self.T[tabla]["r"] if r is not row] + [0]) + 1; row[i] = nv; self.tr[x[2]] = nv
+                nv = max([num(r[i]) for r in self.T[tabla]["r"]] + [0]) + 1; row[i] = nv; self.tr[x[2]] = nv
             else: row[i] = self.val(x[5], x[6])
-        claves = [self.col(tabla, x[2]) for x in mca if x[3] == "K"] or [0]
-        if any(all(otro[i] == row[i] for i in claves) for otro in self.T[tabla]["r"] if otro is not row):
+        nombres_clave = [x[2] for x in mca if x[3] == "K"]
+        if not nombres_clave:
+            nombres_clave = list(claves_primarias_dbd().get(tabla, ()))
+        claves = [self.col(tabla, c) for c in nombres_clave]
+        if claves and any(all(norm(otro[i]) == norm(row[i]) for i in claves) for otro in self.T[tabla]["r"]):
             clave = tuple(row[i] for i in claves)
-            raise Error(f"ya existe {tabla} {clave}")
+            contexto = "; no concilia: ya existe una rebaja VNR para esa clave" if tabla == "AJUSTE_VNR" else ""
+            raise Error(f"ya existe {tabla} {clave}{contexto}")
+        self.T[tabla]["r"].append(row); self.creados.append((tabla, row))
         if tabla in CLAVES_EMPRESA:
             columna = CLAVES_EMPRESA[tabla][0]
             if row[self.col(tabla, columna)] != self.get("EMP"):

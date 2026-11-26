@@ -116,10 +116,18 @@ La vista representa aristas observadas con flechas y botones de detalle; no es t
 
 La aceptación de cotización asigna el código dentro del bloqueo de escritura y registra el código en el recibo idempotente. La prueba conserva fallo T13, costo proyectado y comprueba dos códigos consecutivos. Pendiente: precarga del código en la pantalla y protección del formulario guiado T13 y de otras transacciones creadoras; aún no cumple poka-yoke integral.
 
-## C32-2 · revisión de clave de creación
+## C32-2 · estado inicial de la revisión de clave
 
 La guarda preliminar comprueba las columnas K de MCA o la primera columna. Pendiente comprobar la transacción T13 directa y revisar posibles creaciones legítimas con claves repetidas antes de aceptar el cambio.
 
 ## OT-C32 punto 2 · compuerta roja
 
 La guarda por primera columna rechaza una creación legítima de LINEA: T20 usa varias líneas con el mismo `LIN_EVE` y `LIN_NUM` diferente; MCA no marca esas columnas con K. `tests/test_d9_event_accounts.py::D9EventAccounts::test_t20_acumula_ingreso_costo_y_respeta_saldo_de_otra_empresa` falla con «ya existe LINEA (1,)». Debe incorporarse la clave compuesta de LINEA sin debilitar la guarda de OBJETO y volver a verificar; no se modificó la prueba existente.
+
+### C32-2 · primeras excepciones legítimas identificadas
+
+La segunda ejecución focalizada mostró el mismo falso positivo en `VENTA`: varias líneas de T20 comparten `VTA_EVE`, pero tienen distinto `VTA_LIN`. La primera corrección identificó sus claves compuestas y movió la validación antes de anexar la fila; después se descubrió que esas claves debían derivarse del modelo interno del DBD y no mantenerse como mapeos codificados. La primera compuerta completa encontró además que el rechazo correcto de una rebaja VNR repetida debía conservar el diagnóstico «no concilia». Las pruebas focalizadas tras la aclaración DBD y ese diagnóstico pasan 16.
+
+### C32-2 · fuente de las claves (aclaración 26-nov 15:30)
+
+La aclaración incorporada en `ordenes/RESPUESTAS_CODEX_24NOV.md` exige obtener la PK de `fuente/DBD_Fuente.xlsx` (hoja `DBD_4_Modelo_Interno`), y no suponerla por la primera columna. El motor prioriza K de MCA y usa la PK declarada en el DBD cuando MCA no marca clave; si falta en ambos, no aplica el control por heurística. El inventario encontró 16 métodos CREAR en la fuente y todos sus destinos declaran PK. `AJUSTE_VNR` declara solo `AVN_REC`; un duplicado conserva `ya existe AJUSTE_VNR (...)` y añade «no concilia» para mantener el diagnóstico esperado de T23.5. Se corrigió el mapeo inferido previo. Pruebas focalizadas y compuerta tras rebase: pendientes.
