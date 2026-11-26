@@ -100,3 +100,5 @@ Se probó una comparación aislada de resultados por orden y elemento. No existe
 ## OT-C29b · alcance parcial
 
 La planta permite seleccionar nodos y consultar las conexiones presentes en las trazas, con el monto del tramo. La interacción y la clasificación completa por niveles requieren revisión visual. E7 pendiente: el resultado publicado de SERVITEC contiene el recurso agregado «Técnicos», sin identificar personas en `modelo.recursos`; falta una fuente o contrato de detalle individual. No se atribuyeron importes a trabajadores ficticios.
+## C28 · avance parcial del cotizador
+Se probó el caso de seis meses con intervalos parejos y tasas suministradas. Falta integrar tasas proyectadas y parámetros aprobados, curvas, familias, bandas, pantalla y aceptación T09→T13. No es una capacidad activa.
