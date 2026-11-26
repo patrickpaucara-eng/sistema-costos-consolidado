@@ -236,6 +236,38 @@ class ReynaHandler(BaseHTTPRequestHandler):
             else:
                 self._json(HTTPStatus.CREATED, ficha)
             return
+        if target.path == "/api/suficiencia" and method == "GET":
+            from .suficiencia import detectar_libro
+            from .calculo_local import ruta_libro
+            params = parse_qs(target.query, keep_blank_values=True)
+            empresa = params.get('empresa', [''])[0]
+            if set(params) != {'empresa'} or len(params['empresa']) != 1 or not re.fullmatch(r'[a-z0-9_]{1,60}', empresa):
+                raise Problem(400, 'Empresa inválida.')
+            try: resultado = detectar_libro(ruta_libro(store.root, empresa))
+            except (ValueError, OSError) as exc: raise Problem(422, str(exc)) from None
+            self._json(200, resultado)
+            return
+        if target.path == "/api/plantilla-nivel" and method == "GET":
+            from .libro_dbd import plantilla_vacia
+            from .suficiencia import ETIQUETAS
+            from openpyxl import load_workbook
+            import tempfile
+            params = parse_qs(target.query, keep_blank_values=True)
+            if set(params) != {'nivel'} or len(params['nivel']) != 1 or params['nivel'][0] not in tuple(map(str, range(5))):
+                raise Problem(400, 'Nivel inválido.')
+            nivel = int(params['nivel'][0])
+            with tempfile.TemporaryDirectory() as temp:
+                path = Path(plantilla_vacia(Path(temp) / 'plantilla.xlsx'))
+                wb = load_workbook(path); ws = wb.create_sheet('NIVEL', 0)
+                ws.append(['Guía de datos para el nivel', nivel])
+                ws.append(['La plantilla conserva el formato DBD completo; esta guía no acredita el nivel.'])
+                for i, etiqueta in enumerate(ETIQUETAS): ws.append([i, etiqueta, 'Requerido' if i <= nivel else 'Posterior'])
+                wb.save(path); wb.close(); contenido = path.read_bytes()
+            self.send_response(HTTPStatus.OK)
+            self.send_header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+            self.send_header('Content-Disposition', f'attachment; filename="plantilla_nivel_{nivel}.xlsx"')
+            self.send_header('Content-Length', str(len(contenido))); self.end_headers(); self.wfile.write(contenido)
+            return
         if target.path == "/api/plantilla" and method == "GET":
             from .libro_dbd import plantilla_vacia
             import tempfile as _t
