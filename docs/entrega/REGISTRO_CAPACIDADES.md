@@ -82,3 +82,7 @@ La interfaz consulta cotización, aprendizaje y sensibilidad; presenta bloques d
 ### OT-C27 · adelantos parciales
 
 E2 mueve los controles de rango a Periodos y se verifica en Chromium. Los casos aislados de intervalos y el inventario DBD son prototipos sin conexión a pantallas; la separación física de una copia de espacio no constituye un laboratorio. Los bloques D, A, B, C, E y F no se declaran completos; ver `evidencias/ERRORES_E2E.md`.
+
+### OT-C31 punto 2 · detalle de mano de obra por recurso
+
+La ficha de orden muestra los tramos raíz P2 de recursos `PERS_DIR` que el contrato ya identifica. Una copia temporal de SERVITEC con tres técnicos sintéticos conserva el costo MOD y muestra sus rutas en Chromium; el original no cambia. El detalle no identifica personas si el libro solo contiene un recurso agregado. Ver [evidencia](evidencias/C31/PUNTO_2_PERSONAS.md).
