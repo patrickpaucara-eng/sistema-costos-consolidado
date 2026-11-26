@@ -53,3 +53,18 @@ Idea del dueño: como en el Diseño de Bloques Completos al Azar, la familia es 
   1. Familia A, horas por unidad [10, 11, 9, 10, 10] → media 10, s = 0.7071, intervalo **[7.85, 12.15]** (10 ± 2.15). Componente con 11.5 h → pertenece; con 14 h → no reconocido.
   2. Familia B [10.2, 9.8, 10.5, 9.9, 10.1] contra A → ANOVA F = 0.087, p = **0.776** > 0.05 → sugerir fusionar.
 - Después del 9-dic (arquitectura objetivo): detección de familia por agrupamiento automático y lectura de familias desde BIM.
+
+## H. Panel «Decidir» (notas de clase del dueño, 25-nov; criterios de Oria)
+| Tema de clase | Regla | Estado del sistema | Acción |
+|---|---|---|---|
+| ER gerencial (costeo variable) | Ventas − CV = MC − CF controlable − CF no controlable = Utilidad operativa | MC y fijos existen; no hay ER en ese formato | Nuevo ER gerencial por producto y total, con el atributo de naturaleza (variable/fijo, controlable) |
+| Clasificación | CMD, CSD variables (directamente proporcionales); CPD y gasto de venta mixtos (comisiones variable, salarios fijo); gasto administrativo fijo; rango relevante 1 mes | REC_COMPORT/REC_PCT_VAR existen | Valores por defecto por elemento según esta tabla (etiqueta SUPUESTO si no lo declara el usuario) |
+| PE multiproducto | Preciso: CF asignado a cada objeto por ABC → PE_i = CF_i / MCu_i (unidades y S/). Aproximado (Oria: solo si falta información): MC ponderado = Σ %ventas_i × MC_i | Hoy solo el aproximado con la mezcla del mes | Calcular el preciso cuando el nivel de suficiencia lo permite; el ponderado como respaldo y declarado |
+| Cambio en ventas | Impacto en PE y utilidad; utilidad = (ventas − PE) × MC% | Parcial (sensibilidad) | Escenario «ventas ±x %» con nuevo PE y utilidad |
+| Relevancia | Todo elemento que supera el **10 %** del costo es relevante; ordenar por prioridad; causa y alternativas | El sistema usa Pareto 80 % | Cambiar a la regla del 10 % (decisión de método) |
+| Recomendaciones | Proveedores/negociar (precio), reducir CV y CF de los elementos relevantes, ser más eficientes; buscar impacto positivo | Propuestas por causa | Mostrar el impacto en utilidad y PE de cada propuesta |
+| Caso 1 · Producir o tercerizar | Criterio: menor costo. Ahorro = unidades × (costo de compra − costo de producir). Costo de compra = precio de la pieza + costo de mantenerla; costo de producir = variable + fijo **evitable**. Otros factores: calidad, rendimiento, transición (preparación, mantenimiento) | No existe | Calculadora con datos del sistema + campos del usuario (precio, costo de mantener, transición) |
+| Caso 2 · Eliminar línea o área | Criterio: impacto en la rentabilidad = MC de la línea − CF evitable (los fijos comunes se quedan) | No existe | Calculadora; requiere marcar CF evitable por recurso (atributo REC_EVIT) |
+| Caso 3 · Pedido especial | Criterio: impacto en la utilidad. Con capacidad ociosa: precio mínimo = CV + CF incremental. 3.2 sin capacidad: + costo de oportunidad (MC que se deja de ganar) | Cotizador usa costo completo | El cotizador muestra además la decisión con costo relevante, usando el ocio medido |
+| Monte Carlo / escenarios | Variabilidad para buscar utilidad marginal positiva; los costos no son lineales (bloques) | Monte Carlo de margen y bloques existen | Escenarios de decisión con P05–P95 |
+Casos a mano: los arma Claude al implementar (PE preciso vs ponderado en SERVITEC; producir/tercerizar y pedido especial con y sin ocio).
