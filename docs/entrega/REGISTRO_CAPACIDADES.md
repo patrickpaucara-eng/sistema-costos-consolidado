@@ -82,3 +82,7 @@ La interfaz consulta cotización, aprendizaje y sensibilidad; presenta bloques d
 ### OT-C27 · adelantos parciales
 
 E2 mueve los controles de rango a Periodos y se verifica en Chromium. Los casos aislados de intervalos y el inventario DBD son prototipos sin conexión a pantallas; la separación física de una copia de espacio no constituye un laboratorio. Los bloques D, A, B, C, E y F no se declaran completos; ver `evidencias/ERRORES_E2E.md`.
+
+### OT-C31 punto 6 · diagnóstico preliminar de suficiencia
+
+La barra común muestra la presencia de datos del libro seleccionado y el siguiente requisito faltante. La descarga ofrece el formato DBD completo con una guía del nivel elegido. `tests/test_c31_6_suficiencia.py` prueba ausencia, datos sintéticos, libros existentes, las cinco descargas y navegador. Es una guía conservadora de presencia, no valida la calidad, no demuestra que el motor calcule con ese nivel ni crea reglas de reparto. Los libros con plantillas vacías no se consideran evidencia de datos.
