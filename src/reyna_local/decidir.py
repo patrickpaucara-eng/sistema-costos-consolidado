@@ -101,6 +101,97 @@ def pedido_especial(f, unidades, precio, cf_incremental=0.0, capacidad_ociosa=Tr
             "decision": "ACEPTAR" if inc > 0 else "RECHAZAR"}
 
 
+def asignar_recurso(resultado, criterio, destino, demanda_maxima=None):
+    """Asigna una capacidad a la mezcla con mayor MC por unidad del recurso.
+
+    Solo usa el resultado REAL publicado: MC de `decidir`, medidas CAP y medidas OBJ
+    por orden. Las trazas deben enlazar el inductor con el recurso/actividad elegido.
+    """
+    if resultado.get('sintesis') != 'REAL':
+        raise ValueError('La asignación de capacidad requiere un resultado REAL.')
+    criterio, destino = str(criterio or ''), str(destino or '')
+    medidas = (resultado.get('datos_libro') or {}).get('medidas') or []
+    capacidades = [m for m in medidas if str(m.get('nivel') or '').upper() == 'CAP'
+                    and str(m.get('inductor') or '') == criterio and str(m.get('destino') or '') == destino]
+    if len(capacidades) != 1:
+        raise ValueError('No existe una capacidad CAP única para el recurso elegido.')
+    capacidad = float(capacidades[0].get('cantidad') or 0.0)
+    if not isfinite(capacidad) or capacidad < 0:
+        raise ValueError('La capacidad debe ser un número finito mayor o igual a cero.')
+    relacionada = any(str(t.get('criterio') or '') == criterio and
+                      destino in (str(t.get('origen') or ''), str(t.get('destino') or ''))
+                      for t in resultado.get('trazas') or [])
+    if not relacionada:
+        raise ValueError('No hay una traza que relacione ese recurso con el costo del periodo.')
+
+    objetos = resultado.get('objetos') or []
+    objeto_producto = {str(o.get('codigo')): str(o.get('producto')) for o in objetos if o.get('codigo') and o.get('producto')}
+    cantidad_producto = defaultdict(float)
+    for objeto in objetos:
+        producto = str(objeto.get('producto') or '')
+        cantidad_producto[producto] += float(objeto.get('cantidad') or 0.0)
+    consumo_objeto = {}
+    for medida in medidas:
+        if str(medida.get('nivel') or '').upper() != 'OBJ' or str(medida.get('inductor') or '') != criterio:
+            continue
+        clave = str(medida.get('destino') or '')
+        consumo_objeto[clave] = consumo_objeto.get(clave, 0.0) + float(medida.get('cantidad') or 0.0)
+    if not objeto_producto or any(codigo not in consumo_objeto for codigo in objeto_producto):
+        raise ValueError('Faltan medidas OBJ por orden para calcular el consumo del recurso.')
+
+    ventas = defaultdict(float)
+    for fila in (resultado.get('datos_libro') or {}).get('ventas') or []:
+        ventas[str(fila.get('producto') or '')] += float(fila.get('cantidad') or 0.0)
+    maximos = demanda_maxima or {}
+    filas = []
+    productos_resultado = ((resultado.get('decidir') or {}).get('er_gerencial') or {}).get('productos') or []
+    for fila in productos_resultado:
+        producto = str(fila.get('producto') or '')
+        cantidad = float(fila.get('cantidad') or cantidad_producto.get(producto, 0.0))
+        cantidad_producida = cantidad_producto.get(producto, cantidad)
+        if not producto or cantidad <= 0 or cantidad_producida <= 0:
+            continue
+        venta = ventas.get(producto, 0.0)
+        maximo = float(maximos.get(producto, venta * 1.5))
+        if not isfinite(maximo) or maximo < 0:
+            raise ValueError(f'La demanda máxima de {producto} debe ser finita y no negativa.')
+        mc_unitario = float(fila.get('margen_contribucion') or 0.0) / cantidad
+        consumo = sum(consumo_objeto[codigo] for codigo, prod in objeto_producto.items() if prod == producto)
+        consumo_unitario = consumo / cantidad_producida
+        if not isfinite(mc_unitario) or not isfinite(consumo_unitario) or consumo_unitario < 0:
+            raise ValueError(f'Los datos de margen o consumo de {producto} no son válidos.')
+        filas.append({'producto': producto, 'mc_unitario': mc_unitario,
+                      'consumo_unitario': consumo_unitario, 'demanda_maxima': maximo})
+
+    def prioridad(fila):
+        if fila['consumo_unitario'] == 0 and fila['mc_unitario'] > 0:
+            return (0, 0.0)  # no consume la capacidad escasa
+        if fila['consumo_unitario'] == 0:
+            return (2, 0.0)
+        return (1, -(fila['mc_unitario'] / fila['consumo_unitario']))
+
+    filas.sort(key=lambda x: (prioridad(x), x['producto']))
+    restante = capacidad
+    for fila in filas:
+        if fila['mc_unitario'] <= 0 or fila['demanda_maxima'] <= 0:
+            unidades = 0.0
+        elif fila['consumo_unitario'] == 0:
+            unidades = fila['demanda_maxima']
+        else:
+            unidades = min(fila['demanda_maxima'], restante / fila['consumo_unitario'])
+        usada = unidades * fila['consumo_unitario']
+        restante = max(0.0, restante - usada)
+        ratio = (fila['mc_unitario'] / fila['consumo_unitario']) if fila['consumo_unitario'] else None
+        fila.update({'mc_por_unidad_recurso': round(ratio, 6) if ratio is not None else None,
+                     'unidades_sugeridas': round(unidades, 6), 'capacidad_usada': round(usada, 6),
+                     'contribucion_total': round(unidades * fila['mc_unitario'], 2)})
+    return {'inductor': criterio, 'recurso': capacidades[0].get('destino_nombre') or destino,
+            'capacidad': capacidad, 'capacidad_utilizada': round(capacidad - restante, 6),
+            'capacidad_restante': round(restante, 6), 'margen_contribucion_total': round(sum(f['contribucion_total'] for f in filas), 2),
+            'productos': filas,
+            'nota': 'Ordena por margen de contribución unitario del recurso; máximos editables, sin costo de oportunidad de otros recursos.'}
+
+
 def panel(resultado, recursos):
     filas, sup = estructura(resultado, recursos)
     tot = {k: round(sum(f[k] for f in filas), 2) for k in ("ventas", "cv", "margen_contribucion", "cf_controlable", "cf_no_controlable", "utilidad_operativa")}
