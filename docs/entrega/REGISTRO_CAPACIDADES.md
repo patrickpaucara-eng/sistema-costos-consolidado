@@ -86,3 +86,5 @@ E2 mueve los controles de rango a Periodos y se verifica en Chromium. Los casos 
 ### OT-C31 punto 2 · detalle de mano de obra por recurso
 
 La ficha de orden muestra los tramos raíz P2 de recursos `PERS_DIR` que el contrato ya identifica. Una copia temporal de SERVITEC con tres técnicos sintéticos conserva el costo MOD y muestra sus rutas en Chromium; el original no cambia. El detalle no identifica personas si el libro solo contiene un recurso agregado. Ver [evidencia](evidencias/C31/PUNTO_2_PERSONAS.md).
+### OT-C31 punto 4 · Análisis de familias (alcance acotado)
+La pantalla acepta historia JSON por actividad o recurso, presenta la receta y su intervalo, comprueba pertenencia y compara dos familias con ANOVA. La receta puede enviarse a una cotización proyectada por unidades. `tests/test_c31_4_familias.py` prueba los casos manuales, entrada incompleta, la vista en Chromium y la API real de cotización. La historia y selección son temporales de la sesión; no se guardan ni representan aprobación de una familia o fusión. La aceptación de una cotización y la persistencia de historia quedan fuera de esta entrega; el uso metodológico requiere revisión.
