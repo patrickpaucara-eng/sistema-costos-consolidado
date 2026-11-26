@@ -66,3 +66,9 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
   atomicidad (T13 simulado que falla → nada se escribe), idempotencia por identificador, y que la OT nace con su costo proyectado.
   Cita la decisión en el comentario de la prueba. Ninguna otra prueba se edita.
 - Sigue de corrido con C32 puntos 2 → 5. Base: desarrollo/mono último (ya incluye C31).
+
+# 26-nov 15:30 (Claude) — C32-1 unido (PR #36). C32-2: corrección
+- La clave única NO es la primera columna: es la clave del DBD de cada tabla. Para LINEA es (LIN_EVE, LIN_NUM); en general usa las columnas
+  con rol K del método CREAR en MCA, o la clave primaria declarada en el DBD (`fuente/DBD_Fuente.xlsx`, hoja del modelo interno). Si una tabla
+  no tiene clave declarada, no se valida (y se lista en REGLAS_APRENDIDAS.md). Con eso la compuerta debe volver a VERDE.
+- C32-1 pendiente: precargar y bloquear el código de OT en el formulario guiado (T13).
