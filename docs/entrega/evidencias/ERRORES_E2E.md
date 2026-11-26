@@ -110,3 +110,4 @@ Se probó el caso de seis meses con intervalos parejos y tasas suministradas. Fa
 
 La vista representa aristas observadas con flechas y botones de detalle; no es todavía un diagrama por capas consolidado. Falta revisión visual de legibilidad con todo el caso y trazas repetidas.
 | C31-3 | (cerrado 26-nov, Claude) Aceptar cotización → T09 + T13 en una sola escritura atómica; el sistema completa la TARIFA EST con el costo del saldo sin pisar tarifas cargadas; no duplica OT; idempotente. Pantalla en el cotizador. | Claude |
+| C31-LAB-1 | Registrar FECHA como texto y recalcular | Calcular sin error | Al mezclar fechas texto y numéricas, el orden de KARDEX falla | Los campos guiados envían texto aunque el libro usa fechas numéricas | Normalización de FECHA numérica en el formulario del laboratorio; revisar los demás formularios con Claude | Parcial |

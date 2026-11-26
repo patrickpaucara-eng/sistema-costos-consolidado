@@ -154,6 +154,18 @@ class ReynaHandler(BaseHTTPRequestHandler):
         if target.path in {"/", "/index.html"} and method == "GET":
             self._send(HTTPStatus.OK, self.server.index, "text/html; charset=utf-8")
             return
+        if target.path == "/api/laboratorio/crear" and method == "POST":
+            from .laboratorio import crear
+            self._json(HTTPStatus.CREATED, crear(store, self._body().get('original')))
+            return
+        if target.path == "/api/laboratorio/comparar" and method == "POST":
+            from .laboratorio import comparar_espacios
+            body = self._body()
+            try:
+                result = comparar_espacios(store, body.get('laboratorio'), body.get('periodo'), body.get('sintesis'))
+            except ValueError as exc: raise Problem(422, str(exc)) from None
+            self._json(HTTPStatus.OK, result)
+            return
         if target.path == "/api/libros" and method == "GET":
             from .calculo_local import catalogo
             self._json(HTTPStatus.OK, {"libros": catalogo(store.root)})
