@@ -527,7 +527,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 empresa, periodo, caso = body.get("empresa"), body.get("periodo"), body.get("caso")
                 if not (isinstance(empresa, str) and re.fullmatch(r"[a-z0-9_]{1,60}", empresa) and isinstance(periodo, str)
                         and re.fullmatch(r"\d{4}-(0[1-9]|1[0-2])", periodo)
-                        and caso in ("tercerizar", "eliminar", "pedido", "recurso_escaso")):
+                        and caso in ("tercerizar", "eliminar", "pedido", "recurso_escaso", "vender_procesar")):
                     raise ValueError("Parámetros inválidos.")
                 nombre = f"{empresa}_{periodo}_REAL.json"
                 archivo = next((x for x in (self.server.store.root / "resultados" / nombre, Path(__file__).resolve().parents[2] / "datos" / "resultados" / nombre) if x.is_file()), None)
@@ -541,6 +541,9 @@ class ReynaHandler(BaseHTTPRequestHandler):
                     maximos = body.get("demanda_maxima") or {}
                     if not isinstance(maximos, dict): raise ValueError("Las demandas máximas deben enviarse por producto.")
                     out = DEC.asignar_recurso(resultado, criterio, destino, maximos)
+                elif caso == "vender_procesar":
+                    num = lambda k: float(body.get(k))
+                    out = DEC.vender_o_procesar(num("precio_venta_actual"), num("precio_venta_procesado"), num("costo_procesamiento"))
                 else:
                     producto = body.get("producto")
                     fila = next((f for f in resultado.get("decidir", {}).get("er_gerencial", {}).get("productos", []) if f["producto"] == producto), None)

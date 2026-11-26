@@ -192,6 +192,23 @@ def asignar_recurso(resultado, criterio, destino, demanda_maxima=None):
             'nota': 'Ordena por margen de contribución unitario del recurso; máximos editables, sin costo de oportunidad de otros recursos.'}
 
 
+def vender_o_procesar(precio_venta_actual, precio_venta_procesado, costo_procesamiento):
+    """Compara ingreso adicional con costo posterior al punto de separación, por unidad."""
+    actual = float(precio_venta_actual)
+    procesado = float(precio_venta_procesado)
+    costo = float(costo_procesamiento)
+    if any(not isfinite(x) or x < 0 for x in (actual, procesado, costo)):
+        raise ValueError('Los precios y el costo incremental deben ser finitos y no negativos.')
+    ingreso_incremental = procesado - actual
+    beneficio = ingreso_incremental - costo
+    return {'precio_venta_actual': round(actual, 4), 'precio_venta_procesado': round(procesado, 4),
+            'ingreso_incremental_unitario': round(ingreso_incremental, 4),
+            'costo_incremental_unitario': round(costo, 4),
+            'beneficio_incremental_unitario': round(beneficio, 4),
+            'decision': 'PROCESAR' if beneficio > 0 else 'VENDER',
+            'regla': 'Procesar solo cuando ingreso incremental − costo incremental > 0.'}
+
+
 def panel(resultado, recursos):
     filas, sup = estructura(resultado, recursos)
     tot = {k: round(sum(f[k] for f in filas), 2) for k in ("ventas", "cv", "margen_contribucion", "cf_controlable", "cf_no_controlable", "utilidad_operativa")}
