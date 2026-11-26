@@ -27,6 +27,7 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 | CAP-15 | Recibir y seleccionar una corrida VNR externa mediante T25.4/T23.5 | Verificada con método sintético en XLSX temporal | 26 pruebas distinguen huellas textuales (`001`/`1`), método y versión vigentes, aíslan existencias por empresa, aplican permisos y vigencia, persisten `RESULTADO_METODO`, concilian el periodo completo (existencia, CPU, `AJUSTE_VNR` y `CTA_GASTO`) y revierten cuando falta un escritor o la rebaja excede el saldo. La revisión independiente confirmó que T25.4 recibe un método aprobado y efectivo y T23.5 consume la versión vigente al inicio del periodo. No valida proveedor comercial, método ORIA ni toda la conciliación D9. |
 
 | CAP-16 | Calcular y descargar reportes del caso Frenosa | Verificada en entorno Linux y navegador local | Conecta el productor existente a REAL, CONTABLE y ESTIMADO; guarda el contrato y permite descargar exportaciones. Faltan empaquetado Windows y aceptación con datos de operación. Ver [OT-C04](evidencias/OT-C04/ENTREGA.md). |
+| CAP-19 | Comparar procesamiento adicional con venta en el punto de separación | Verificada con caso manual, API y Chromium | La calculadora del panel muestra ingreso incremental, costo incremental y beneficio neto por unidad; procesa solo cuando el neto es positivo. Caso exacto: S/ 14 − S/ 10 − S/ 3 = S/ 1; PROCESAR. Ver [OT-C32 punto 5](evidencias/C32_5_PROCESAR_VENDER.md). |
 
 ## Evidencia de este incremento
 
