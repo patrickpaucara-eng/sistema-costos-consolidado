@@ -36,6 +36,8 @@ def cotizar(resultado, medidas, actividades, materiales, precio_mercado, margen_
             basis='uso'; warnings.append(f'{code}: sin capacidad práctica: tasa sobre uso')
         if base <= 0: raise ValueError(f'No hay capacidad o uso positivo para {code}')
         rate = _number(available[code].get('costo'),f'Costo de {code}') / base
+        unidad = next((str(i.get('unidad') or '') for i in (resultado.get('modelo') or {}).get('inductores', []) if i.get('codigo') == criterion), '')
+        if '%' in unidad: warnings.append(f'{code}: su inductor ({criterion}) es un porcentaje, no una cantidad física: la cotización por esta actividad no es confiable (registra la cantidad real del inductor).')
         lines.append({'tipo':'actividad','codigo':code,'cantidad':qty,'tasa':rate,'importe':round(rate*qty,2),'base':basis,'inductor':criterion})
     kdx = resultado.get('kardex') or []
     for code, qty0 in materiales.items():
@@ -77,3 +79,59 @@ def cotizar_intervalos_parejos(cantidades, tasas_por_intervalo, meses, intervalo
                        'tasa': _number(tasas[codigo], codigo)} for codigo, cantidad in cantidades.items()])
     importes, total = importe_intervalos(filas)
     return {'intervalos': importes, 'total': total}
+
+
+def costo_por_intervalos(cantidades, tasa_mes, meses, intervalo, curva='pareja'):
+    """Costo proyectado de la OT (decisión 25-nov): las cantidades totales se reparten entre intervalos según la curva
+    (pareja / inicio / final) y cada intervalo se valora con la tasa proyectada de su MES MEDIO.
+    tasa_mes(codigo, mes) → tasa del mes (1 = primer mes de ejecución)."""
+    if isinstance(meses, bool) or isinstance(intervalo, bool) or not isinstance(meses, int) or not isinstance(intervalo, int) or meses <= 0 or intervalo <= 0:
+        raise ValueError('Duración e intervalo deben ser enteros positivos.')
+    if curva not in ('pareja', 'inicio', 'final'): raise ValueError('Curva inválida.')
+    tramos = [(i + 1, min(i + intervalo, meses)) for i in range(0, meses, intervalo)]; k = len(tramos)
+    pesos = [(b - a + 1) * ({'pareja': 1, 'inicio': k - i, 'final': i + 1}[curva]) for i, (a, b) in enumerate(tramos)]
+    total_p = sum(pesos); filas = []
+    for (a, b), w in zip(tramos, pesos):
+        medio = a + (b - a) // 2; parte = w / total_p
+        det = {c: _number(q, c) * parte * tasa_mes(c, medio) for c, q in cantidades.items()}
+        filas.append({'desde_mes': a, 'hasta_mes': b, 'mes_medio': medio, 'proporcion': round(parte, 6),
+                      'costo': round(sum(det.values()), 2), 'detalle': {c: round(v, 2) for c, v in det.items()}})
+    return {'intervalos': filas, 'total': round(sum(f['costo'] for f in filas), 2)}
+
+
+def cotizar_proyectado(libro, emp, resultado, medidas, actividades, materiales, precio_mercado, margen_objetivo,
+                       meses, intervalo=3, curva='pareja', contrato='CERRADO', familia=None, unidades=None):
+    """Cotizador por intervalos + familias (bloques B y G). Las tasas de cada mes salen del costo PROYECTADO por el mismo
+    motor (bloque A): actividad = tasa base × (costo proyectado de la actividad / costo base); material = costo unitario × factor de precio.
+    familia: {inductor: receta} (familias.receta); con unidades, explota la receta y da el rango al 95 %."""
+    from .proyeccion import proyectar_granular
+    rango_fam = None
+    if familia:
+        from .familias import explotar
+        if not unidades: raise ValueError('Indica cuántas unidades del componente')
+        ex = explotar(familia, _number(unidades, 'Unidades'))
+        actividades = {k: v['cantidad'] for k, v in ex.items() if k in {str(a['codigo']) for a in resultado.get('actividades', [])}}
+        materiales = {**(materiales or {}), **{k: v['cantidad'] for k, v in ex.items() if k not in actividades}}
+        rango_fam = ex
+    base = cotizar(resultado, medidas, actividades, materiales or {}, precio_mercado, margen_objetivo)
+    proy = proyectar_granular(libro, emp, meses=meses)['meses']
+    costo_base = {str(a['codigo']): float(a.get('costo') or 0) for a in resultado.get('actividades', [])}
+    tasa0 = {l['codigo']: (l['tipo'], l['tasa']) for l in base['lineas']}
+    def tasa_mes(c, m):
+        mes = proy[min(m, len(proy)) - 1]; tipo, t = tasa0[c]
+        if tipo == 'actividad':
+            act = {x['actividad']: x['monto'] for x in mes['desglose']['actividades']}
+            return t * (act.get(c, costo_base.get(c, 0)) / costo_base[c]) if costo_base.get(c) else t
+        return t * float(mes['factores'].get('pre', {}).get(c, 1.0))
+    cant = {**actividades, **(materiales or {})}
+    r = costo_por_intervalos(cant, tasa_mes, meses, intervalo, curva)
+    lo = hi = None
+    if rango_fam:
+        lo = costo_por_intervalos({k: v['minimo'] for k, v in rango_fam.items()}, tasa_mes, meses, intervalo, curva)['total']
+        hi = costo_por_intervalos({k: v['maximo'] for k, v in rango_fam.items()}, tasa_mes, meses, intervalo, curva)['total']
+    objetivo = base['costo_objetivo']
+    return {**r, 'costo_base_mes_actual': base['costo_pedido'], 'costo_objetivo': objetivo, 'brecha': round(r['total'] - objetivo, 2),
+            'rango_95': [lo, hi] if lo is not None else None, 'contrato': contrato,
+            'recomendacion': ('Precio cerrado: cotiza cerca del límite alto del rango; la empresa asume el riesgo de precios.' if contrato == 'CERRADO'
+                              else 'Con reajuste: el riesgo de precios pasa al cliente; cotiza sobre el costo esperado.'),
+            'avisos': base['avisos'], 'intervalo_meses': intervalo, 'curva': curva}

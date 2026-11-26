@@ -312,7 +312,14 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 if (validar(result) or result.get('periodo_actual') != per or result.get('sintesis') != 'REAL'
                         or len(data['EMPRESA']) != 1 or result['empresa'].get('codigo') != data['EMPRESA'][0].get('EMP_COD')):
                     raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
-                quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'), producto=body.get('producto'), carpeta_aprendizaje=store.root, empresa_aprendizaje=empresa)
+                if body.get('meses'):
+                    from .cotizador import cotizar_proyectado
+                    from .libro_dbd import empresa as leer_empresa
+                    quote = cotizar_proyectado(libro, leer_empresa(libro)[0], result, data['MEDIDA'], body.get('actividades') or {}, body.get('materiales') or {},
+                                               body.get('precio_mercado'), body.get('margen_objetivo'), int(body['meses']), int(body.get('intervalo') or 3),
+                                               body.get('curva') or 'pareja', body.get('contrato') or 'CERRADO')
+                else:
+                    quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'), producto=body.get('producto'), carpeta_aprendizaje=store.root, empresa_aprendizaje=empresa)
                 if provisional:
                     quote['aviso'] = 'tasas provisionales: mes no cerrado'
                     quote['avisos'].append(quote['aviso'])
