@@ -34,6 +34,7 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 | CAP-21 | Mostrar límites del modelo en las vistas que los usan | Verificada en Chromium | Futuro y cotizador declaran la proyección lineal dentro del rango observado; Familias avisa que un cambio de proceso exige reiniciar la historia; Decidir explica la restricción única y la alternativa Solver; Registrar advierte uso de un usuario a la vez. Ver [C33-3](evidencias/C33_3_AVISOS_LIMITES.md). |
 | CAP-22 | Definir parámetros obligatorios por familia y aprender recetas lineales con OT reales | Verificada como modelo de datos y cálculo aislado | Hoja opcional `FAMILIA_PARAM`; QR en Python estándar; Tolva 1.300 kg → 75 h. No está enlazada aún al formulario ni al libro operativo. Ver [C34-1](evidencias/C34_1_RECETAS_PARAMETRIZADAS.md). |
 | CAP-23 | Separar preparación fija por lote, costo variable y conceptos fuera del ABC | Verificada por cálculo aislado | 50.000 cajas: un lote S/ 18.900; dos lotes S/ 20.100; diferencia S/ 1.200. Conceptos fijos y contingencia con base explícita; la pantalla comparativa queda en C34-5. Ver [C34-2](evidencias/C34_2_CONCEPTOS_Y_LOTES.md). |
+| CAP-24 | Valorar recursos con tramos marginales configurables por cantidad | Verificada por cálculo aislado | Soldadura 200 h → S/ 6.600; sin tabla conserva `cantidad × tasa` lineal. Hoja opcional `COSTO_TRAMO`; interfaz pendiente en C34-5. Ver [C34-3](evidencias/C34_3_TRAMOS_CANTIDAD.md). |
 
 ## Evidencia de este incremento
 
