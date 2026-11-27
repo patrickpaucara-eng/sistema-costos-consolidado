@@ -52,3 +52,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-26,19:30,22:25,OT-C33-1 cobertura de claves y colisión de OT,Monografía,Codex,22 pruebas focalizadas; compuerta VERDE: 526 pruebas, 1 advertencia y 26 subpruebas
 2026-11-26,22:25,22:42,OT-C33-2 tope de demanda en recurso escaso,Monografía,Codex,3 pruebas focalizadas y Chromium; compuerta VERDE: 507 pruebas, 1 advertencia y 26 subpruebas
 2026-11-26,22:42,22:57,OT-C33-3 avisos de límites en pantallas,Monografía,Codex,1 prueba Chromium; compuerta VERDE: 505 pruebas, 1 advertencia y 26 subpruebas
+2026-11-27,15:08,15:31,OT-C34-1 receta parametrizada por familia,Monografía,Codex,6 pruebas focalizadas OK; compuerta ROJA por test C07 de Chromium no modificado; PR bloqueado por AGENTS.md
