@@ -733,16 +733,55 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
     let guidedFields = [];
     let guidedRevision = 0;
     let currentGuidedCode = "";
+    let guidedObjectSpec = null;
+    let guidedObjectCode = "";
+    let guidedObjectRevision = 0;
+    let guidedObjectTimer;
     const guidedDrafts = new Map();
     let support = null;
     const guided = byId("guided-form");
     const addLine = byId("add-line");
     function fieldControl(field) {
-      const el = document.createElement(field.lista ? "select" : "input");
+      const assigned = guidedObjectSpec?.variable === field.variable;
+      const el = document.createElement(!assigned && field.lista ? "select" : "input");
       el.dataset.variable = field.variable;
       el.setAttribute("aria-label", field.etiqueta || field.variable);
-      if (field.lista) el.replaceChildren(makeOption("", "Selecciona"), ...field.valores.map(value => makeOption(String(value))));
+      if (assigned) {
+        el.readOnly = true;
+        el.setAttribute("aria-readonly", "true");
+        el.dataset.sistemaAsignado = "true";
+        el.title = "Código generado por el sistema; solo lectura.";
+      } else if (field.lista) el.replaceChildren(makeOption("", "Selecciona"), ...field.valores.map(value => makeOption(String(value))));
       return el;
+    }
+    async function refreshGuidedObjectCode() {
+      const revision = ++guidedObjectRevision;
+      const spec = guidedObjectSpec, id = selectedWorkspace?.id, trx = currentGuidedCode;
+      if (!spec || !id || !trx) return;
+      const control = [...guided.querySelectorAll("[data-variable]")].find(el => el.dataset.variable === spec.variable);
+      if (!control) return;
+      const header = {};
+      guided.querySelectorAll(":scope > label [data-variable]").forEach(el => { if (el.value !== "") header[el.dataset.variable] = el.value; });
+      const lines = [...guided.querySelectorAll("tbody tr")].map(collectFields);
+      const help = byId("guided-object-help");
+      try {
+        const result = await api("/api/objeto-siguiente", {id, transaction: trx, header, lines});
+        if (revision !== guidedObjectRevision || selectedWorkspace?.id !== id || currentGuidedCode !== trx) return;
+        guidedObjectCode = result.codigo || "";
+        control.value = guidedObjectCode;
+        if (help) help.textContent = guidedObjectCode
+          ? `Siguiente correlativo disponible: ${guidedObjectCode}. El sistema lo asigna; no se puede editar.`
+          : `Completa ${result.contexto?.join(" y ") || "el producto o la estimación"} para generar el correlativo.`;
+      } catch (error) {
+        if (revision !== guidedObjectRevision || selectedWorkspace?.id !== id || currentGuidedCode !== trx) return;
+        guidedObjectCode = "";
+        control.value = "";
+        if (help) help.textContent = `No se pudo proponer el correlativo. ${error.message}`;
+      }
+    }
+    function scheduleGuidedObjectCode() {
+      clearTimeout(guidedObjectTimer);
+      guidedObjectTimer = setTimeout(refreshGuidedObjectCode, 120);
     }
     function appendLine() {
       const row = document.createElement("tr");
@@ -775,23 +814,34 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       support=draft.support;
       if (support) byId("support-hash").textContent=`${support.name} · SHA-256: ${support.hash} (huella conservada)`;
     }
-    function addUnavailableTransactions(codes) {
+    function addUnavailableTransactions(codes, objectCreators = []) {
       for (const tx of codes || []) {
-        if ([...transaction.options].some(option => option.value === tx)) continue;
-        const option = makeOption(tx, `${tx} — sin prueba`); option.disabled = true; transaction.add(option);
+        const createsObject = objectCreators.includes(tx);
+        const existing = [...transaction.options].find(option => option.value === tx);
+        if (existing) {
+          if (createsObject) {
+            existing.disabled = false;
+            existing.textContent = `${tx} — crea OBJETO`;
+          }
+          continue;
+        }
+        const option = makeOption(tx, createsObject ? `${tx} — crea OBJETO` : `${tx} — sin prueba`);
+        option.disabled = !createsObject; transaction.add(option);
       }
     }
     async function loadTransactionCatalog(space) {
       if (!space.transactions.length) return;
       try {
         const data = await api(`/api/trx-campos?id=${encodeURIComponent(space.id)}&trx=${encodeURIComponent(space.transactions[0])}`);
-        if (selectedWorkspace?.id === space.id) addUnavailableTransactions(data.transacciones);
+        if (selectedWorkspace?.id === space.id) addUnavailableTransactions(data.transacciones, data.transacciones_objeto);
       } catch (error) {
         if (selectedWorkspace?.id === space.id) notice(executeStatus, `No se pudo cargar el catálogo. ${error.message}`, "error");
       }
     }
     async function loadGuidedFields() {
       const revision = ++guidedRevision, code = transaction.value, id = selectedWorkspace?.id;
+      ++guidedObjectRevision;
+      guidedObjectSpec = null; guidedObjectCode = "";
       guidedFields = []; guided.replaceChildren(); addLine.hidden = true;
       support = null; byId("support-document").value = ""; byId("support-hash").textContent = "Sin documento de soporte.";
       if (!code || !id) return;
@@ -799,10 +849,17 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
         const data = await api(`/api/trx-campos?id=${encodeURIComponent(id)}&trx=${encodeURIComponent(code)}`);
         if (revision !== guidedRevision || selectedWorkspace?.id !== id) return;
         guidedFields = data.campos;
-        addUnavailableTransactions(data.transacciones);
+        guidedObjectSpec = data.objeto || null;
+        addUnavailableTransactions(data.transacciones, data.transacciones_objeto);
         for (const field of guidedFields.filter(f => f.nivel === "C")) {
           const label = document.createElement("label"); label.textContent = field.etiqueta || field.variable;
-          label.append(fieldControl(field)); guided.append(label);
+          const control = fieldControl(field); label.append(control);
+          if (guidedObjectSpec?.variable === field.variable) {
+            const help = document.createElement("span"); help.id = "guided-object-help"; help.className = "helper";
+            help.setAttribute("role", "status"); help.textContent = "Selecciona el producto o la estimación para generar el correlativo.";
+            label.append(help);
+          }
+          guided.append(label);
         }
         const fields = guidedFields.filter(f => f.nivel === "L");
         if (fields.length) {
@@ -811,6 +868,15 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
           head.append(row); table.append(head, document.createElement("tbody")); guided.append(table); addLine.hidden = false; appendLine();
         }
         restoreGuided(id,code);
+        if (guidedObjectSpec) {
+          guided.querySelectorAll("[data-variable]").forEach(el => {
+            if (el.dataset.variable !== guidedObjectSpec.variable) {
+              el.addEventListener("change", scheduleGuidedObjectCode);
+              el.addEventListener("input", scheduleGuidedObjectCode);
+            }
+          });
+          await refreshGuidedObjectCode();
+        }
       } catch (error) { if (revision === guidedRevision) notice(executeStatus, `No se pudieron cargar los campos. ${error.message}`, "error"); }
     }
     transaction.addEventListener("change", () => { saveGuided(); currentGuidedCode=transaction.value; loadGuidedFields(); });
@@ -861,6 +927,10 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       if (byId("support-document").files.length && !support) throw new Error("Espera o vuelve a seleccionar el documento para calcular su huella.");
       if (support && guidedFields.some(f => f.nivel === "C" && f.variable === "DOC")) payload.header.DOC = support.name;
       if (support && guidedFields.some(f => f.nivel === "C" && f.variable === "DOC_SHA")) payload.header.DOC_SHA = support.hash;
+      if (guidedObjectSpec) {
+        if (!guidedObjectCode) throw new Error("Completa el producto o la estimación para generar el código de la orden.");
+        payload.header[guidedObjectSpec.variable] = guidedObjectCode;
+      }
       if (!payload.user || !payload.request_id) {
         throw new Error("Completa el usuario y el identificador de solicitud.");
       }
@@ -1008,8 +1078,9 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
         if (selectedWorkspace?.id !== id) return;
         const message = wasConfirmed
           ? `La solicitud ya estaba registrada en la versión ${result.version}. No creó otro movimiento.`
-          : `Transacción ${result.transaction} confirmada. Versión ${result.version}.`;
+          : `Transacción ${result.transaction} confirmada.${guidedObjectSpec ? ` Código asignado: ${payload.header[guidedObjectSpec.variable]}.` : ""} Versión ${result.version}.`;
         notice(executeStatus, tableSelect.value ? message : `${message} Elige una tabla para consultar las filas.`, "success");
+        if (guidedObjectSpec) await refreshGuidedObjectCode();
         if (tableSelect.value) loadTable();
       } catch (error) {
         if (selectedWorkspace?.id !== id) return;

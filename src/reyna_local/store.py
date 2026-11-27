@@ -24,6 +24,7 @@ from openpyxl.utils import get_column_letter, column_index_from_string, range_bo
 from openpyxl.utils.exceptions import InvalidFileException
 
 from .motor_espejo import Motor, norm
+from .correlativo_objeto import especificacion_creacion, resolver_producto, siguiente_codigo
 
 SOURCE_REVISION = "cac2501d9f712655dda466d216dc5bff2dd446a5"
 ENGINE_SHA256 = "8c962583170cbb200c564bef8edfd95ae931602b82fa2f89f2bb48bcd9ce2a11"
@@ -691,6 +692,36 @@ class Store:
         return {"table": name, "columns": data["h"], "rows": visible,
                 "total": len(data["r"]), "offset": offset, "limit": limit, "version": metadata(tables)["version"]}
 
+    def sugerir_codigo_objeto(self, identifier, transaction, header, lines=None):
+        """Sugiere el próximo código para una transacción cuya secuencia DBD crea OBJETO."""
+        txn, _, _, header, lines = validate_execution({
+            "transaction": transaction, "user": "preview", "request_id": "preview",
+            "header": header, "lines": lines or [],
+        })
+        path = self.path(identifier)
+        with writer_lock(path.parent):
+            raw = content_bytes(path)
+            tables, _ = load_data(raw)
+            info = metadata(tables)
+            if info["id"] != identifier or info["engine_sha256"] != ENGINE_SHA256:
+                raise Problem(409, "La identidad o versión del motor del espacio es incompatible.")
+            same_workbook(path, raw)
+            if txn not in (*TRANSACTIONS, *detectar_transacciones_e26(tables)):
+                raise Problem(409, f"El libro no define la transacción {txn}.")
+            spec = especificacion_creacion(tables, txn)
+            if spec is None:
+                return {"crea_objeto": False}
+            product = resolver_producto(tables, spec, header, lines, info.get("company_code"))
+            if not product:
+                return {"crea_objeto": True, "variable": spec["variable"], "codigo": None,
+                        "contexto": spec["producto"]["contexto"]}
+            try:
+                code = siguiente_codigo(tables, info.get("company_code"), product)
+            except ValueError as exc:
+                raise Problem(422, str(exc)) from None
+            return {"crea_objeto": True, "variable": spec["variable"], "codigo": code,
+                    "producto": product, "contexto": spec["producto"]["contexto"]}
+
     def execute(self, identifier, body):
         txn, user, key, header, lines = validate_execution(body)
         command = encode({"transaction": txn, "user": user, "header": header, "lines": lines})
@@ -780,14 +811,10 @@ class Store:
             same_workbook(path, raw)
             if any(t not in detectar_transacciones_e26(tables) for t in ("T09", "T13")):
                 raise Problem(409, "El libro no define T09 y T13.")
-            prefijo = f"OT-{company}-{prod}-"
-            if len(prefijo) + 4 > 80:
-                raise Problem(422, "El código generado supera el límite permitido.")
-            usados = {str(r[0]) for r in tables["OBJETO"]["r"] if r}
-            numero = next((n for n in range(1, 10000) if f"{prefijo}{n:04d}" not in usados), None)
-            if numero is None:
-                raise Problem(422, "Se agotaron los códigos de orden para este producto.")
-            obj = f"{prefijo}{numero:04d}"
+            try:
+                obj = siguiente_codigo(tables, company, prod)
+            except ValueError as exc:
+                raise Problem(422, str(exc)) from None
             motor = Motor.__new__(Motor)
             motor.T = {n: {"h": s["h"], "r": [list(r) for r in s["r"]]} for n, s in tables.items() if n not in (META, RECEIPTS)}
             motor.usr = motor.perfil = ""; motor.pend = None

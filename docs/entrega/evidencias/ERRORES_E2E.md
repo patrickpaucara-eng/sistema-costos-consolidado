@@ -112,9 +112,9 @@ La vista representa aristas observadas con flechas y botones de detalle; no es t
 | C31-3 | (cerrado 26-nov, Claude) Aceptar cotización → T09 + T13 en una sola escritura atómica; el sistema completa la TARIFA EST con el costo del saldo sin pisar tarifas cargadas; no duplica OT; idempotente. Pantalla en el cotizador. | Claude |
 | C31-LAB-1 | Registrar FECHA como texto y recalcular | Calcular sin error | Al mezclar fechas texto y numéricas, el orden de KARDEX falla | Los campos guiados envían texto aunque el libro usa fechas numéricas | Normalización de FECHA numérica en el formulario del laboratorio; revisar los demás formularios con Claude | Parcial |
 
-## C32-1 · avance parcial
+## C32-1 · estado completado por C32-1b
 
-La aceptación de cotización asigna el código dentro del bloqueo de escritura y registra el código en el recibo idempotente. La prueba conserva fallo T13, costo proyectado y comprueba dos códigos consecutivos. Pendiente: precarga del código en la pantalla y protección del formulario guiado T13 y de otras transacciones creadoras; aún no cumple poka-yoke integral.
+La aceptación de cotización asigna el código dentro del bloqueo de escritura y conserva el código en el recibo idempotente. C32-1b extiende el poka-yoke al formulario guiado: detecta por TOP→OME→MET/MCA qué transacciones crean OBJETO, deriva el producto de los datos del formulario o de una lectura DBD previa y muestra el siguiente código como campo de solo lectura. La prueba Chromium ejecuta T13 dos veces con estimaciones pendientes y verifica los códigos consecutivos `OT-FRE-SW50-0001` y `OT-FRE-SW50-0002`, además de la persistencia en el libro. La sugerencia es informativa y no reserva un correlativo; la escritura sigue protegida por la clave única del objeto. Ver [evidencia C32-1b](C32_1b_FORMULARIO_OT.md).
 
 ## C32-2 · estado inicial de la revisión de clave
 

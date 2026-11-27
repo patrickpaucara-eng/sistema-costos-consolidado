@@ -15,7 +15,7 @@ import webbrowser
 
 from .receipt_audit import audit_receipts
 from .exportar import exportar, TIPOS
-from .store import Problem, Store, load_data, content_bytes, metadata, TRANSACTIONS, TRANSACCIONES_E26
+from .store import Problem, Store, load_data, content_bytes, metadata, TRANSACTIONS, TRANSACCIONES_E26, detectar_transacciones_e26
 from .contrato import validar
 
 
@@ -503,7 +503,32 @@ class ReynaHandler(BaseHTTPRequestHandler):
                             options.append(value)
                 fields.append(dict(secuencia=sequence, variable=variable, etiqueta=label, nivel=level, lista=reference, valores=options))
             fields.sort(key=lambda field: int(field['secuencia']))
-            self._json(200, {"transaccion": trx, "campos": fields, "transacciones": [r[0] for r in tables.get("TRX", {}).get("r", []) if r and isinstance(r[0], str)]})
+            from .correlativo_objeto import especificacion_creacion
+            object_spec = especificacion_creacion(tables, trx)
+            object_meta = None
+            if object_spec:
+                object_meta = {"variable": object_spec["variable"], "contexto": object_spec["producto"]["contexto"]}
+                for field in fields:
+                    if field["variable"] == object_spec["variable"]:
+                        field["sistema_asignado"] = True
+                        field["solo_lectura"] = True
+            configured_transactions = list(TRANSACTIONS) + detectar_transacciones_e26(tables)
+            object_transactions = [code for code in configured_transactions
+                                   if especificacion_creacion(tables, code) is not None]
+            self._json(200, {"transaccion": trx, "campos": fields,
+                             "transacciones": [r[0] for r in tables.get("TRX", {}).get("r", []) if r and isinstance(r[0], str)],
+                             "transacciones_objeto": object_transactions,
+                             "objeto": object_meta})
+            return
+        if target.path == "/api/objeto-siguiente" and method == "POST":
+            body = self._body()
+            identifier, trx = body.get("id"), body.get("transaction")
+            header, lines = body.get("header", {}), body.get("lines", [])
+            if (not isinstance(identifier, str) or not re.fullmatch(r"[a-f0-9]{32}", identifier)
+                    or not isinstance(trx, str) or not re.fullmatch(r"[A-Z0-9.]{1,8}", trx)
+                    or not isinstance(header, dict) or not isinstance(lines, list)):
+                raise Problem(400, "Indica un espacio, transacción y datos de formulario válidos.")
+            self._json(200, store.sugerir_codigo_objeto(identifier, trx, header, lines))
             return
         if target.path == "/api/exportar" and method == "POST":
             try:
