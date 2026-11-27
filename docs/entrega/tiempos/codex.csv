@@ -49,3 +49,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-26,16:58,17:19,OT-C32 punto 4 asignación de recurso escaso y compuerta,Monografía,Codex,3 pruebas propias en Python API y Chromium; COMPUERTA VERDE: 489 pruebas, 1 advertencia y 26 subpruebas
 2026-11-26,17:23,17:38,OT-C32 punto 5 procesar o vender,Monografía,Codex,3 pruebas propias y compuerta VERDE: 489 pruebas; 1 advertencia; 26 subpruebas
 2026-11-26,18:55,19:30,OT-C32-1b formulario guiado y revisión integral,Monografía,Codex,Chromium con dos OT consecutivas; 504 pruebas, 1 advertencia y 26 subpruebas; compuerta VERDE
+2026-11-26,22:25,22:42,OT-C33-2 tope de demanda en recurso escaso,Monografía,Codex,3 pruebas focalizadas y Chromium; compuerta VERDE: 507 pruebas, 1 advertencia y 26 subpruebas
