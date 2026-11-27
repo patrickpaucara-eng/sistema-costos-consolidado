@@ -35,6 +35,7 @@ El recorrido actual es HTML local → Python → copia del XLSX → reapertura. 
 | CAP-22 | Definir parámetros obligatorios por familia y aprender recetas lineales con OT reales | Verificada como modelo de datos y cálculo aislado | Hoja opcional `FAMILIA_PARAM`; QR en Python estándar; Tolva 1.300 kg → 75 h. No está enlazada aún al formulario ni al libro operativo. Ver [C34-1](evidencias/C34_1_RECETAS_PARAMETRIZADAS.md). |
 | CAP-23 | Separar preparación fija por lote, costo variable y conceptos fuera del ABC | Verificada por cálculo aislado | 50.000 cajas: un lote S/ 18.900; dos lotes S/ 20.100; diferencia S/ 1.200. Conceptos fijos y contingencia con base explícita; la pantalla comparativa queda en C34-5. Ver [C34-2](evidencias/C34_2_CONCEPTOS_Y_LOTES.md). |
 | CAP-24 | Valorar recursos con tramos marginales configurables por cantidad | Verificada por cálculo aislado | Soldadura 200 h → S/ 6.600; sin tabla conserva `cantidad × tasa` lineal. Hoja opcional `COSTO_TRAMO`; interfaz pendiente en C34-5. Ver [C34-3](evidencias/C34_3_TRAMOS_CANTIDAD.md). |
+| CAP-25 | Distribuir costo con curva S y estimar días de capacidad para una nueva OT | Verificada como cálculo aislado | Curva de seis intervalos produce pesos 1-2-3-3-2-1; 85 h con 6 h libres/día requiere 15 días y llega 3 días tarde frente a 12. La fuente de carga de OTs abiertas y calendario aún no se integra. Ver [C34-4](evidencias/C34_4_CURVA_S_CAPACIDAD.md). |
 
 ## Evidencia de este incremento
 

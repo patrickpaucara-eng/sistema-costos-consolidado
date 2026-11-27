@@ -55,3 +55,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-27,15:08,15:31,OT-C34-1 receta parametrizada por familia,Monografía,Codex,6 pruebas focalizadas OK; compuerta ROJA por test C07 de Chromium no modificado; PR bloqueado por AGENTS.md
 2026-11-27,15:31,15:34,OT-C34-2 costos adicionales y preparación por lote,Monografía,Codex,6 pruebas focalizadas OK; compuerta ROJA por el test C07; PR bloqueado por AGENTS.md
 2026-11-27,15:34,15:51,OT-C34-3 tramos marginales por cantidad,Monografía,Codex,6 pruebas focalizadas OK; compuerta VERDE: 548 pruebas, 1 advertencia, 26 subpruebas
+2026-11-27,15:51,16:10,OT-C34-4 curva S y capacidad/plazo,Monografía,Codex,7 pruebas focalizadas OK; compuerta VERDE: 555 pruebas, 1 advertencia, 26 subpruebas
