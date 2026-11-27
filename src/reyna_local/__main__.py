@@ -356,11 +356,37 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 self._json(200, salida)
             except (ValueError, TypeError, KeyError, ZeroDivisionError) as exc: raise Problem(422, str(exc)) from None
             return
-        if target.path == "/api/cotizar" and method == "POST":
+        if target.path == "/api/pedido/familias" and method == "GET":
+            from .calculo_local import ruta_libro
+            from .recetas_pedido import leer_familias_de_libro
+            q = parse_qs(target.query, keep_blank_values=True, max_num_fields=1)
+            if set(q) - {"empresa"} or any(len(v) != 1 for v in q.values()):
+                raise Problem(400, "Parámetros inválidos para consultar familias.")
+            empresa = q.get("empresa", [""])[0]
+            if not re.fullmatch(r"[a-z0-9_]{1,60}", empresa):
+                raise Problem(400, "Elige una empresa válida.")
+            try:
+                from openpyxl import load_workbook
+                libro = ruta_libro(store.root, empresa)
+                wb = load_workbook(libro, read_only=True, data_only=True)
+                try:
+                    modelos = leer_familias_de_libro(wb)
+                finally:
+                    wb.close()
+                familias = [{"codigo": codigo, "parametros": list(modelo["parametros"].values()),
+                             "inductores": [{"codigo": ind} for ind in sorted(modelo["inductores"])]}
+                            for codigo, modelo in sorted(modelos.items())]
+            except (OSError, ValueError, KeyError):
+                familias = []
+            self._json(HTTPStatus.OK, {"familias": familias,
+                                      "aviso": "Configura una hoja FAMILIA_PARAM para habilitar recetas." if not familias else ""})
+            return
+        if target.path in {"/api/cotizar", "/api/pedido/cotizar"} and method == "POST":
             from .calculo_local import ruta_libro
             from .cotizador import cotizar
             from .raiz import RAIZ
             import puerto_lectura as P
+            es_pedido = target.path == "/api/pedido/cotizar"
             body = self._body()
             empresa = body.get('empresa')
             if not isinstance(empresa, str) or not re.fullmatch(r'[a-z0-9_]{1,60}', empresa):
@@ -388,7 +414,22 @@ class ReynaHandler(BaseHTTPRequestHandler):
                 if (validar(result) or result.get('periodo_actual') != per or result.get('sintesis') != 'REAL'
                         or len(data['EMPRESA']) != 1 or result['empresa'].get('codigo') != data['EMPRESA'][0].get('EMP_COD')):
                     raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
-                if body.get('familia') is not None:
+                if es_pedido:
+                    from openpyxl import load_workbook
+                    from .recetas_pedido import leer_familias_de_libro
+                    from .pedido import cotizar_pedido
+                    wb = load_workbook(libro, read_only=True, data_only=True)
+                    try:
+                        modelos = leer_familias_de_libro(wb)
+                    finally:
+                        wb.close()
+                    familia = str(body.get('familia') or '')
+                    if familia not in modelos:
+                        raise ValueError('Elige una familia parametrizada en el libro.')
+                    from .libro_dbd import empresa as leer_empresa
+                    quote = cotizar_pedido(libro, leer_empresa(libro)[0], result, data['MEDIDA'],
+                                           modelos[familia], body)
+                elif body.get('familia') is not None:
                     import math
                     familia=body['familia']; unidades=body.get('unidades')
                     if not body.get('meses') or not isinstance(familia,dict) or not familia or len(familia)>100:
@@ -400,13 +441,13 @@ class ReynaHandler(BaseHTTPRequestHandler):
                         vs=[valores.get(k) for k in ('media','minimo','maximo')]
                         if any(isinstance(v,bool) or not isinstance(v,(int,float)) or not math.isfinite(v) for v in vs) or vs[0]<0 or vs[1]>vs[0] or vs[2]<vs[0]:
                             raise ValueError('Receta inválida.')
-                if body.get('meses'):
+                if not es_pedido and body.get('meses'):
                     from .cotizador import cotizar_proyectado
                     from .libro_dbd import empresa as leer_empresa
                     quote = cotizar_proyectado(libro, leer_empresa(libro)[0], result, data['MEDIDA'], body.get('actividades') or {}, body.get('materiales') or {},
                                                body.get('precio_mercado'), body.get('margen_objetivo'), int(body['meses']), int(body.get('intervalo') or 3),
                                                body.get('curva') or 'pareja', body.get('contrato') or 'CERRADO', familia=body.get('familia'), unidades=body.get('unidades'))
-                else:
+                elif not es_pedido:
                     quote = cotizar(result, data['MEDIDA'], body.get('actividades'), body.get('materiales'), body.get('precio_mercado'), body.get('margen_objetivo'), producto=body.get('producto'), carpeta_aprendizaje=store.root, empresa_aprendizaje=empresa)
                 if provisional:
                     quote['aviso'] = 'tasas provisionales: mes no cerrado'

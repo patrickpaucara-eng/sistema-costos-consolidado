@@ -83,13 +83,28 @@ def cotizar_intervalos_parejos(cantidades, tasas_por_intervalo, meses, intervalo
 
 def costo_por_intervalos(cantidades, tasa_mes, meses, intervalo, curva='pareja'):
     """Costo proyectado de la OT (decisión 25-nov): las cantidades totales se reparten entre intervalos según la curva
-    (pareja / inicio / final) y cada intervalo se valora con la tasa proyectada de su MES MEDIO.
+    (pareja / inicio / final / s) y cada intervalo se valora con la tasa proyectada de su MES MEDIO.
     tasa_mes(codigo, mes) → tasa del mes (1 = primer mes de ejecución)."""
     if isinstance(meses, bool) or isinstance(intervalo, bool) or not isinstance(meses, int) or not isinstance(intervalo, int) or meses <= 0 or intervalo <= 0:
         raise ValueError('Duración e intervalo deben ser enteros positivos.')
-    if curva not in ('pareja', 'inicio', 'final'): raise ValueError('Curva inválida.')
+    if curva not in ('pareja', 'inicio', 'final', 's'): raise ValueError('Curva inválida.')
     tramos = [(i + 1, min(i + intervalo, meses)) for i in range(0, meses, intervalo)]; k = len(tramos)
-    pesos = [(b - a + 1) * ({'pareja': 1, 'inicio': k - i, 'final': i + 1}[curva]) for i, (a, b) in enumerate(tramos)]
+    if curva == 's':
+        # Perfil base de seis intervalos: 1-2-3-3-2-1. Para otro número de
+        # intervalos se interpola linealmente entre esos seis puntos y luego se normaliza.
+        perfil = (1, 2, 3, 3, 2, 1)
+        if k == 1:
+            pesos_curva = [3.0]
+        else:
+            posiciones = [i * (len(perfil) - 1) / (k - 1) for i in range(k)]
+            pesos_curva = []
+            for posicion in posiciones:
+                abajo = int(posicion); arriba = min(abajo + 1, len(perfil) - 1)
+                fraccion = posicion - abajo
+                pesos_curva.append(perfil[abajo] * (1 - fraccion) + perfil[arriba] * fraccion)
+    else:
+        pesos_curva = [{'pareja': 1, 'inicio': k - i, 'final': i + 1}[curva] for i in range(k)]
+    pesos = [(b - a + 1) * pesos_curva[i] for i, (a, b) in enumerate(tramos)]
     total_p = sum(pesos); filas = []
     for (a, b), w in zip(tramos, pesos):
         medio = a + (b - a) // 2; parte = w / total_p
