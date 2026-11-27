@@ -133,3 +133,26 @@ La segunda ejecución focalizada mostró el mismo falso positivo en `VENTA`: var
 La aclaración incorporada en `ordenes/RESPUESTAS_CODEX_24NOV.md` exige obtener la PK de `fuente/DBD_Fuente.xlsx` (hoja `DBD_4_Modelo_Interno`), y no suponerla por la primera columna. El motor prioriza K de MCA y usa la PK declarada en el DBD cuando MCA no marca clave; si falta en ambos, no aplica el control por heurística. El inventario encontró 16 métodos CREAR en la fuente y todos sus destinos declaran PK. `AJUSTE_VNR` declara solo `AVN_REC`; un duplicado conserva `ya existe AJUSTE_VNR (...)` y añade «no concilia» para mantener el diagnóstico esperado de T23.5. Se corrigió el mapeo inferido previo. Pruebas focalizadas y compuerta tras rebase: pendientes.
 
 La primera compuerta tras el rebase detectó que C32-1 repetía `ESR_REF=COTIZADOR`; la segunda aceptación chocaba con la PK de `ESCENARIO_REF` y devolvía 422. `store.aceptar_cotizacion` ahora identifica la referencia como `COT-<EST>`, única por estimación y dentro del campo DBD de 10 caracteres. No se modificó la prueba existente, que comprueba la segunda aceptación. Verificación focalizada y compuerta final tras esta corrección: pendientes.
+
+
+## E29 · Rediseño del cotizador como «pedido» (registrado 26-nov, SIN implementar)
+
+**Hallazgo.** El cotizador pide datos internos (actividades, inductores) y no los del cliente. Lo realista: el cliente declara su necesidad, el técnico especifica, y el sistema detecta la familia, explota la receta aprendida, revisa capacidad y plazo, proyecta el costo con rango, compara con el mercado y emite propuesta; al aceptar, abre la OT.
+
+**Brechas que destapó la simulación en 4 rubros** (metalmecánica, construcción, imprenta, servicios):
+1. Plantillas de parámetros obligatorios por familia.
+2. Conceptos adicionales: subcontratos, transporte, gastos generales, contingencia.
+3. Preparación por lote separada del costo por unidad.
+4. Curva S como cuarta forma de reparto (además de pareja, inicio, final).
+5. Capacidad contra fecha requerida: llega o cuántos días tarde.
+
+**No linealidad y escalonado (hallazgo 26-nov).** El diseño asume costo variable lineal y pedido aislado. Faltan: tramos de cantidad (horas extra, descuento por volumen, merma por tamaño de lote); interacción entre pedidos simultáneos (se cubre con Exportar a Solver, no se programa); tope de demanda en recurso escaso (OT-C33-2). Declarados como «Límites del modelo» (OT-C33-3 y sección de la monografía).
+
+**Ideas rescatadas de la charla con Meta AI (26-nov), baja prioridad:**
+- «Fundamento» en cada resultado de cotizador, Futuro y Decidir: fórmula, supuesto, dato usado, límite. (Entra en E29.)
+- Las 4 rupturas (precio, cantidad, tiempo, demanda) como índice de lectura; hoy cubiertas salvo tiempo, que es la brecha 5.
+- Costo hundido como nota en Decidir; costo de dinero detenido y lucro cesante: trabajo futuro, fuera de costo de producto.
+- Matriz problema por método, armada desde el catálogo de métodos actual, como anexo de trabajo futuro. Usar «grupo de datos», no «familia» (choca con familia DBCA).
+- Descartado: clasificar por cómputo (Monte Carlo no necesita GPU), diagnóstico por texto libre, límites numéricos sin base, citar QFD/TRIZ/DSM como respaldo de costos.
+
+**Contexto monografía 2 (presupuestos).** Los parámetros de tiempo, capacidad y calendario que E29 incorpora son los mismos que necesitará el presupuesto. Se construyen en la Base compartida (ver DECISIONES_DUENO 26-nov).
