@@ -1362,7 +1362,7 @@ nav a.activo{background:rgba(255,255,255,.14);font-weight:700}.vista-oculta{disp
       const demanda_maxima=Object.fromEntries([...$('dc-demanda-maxima').querySelectorAll('input')].map(i=>[i.dataset.producto,Number(i.value)]));
       const response=await fetch('/api/decidir',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empresa:$('result-empresa').value,periodo:resultadoActual.periodo_actual,caso:'recurso_escaso',criterio,destino,demanda_maxima})});
       const j=await response.json(); if(!response.ok)throw Error(j.error||'No se pudo asignar la capacidad.');
-      estado.textContent=`Capacidad usada: ${value(j.capacidad_utilizada)} de ${value(j.capacidad)} · restante: ${value(j.capacidad_restante)} · MC total: S/ ${value(j.margen_contribucion_total)}.`;
+      estado.textContent=`Capacidad usada: ${value(j.capacidad_utilizada)} de ${value(j.capacidad)} · capacidad no usada: ${value(j.capacidad_restante)} · MC total: S/ ${value(j.margen_contribucion_total)}.`;
       table('dc-escasez-resultado',j.productos,[['producto','Producto'],['mc_unitario','MC por unidad'],['consumo_unitario','Recurso por unidad'],['mc_por_unidad_recurso','MC por unidad de recurso'],['demanda_maxima','Demanda máxima'],['unidades_sugeridas','Unidades asignadas'],['capacidad_usada','Capacidad usada'],['contribucion_total','MC total']]);
     }catch(err){estado.textContent=err.message||'No se pudo asignar la capacidad.';}finally{$('dc-asignar').disabled=!resultadoActual||resultadoActual.sintesis!=='REAL'||!$('dc-recurso').value;}
   });
