@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa del presupuesto (B) — SUPUESTO</title>
+<style>
+  :root{
+    --papel:#f6f4ee; --tinta:#1d2433; --suave:#5b6474; --linea:#9aa3b2;
+    --reusa:#8fcf6a; --reusa-b:#4f8f2c;     /* reutiliza el motor de costos */
+    --nuevo:#dceafb; --nuevo-b:#5b86c4;     /* dato nuevo de presupuesto */
+    --fin:#ffb627; --fin-b:#c07a00;         /* financiero: deuda, caja, VAN */
+    --sup:#e0567a;                          /* SUPUESTO, sin confirmar por Oria */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--papel);color:var(--tinta);font:15px/1.35 "Segoe UI",system-ui,-apple-system,sans-serif}
+  header{max-width:1320px;margin:0 auto;padding:22px 24px 4px}
+  h1{margin:0;font-size:24px;letter-spacing:-.3px}
+  h2{font-size:17px;margin:28px auto 4px;max-width:1320px;padding:0 24px}
+  header p,.nota{margin:4px auto;color:var(--suave);max-width:1320px;padding:0 24px}
+  .sello{display:inline-block;background:var(--sup);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:.5px;vertical-align:middle;margin-left:8px}
+  .lienzo{max-width:1320px;margin:0 auto;padding:6px 12px 10px;overflow-x:auto}
+  svg{display:block;width:100%;min-width:980px;height:auto}
+  svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--tinta)}
+  .t{font-size:14px;font-weight:650}
+  .s{font-size:11.5px;fill:var(--suave)}
+  .zona{font-size:12.5px;font-weight:800;letter-spacing:1.4px}
+  .flecha{fill:none;stroke:var(--linea);stroke-width:2.4}
+  .ley{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;font-size:12.5px;color:var(--suave);padding:4px 12px 26px}
+  .ley span{display:inline-flex;align-items:center;gap:6px}
+  .ley i{width:13px;height:13px;border-radius:3px;display:inline-block;border:1.5px solid rgba(0,0,0,.25)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Mapa del presupuesto (B)<span class="sello">SUPUESTO — sin enunciado oficial de Oria</span></h1>
+  <p>Reconstrucción provisional, 27-nov. Fuentes: diseño PRES del 2-nov (M6), índice de la MONO 2 de 2019, propuesta reconstruida por otra IA, sílabo semanas 13-15, y Finanzas Corporativas I (Kendo/Baldeón) para la parte financiera. Nada de esto se construye antes del 9-dic.</p>
+</header>
+
+<h2>B1 · Presupuesto operativo — ventas, producción, materiales, ABC proyectado</h2>
+<p class="nota">La mitad de este mapa ya existe: el motor de costos (<code>proyectar_granular</code>) ya proyecta recurso, centro, actividad y orden. Lo nuevo es solo la capa de ventas y precio por encima.</p>
+<div class="lienzo">
+<svg viewBox="0 0 1300 360" role="img" aria-label="Mapa del presupuesto operativo">
+  <defs>
+    <marker id="pf1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d8796"/></marker>
+  </defs>
+
+  <!-- NUEVO: ventas y precio -->
+  <g>
+    <rect x="30" y="40" width="200" height="60" rx="10" fill="var(--nuevo)" stroke="var(--nuevo-b)" stroke-width="2"/>
+    <text x="130" y="64" text-anchor="middle" class="t">PO-01 Ventas (unid)</text>
+    <text x="130" y="82" text-anchor="middle" class="s">pronóstico por OT/producto</text>
+  </g>
+  <g>
+    <rect x="30" y="120" width="200" height="60" rx="10" fill="var(--nuevo)" stroke="var(--nuevo-b)" stroke-width="2"/>
+    <text x="130" y="144" text-anchor="middle" class="t">PO-02 Precio unitario</text>
+    <text x="130" y="162" text-anchor="middle" class="s">proyectado por periodo</text>
+  </g>
+  <g>
+    <rect x="30" y="200" width="200" height="60" rx="10" fill="var(--nuevo)" stroke="var(--nuevo-b)" stroke-width="2"/>
+    <text x="130" y="224" text-anchor="middle" class="t">PO-04 Política inventario</text>
+    <text x="130" y="242" text-anchor="middle" class="s">cobertura en días, dato nuevo</text>
+  </g>
+
+  <path class="flecha" d="M230,70 L300,140" marker-end="url(#pf1)"/>
+  <path class="flecha" d="M230,150 L300,150" marker-end="url(#pf1)"/>
+  <path class="flecha" d="M230,230 L300,170" marker-end="url(#pf1)"/>
+
+  <!-- PO-03 ventas en S/ -->
+  <g>
+    <rect x="310" y="120" width="190" height="60" rx="10" fill="var(--nuevo)" stroke="var(--nuevo-b)" stroke-width="2"/>
+    <text x="405" y="144" text-anchor="middle" class="t">PO-03 Ventas (S/)</text>
+    <text x="405" y="162" text-anchor="middle" class="s">= PO-01 × PO-02</text>
+  </g>
+  <path class="flecha" d="M500,150 L580,150" marker-end="url(#pf1)"/>
+
+  <!-- PO-05 producción -->
+  <g>
+    <rect x="590" y="120" width="190" height="60" rx="10" fill="var(--nuevo)" stroke="var(--nuevo-b)" stroke-width="2"/>
+    <text x="685" y="144" text-anchor="middle" class="t">PO-05 Producción</text>
+    <text x="685" y="162" text-anchor="middle" class="s">ventas ± cambio de inventario</text>
+  </g>
+  <path class="flecha" d="M780,150 L860,150" marker-end="url(#pf1)"/>
+
+  <!-- REUSA: motor de costos -->
+  <g>
+    <rect x="870" y="30" width="400" height="260" rx="14" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2.4" fill-opacity=".35"/>
+    <text x="1070" y="52" text-anchor="middle" class="zona" fill="var(--reusa-b)">YA EXISTE — reutiliza proyectar_granular</text>
+  </g>
+  <g>
+    <rect x="890" y="70" width="170" height="55" rx="9" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2"/>
+    <text x="975" y="92" text-anchor="middle" class="t">PO-06 Consumo MD</text>
+    <text x="975" y="108" text-anchor="middle" class="s">receta × producción</text>
+  </g>
+  <g>
+    <rect x="1070" y="70" width="170" height="55" rx="9" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2"/>
+    <text x="1155" y="92" text-anchor="middle" class="t">PO-07 Compras MD</text>
+    <text x="1155" y="108" text-anchor="middle" class="s">consumo ± kardex</text>
+  </g>
+  <g>
+    <rect x="890" y="135" width="170" height="55" rx="9" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2"/>
+    <text x="975" y="157" text-anchor="middle" class="t">PO-08/09 PD y SD</text>
+    <text x="975" y="173" text-anchor="middle" class="s">horas/minuto real × tasa</text>
+  </g>
+  <g>
+    <rect x="1070" y="135" width="170" height="55" rx="9" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2"/>
+    <text x="1155" y="157" text-anchor="middle" class="t">PO-10/11 CIF y ABC</text>
+    <text x="1155" y="173" text-anchor="middle" class="s">reparto escalonado proyectado</text>
+  </g>
+  <g>
+    <rect x="950" y="205" width="240" height="60" rx="9" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2.4"/>
+    <text x="1070" y="229" text-anchor="middle" class="t">PO-12/13 Costo de producción y de ventas</text>
+    <text x="1070" y="247" text-anchor="middle" class="s">salida tal cual del motor actual</text>
+  </g>
+
+  <path class="flecha" d="M1070,190 L1070,205" marker-end="url(#pf1)"/>
+
+  <!-- PO-14/15/16 -->
+  <g>
+    <rect x="1070" y="300" width="200" height="55" rx="9" fill="var(--nuevo)" stroke="var(--nuevo-b)" stroke-width="2"/>
+    <text x="1170" y="322" text-anchor="middle" class="t">PO-14/15/16</text>
+    <text x="1170" y="340" text-anchor="middle" class="s">gastos adm/ventas · resultado operativo (nuevo)</text>
+  </g>
+  <path class="flecha" d="M1070,265 L1170,300" marker-end="url(#pf1)"/>
+</svg>
+</div>
+<div class="ley">
+  <span><i style="background:var(--nuevo)"></i>dato nuevo (ventas, precio, inventario, gastos)</span>
+  <span><i style="background:var(--reusa)"></i>ya existe, se reusa el motor de costos</span>
+</div>
+
+<h2>B2 · Presupuesto financiero — caja, deuda, impuestos, VAN/TIR, estados proyectados</h2>
+<p class="nota">Esto sí es enteramente nuevo: ninguna de estas entidades vive hoy en el sistema de costos. Fuente: diseño PRES del 2-nov (M6) + Finanzas Corporativas I / Kendo para deuda, impuestos y valorización.</p>
+<div class="lienzo">
+<svg viewBox="0 0 1300 420" role="img" aria-label="Mapa del presupuesto financiero">
+  <defs>
+    <marker id="pf2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7d8796"/></marker>
+  </defs>
+
+  <g>
+    <rect x="30" y="30" width="230" height="60" rx="10" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2" fill-opacity=".45"/>
+    <text x="145" y="54" text-anchor="middle" class="t">Costo de ventas (PO-13)</text>
+    <text x="145" y="72" text-anchor="middle" class="s">entra por el contrato publicado</text>
+  </g>
+  <g>
+    <rect x="30" y="110" width="230" height="60" rx="10" fill="var(--reusa)" stroke="var(--reusa-b)" stroke-width="2" fill-opacity=".45"/>
+    <text x="145" y="134" text-anchor="middle" class="t">Ventas (PO-03)</text>
+    <text x="145" y="152" text-anchor="middle" class="s">entra por el contrato publicado</text>
+  </g>
+
+  <path class="flecha" d="M260,60 L330,80" marker-end="url(#pf2)"/>
+  <path class="flecha" d="M260,140 L330,110" marker-end="url(#pf2)"/>
+
+  <g>
+    <rect x="340" y="50" width="220" height="90" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2"/>
+    <text x="450" y="80" text-anchor="middle" class="t">PF-08 Estado de resultados proyectado</text>
+    <text x="450" y="98" text-anchor="middle" class="s">+ gasto financiero, impuesto corriente/diferido</text>
+    <text x="450" y="116" text-anchor="middle" class="s">(Kendo: UAI, impuesto, utilidad neta)</text>
+  </g>
+
+  <g>
+    <rect x="30" y="200" width="230" height="60" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2"/>
+    <text x="145" y="224" text-anchor="middle" class="t">PF-01/02/03 Cobranzas y pagos</text>
+    <text x="145" y="242" text-anchor="middle" class="s">días de cobro/pago, política</text>
+  </g>
+  <g>
+    <rect x="30" y="280" width="230" height="60" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2"/>
+    <text x="145" y="304" text-anchor="middle" class="t">PF-05/06 Inversión y deuda</text>
+    <text x="145" y="322" text-anchor="middle" class="s">bonos, leasing NIIF16, amortización</text>
+  </g>
+
+  <path class="flecha" d="M260,230 L340,190" marker-end="url(#pf2)"/>
+  <path class="flecha" d="M260,310 L340,190" marker-end="url(#pf2)"/>
+
+  <g>
+    <rect x="350" y="200" width="220" height="70" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2.4"/>
+    <text x="460" y="226" text-anchor="middle" class="t">PF-07 Presupuesto de caja</text>
+    <text x="460" y="244" text-anchor="middle" class="s">método directo/indirecto, colchón, α</text>
+    <text x="460" y="260" text-anchor="middle" class="s">(Kendo: FC y WK, R4)</text>
+  </g>
+
+  <path class="flecha" d="M450,140 L460,200" marker-end="url(#pf2)"/>
+  <path class="flecha" d="M460,270 L460,305" marker-end="url(#pf2)"/>
+
+  <g>
+    <rect x="350" y="305" width="220" height="70" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2"/>
+    <text x="460" y="330" text-anchor="middle" class="t">PF-09/10 Balance y flujo de efectivo</text>
+    <text x="460" y="348" text-anchor="middle" class="s">prueba de cuadre A = P + Pat</text>
+    <text x="460" y="364" text-anchor="middle" class="s">[DECISIÓN DEL USUARIO, E-074]</text>
+  </g>
+
+  <path class="flecha" d="M570,100 L700,100" marker-end="url(#pf2)"/>
+
+  <g>
+    <rect x="710" y="60" width="260" height="90" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2.4"/>
+    <text x="840" y="90" text-anchor="middle" class="t">Evaluación de inversión</text>
+    <text x="840" y="108" text-anchor="middle" class="s">FCF económico/financiero, VAN, TIR, Payback</text>
+    <text x="840" y="126" text-anchor="middle" class="s">(Kendo: Proyecto Base, Impuestos)</text>
+  </g>
+
+  <path class="flecha" d="M840,150 L840,220" marker-end="url(#pf2)"/>
+
+  <g>
+    <rect x="710" y="225" width="260" height="90" rx="10" fill="var(--fin)" stroke="var(--fin-b)" stroke-width="2.4"/>
+    <text x="840" y="255" text-anchor="middle" class="t">Valorización (opcional)</text>
+    <text x="840" y="273" text-anchor="middle" class="s">flujo de caja descontado, comparables</text>
+    <text x="840" y="291" text-anchor="middle" class="s">(Kendo: Valor, FCD, Koa/Ke)</text>
+  </g>
+
+  <g>
+    <rect x="1000" y="140" width="260" height="110" rx="12" fill="none" stroke="var(--sup)" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="1130" y="165" text-anchor="middle" class="t" fill="var(--sup)">Catálogo de decisiones (C)</text>
+    <text x="1130" y="185" text-anchor="middle" class="s">aprende de lo que hace el responsable</text>
+    <text x="1130" y="203" text-anchor="middle" class="s">frente a la recomendación del sistema</text>
+    <text x="1130" y="221" text-anchor="middle" class="s">umbral de autonomía por tipo de decisión</text>
+    <text x="1130" y="238" text-anchor="middle" class="s" fill="var(--sup)">SUPUESTO — diseño pendiente</text>
+  </g>
+  <path class="flecha" d="M970,195 L1000,195" marker-end="url(#pf2)" stroke-dasharray="4 4"/>
+</svg>
+</div>
+<div class="ley">
+  <span><i style="background:var(--reusa)"></i>entra por el contrato de costos</span>
+  <span><i style="background:var(--fin)"></i>dato financiero nuevo</span>
+  <span><i style="border-style:dashed;background:#fff"></i>pendiente de diseñar (SUPUESTO)</span>
+</div>
+</body>
+</html>
