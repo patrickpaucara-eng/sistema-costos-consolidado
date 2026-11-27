@@ -42,6 +42,18 @@ def calcular_plazo_actividades(cargas_nuevas, capacidad_practica_diaria,
             raise ValueError(f"Falta capacidad práctica de {actividad}")
         capacidad = _numero(capacidad_practica_diaria[actividad], f"Capacidad práctica de {actividad}")
         agenda = compromisos.get(actividad, [])
+        if isinstance(agenda, (int, float)) and not isinstance(agenda, bool):
+            reservada_diaria = _numero(agenda, f"Carga comprometida diaria de {actividad}")
+            if reservada_diaria > capacidad + 1e-9:
+                raise ValueError(f"La carga comprometida supera la capacidad práctica de {actividad} en un día")
+            libre = max(0.0, capacidad - reservada_diaria)
+            if carga > 0 and libre <= 0:
+                raise ValueError(f"No hay capacidad práctica disponible para {actividad}")
+            dias = math.ceil(carga / libre) if carga > 0 else 0
+            por_actividad[actividad] = {"carga_nueva": carga, "capacidad_practica_diaria": capacidad,
+                                       "dias": dias, "carga_comprometida_diaria": reservada_diaria,
+                                       "carga_comprometida_total_estimada": reservada_diaria * dias}
+            continue
         if not isinstance(agenda, (list, tuple)):
             raise ValueError(f"Las OTs abiertas de {actividad} requieren una agenda diaria")
         agenda = [_numero(valor, f"Carga comprometida de {actividad}") for valor in agenda]

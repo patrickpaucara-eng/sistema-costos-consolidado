@@ -1,6 +1,6 @@
 # C34-3 · Tramos de costo variable por cantidad
 
-**Dependencia:** apilado sobre `codex/C34-2`; las ramas previas deben integrarse antes de considerar completo este PR. **Alcance:** cálculo y tabla opcional; la pantalla se conecta en C34-5.
+**Dependencia:** apilado sobre `codex/C34-2`; las ramas previas deben integrarse antes de considerar completo este PR. **Alcance:** cálculo y tabla opcional.
 
 La hoja opcional `COSTO_TRAMO` contiene recurso, límite inferior, límite superior y tasa marginal. Los tramos deben iniciar en cero, ser contiguos y tener tasas no negativas. El último puede quedar abierto; si se define un máximo final, una cantidad que lo exceda se rechaza. Solo se aplican a recursos declarados. En ausencia de hoja/tabla, se conserva la multiplicación lineal existente `cantidad × tasa base` sin redondeo intermedio.
 
@@ -12,7 +12,7 @@ Pruebas propias: `python -m unittest discover -s tests -p 'test_c34_3_tramos_can
 
 ## Límites
 
-- No se conecta aún la tabla a los costos de recurso obtenidos por el cotizador ni hay edición en pantalla; C34-5 consumirá la función.
+- La pantalla guiada de C34-5 muestra cantidades, costos y adicionales; no activa `COSTO_TRAMO`. Falta decidir qué granularidad identifica el recurso (código de recurso, material, actividad o inductor) y cómo se aplica cuando un pedido cruza varios intervalos proyectados. La función queda probada aislada hasta cerrar ese contrato.
 - Se interpreta el contrato como tramos marginales progresivos; aplicar la última tarifa a toda la cantidad sería otro contrato y cambiaría el caso manual.
 - El modelo no contempla negociación, descuentos retroactivos ni cambios simultáneos de pedidos; no forma parte de este punto.
 

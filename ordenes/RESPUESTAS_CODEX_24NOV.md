@@ -72,6 +72,10 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
   con rol K del método CREAR en MCA, o la clave primaria declarada en el DBD (`fuente/DBD_Fuente.xlsx`, hoja del modelo interno). Si una tabla
   no tiene clave declarada, no se valida (y se lista en REGLAS_APRENDIDAS.md). Con eso la compuerta debe volver a VERDE.
 - C32-1 pendiente: precargar y bloquear el código de OT en el formulario guiado (T13).
+
+# 27-nov — C34-5, integración de tramos en Pedido
+- La interfaz guiada calcula cantidades técnicas y aplica el costo REAL de las actividades/materiales identificados por la receta. La hoja opcional `COSTO_TRAMO` de C34-3 no se aplica automáticamente en este flujo: el pedido no define si `COD_RECURSO` se compara con el código de recurso, material, actividad o inductor, ni cómo distribuir una cantidad entre tarifas marginales cuando el costo se proyecta por intervalos.
+- Hasta acordar la clave y la interacción con proyección, se conserva C34-3 como capacidad de cálculo aislada; el Pedido deja visible el costo con tasa REAL y documenta este límite. No se inventa una conversión de códigos ni se aplica una tasa por tramo a una base distinta.
 # C34-4 · aclaraciones de implementación (27-nov)
 
 - **Curva S para un número distinto de seis intervalos:** la OT fija los seis pesos `1-2-3-3-2-1` pero no define cómo reducirlos o ampliarlos. Implementación provisional: interpolar linealmente los seis puntos en una malla uniforme con el número de intervalos requerido y normalizar; seis intervalos conservan exactamente los pesos del caso manual. Revisar si Oria prefiere otra discretización.
