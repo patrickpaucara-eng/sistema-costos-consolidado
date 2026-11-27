@@ -51,3 +51,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-26,18:55,19:30,OT-C32-1b formulario guiado y revisión integral,Monografía,Codex,Chromium con dos OT consecutivas; 504 pruebas, 1 advertencia y 26 subpruebas; compuerta VERDE
 2026-11-26,19:30,22:25,OT-C33-1 cobertura de claves y colisión de OT,Monografía,Codex,22 pruebas focalizadas; compuerta VERDE: 526 pruebas, 1 advertencia y 26 subpruebas
 2026-11-26,22:25,22:42,OT-C33-2 tope de demanda en recurso escaso,Monografía,Codex,3 pruebas focalizadas y Chromium; compuerta VERDE: 507 pruebas, 1 advertencia y 26 subpruebas
+2026-11-26,22:42,22:57,OT-C33-3 avisos de límites en pantallas,Monografía,Codex,1 prueba Chromium; compuerta VERDE: 505 pruebas, 1 advertencia y 26 subpruebas
