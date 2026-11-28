@@ -7,6 +7,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 import pytest
 from reyna_local.__main__ import ReynaServer
+from nav_helpers import ir_a_pestana
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -53,10 +54,10 @@ def test_pantalla_crea_lab_y_edita_copia(tmp_path):
             try: browser=p.chromium.launch(args=['--no-sandbox'])
             except Exception: browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
             page=browser.new_page();page.goto(base)
-            page.locator('nav a[href="#espacios"]').click()
+            ir_a_pestana(page, '#espacios')
             page.locator(f'button[data-workspace-id="{original["id"]}"]').click()
             sync.expect(page.locator('#detail-name')).to_have_text('Original web',timeout=30000)
-            page.locator('nav a[href="#laboratorio"]').click()
+            ir_a_pestana(page, '#laboratorio')
             page.locator('#lab-crear').click()
             sync.expect(page.locator('#lab-estado')).to_contain_text('Copia creada',timeout=30000)
             page.locator('#lab-editar').click()
@@ -71,7 +72,7 @@ def test_pantalla_crea_lab_y_edita_copia(tmp_path):
                 else: item.fill(valor)
             page.locator('#execute-form button[type="submit"]').click()
             sync.expect(page.locator('#execute-status')).to_contain_text('confirmada',timeout=30000)
-            page.locator('nav a[href="#laboratorio"]').click()
+            ir_a_pestana(page, '#laboratorio')
             page.locator('#result-periodo').fill('2010-12');page.locator('#result-sintesis').select_option('REAL')
             page.locator('#lab-comparar').click()
             sync.expect(page.locator('#lab-estado')).to_contain_text('Comparación terminada',timeout=120000)

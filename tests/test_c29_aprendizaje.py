@@ -2,6 +2,7 @@ import json
 import threading
 import pytest
 from reyna_local.__main__ import ReynaServer
+from nav_helpers import ir_a_pestana
 
 
 def test_aprobar_y_rechazar_en_navegador(tmp_path):
@@ -15,7 +16,7 @@ def test_aprobar_y_rechazar_en_navegador(tmp_path):
             try: browser=p.chromium.launch(args=['--no-sandbox'])
             except Exception: browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
             page=browser.new_page();page.goto(f'http://127.0.0.1:{server.server_port}/')
-            page.locator('nav a[href="#aprendido"]').click()
+            ir_a_pestana(page, '#aprendido')
             page.locator('#ap-actualizar').click()
             sync.expect(page.locator('#ap-calibraciones article')).to_have_count(2)
             page.locator('#ap-calibraciones article').nth(0).get_by_role('button',name='Aprobar').click()

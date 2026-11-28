@@ -12,6 +12,7 @@ import pytest
 
 from reyna_local.__main__ import ReynaServer
 from reyna_local.recetas_pedido import aprender_familia, guardar_familias_en_libro, intervalo_prediccion
+from nav_helpers import ir_a_pestana
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -95,7 +96,7 @@ def test_pedido_guiado_en_chromium_hasta_abrir_ot(tmp_path):
                 browser = playwright.chromium.launch(executable_path="/usr/bin/chromium", args=["--no-sandbox"])
             page = browser.new_page()
             page.goto(base + "/")
-            page.locator('nav a[href="#cotizador"]').click()
+            ir_a_pestana(page, '#cotizador')
             page.locator("#pedido-familia option[value='TOLVA']").wait_for(state="attached")
             page.locator("#pedido-producto").fill("SW50")
             page.locator("#pedido-cantidad").fill("1")
