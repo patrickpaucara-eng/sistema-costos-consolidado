@@ -156,3 +156,11 @@ La primera compuerta tras el rebase detectó que C32-1 repetía `ESR_REF=COTIZAD
 - Descartado: clasificar por cómputo (Monte Carlo no necesita GPU), diagnóstico por texto libre, límites numéricos sin base, citar QFD/TRIZ/DSM como respaldo de costos.
 
 **Contexto monografía 2 (presupuestos).** Los parámetros de tiempo, capacidad y calendario que E29 incorpora son los mismos que necesitará el presupuesto. Se construyen en la Base compartida (ver DECISIONES_DUENO 26-nov).
+
+## E30-E32 · Usabilidad (dueño, 27-nov, EXE con C34; validados en `web/index.html`, SIN corregir)
+
+**E30 · Navegación aglomerada.** Validado: 5 grupos y 26 opciones en la barra lateral (Entregar tiene 9, Estimar 5, Registrar 5, Aprender 4, Definir 3). «Planta del costo» muestra a la vez cuatro bloques, unas 16 fichas y la lista completa de conexiones. Esperado: ver solo lo necesario para la tarea. Propuesta: abrir un solo grupo a la vez; menú principal de ~7 destinos con el resto como pestañas dentro de cada pantalla; en Planta del costo, un bloque a la vez y conexiones plegadas.
+
+**E31 · «Cotizar pedido» no sirve para el día a día.** Validado: la sección tiene 37 campos, 4 botones y 2 plegables en una sola pantalla. Esperado: pedido en 3 pasos (Cliente → Técnico → Resultado), 6 campos visibles, valores propuestos desde el último pedido de la misma familia, opción «partir de una OT existente»; el resto en «Avanzado».
+
+**E32 · La cabecera ocupa espacio útil.** Validado: `.selector-global` es `position:sticky` y contiene empresa, síntesis, periodo, aviso de nivel, plantilla de nivel, sello, Consultar y Calcular (~190 px en 1650 px de ancho). Propuesta: una barra de una línea (empresa · periodo · síntesis · sello · Calcular); aviso de nivel y plantilla de nivel pasan a Definir.
