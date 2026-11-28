@@ -213,3 +213,7 @@ Python 3.11 con openpyxl 3.1.5, defusedxml 0.7.1, python-docx 1.1.2 y pulp 2.9.0
 
 ### Siguiente
 Pieza 5 (`parametros.py`, B0): ver «Cómo retomar la pieza 5», arriba.
+
+## 28-nov · Claude: síntesis del plan (decisión del dueño)
+- Nueva pieza `sintesis.py` + `test_sintesis.py` (9/9): toda línea de ticket lleva ticket, recurso, monto, fecha_devengo, fecha_caja, clase (INGRESO, EGRESO, INVERSION, FINANCIAMIENTO, APORTE, DIVIDENDO, IMPUESTO) y estado (programado, comprometido, ejecutado). Todo presupuesto = fila del CATALOGO (reloj + clases + agrupación); control de ejecución = asignado − comprometido − ejecutado.
+- PENDIENTE al retomar (Codex): (a) `eventos.py` debe emitir líneas con esos 7 campos al mover un ticket; (b) `calculadora.py` debe devolver su plan como líneas (cobro de OT = INGRESO con fecha_caja según plazo de cobro; conversión y materiales = EGRESO; préstamo = FINANCIAMIENTO; activo = INVERSION) para que B8 sea solo `sintesis.sintetizar`. Las piezas 6 (caja/estados) y 8 (B8) se apoyan en `sintesis.py`, sin código por tipo de presupuesto.
