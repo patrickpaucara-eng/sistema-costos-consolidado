@@ -66,3 +66,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-28,05:18,06:00,"OT-C35-3 adapta recorridos autorizados y cierra compuerta",Monografía,Codex,"13 pruebas focalizadas verdes; compuerta VERDE: 569 pruebas y contrato de resultados válido"
 2026-11-28,00:38,00:41,OT-C35-4 manual y evidencias visuales,Monografía,Codex,"Manual aumenta 49 palabras; capturas nuevas de menú y Pedido en espacio temporal; la compuerta quedó bloqueada por C35-3 (estado al 28-nov antes de la autorización de actualizar E2E)"
 2026-11-28,06:00,06:19,"OT-C35-4 rebase, evidencia y compuerta",Monografía,Codex,"Manual +49 palabras; capturas y enlaces a evidencia C35-1/C35-2; compuerta VERDE: 569 pruebas y contrato válido"
+2026-11-28,06:22,06:37,"OT-C37-0 plantilla UIX y compuerta",Monografía,Codex,"Plantilla de 276 palabras; compuerta VERDE: 563 pruebas y contrato válido"
