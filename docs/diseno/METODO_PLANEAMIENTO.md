@@ -35,3 +35,19 @@ Registro de decisión: recomendado / hecho / resultado. Precisión por tipo de d
 
 ## 6. Mínimo para el 16-dic
 Misión aprobada, eventos, DBD, banco de escenarios y un prototipo que reprograma 3 escenarios de punta a punta. Lo financiero (VAN, deuda, estados) entra en la versión de entrega final.
+
+## 7. Pendientes de la discusión con Meta AI (27-nov, sin aprobar; para MN 02)
+Útil (adoptar como propuesta):
+- P1 Un solo modelo de programación entera mixta: variables X (cantidad por OT), Y (asignación OT→recurso), T (tardanza), D (financiamiento), S (saldo de caja). Objetivo **maximizar** utilidad descontada (con ingreso variable, minimizar costo lleva a producir cero).
+- P2 El dinero es un recurso más: restricción de caja y caja mínima, igual que stock mínimo.
+- P3 Los hechos externos (congelamiento de cuenta, cierre de línea, máquina parada) solo cambian el lado derecho de una restricción; no cambian el modelo.
+- P4 Producto no estándar: un método traduce los parámetros del cliente a tiempos y consumos (es la receta de familia de C34/C35). Si cambia la composición, es otro producto.
+- P5 La inversión entra al mismo flujo: gasta hoy, da capacidad futura (Cap futura = Cap hoy + ΔCap × I) y su VAN sale del objetivo descontado.
+Corregir antes de usar:
+- C1 Faltan restricciones que la propia conversación menciona: fecha de entrega (T ≥ fin − fecha), secuencia/contaminación (pigmento negro), ventanas de proveedor y de energía, y periodos de tiempo (sin índice t en capacidad y stock).
+- C2 Y con p_ij no depende de X: tiempo debe ser p_ij × X_i (o Y forzar X).
+- C3 Los «escenarios» (falta resina, cliente urgente) no son eventos según Tino: el evento es la transacción (recepción tardía, parada de planta, pedido); el escenario es su efecto en el plan (§3).
+- C4 La inversión no es una OT (objeto de costo); es un ticket del plan con flujo propio. Se modela junto, pero no se costea como orden.
+- C5 «Warm start» y «segundos con 50 OT» son afirmaciones sin prueba; exige solucionador MIP (no hay en Python puro; hoy solo exportamos a Solver). Decidir: dependencia nueva (PuLP/CBC) o exportación.
+- C6 Penalización por tardanza, caja mínima y tasa efectiva por periodo son parámetros de Definir con valor real, no supuestos de la IA.
+- C7 Meta usa «Tinno» y «Chemisa/Chemi Látex» como si fueran la empresa: no son datos del proyecto.
