@@ -217,3 +217,26 @@ Pieza 5 (`parametros.py`, B0): ver «Cómo retomar la pieza 5», arriba.
 ## 28-nov · Claude: síntesis del plan (decisión del dueño)
 - Nueva pieza `sintesis.py` + `test_sintesis.py` (9/9): toda línea de ticket lleva ticket, recurso, monto, fecha_devengo, fecha_caja, clase (INGRESO, EGRESO, INVERSION, FINANCIAMIENTO, APORTE, DIVIDENDO, IMPUESTO) y estado (programado, comprometido, ejecutado). Todo presupuesto = fila del CATALOGO (reloj + clases + agrupación); control de ejecución = asignado − comprometido − ejecutado.
 - PENDIENTE al retomar (Codex): (a) `eventos.py` debe emitir líneas con esos 7 campos al mover un ticket; (b) `calculadora.py` debe devolver su plan como líneas (cobro de OT = INGRESO con fecha_caja según plazo de cobro; conversión y materiales = EGRESO; préstamo = FINANCIAMIENTO; activo = INVERSION) para que B8 sea solo `sintesis.sintetizar`. Las piezas 6 (caja/estados) y 8 (B8) se apoyan en `sintesis.py`, sin código por tipo de presupuesto.
+
+## 28-nov · Claude: el plan y el estado en líneas (`lineas.py`)
+**Hecho**
+- `lineas.py`: `lineas_desde_plan(res, calendario, datos)` y `lineas_desde_estado(EstadoPlan, costo_material, plazo_cobro_dias, plazo_pago_dias, incluir_propuestos=False)`. Calendario: `mensual("AAAA-MM")`, dict `{periodo: fecha}` o función. No toca `calculadora.py` ni `eventos.py` (usa `calculadora._leer` para normalizar los datos igual que la calculadora).
+- Reglas: OT = INGRESO (devengo al terminar, caja + plazo_cobro) + multa EGRESO; conversión EGRESO (caja = devengo); material EGRESO por lotes PEPS (caja al llegar, devengo al consumir, inventario final en T+1, stock inicial pagado en hoy−1 y «ejecutado»); préstamo FINANCIAMIENTO entrada en t, devolución e interés salida en t+1; activo INVERSION (devengo instalación, caja periodo_pago); flujos externos con devengo en hoy−1. Estado: lo que decide el plan «programado»; llegadas, externos, deuda inicial e inversión aprobada «comprometido».
+- `sintesis.py`: campo opcional `sentido` (entrada/salida) solo para FINANCIAMIENTO y APORTE; en otras clases un sentido contrario se rechaza. Las 9 pruebas anteriores siguen sin cambio.
+- `test_lineas.py` (15): caso k a mano (saldo 20 / 129.8 / 329.8; operativo 120 y 120), caso e a mano, conciliación de caja y operativo en e, f, g, h1, j, k y el caso aleatorio de 50 OT; estado a mano (efectivo ene 188, feb 297, mar −120; control de ejecución). Suite B: 61 pasan, 1 se salta (spec). `pytest tests --collect-only`: 571 sin errores.
+
+**Inconsistencias encontradas (calculadora ↔ modelo de síntesis)**
+1. Sin `sentido`, la síntesis no podía devolver un préstamo ni pagar interés (SIGNO fijo + monto ≥ 0). Resuelto con el campo opcional; **el dueño debe confirmarlo** (es un 8.º campo).
+2. La salida de `plan()` no trae precio, plazo de cobro, costo por hora ni costo de material: `lineas_desde_plan` necesita también `datos`.
+3. Material: el objetivo de la calculadora y `componentes.costo_materiales` lo cargan al **comprar** (stock inicial gratis, inventario final sin valor); `estados_proyectados` lo carga al **consumir** y a `costo`, no a `costo_compra`. Las líneas usan PEPS: coinciden con la hoja k y con estados_proyectados cuando ambos costos son iguales; en el caso aleatorio (5 contra 4) difieren.
+4. Interés: la calculadora lo devenga en el periodo de pago (t+1), no en el que corre el préstamo. Se siguió a la calculadora.
+5. `flujos_externos` y `deuda_inicial` no tienen fecha de devengo ni clase; se supuso devengo en hoy−1 (fuera de la utilidad, como dice la calculadora).
+6. La calculadora no tiene plazo de pago para conversión ni material (paga al momento): devengo = caja en los EGRESO del plan.
+7. Una línea tiene un solo estado para dos relojes: una compra recibida pero no pagada queda «ejecutado» también en caja.
+8. `spec.LINEA_TICKET` pide `cantidad`, `centro` y `titular`; `sintesis.CAMPOS` no los exige y el operativo agrupa por clase, no por centro. Las líneas llevan `cantidad` y `centro` cuando se conocen; `titular` no existe en ningún lado.
+9. Estado: la COMPRA no trae monto (se pasa `costo_material`); el ticket OT no trae costos (solo genera el INGRESO); la recepción parcial usa la fecha prevista de llegada; los cobros y pagos sin ticket no se pueden clasificar y no generan línea.
+
+**Pendiente**
+- Que el dueño apruebe `sentido` (punto 1) y decida la base del costo de material (compra o consumo) para que calculadora, estados_proyectados y síntesis digan lo mismo (punto 3).
+- Piezas 6 y 8 (B5/B8): reemplazar `estados_proyectados` por síntesis sobre estas líneas; agregar IMPUESTO (IR devengado) y depreciación como líneas.
+- `eventos.py` todavía no emite líneas al mover un ticket: hoy se reconstruyen con `lineas_desde_estado` (suficiente porque el estado se deriva entero).
