@@ -49,6 +49,9 @@ chk(not mal,"Los 6 eventos tocan un ticket que existe o son mantenimiento de dat
 # 7 parámetros
 sup=[p[0] for p in PARAMS if '(S)' not in p[2] and 'legal' not in p[2]]
 chk(not sup,"Cada parámetro tiene valor inicial marcado SUPUESTO (o vigencia legal), responsable y regla de cierre"+(f" — sin marcar: {sup}" if sup else f" ({len(PARAMS)} parámetros)"))
+# 7b síntesis
+ok7b=all(c in CLASES for _,_,f,_ in SINTESIS if f!='todas' for c in f) and {'fecha_devengo','fecha_caja','clase','estado'}<=set(LINEA_TICKET)
+chk(ok7b,'Toda síntesis usa clases existentes y cada línea de ticket trae devengo, caja, clase y estado (cualquier presupuesto se arma sin programar)')
 # 8 casos a mano
 v12=120000/1.02**12; v24=120000/1.02**24
 chk(abs(v12-94619)<5 and abs(v24-74607)<5 and v12>80000>v24,f"Caso de inversión a mano: 120,000 a 12 meses al 2 % vale hoy {v12:,.0f} > 80,000 (comprar); a 24 meses vale {v24:,.0f} < 80,000 (no comprar)")

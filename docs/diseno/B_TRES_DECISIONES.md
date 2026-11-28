@@ -32,3 +32,6 @@ B solo lee el contrato publicado (`contrato.py`). Hoy faltan tres cosas, y ya ex
 | Fecha comprometida de entrega de la orden | **No existe**: OBJETO solo tiene OBJ_FEC_TER (real) y ESTIMACION no guarda fecha | Agregar `EST_FEC_ENT` a ESTIMACION (la pide el Pedido) y publicar `ordenes_abiertas`: [{codigo, producto, cantidad, avance, fecha_entrega}] |
 
 Orden para Codex: **C39** (ver `ordenes/OT-C39_CONTRATO_A_B.md`), después de C38 y de los documentos de MN 1.
+
+## Resolución del §1 (dueño, 28-nov)
+Se mantiene la misión del 27-nov: **el plan (tickets de recursos comprometidos) es la base; todo presupuesto es una síntesis**. Cumple M6 sin depender de tipos de presupuesto. Lo que faltaba no eran «tipos» sino atributos de cada línea de ticket para que las síntesis sean posibles: fecha de devengo, fecha de caja, clase de concepto (INGRESO, EGRESO, INVERSION, FINANCIAMIENTO, APORTE, DIVIDENDO, IMPUESTO) y estado (programado, comprometido, ejecutado). Las síntesis viven en un catálogo editable (operativo, efectivo, inversiones, financiero, control de ejecución, estados proyectados); crear otro presupuesto = agregar una fila, sin programar. Aplicado en `tools/mapa_b/spec.py` (LINEA_TICKET, CLASES, SINTESIS) y validado (11/11).

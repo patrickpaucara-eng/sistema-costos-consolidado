@@ -78,3 +78,5 @@
 - 28-nov: cola única de Codex en `ordenes/COLA_CODEX.md` (C37 → documentos MN 1 → manual → B). C38 (correcciones de cálculo) la hace Claude en paralelo, porque el cálculo es responsabilidad de Claude según AGENTS.md y no choca con las pantallas de C37.
 
 - 28-nov (cambio): C38 la hace Codex (no Claude) para ahorrar tokens; va en `COLA_CODEX.md` justo después de C37, con prioridad sobre C37 si se acerca el 4-dic.
+
+- 28-nov (MN 02): misión de B = la del 27-nov (programación de recursos comprometidos). Los presupuestos (operativo, efectivo, inversiones, financiero, control, estados) son síntesis configurables del plan; cada línea de ticket lleva fecha de devengo, fecha de caja, clase y estado. M6 queda cubierta como conjunto de síntesis.

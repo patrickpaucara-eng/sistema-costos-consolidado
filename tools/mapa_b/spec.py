@@ -16,6 +16,19 @@ EVENTOS=[ # nombre, dato que trae, ticket que toca, qué recalcula
  ('No conformidad','OT, cantidad mala','OT','reproceso: más horas y material en esa OT'),
  ('Cambia un dato maestro','capacidad, precio, tasa, plazo de proveedor','—','cierra el valor viejo y abre el nuevo con vigencia'),
 ]
+# Cada línea de ticket (sea OT, compra, financiamiento o inversión) lleva SIEMPRE: recurso, cantidad, monto,
+# fecha de devengo, fecha de caja, clase de concepto y estado (programado → comprometido → ejecutado).
+# Con eso cualquier presupuesto es una SÍNTESIS (filtro + agrupación + reloj) definida como dato, no como código.
+LINEA_TICKET=['recurso','cantidad','monto','fecha_devengo','fecha_caja','clase','estado','centro','titular']
+CLASES=['INGRESO','EGRESO','INVERSION','FINANCIAMIENTO','APORTE','DIVIDENDO','IMPUESTO']
+SINTESIS=[ # nombre, reloj, filtro de clases, agrupación  (catálogo editable: se pueden crear más sin programar)
+ ('Presupuesto operativo','devengo',['INGRESO','EGRESO'],'centro y periodo'),
+ ('Presupuesto de efectivo','caja','todas','periodo'),
+ ('Presupuesto de inversiones','devengo',['INVERSION'],'proyecto y periodo'),
+ ('Presupuesto financiero','caja',['FINANCIAMIENTO','APORTE','DIVIDENDO','IMPUESTO'],'periodo'),
+ ('Control de ejecución','ambos','todas','línea: programado, comprometido, ejecutado, disponible'),
+ ('Estados proyectados','devengo + caja','todas','cuenta'),
+]
 TICKETS=[
  ('OT (producir)','código, producto, cantidad, fecha entrega, recurso asignado, inicio, fin','propuesto → comprometido → en ejecución → terminado / cancelado'),
  ('COMPRA','material, cantidad, proveedor, fecha pedido, fecha llegada','propuesto → comprometido → recibido / cancelado'),
@@ -40,7 +53,7 @@ MODS=[
   inp=['P.parametros','C.costos'],out=['V.inversiones'],pantalla='Inversión'),
  dict(id='B7',n='Desviación y reprogramación',para='Compara lo programado con lo ejecutado; si se aleja más que el umbral, dispara un nuevo cálculo desde el estado de hoy.',
   inp=['T.estado','H.hechos_validos','P.parametros'],out=['D.desviacion','D.disparo'],pantalla='Plan'),
- dict(id='B8',n='Estados proyectados y evaluación',para='Arma flujo de caja, estado de resultados y balance proyectado a n periodos, y calcula VAN, TIR y recuperación de lo decidido.',
+ dict(id='B8',n='Síntesis y evaluación',para='Genera cualquier presupuesto como síntesis del plan (catálogo SINTESIS: filtro de clases + agrupación + reloj devengo o caja), los estados proyectados y VAN, TIR y recuperación.',
   inp=['X.plan','F.flujo','F.deuda','C.costos','V.inversiones','P.parametros'],out=['E.estados','E.evaluacion'],pantalla='Reportes'),
  dict(id='B9',n='Recomendación y aprendizaje',para='Entrega la programación al gerente, registra qué decidió y mide cuánto acierta el sistema para ganar autonomía.',
   inp=['X.plan','T.tickets','D.desviacion','E.estados','U.gerente','A.precision'],out=['R.programa','R.aprendizaje'],pantalla='Decidir'),
