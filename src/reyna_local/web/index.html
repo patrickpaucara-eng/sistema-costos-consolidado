@@ -325,6 +325,7 @@ main#principal{padding-top:0}
             <h3>2. Resultado y comparación</h3>
             <p class="legend">El margen, los intervalos y otros criterios se definen en Configuración; aquí solo se indica el precio observado del mercado.</p>
             <label>Precio de mercado (S/) <input id="pedido-precio" type="number" min="0" step="any" required></label>
+            <label>Unidades por lote alternativo (opcional) <input id="pedido-lote-comparar" type="number" min="0.001" step="any"></label>
             <fieldset id="pedido-falta-confirmar" class="pedido-faltantes" hidden><legend>Falta confirmar</legend><p>El sistema no pudo derivar estos datos con la historia disponible.</p><div id="pedido-parametros-tecnicos" class="fields"></div></fieldset>
             <div class="actions"><button id="pedido-volver" class="secondary" type="button">Volver a los datos</button><button id="pedido-calcular" type="submit">Calcular resultado</button></div>
             <p id="pedido-estado" role="status"></p>
@@ -1410,6 +1411,7 @@ main#principal{padding-top:0}
   }
   mostrarPasoPedido(1);
   $('pedido-continuar').addEventListener('click',()=>{
+    if(!familiasPedido.length&&$('cot-avanzado').open){mostrarPasoPedido(2);$('pedido-precio').focus();return;}
     const paso=$('pedido-paso-cliente');const faltante=[...paso.querySelectorAll('input,select')].find(x=>!x.checkValidity());
     if(faltante){faltante.reportValidity();faltante.focus();return;}mostrarPasoPedido(2);$('pedido-precio').focus();
   });
@@ -1452,6 +1454,7 @@ main#principal{padding-top:0}
       fecha_requerida:$('pedido-fecha').value,cantidad:Number($('pedido-cantidad').value),familia:familia.codigo,parametros,parametros_tecnicos:parametrosTecnicos,
       precio_mercado:Number($('pedido-precio').value),margen_objetivo:Number(pedidoConfig.margen)/100,contrato:$('pedido-contrato').value,
       unidades_por_lote:pedidoConfig.lote===''?null:Number(pedidoConfig.lote),preparacion_por_lote:Number(pedidoConfig.preparacion)||0,conceptos_adicionales:concepto,
+      comparar_unidades_por_lote:$('pedido-lote-comparar').value===''?null:Number($('pedido-lote-comparar').value),
       capacidad_practica_diaria:pedidoConfig.capacidad?.[familia.codigo]||{},ot_comprometidas_por_dia:pedidoConfig.comprometida?.[familia.codigo]||{},
       dias_solicitados:pedidoConfig.dias===''?null:Number(pedidoConfig.dias),meses:Number(pedidoConfig.meses)||0,intervalo:Number(pedidoConfig.intervalo),curva:pedidoConfig.curva,
       umbral_firme:{monto:pedidoConfig.umbralMonto===''?null:Number(pedidoConfig.umbralMonto),ancho_pct:pedidoConfig.umbralAncho===''?null:Number(pedidoConfig.umbralAncho)}};
@@ -1459,11 +1462,12 @@ main#principal{padding-top:0}
       ultimaCotizacion={...data,_pedido:body};pintarFaltantesPedido(data.faltantes,parametrosTecnicos);
       const preliminar=data.estado!=='FIRME';const titulo=cell(root,'h3',preliminar?'Cotización preliminar':`Cotización firme · costo esperado: S/ ${number(data.costo_esperado)}`);titulo.className=preliminar?'pedido-preliminar':'pedido-firme';
       if(data.costo_esperado!=null){cell(root,'p',data.rango_p05_p95?`Rango P05–P95: S/ ${number(data.rango_p05_p95.p05)} a S/ ${number(data.rango_p05_p95.p95)} · ${data.rango_p05_p95.metodo}`:'Rango P05–P95: no estimable con la historia disponible.');
-        const plazo=data.plazo||{};cell(root,'p',plazo.dias_earliest==null?`Entrega: no estimable. ${plazo.motivo||''}`:(plazo.dias_tarde>0?`Llega ${plazo.dias_tarde} días de capacidad tarde.`:`Llega dentro del plazo solicitado (${plazo.dias_earliest} días de capacidad).`));
+        const plazo=data.plazo||{};cell(root,'p',plazo.dias_earliest==null?`Entrega más temprana: no estimable. ${plazo.motivo||''}`:(plazo.dias_tarde>0?`Entrega más temprana: ${plazo.dias_earliest} días de capacidad. Llega ${plazo.dias_tarde} días tarde.`:`Entrega más temprana: ${plazo.dias_earliest} días de capacidad. Llega dentro del plazo solicitado.`));
         cell(root,'p',`Precio sugerido: S/ ${number(data.precio_sugerido)} · mercado: S/ ${number(data.precio_mercado)} · diferencia: S/ ${number(data.brecha_mercado)}.`);cell(root,'p',data.decision||'');
       }
       try{const x=await fetch('/api/suficiencia?'+new URLSearchParams({empresa:$('result-empresa').value})),j=await x.json();if(x.ok)cell(root,'p',j.nivel==null?'Suficiencia de datos: sin determinar.':`Suficiencia de datos: nivel ${j.nivel}${j.falta?` · para subir: ${j.falta}`:''}.`);}catch{cell(root,'p','Suficiencia de datos: no disponible.');}
-      if(data.fundamento){const just=cell(root,'details','');cell(just,'summary','Fundamento en 4 líneas');[['Fórmula',data.fundamento.formula],['Supuesto',data.fundamento.supuesto],['Dato',data.fundamento.dato_usado],['Límite',data.fundamento.limite]].forEach(([a,b])=>cell(just,'p',`${a}: ${b}`));}
+      if(data.fundamento){const just=cell(root,'details','');cell(just,'summary','Fundamento en 4 líneas');[['Fórmula',data.fundamento.formula],['Supuesto',data.fundamento.supuesto],['Dato usado',data.fundamento.dato_usado],['Límite',data.fundamento.limite]].forEach(([a,b])=>cell(just,'p',`${a}: ${b}`));}
+      if(data.comparacion_lotes){const comparacion=cell(root,'details','');cell(comparacion,'summary','Comparación de tamaños de lote');cell(comparacion,'p',`La diferencia máxima entre alternativas es S/ ${number(data.comparacion_lotes.diferencia_max_min)}.`);(data.comparacion_lotes.alternativas||[]).forEach(x=>cell(comparacion,'p',`${number(x.unidades_por_lote)} unidades por lote: costo S/ ${number(x.costo_pedido)}; diferencia frente a la primera alternativa: S/ ${number(x.diferencia_vs_primera)}.`));}
       (data.avisos||[]).forEach(x=>cell(root,'p',`Aviso: ${x}`));
       if(preliminar){$('pedido-guardar-preliminar').hidden=false;estado.textContent='Revisa los faltantes o guarda la cotización como preliminar. No abre una OT.';}
       else{mostrarPasoPedido(3);const resumen=$('pedido-resumen-confirmacion');resumen.replaceChildren(...[...root.children].map(x=>x.cloneNode(true)));$('pedido-aceptar-estado').textContent='Revisa costo, rango, plazo y fundamento antes de aceptar.';
