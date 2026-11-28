@@ -80,3 +80,5 @@
 - 28-nov (cambio): C38 la hace Codex (no Claude) para ahorrar tokens; va en `COLA_CODEX.md` justo después de C37, con prioridad sobre C37 si se acerca el 4-dic.
 
 - 28-nov (MN 02): misión de B = la del 27-nov (programación de recursos comprometidos). Los presupuestos (operativo, efectivo, inversiones, financiero, control, estados) son síntesis configurables del plan; cada línea de ticket lleva fecha de devengo, fecha de caja, clase y estado. M6 queda cubierta como conjunto de síntesis.
+
+- 28-nov: el dueño aprueba E43 tal como está en `docs/entrega/E43_ARCHIVO_PROPUESTA.md` → OT-C40 en la cola de Codex, después de C38.
