@@ -14,6 +14,10 @@ ESTADOS = ("programado", "comprometido", "ejecutado")
 RELOJES = ("devengo", "caja")
 SIGNO = {"INGRESO": 1, "EGRESO": -1, "INVERSION": -1, "FINANCIAMIENTO": 1, "APORTE": 1, "DIVIDENDO": -1, "IMPUESTO": -1}
 CAMPOS = ("ticket", "recurso", "monto", "fecha_devengo", "fecha_caja", "clase", "estado")
+# Campo opcional «sentido» (agregado 28-nov con lineas.py): FINANCIAMIENTO y APORTE van en los dos sentidos
+# (se toma y se devuelve un préstamo; se aporta y se retira capital). Sin «sentido» manda SIGNO[clase].
+SENTIDOS = {"entrada": 1, "salida": -1}
+DOS_SENTIDOS = ("FINANCIAMIENTO", "APORTE")
 
 # nombre: (reloj, clases o None = todas, agrupar por)
 CATALOGO = {
@@ -39,7 +43,19 @@ def validar(linea):
         raise LineaInvalida(f"Línea {linea['ticket']}: estado «{linea['estado']}» no existe.")
     if not isinstance(linea["monto"], (int, float)) or linea["monto"] < 0:
         raise LineaInvalida(f"Línea {linea['ticket']}: el monto debe ser un número ≥ 0 (el signo lo da la clase).")
+    s = linea.get("sentido")
+    if s is not None:
+        if s not in SENTIDOS:
+            raise LineaInvalida(f"Línea {linea['ticket']}: sentido «{s}» no existe (entrada, salida).")
+        if linea["clase"] not in DOS_SENTIDOS and SENTIDOS[s] != SIGNO[linea["clase"]]:
+            raise LineaInvalida(f"Línea {linea['ticket']}: {linea['clase']} no puede ir en sentido «{s}»; "
+                                f"solo {', '.join(DOS_SENTIDOS)} van en los dos sentidos.")
     return linea
+
+
+def signo(linea):
+    s = linea.get("sentido")
+    return SIGNO[linea["clase"]] if s is None else SENTIDOS[s]
 
 
 def sintetizar(lineas, nombre, catalogo=CATALOGO, periodo=lambda f: f[:7]):
@@ -52,7 +68,7 @@ def sintetizar(lineas, nombre, catalogo=CATALOGO, periodo=lambda f: f[:7]):
         if clases is not None and l["clase"] not in clases:
             continue
         val = {"periodo": periodo(l["fecha_" + reloj]), "clase": l["clase"], "recurso": l["recurso"], "ticket": l["ticket"]}
-        out[tuple(val[g] for g in grupo)] += SIGNO[l["clase"]] * l["monto"]
+        out[tuple(val[g] for g in grupo)] += signo(l) * l["monto"]
     return {k: round(v, 2) for k, v in sorted(out.items())}
 
 
