@@ -179,3 +179,6 @@ La pantalla Decidir pide «¿Hay capacidad ociosa?», unidades, precio, costo de
 
 ## E36 · Falta un mapa de módulo a detalle con prueba de estrés (dueño, 27-nov; en curso)
 El dueño exige, antes de cerrar la MN 01, un mapa detallado de cada módulo (para qué sirve, qué dato usa, de dónde viene, qué teoría de Oria aplica, qué decisión permite) y someterlo a cinco pruebas: autosuficiencia de datos, aplicación coherente de Oria, practicidad, decisiones ágiles y UIX con formato estándar (patrones reconocibles, mínimo uso de ratón). Se trata en OT-C36.
+
+## E37 · Tabla de tramos de la orden mezcla dos niveles (dueño, 27-nov; validado en captura, SIN corregir)
+En «Ver todos los tramos», las columnas Cantidad del destino × Tasa dan el monto del **centro** (10 × 30 = 300), pero «Parte de esta orden» muestra 49.8 (la proporción de la orden dentro de ese monto). El usuario no puede reproducir la cifra con las columnas visibles. **Esperado:** mostrar la cadena completa en una fila (monto del tramo → % que toma la orden → parte de la orden) o una línea de verificación «Σ partes = total del origen» visible en pantalla. Entra en C36 (criterios 1 y 2).
