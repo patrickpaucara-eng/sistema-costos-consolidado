@@ -1,0 +1,18 @@
+{
+  "fecha": "28-nov-2026",
+  "rama": "desarrollo/mono",
+  "commit": "4d07159",
+  "compuerta": {"veredicto": "VERDE", "pasadas": 574, "subpruebas": 26, "duracion": "14 min 32 s", "contrato": "cumple",
+                "nota": "Corrida de la unión de C37-3, C37-5 y C37-6 (tools/unir_pr.py); el commit publicado agrega solo dos archivos de decisiones y cola."},
+  "e2e": {"ok": 30, "total": 30},
+  "modelo3": {"pasadas": 12, "total": 12},
+  "oraculo": {"formulas": 777, "errores": 0, "filas_datos": 70, "cifras": 20, "flechas": 27, "dif_REB": "0.00", "dif_MPR": "0.00"},
+  "hostiles": {"libros": 9, "verificacion": "PIEZA 24: OK (9 libros verificados con validar() y calcular())"},
+  "auditoria": {
+    "controles_ok": 10, "controles_total": 10,
+    "estado": {"S1": "CONFIRMADO", "S2": "CONFIRMADO", "S3": "CONFIRMADO", "S4": "CONFIRMADO", "S5": "CONFIRMADO",
+               "S6": "CONFIRMADO", "S7": "CONFIRMADO", "S8": "CONFIRMADO", "S9": "CONFIRMADO"},
+    "s8a": "5 de 30", "s8b": "0 de 2",
+    "s9": "2 órdenes: 31 llamadas, 2.4 s; 50 órdenes: 411 llamadas, 2.8 s"
+  }
+}
