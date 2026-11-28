@@ -25,9 +25,10 @@ Mapa general: `docs/diagramas/mapa-sistemas-AB.html` (botón Gerente/Desarrollad
 - **Documentos:** 80/20, breves. Mapas: **visuales, poco texto** (el dueño lo pidió explícitamente).
 - **Principios del dueño para todo:** práctico (≤3 pasos, ≤6 campos, nunca pedir lo que el sistema ya sabe), aporta valor (cada pantalla termina en un número accionable), **entorno hostil** (sin 0 silenciosos ni trazas técnicas), Tino (evento = transacción consumada; ticket = evento futuro con recursos comprometidos; hechos inmutables; parámetros con vigencia), Oria (matriz de configuración + matriz de cálculo; lo repartido = lo gastado).
 
-## 4. Estado al 28-nov 09:30
+## 4. Estado al 28-nov 09:45 (verifica PRs abiertos y compuerta antes de confiar en esto)
 - `desarrollo/mono` en VERDE (571 pruebas). Unidas: C32–C35, C37-0, C37-1, C37-2.
-- **Cola de Codex** (`ordenes/COLA_CODEX.md`): E45+E46 (vista de matrices) → C37-3…7 → **C38** (10 correcciones de cálculo de la auditoría; prioridad sobre C37 si llega el 3-dic) → documentos MN 1 → manual → C39 (contrato A→B) → B piezas 5–23.
+- **Cola de Codex** (`ordenes/COLA_CODEX.md`): E45+E46 (vista de matrices) → C37-3…7 → **C38** (10 correcciones de cálculo de la auditoría; si al 3-dic C37 no terminó, C38 va primero) → **C41** (lo que pide Oria en su SIC-ABCDIEP: precisión contra modelo ingenuo, Monte Carlo honesto, margen por capas; ver `docs/diseno/CONTRASTE_CLEIN.md`) → **C40** (archivar código que no corre; E43 aprobado) → documentos MN 1 → manual → C39 (contrato A→B) → B piezas 5–23.
+- **Decisión pendiente del dueño:** K4 de `CONTRASTE_CLEIN.md` (autonomía: el sistema solo «propone» salvo habilitación escrita del dueño; Oria prohíbe cambios automáticos de precios, compras o personal).
 - **Pendiente del coordinador:** unir PRs que lleguen; generar el EXE final (GitHub Actions, workflow de Windows; `tools/windows/build.py`) cuando C37+C38 estén unidas; llenar cifras finales en documentos.
 - **Pendiente del dueño:** probar el EXE sin internet con el guion; horas (`docs/entrega/tiempos/`); exportar chats (entregable 1); decidir qué código que no corre se archiva (E43: `analitica/`, `analitica2/`, métodos «cáscara»); zip de 13 entregables; ensayo.
 
@@ -66,3 +67,14 @@ Español, frases cortas, sin jerga; responder primero lo que preguntó; cuando h
 Si 1–7 pasan, unir con `tools/unir_pr.py`. Si alguno falla, devolver a Codex con el número de regla.
 
 **EXE final:** GitHub → Actions → «Paquete offline de Windows» → *Run workflow* sobre `desarrollo/mono` (también corre solo con cada push). El artefacto es `ReynaCostos-Windows-x64.zip`. Hacerlo cuando C37 y C38 estén unidas; luego el dueño lo prueba con `docs/entrega/GUION_PRUEBA_DUENO.md`.
+
+## 9. Regla de recorte si Codex se atrasa (fechas fijas: congelar código 6-dic 18:00; entrega 9-dic 18:00)
+Lo que no esté unido con compuerta VERDE el 6-dic 18:00 **no entra**: se declara como límite en el manual y la monografía. Si hay que elegir, se protege en este orden (1 = nunca se corta):
+1. **C38-1…C38-5** (errores críticos de cálculo y control registrado = entrado).
+2. **Entregables obligatorios:** informe de pruebas y manual de usuario (sin ellos la MN 01 no cumple).
+3. **E45 + E46** (matrices y recíproco como Oria: lo ve el profesor).
+4. **C41-1** (precisión contra modelo ingenuo: el criterio de Oria) y **C37-7** (entorno hostil: ya tiene libros listos).
+5. **C37-3** (Decidir con datos propios) y **C37-4** (tramos en el Pedido).
+6. **C41-2, C41-3**, presentación y preguntas del jurado.
+7. **Se cortan primero:** C37-5 (una sola familia), C37-6 (pantallas sin valor), C38-6…C38-10, C40 (archivo), guion de prueba (el dueño puede probar con el manual).
+Revisión de avance: 1-dic, 3-dic y 5-dic. En cada una, si lo pendiente de los niveles 1–4 no cabe en los días que quedan, sacar de la cola de Codex todo el nivel 7 y avisar al dueño.
