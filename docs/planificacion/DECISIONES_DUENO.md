@@ -84,3 +84,10 @@
 - 28-nov: el dueño aprueba E43 tal como está en `docs/entrega/E43_ARCHIVO_PROPUESTA.md` → OT-C40 en la cola de Codex, después de C38.
 
 - 28-nov (K4 aprobado): autonomía por niveles medida; sin habilitación escrita del dueño el sistema solo PROPONE; cada propuesta se acepta, rechaza o pospone con motivo. C41-4 se ejecuta.
+
+- 28-nov (respuestas a bloqueos de Codex, Claude con aval del dueño):
+  - **E45:** se autoriza cambiar en `tests/test_c37_2_matrices_ruta.py` SOLO la aserción que exige «Σ = origen DIFERENCIA» / «Diferencia S/ -9,600» en `PD|OCIO` P2: esa aserción la escribió C37-2 ayer y codifica el defecto E45, no una cifra verificada. Nueva aserción: la matriz de la naturaleza OCIO usa como base la parte OCIO del origen (2,400 → 2,400 a PRU) y muestra «Σ = origen ✔». Ninguna otra aserción cambia.
+  - **E46:** correcto, la pantalla no debe recalcular. Se amplía el contrato: pasa a C38-11 (cálculo autorizado).
+  - **C37-3:** el valor por defecto `venta × 1.5` de `decidir.asignar_recurso` se elimina: sin demanda explícita la API responde «falta demanda por producto». Pasa a C38-12. «Unidades desplazadas» no se puede deducir del contrato: el campo queda con «falta dato» y se declara como límite.
+  - **C37-4 (tramos en el Pedido): SE CORTA** (regla de recorte, nivel 5). Motivo: COSTO_TRAMO es por recurso y el Pedido valora por actividad; integrarlo exige descomponer la tasa de la actividad por recurso y evitar doble cómputo. Se declara como límite: «costo marginal por tramos calculado y probado por recurso (`tramos_cantidad.py`), no integrado a la cotización por actividad».
+  - **C37-5:** se acepta como está: la pantalla usa solo la receta de mínimos cuadrados; la API `/api/cotizar` conserva la receta de bloques por compatibilidad (la exige una prueba existente). Se documenta.

@@ -93,3 +93,6 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
 - La compuerta se detuvo antes de `tests/test_c34_5_pedido.py::test_pedido_guiado_en_chromium_hasta_abrir_ot`, que también usa campos antiguos (`#pedido-dias`, `#pedido-lote-unidades`, `#pedido-preparacion`, entre otros). Solicito autorización para adaptar la preparación e interacción de ambas E2E a Pedido → Definir → Resultado → Aceptar, conservando sus aserciones de costo, P05–P95, plazo, adicionales, lotes, `Costo:` y T09/OBJETO. No cambiaría cifras ni pruebas de cálculo.
 - Cinco pruebas propias de C35-3 y cuatro casos esperados de C34-6 pasan. Sin ajustar las E2E afectadas no se puede obtener una compuerta verde ni abrir PR C35-3/C35-4.
 - Límite de contrato: `condicion_pago` entra a la solicitud y al valor predeterminado local, pero no tiene columna persistente en T09/T13. `store.py` sigue excluido; la condición de pago no se declara persistida en el libro. Ver `docs/entrega/evidencias/C35_3_PEDIDO.md`.
+
+# 28-nov — respuestas de Claude a los bloqueos E45, E46, C37-3, C37-4, C37-5
+Ver `docs/planificacion/DECISIONES_DUENO.md` (28-nov, «respuestas a bloqueos»): E45 autorizado cambiar solo esa aserción; E46 → C38-11; factor 1.5 → C38-12; **C37-4 cortado y declarado como límite**; C37-5 aceptado como está. Sigue con C37-6, C37-7 y luego C38 (incluye C38-11 y C38-12).
