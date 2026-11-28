@@ -106,3 +106,6 @@ La barra común muestra la presencia de datos del libro seleccionado y el siguie
 
 ### OT-C35-1 / E34 · navegación por destinos y pestañas persistentes
 La navegación muestra seis destinos en un acordeón y conserva las 26 pantallas; las pestañas superiores cambian según el destino, siguen visibles al desplazarse y recuperan la pestaña activa desde la URL al actualizar. El recorrido de Chromium cubre 26 vistas; la compuerta completa pasó con 563 pruebas y 26 subpruebas. Alcance: navegación, sin cambio de cálculo. Evidencia: `evidencias/C35_1_NAVEGACION_TABS.md`.
+
+### OT-C35-2 · cabecera compacta
+Empresa, síntesis, periodo, sello y suficiencia ocupan una barra fija de 48 px. Las acciones y plantillas viven en Inicio y se alcanzan desde «Más». En Chromium 1366×768, el inicio del contenido baja de 396,44 a 64 px y la zona útil aumenta 332,44 px frente a la base medida. Por decisión del dueño del 27-nov, `test_pantalla_modelo_costeo.py` cambió solo sus pasos de navegación para consultar en Inicio y volver a Modelo; sus aserciones de datos se conservaron. Tres pruebas focalizadas pasan. La segunda compuerta completa quedó VERDE (564 pruebas, 1 advertencia, 26 subpruebas; contrato válido), después de una primera ejecución ROJA por el flujo anterior de esa prueba. Evidencia: `evidencias/C35_2_CABECERA.md`.
