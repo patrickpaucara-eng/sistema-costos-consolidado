@@ -80,3 +80,9 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
 
 - **Curva S para un número distinto de seis intervalos:** la OT fija los seis pesos `1-2-3-3-2-1` pero no define cómo reducirlos o ampliarlos. Implementación provisional: interpolar linealmente los seis puntos en una malla uniforme con el número de intervalos requerido y normalizar; seis intervalos conservan exactamente los pesos del caso manual. Revisar si Oria prefiere otra discretización.
 - **Capacidad y plazo:** la OT no define calendario, turnos ni un esquema validado para traducir una OT abierta a carga pendiente diaria. El cálculo recibe capacidad práctica y carga comprometida por actividad/día, ambas en la misma unidad; no infiere automáticamente carga pendiente desde el estado de OBJETO ni trata datos históricos como reservas. El resultado expresa días de capacidad, no fecha de calendario. C34-5 debe integrar una fuente con semántica aprobada antes de presentar una fecha empresarial.
+
+# 27-nov — bloqueo de C35-2 por flujo de acciones
+
+- La compuerta única de `codex/C35-2` dio ROJA: 521 pruebas pasaron, 1 falló, 15 subpruebas pasaron y el contrato de resultados cumplió. Falló `tests/test_pantalla_modelo_costeo.py::test_modelo_y_avisos_en_chromium` antes de sus aserciones de datos: entra a `#modelo` y espera visible «Resultados actualizados.»; C35-2 mueve consulta/estado a Inicio.
+- El dueño autorizó (DECISIONES_DUENO.md, 27-nov) cambiar solo los pasos de navegación: Inicio → consultar → volver a Modelo; las aserciones se conservan. La prueba también usa destino → pestaña para ir a Calidad.
+- Las tres pruebas focalizadas de cabecera y Chromium pasan. La segunda compuerta completa quedó VERDE: 564 pruebas, 1 advertencia, 26 subpruebas y contrato válido; C35-2 puede abrir su PR.

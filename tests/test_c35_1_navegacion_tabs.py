@@ -58,7 +58,7 @@ def test_recorrido_26_pantallas_y_pestana_activa_tras_actualizar(tmp_path):
             page.locator("#module-tabs [role='tab'][href='#dashboard']").click()
             assert page.locator("#module-tabs").evaluate("e => getComputedStyle(e).position") == "sticky"
             page.reload()
-            page.locator("#result-status").wait_for()
+            page.locator("#module-tabs [role='tab'][href='#dashboard'][aria-current='page']").wait_for()
             assert page.locator("#module-tabs [role='tab'][href='#dashboard'][aria-current='page']").count() == 1
             assert page.locator("#nav-destinos details[open]").count() == 1
             browser.close()

@@ -18,4 +18,10 @@ Empresa, síntesis, periodo, sello y suficiencia permanecen en la barra fija de 
 
 ## Límite
 
-La compuerta completa se ejecuta al finalizar la rama. Las capturas de menú y Pedido forman parte de C35-4.
+Las capturas de menú y Pedido forman parte de C35-4.
+
+## Verificación de integración (27-nov-2026)
+
+Las pruebas focalizadas de navegación, cabecera y modelo pasan juntas: **3 pasaron** en Chromium. Tras la autorización del dueño del 27-nov, `tests/test_pantalla_modelo_costeo.py` ahora navega Inicio → consultar → Modelo → Calidad con destino → pestaña; no se modificaron sus aserciones de modelo, trazas, actividades o avisos.
+
+La primera compuerta completa dio **ROJA**: 521 pasaron, 1 falló, 15 subpruebas pasaron y el contrato de resultados cumple. Tras la autorización y el ajuste limitado de navegación, la segunda compuerta completa dio **VERDE: 564 pruebas, 1 advertencia y 26 subpruebas; contrato de resultados válido**. La corrida final fue `PATH=/tmp/reyna-costos-test/bin:$PATH python tools/verificar.py`.
