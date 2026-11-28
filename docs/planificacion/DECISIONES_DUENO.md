@@ -65,3 +65,5 @@
 - 27-nov (AUTORIZACIÓN C35-2): Codex puede cambiar solo los pasos de navegación de `test_pantalla_modelo_costeo.py::test_modelo_y_avisos_en_chromium` (ir a Inicio, consultar, volver a Modelo), sin tocar aserciones, y correr una segunda compuerta completa. La misma regla vale para cualquier otra prueba de C35 que solo dependa de navegación.
 
 - 27-nov: OT-C37 (funcionalidad MN 01: practicidad, valor, entorno hostil) reemplaza a OT-C36; el mapa a detalle ya lo hizo Claude. Archivar código que no corre (E43) sigue pendiente de decisión del dueño.
+
+- 28-nov (AUTORIZACIÓN C35-3/4): Codex puede adaptar preparación, selectores y pasos de `test_c26_interaccion.py` y `test_c34_5_pedido.py` al Pedido de 3 pasos. Prohibido cambiar aserciones, cifras esperadas o datos de entrada que alteren el resultado; el PR lista cada línea cambiada.
