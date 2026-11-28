@@ -1,5 +1,7 @@
 # Continuidad del Sistema de Costos Consolidado
 
+> **Coordinador nuevo: lee primero `docs/TRASPASO.md`.**
+
 Al iniciar una sesión, leer `README.md`, `docs/fuentes/INDICE_FUENTES.md`, `docs/planificacion/ESTADO.md` y `docs/entrega/PLAN_MVP_Y_PENDIENTES.md`. Consultar Git y verificar los hashes y la rama antes de tomar la descripción HTML como estado actual.
 
 ## Decisiones vigentes del dueño
