@@ -45,3 +45,5 @@
 | 27-nov | Validado: Kendo / Finanzas Corporativas I (FIEECS, prof. Heber Baldeón) es OTRO curso del dueño, no de Oria. Se usa como referencia metodológica para rellenar PF (deuda con bonos/leasing NIIF16, impuesto corriente/diferido, VAN/TIR, valorización FCD) sin copiar sus hojas ni su código; la práctica de Kendo (rondas R1-R6) es entrega propia de ese curso, no se integra al sistema | Claude |
 
 - 27-nov: el dueño pide corregir E30–E33 en una sola orden (OT-C35) antes de continuar la revisión; la agrupación del menú por ciclo del pedido es propuesta de Claude, pendiente de contraste con Tino.
+
+- 27-nov (AUTORIZACIÓN): el dueño autoriza a Codex a actualizar `tests/test_c26_e22.py` para que refleje el menú nuevo de OT-C35-1 (seis destinos, un solo menú abierto). Solo ese cambio de la prueba; el resto de pruebas existentes sigue sin tocarse. Codex lo declara en el PR.
