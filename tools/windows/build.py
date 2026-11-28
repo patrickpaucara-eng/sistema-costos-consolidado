@@ -60,7 +60,7 @@ def build(work):
     assets = []
     for name in ("src", "casos", "fuente", "datos", "tools"):
         assets.extend(["--add-data", f"{ROOT / name}{os.pathsep}{name}"])
-    for name in ("metodos", "analitica", "analitica2", "casos"):
+    for name in ("metodos", "casos"):
         assets.extend(["--add-data", f"{ROOT / "src" / name}{os.pathsep}{name}"])
     hidden = []
     for module in ("reyna_local.resultados", "reyna_local.analisis", "puerto_lectura", "integra_env", "rutas", "metodos.reparto_etapas", "reyna_local.calculo_local", "reyna_local.flujo", "reyna_local.libro_dbd", "reyna_local.raiz", "defusedxml"):
