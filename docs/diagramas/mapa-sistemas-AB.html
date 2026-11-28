@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa de los dos sistemas · Costos (MN 01) + Planeamiento (MN 02)</title>
+<style>
+body{margin:0;background:#f7f6f2;color:#1d2433;font:14px/1.3 "Segoe UI",system-ui,sans-serif}
+.w{max-width:1400px;margin:0 auto;padding:12px 14px}
+h1{font-size:20px;margin:2px 0 6px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0 4px}
+.bar button{font:inherit;padding:6px 14px;border-radius:18px;border:1.5px solid #7d8796;background:#fff;cursor:pointer}
+.bar button[aria-pressed=true]{background:#1d2433;color:#fff;border-color:#1d2433}
+.ley{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#5b6474}.ley i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+svg{width:100%;height:auto;display:block}svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:#1d2433}
+.n{cursor:pointer}.n:hover rect,.n:focus rect{stroke:#1d2433;stroke-width:2.6}
+.e{fill:none;stroke-width:2}.dim{opacity:.12}
+#info{min-height:44px;background:#fff;border:1px solid #c9ced6;border-radius:10px;padding:8px 12px;margin-top:6px;font-size:14px}
+</style></head><body><div class="w">
+<h1>Dos sistemas, un mapa: Costos (MN 01) y Planeamiento (MN 02)</h1>
+<div class="bar"><b>Ver como:</b><button id="vg" aria-pressed="true">Gerente</button><button id="vd" aria-pressed="false">Desarrollador</button>
+<span style="color:#5b6474;font-size:12.5px">· toca una caja para ver solo sus conexiones · toca el fondo para ver todo</span></div>
+<div class="ley"><span><i style="background:#dff3e9;border:1.5px solid #2f9e6a"></i>A · Costos (qué costó)</span><span><i style="background:#fff3dc;border:1.5px solid #c07a00"></i>B · Planeamiento (qué haremos y con qué plata)</span><span><i style="background:#efe9fb;border:1.5px solid #7a5bd1"></i>C · Aprendizaje (dentro de A)</span><span><i style="background:#eef1f5;border:1.5px solid #7d8796"></i>Fuera del sistema</span><span>— hecho real &nbsp; - - - lectura (no copia) &nbsp; ⟲ se corrige solo</span></div>
+<svg id="m" viewBox="0 0 1400 800" aria-label="Mapa de los sistemas A y B"></svg>
+<div id="info">Toca una caja.</div>
+</div>
+<script>
+const NS='http://www.w3.org/2000/svg',S=document.getElementById('m');
+const el=(p,t,a,x)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(x!=null)e.textContent=x;p.appendChild(e);return e};
+const C={A:['#dff3e9','#2f9e6a'],B:['#fff3dc','#c07a00'],C:['#efe9fb','#7a5bd1'],X:['#eef1f5','#7d8796']};
+// id: [grupo, x, y, w, ícono, gerente, desarrollador, explicación]
+const N={
+ cli:['X',20,100,170,'🧑‍💼','Cliente','cliente (externo)','Pide un producto o servicio en sus términos: qué, cuánto, para cuándo.'],
+ pro:['X',20,220,170,'🚚','Proveedor','proveedor (externo)','Vende material; su entrega llega a tiempo o tarde.'],
+ pla:['X',20,340,170,'🏭','Planta y personal','operación (externo)','Consume material y horas; a veces se detiene.'],
+ ban:['X',20,640,170,'🏦','Banco','banco (externo)','Presta dinero con una tasa; cobra intereses.'],
+ ger:['X',1210,470,170,'👔','Gerente','usuario gerente','Recibe reportes de costos y la programación; acepta la recomendación o hace otra cosa, y el sistema aprende de ambas.'],
+ con:['X',1210,100,170,'📒','Contabilidad / SUNAT','contabilidad (externo)','Recibe el costo según NIC 2 (síntesis CONTABLE): ocio y pérdidas van a gasto.'],
+ met:['X',470,8,170,'📚','Oria · Tino Reyna','métodos (fuente)','Oria: ABC, reparto por etapas, escalonado y recíproco. Tino: MCD/DBD, evento = transacción consumada.'],
+ // A
+ ped:['A',250,100,170,'📝','Cotizar pedido','pedido.py · recetas_pedido.py','Traduce lo que pide el cliente a costo, rango, plazo y precio; si acepta, abre la orden.'],
+ lib:['A',250,220,170,'📗','Libro de costos','libro DBD (.xlsx) · libro_dbd.py','Guarda los hechos: compras, consumos, horas, órdenes, criterios. Revisa el formato antes de calcular.'],
+ rep:['A',470,220,180,'⚙','Reparto P1→P7','metodos/reparto_etapas.py','Reparte el costo con las dos matrices de Oria: configuración (cuánto le toca a cada uno) y cálculo (monto × medida ÷ total). Lo repartido = lo gastado.'],
+ res:['A',690,220,180,'📊','Costo de cada orden','resultados.py · contrato.py','Publica un único resultado: costo por orden, real y contable, con su ruta. Todo lo demás solo lo lee.'],
+ pan:['A',930,160,180,'🖥','Pantallas y reportes','web/index.html · exportar.py','Planta del costo, órdenes, ruta, reportes Excel/Word. Nunca recalculan.'],
+ cie:['A',930,270,180,'🔏','Cierre y sello','cierre.py','Cierra el mes con huella: el mismo libro da siempre el mismo número; quien registra no aprueba.'],
+ dec:['A',690,100,180,'⚖','Decidir','decidir.py · variable.py','Producir o tercerizar, recurso escaso, vender o procesar, punto de equilibrio.'],
+ apr:['C',930,370,180,'🧠','Aprendizaje','aprendizaje.py · autonomia.py','Mide su error, se calibra y gana autonomía a medida que acierta; aprende en silencio de lo que hace el gerente.'],
+ // puerto
+ ctr:['X',690,450,200,'🔌','Lectura de costos','contrato publicado (A → B)','B solo LEE lo que A publica: costo por actividad, capacidad, recetas, órdenes abiertas. No hay base compartida.'],
+ // B
+ eve:['B',250,560,180,'⚡','Hechos del día','eventos.py (B1)','Pedido, llega material, planta parada, cobro o pago, no conformidad, cambio de dato. Cada uno mueve el plan.'],
+ tic:['B',470,560,180,'🎫','Plan = tickets','libro PLAN (.xlsx) · B3','Recursos comprometidos a futuro: producir, comprar, prestarse, invertir. Cada línea: monto, devengo, caja, clase, estado.'],
+ cal:['B',690,560,190,'🧮','Calculadora','calculadora.py (B4, PuLP)','Elige qué hacer, dónde y cuándo para ganar más, respetando horas, material, caja mínima, fechas y secuencia.'],
+ par:['B',690,690,190,'🎚','Parámetros','parametros.py (B0)','Nacen como supuestos (multa, caja mínima, tasas, horizonte) y se cierran con lo medido; nunca se borran.'],
+ sin:['B',930,560,180,'🧾','Presupuestos','sintesis.py (B8)','Cualquier presupuesto es una lectura del plan: operativo (devengo), efectivo (caja), inversiones, financiero, control de ejecución. Uno nuevo = una fila.'],
+ dsv:['B',470,690,180,'↔','Desviación','desviacion.py (B7)','Compara lo programado con lo hecho; si se aleja, recalcula el plan desde hoy.'],
+ rec:['B',930,690,180,'💡','Recomendación','B9','Entrega la programación al gerente con su fundamento; registra si la acepta.'],
+};
+// [desde, hasta, texto, tipo: h=hecho, l=lectura, b=bucle]
+const E=[
+ ['cli','ped','pedido','h'],['ped','lib','orden nueva','h'],['pro','lib','compra','h'],['pla','lib','consumo y horas','h'],
+ ['lib','rep','hechos','h'],['met','rep','método','l'],['rep','res','','h'],['res','dec','','h'],['res','pan','','h'],['res','cie','','h'],
+ ['pan','con','costo NIC 2','h'],['res','apr','error medido','h'],['apr','ped','se calibra','b'],['pan','ger','reportes','h'],
+ ['res','ctr','publica','l'],['ctr','cal','costo, capacidad, recetas','l'],
+ ['cli','eve','','h'],['pro','eve','','h'],['pla','eve','','h'],['ban','eve','préstamo, cobro','h'],
+ ['eve','tic','','h'],['tic','cal','','h'],['par','cal','','h'],['cal','sin','plan','h'],
+ ['tic','dsv','','h'],['dsv','cal','recalcular','b'],['sin','rec','','h'],['rec','ger','programa','h'],['ger','apr','lo que decidió','b'],
+];
+let modo='g';const W=48;
+function centro(k){const [g,x,y,w]=N[k];return [x+w/2,y+W/2,x,y,w]}
+function draw(){S.innerHTML='';const df=el(S,'defs',{});['h','l','b'].forEach(t=>{const m=el(df,'marker',{id:'a'+t,viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:7,markerHeight:7,orient:'auto'});el(m,'path',{d:'M0,0L10,5L0,10z',fill:{h:'#8d95a3',l:'#5b86c4',b:'#e0567a'}[t]})});
+ // zonas
+ [['A · SISTEMA DE COSTOS — ¿cuánto costó cada orden y por qué?',235,70,890,360,'#2f9e6a'],['B · SISTEMA DE PLANEAMIENTO — ¿qué haremos, cuándo y con qué plata?',235,530,890,230,'#c07a00']].forEach(([t,x,y,w,h,c])=>{el(S,'rect',{x,y,width:w,height:h,rx:16,fill:'none',stroke:c,'stroke-width':2,'stroke-dasharray':'2 0',opacity:.5});el(S,'text',{x:x+14,y:y+h-10,'font-size':13,'font-weight':800,fill:c},t)});
+ el(S,'text',{x:20,y:90,'font-size':12,'font-weight':800,fill:'#7d8796'},'AFUERA');
+ const g=el(S,'g',{id:'edges'});
+ E.forEach(([a,b,t,k],i)=>{let [x1,y1,ax,ay,aw]=centro(a),[x2,y2,bx,by,bw]=centro(b);
+  // salir/entrar por el borde
+  const sx=x2>ax+aw?ax+aw:(x2<ax?ax:x1), sy=sx===x1?(y2>y1?ay+W:ay):y1;
+  const tx=x1>bx+bw?bx+bw:(x1<bx?bx:x2), ty=tx===x2?(y1>y2?by+W:by):y2;
+  const mx=(sx+tx)/2,my=(sy+ty)/2;
+  const p=el(g,'path',{class:'e',d:`M${sx} ${sy}C${(sx+mx)/2} ${sy} ${(mx+tx)/2} ${ty} ${tx} ${ty}`,stroke:{h:'#8d95a3',l:'#5b86c4',b:'#e0567a'}[k],'stroke-dasharray':k==='l'?'7 5':(k==='b'?'3 4':''),'marker-end':`url(#a${k})`});p.dataset.a=a;p.dataset.b=b;
+  if(t){const tt=el(g,'text',{x:mx,y:my-4,'text-anchor':'middle','font-size':10.5,fill:'#5b6474','paint-order':'stroke',stroke:'#f7f6f2','stroke-width':3},t);tt.dataset.a=a;tt.dataset.b=b;}
+ });
+ for(const k in N){const [gr,x,y,w,ic,tg,td]=N[k];const n=el(S,'g',{class:'n',tabindex:0});n.dataset.k=k;
+  el(n,'rect',{x,y,width:w,height:W,rx:10,fill:C[gr][0],stroke:C[gr][1],'stroke-width':1.6});
+  el(n,'text',{x:x+12,y:y+31,'font-size':20},ic);
+  const t=modo==='g'?tg:td;el(n,'text',{x:x+42,y:y+(modo==='g'?30:22),'font-size':modo==='g'?14:11.5,'font-weight':650},modo==='g'?t:t.split(' · ')[0]);
+  if(modo==='d'&&t.includes(' · '))el(n,'text',{x:x+42,y:y+37,'font-size':11,fill:'#5b6474'},t.split(' · ').slice(1).join(' · '));
+  n.addEventListener('click',ev=>{ev.stopPropagation();foco(k)});n.addEventListener('keydown',ev=>{if(ev.key==='Enter')foco(k)});}
+}
+function foco(k){const v=new Set([k]);S.querySelectorAll('#edges [data-a]').forEach(e=>{const on=e.dataset.a===k||e.dataset.b===k;e.classList.toggle('dim',!on);if(on){v.add(e.dataset.a);v.add(e.dataset.b)}});
+ S.querySelectorAll('.n').forEach(n=>n.classList.toggle('dim',!v.has(n.dataset.k)));
+ const [gr,,,,ic,tg,td,ex]=N[k];document.getElementById('info').innerHTML=`<b>${ic} ${tg}</b> <span style="color:#5b6474">(${td})</span> — ${ex}`;}
+S.addEventListener('click',()=>{S.querySelectorAll('.dim').forEach(x=>x.classList.remove('dim'));document.getElementById('info').textContent='Toca una caja.'});
+function set(m){modo=m;document.getElementById('vg').setAttribute('aria-pressed',m==='g');document.getElementById('vd').setAttribute('aria-pressed',m==='d');draw()}
+document.getElementById('vg').onclick=()=>set('g');document.getElementById('vd').onclick=()=>set('d');
+draw();
+</script></body></html>
