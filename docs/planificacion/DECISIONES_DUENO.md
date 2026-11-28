@@ -74,3 +74,5 @@
 - 28-nov (pendiente A→B): el contrato de resultados (`contrato.py`) no publica capacidad práctica, receta por producto ni fecha de entrega de las órdenes, que B necesita. Ampliar el contrato es tarea de A después de C37 (orden futura), no de B.
 
 - 28-nov: auditoría independiente (otra IA) con 9 hallazgos confirmados → OT-C38. Se autoriza a Codex tocar el cálculo solo para C38, con la prueba de auditoría y el oráculo SERVITEC como compuerta. El libro de ejemplo SERVITEC debe poder cerrarse: se agrega la cuenta de merma (C38-10). La otra IA queda en pausa (sin créditos); su cola restante (B piezas 5–23, MN 1 piezas 26–29 y 31–32) se retoma cuando haya créditos o se reasigna.
+
+- 28-nov: cola única de Codex en `ordenes/COLA_CODEX.md` (C37 → documentos MN 1 → manual → B). C38 (correcciones de cálculo) la hace Claude en paralelo, porque el cálculo es responsabilidad de Claude según AGENTS.md y no choca con las pantallas de C37.
