@@ -1,0 +1,72 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa visual · Sistema de costos (MN 01)</title>
+<style>
+:root{--ok:#2f9e6a;--warn:#e39b12;--bad:#d6453d;--na:#c3c8cf;--libro:#3b7dd8;--calc:#2f9e6a;--decision:#7a5bd1;--repite:#d6453d;--supuesto:#e39b12;--tecnico:#8a8f98}
+body{margin:0;background:#f7f6f2;color:#1d2433;font:14px/1.3 "Segoe UI",system-ui,sans-serif}
+.w{max-width:1200px;margin:0 auto;padding:14px}h1{font-size:20px;margin:2px 0 10px}h2{font-size:15px;margin:22px 0 6px;color:#5b6474;letter-spacing:.5px}
+svg{width:100%;height:auto;display:block}svg text{font-family:"Segoe UI",system-ui,sans-serif}
+.nodo{cursor:pointer}.nodo:hover rect.b,.nodo.sel rect.b{stroke:#1d2433;stroke-width:2.5}
+.ley{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#5b6474;margin:4px 0}.ley i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+</style></head><body><div class="w">
+<h1>Sistema de costos · mapa visual (MN 01)</h1>
+<svg viewBox="0 0 1200 150" aria-label="Recorrido">
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8d95a3"/></marker></defs>
+<g id="pipe"></g></svg>
+<div class="ley"><b>Toca un módulo ↓</b><span><i style="background:var(--ok)"></i>bien</span><span><i style="background:var(--warn)"></i>mejorable</span><span><i style="background:var(--bad)"></i>falla</span><span><i style="background:var(--na)"></i>no aplica</span><span>· 5 puntos = datos propios · Oria · práctico · decide rápido · formato</span></div>
+<svg id="mapa" viewBox="0 0 1200 470" aria-label="Destinos y módulos"></svg>
+<svg id="det" viewBox="0 0 1200 350" aria-label="Detalle del módulo"></svg>
+<div class="ley"><b>Origen del dato:</b><span><i style="background:var(--libro)"></i>libro</span><span><i style="background:var(--calc)"></i>calculado</span><span><i style="background:var(--decision)"></i>lo decides tú</span><span><i style="background:var(--repite)"></i>lo pide pero ya lo tiene</span><span><i style="background:var(--supuesto)"></i>supuesto</span><span><i style="background:var(--tecnico)"></i>técnico</span></div>
+<h2>EL REPARTO (ORIA)</h2>
+<svg viewBox="0 0 1200 250" aria-label="Etapas del reparto"><g id="rep"></g></svg>
+<h2>CÓDIGO: LO QUE CORRE Y LO QUE NO</h2>
+<svg viewBox="0 0 1200 150" aria-label="Código activo e inactivo"><g id="cod"></g></svg>
+</div>
+<script>
+const D=__DATA__;
+const NS='http://www.w3.org/2000/svg';
+const el=(p,t,a,txt)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e};
+const S={ok:'#2f9e6a',warn:'#e39b12',bad:'#d6453d',na:'#c3c8cf'};
+const F={libro:'#3b7dd8',calc:'#2f9e6a',decision:'#7a5bd1',repite:'#d6453d',supuesto:'#e39b12',tecnico:'#8a8f98'};
+// recorrido
+const P=[['📗','Libro'],['✔','Revisa'],['⇅','Ordena'],['⚙','Reparte'],['📊','Resultado'],['🖥','Pantallas']];
+const pipe=document.getElementById('pipe');
+P.forEach(([ic,t],i)=>{const x=30+i*195;el(pipe,'circle',{cx:x+40,cy:50,r:36,fill:i==3?'#dff3e9':'#fff',stroke:'#7d8796','stroke-width':2});el(pipe,'text',{x:x+40,y:60,'text-anchor':'middle','font-size':28},ic);el(pipe,'text',{x:x+40,y:108,'text-anchor':'middle','font-size':14,'font-weight':700},t);if(i<5)el(pipe,'path',{d:`M${x+80} 50H${x+150}`,stroke:'#8d95a3','stroke-width':2.5,'marker-end':'url(#a)'});});
+el(pipe,'path',{d:'M1063 118Q620 175 88 118',fill:'none',stroke:'#8d95a3','stroke-width':1.6,'stroke-dasharray':'5 5','marker-end':'url(#a)'});
+// destinos
+const M=document.getElementById('mapa');const cw=196;let sel=null;
+D.forEach((g,ci)=>{const x=6+ci*cw;el(M,'rect',{x,y:4,width:cw-10,height:36,rx:10,fill:g.c});el(M,'text',{x:x+(cw-10)/2,y:28,'text-anchor':'middle',fill:'#fff','font-size':15,'font-weight':700},g.d);
+ g.m.forEach((m,ri)=>{const y=52+ri*60;const n=el(M,'g',{class:'nodo',tabindex:0});n.dataset.id=m.id;
+  el(n,'rect',{class:'b',x,y,width:cw-10,height:52,rx:9,fill:'#fff',stroke:g.c,'stroke-width':1.5});
+  el(n,'text',{x:x+10,y:y+21,'font-size':13,'font-weight':650},m.n);
+  m.s.forEach((s,k)=>el(n,'circle',{cx:x+16+k*16,cy:y+38,r:6,fill:S[s]}));
+  if(m.h.length){el(n,'circle',{cx:x+cw-26,cy:y+30,r:11,fill:'#d6453d'});el(n,'text',{x:x+cw-26,y:y+35,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':700},m.h.length);}
+  n.addEventListener('click',()=>abrir(m,g,n));n.addEventListener('keydown',e=>{if(e.key==='Enter')abrir(m,g,n)});
+ });});
+function wrapTxt(p,x,y,t,o){el(p,'text',Object.assign({x,y,'font-size':13},o||{}),t)}
+function abrir(m,g,n){if(sel)sel.classList.remove('sel');sel=n;n.classList.add('sel');const R=document.getElementById('det');R.innerHTML='';
+ el(R,'rect',{x:2,y:2,width:1196,height:346,rx:14,fill:'#fff',stroke:g.c,'stroke-width':2});
+ el(R,'text',{x:20,y:30,'font-size':17,'font-weight':700,fill:g.c},`${g.d} › ${m.n}`);
+ const ins=m.i.length?m.i:[['—','tecnico']];const cy=180,bx=470;
+ ins.forEach(([t,f],k)=>{const y=cy-(ins.length-1)*22+k*44;el(R,'rect',{x:30,y:y-17,width:250,height:34,rx:17,fill:F[f],opacity:.15});el(R,'rect',{x:30,y:y-17,width:10,height:34,rx:5,fill:F[f]});wrapTxt(R,50,y+5,t);el(R,'path',{d:`M282 ${y}C380 ${y} 380 ${cy} ${bx-4} ${cy}`,fill:'none',stroke:F[f],'stroke-width':2.2,opacity:.8});});
+ el(R,'circle',{cx:bx+60,cy,r:58,fill:g.c,opacity:.12,stroke:g.c,'stroke-width':2});el(R,'text',{x:bx+60,y:cy+10,'text-anchor':'middle','font-size':30},'⚙');
+ m.o.forEach((t,k)=>{const y=cy-(m.o.length-1)*24+k*48;el(R,'path',{d:`M${bx+120} ${cy}C${bx+200} ${cy} ${bx+200} ${y} ${bx+250} ${y}`,fill:'none',stroke:'#2f9e6a','stroke-width':2.2});el(R,'rect',{x:bx+252,y:y-17,width:190,height:34,rx:8,fill:'#dff3e9',stroke:'#2f9e6a'});wrapTxt(R,bx+264,y+5,t);});
+ const dx=bx+470;el(R,'path',{d:`M${bx+442} ${cy}H${dx}`,stroke:'#7a5bd1','stroke-width':2.2,'marker-end':'url(#a)'});
+ el(R,'rect',{x:dx+4,y:cy-26,width:220,height:52,rx:26,fill:'#efe9fb',stroke:'#7a5bd1','stroke-width':2});el(R,'text',{x:dx+114,y:cy-4,'text-anchor':'middle','font-size':11,fill:'#5b6474'},'PERMITE');el(R,'text',{x:dx+114,y:cy+14,'text-anchor':'middle','font-size':14,'font-weight':700},m.dec);
+ const C=['Datos','Oria','Práctico','Rápido','Formato'];m.s.forEach((s,k)=>{const x=330+k*110;el(R,'circle',{cx:x,cy:42,r:11,fill:S[s]});el(R,'text',{x:x+16,y:47,'font-size':12,fill:'#5b6474'},C[k]);});
+ m.h.forEach((h,k)=>{const x=20+k*260;el(R,'rect',{x,y:310,width:245,height:28,rx:14,fill:'#fbe3e0'});el(R,'text',{x:x+14,y:329,'font-size':13,fill:'#a32117','font-weight':600},'✘ '+h);});
+}
+abrir(D[0].m[0],D[0],M.querySelector('.nodo'));
+// reparto
+const RP=document.getElementById('rep');
+const E=[['P1-P3','Directos','→ orden'],['P4A','Indirectos','→ centros'],['P4B','Apoyo','→ productivos','⟲'],['P4D','Centros','→ actividades'],['P4E','Escalonado','estrat.→apoyo→oper.','⟲'],['P4C','Inductor','→ orden'],['P5-P7','Adm, ventas, fin.','→ orden']];
+E.forEach(([c,a,b,r],i)=>{const x=10+i*170;el(RP,'rect',{x,y:10,width:150,height:76,rx:12,fill:'#fff',stroke:r?'#7a5bd1':'#2f9e6a','stroke-width':2});el(RP,'text',{x:x+75,y:34,'text-anchor':'middle','font-size':15,'font-weight':800},c);el(RP,'text',{x:x+75,y:54,'text-anchor':'middle','font-size':12.5},a);el(RP,'text',{x:x+75,y:72,'text-anchor':'middle','font-size':12,fill:'#5b6474'},b);if(r)el(RP,'text',{x:x+140,y:28,'text-anchor':'end','font-size':16,fill:'#7a5bd1'},r);if(i<6)el(RP,'path',{d:`M${x+150} 48H${x+168}`,stroke:'#8d95a3','stroke-width':2,'marker-end':'url(#a)'});});
+el(RP,'text',{x:10,y:110,'font-size':12,fill:'#7a5bd1'},'⟲ recíproco entre pares del mismo nivel');
+function mat(x,tit,filas,res){el(RP,'text',{x,y:138,'font-size':13,'font-weight':700},tit);const cols=['','CAL','MANT','TALLER','Σ'];cols.forEach((c,k)=>el(RP,'text',{x:x+40+k*90,y:160,'text-anchor':'middle','font-size':12,fill:'#5b6474'},c));filas.forEach((f,k)=>f.forEach((v,j)=>{el(RP,'rect',{x:x+j*90-5,y:168,width:86,height:30,fill:j==4?'#dff3e9':(j? '#fff':'#eef1f5'),stroke:'#c9ced6'});el(RP,'text',{x:x+40+j*90-5,y:188,'text-anchor':'middle','font-size':13},v);}));el(RP,'text',{x,y:222,'font-size':12,fill:'#5b6474'},res);}
+mat(20,'① Configuración: cuánto le toca',[['Alquiler','10','20','70','100']],'criterio DIST_ALQ');
+mat(620,'② Cálculo: 498 × medida ÷ 100',[['Alquiler','49.8','99.6','348.6','498 ✔']],'lo repartido = lo gastado');
+el(RP,'text',{x:540,y:190,'font-size':26,fill:'#8d95a3'},'⇒');
+el(RP,'text',{x:1180,y:245,'text-anchor':'end','font-size':12,fill:'#d6453d','font-weight':600},'✘ la pantalla no muestra estas dos matrices');
+// código
+const CD=document.getElementById('cod');const G=[['Corre',51,'#2f9e6a'],['Analítica antigua',21,'#d6453d'],['Cáscaras sin cálculo',4,'#e39b12'],['Métodos sueltos',7,'#e39b12'],['Herramientas de prueba',5,'#c3c8cf'],['Tramos (sin conectar)',1,'#7a5bd1']];
+const tot=G.reduce((a,g)=>a+g[1],0);let x=10;G.forEach(([t,n,c],i)=>{const w=1180*n/tot;el(CD,'rect',{x,y:20,width:w-2,height:46,rx:6,fill:c});if(w>40)el(CD,'text',{x:x+w/2,y:49,'text-anchor':'middle',fill:'#fff','font-size':15,'font-weight':800},n);const ly=i%2?120:94;el(CD,'path',{d:`M${x+w/2} 68V${ly-14}`,stroke:c,'stroke-width':1.5});el(CD,'text',{x:x+w/2,y:ly,'text-anchor':i==0?'middle':'middle','font-size':12.5,'font-weight':600,fill:'#1d2433'},w>40?t:`${t} (${n})`);x+=w;});
+</script></body></html>

@@ -1,195 +1,72 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mapa a detalle del sistema de costos (MN 01)</title>
+<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa visual · Sistema de costos (MN 01)</title>
 <style>
-:root{--papel:#f7f6f2;--tinta:#1d2433;--suave:#5b6474;--linea:#c9ced6;
---libro:#3b7dd8;--calc:#2f9e6a;--decision:#7a5bd1;--repite:#d6453d;--supuesto:#e39b12;--tecnico:#8a8f98;
---ok:#2f9e6a;--warn:#e39b12;--bad:#d6453d;--na:#b9bec6}
-*{box-sizing:border-box}
-body{margin:0;background:var(--papel);color:var(--tinta);font:15px/1.4 "Segoe UI",system-ui,-apple-system,sans-serif}
-.w{max-width:1200px;margin:0 auto;padding:16px}
-h1{font-size:22px;margin:4px 0}
-h2{font-size:17px;margin:26px 0 6px}
-p.n{color:var(--suave);margin:4px 0 10px}
-svg{width:100%;height:auto;display:block}
-svg text{font-family:"Segoe UI",system-ui,sans-serif;fill:var(--tinta)}
-.t{font-size:13px;font-weight:650}.s{font-size:11px;fill:var(--suave)}
-.fl{fill:none;stroke:#8d95a3;stroke-width:2}
-.ley{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--suave);margin:6px 0}
-.ley i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.destinos{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.dest{background:#fff;border:1px solid var(--linea);border-radius:10px;padding:8px}
-.dest h3{margin:2px 4px 6px;font-size:14px}
-.mod{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:#f3f4f6;border:1px solid transparent;border-radius:7px;padding:6px 8px;margin:3px 0;font:inherit;font-size:13.5px;cursor:pointer;color:inherit}
-.mod:hover,.mod:focus{border-color:#7d8796;outline:none}
-.mod.sel{background:#e4ecfb;border-color:var(--libro)}
-.dots{display:flex;gap:3px;flex:none;margin-left:6px}
-.dots b{width:8px;height:8px;border-radius:50%;display:inline-block}
-.flag{font-size:11px;color:#fff;background:var(--bad);border-radius:8px;padding:0 6px;margin-left:4px}
-#det{background:#fff;border:2px solid var(--libro);border-radius:12px;padding:12px 14px;margin-top:12px}
-#det h3{margin:0 0 4px;font-size:17px}
-.fila{display:grid;grid-template-columns:1fr 70px 1fr 70px 1fr;align-items:stretch;gap:0;margin:10px 0}
-.col{background:#f6f7f9;border-radius:10px;padding:8px}
-.col h4{margin:0 0 6px;font-size:12px;letter-spacing:.8px;color:var(--suave)}
-.arr{display:flex;align-items:center;justify-content:center;color:#8d95a3;font-size:28px}
-.chip{display:block;border-left:5px solid;background:#fff;border-radius:6px;padding:4px 7px;margin:4px 0;font-size:13px}
-.prog{font-family:Consolas,monospace;font-size:12.5px;display:block;margin:3px 0}
-.sem{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px}
-.sem div{border-radius:8px;padding:6px;font-size:12px;color:#fff;min-height:54px}
-.sem div span{display:block;font-weight:700;font-size:12.5px}
-.hall{margin:8px 0 0;padding-left:18px;font-size:13px}
-.etapas{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.et{background:#fff;border:1px solid var(--linea);border-radius:8px;padding:6px 8px;font-size:12.5px;min-width:120px}
-.et b{display:block;font-size:13px}
-.et.ap{border-color:var(--decision)}
-.mtx{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-table{border-collapse:collapse;font-size:12.5px;background:#fff}
-td,th{border:1px solid var(--linea);padding:3px 7px;text-align:right}
-th{background:#eef1f5}
-td:first-child,th:first-child{text-align:left}
-.muerto{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
-.muerto div{background:#fff;border:1px dashed var(--bad);border-radius:10px;padding:8px 10px;font-size:13px}
-.muerto code{font-size:12px}
-@media(max-width:760px){.fila{grid-template-columns:1fr}.arr{transform:rotate(90deg);height:26px}.sem{grid-template-columns:repeat(2,1fr)}.mtx{grid-template-columns:1fr}}
-</style>
-</head>
-<body><div class="w">
-<h1>Mapa a detalle del sistema de costos · MN 01</h1>
-<p class="n">Leído del código el 27-nov (rama <code>desarrollo/mono</code>), no de memoria. Toca un módulo para ver qué entra, qué programa lo calcula, qué sale y qué decisión permite. Solo se marca en rojo lo que tiene problema o no tiene justificación.</p>
-
-<h2>1 · El recorrido completo, en una línea</h2>
-<svg viewBox="0 0 1200 250" role="img" aria-label="Recorrido del sistema">
-<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8d95a3"/></marker></defs>
-<g><rect x="10" y="80" width="150" height="66" rx="10" fill="#e4ecfb" stroke="#3b7dd8" stroke-width="2"/><text x="85" y="106" text-anchor="middle" class="t">Libro de la empresa</text><text x="85" y="124" text-anchor="middle" class="s">Excel con formato DBD</text><text x="85" y="138" text-anchor="middle" class="s">(los datos y hechos)</text></g>
-<g><rect x="200" y="80" width="140" height="66" rx="10" fill="#fff" stroke="#8d95a3" stroke-width="2"/><text x="270" y="106" text-anchor="middle" class="t">Revisa el formato</text><text x="270" y="124" text-anchor="middle" class="s">si falla, no calcula</text><text x="270" y="138" text-anchor="middle" class="s">libro_dbd.py</text></g>
-<g><rect x="380" y="80" width="150" height="66" rx="10" fill="#fff" stroke="#8d95a3" stroke-width="2"/><text x="455" y="106" text-anchor="middle" class="t">Ordena los hechos</text><text x="455" y="124" text-anchor="middle" class="s">kardex y costo de compra</text><text x="455" y="138" text-anchor="middle" class="s">flujo.py</text></g>
-<g><rect x="570" y="70" width="190" height="86" rx="10" fill="#dff3e9" stroke="#2f9e6a" stroke-width="2"/><text x="665" y="98" text-anchor="middle" class="t">Reparte el costo</text><text x="665" y="116" text-anchor="middle" class="s">por etapas P1 → P7</text><text x="665" y="130" text-anchor="middle" class="s">(ver punto 3)</text><text x="665" y="146" text-anchor="middle" class="s">metodos/reparto_etapas.py</text></g>
-<g><rect x="800" y="80" width="170" height="66" rx="10" fill="#fff" stroke="#8d95a3" stroke-width="2"/><text x="885" y="104" text-anchor="middle" class="t">Arma el resultado</text><text x="885" y="122" text-anchor="middle" class="s">órdenes, análisis, propuestas</text><text x="885" y="138" text-anchor="middle" class="s">resultados.py + contrato</text></g>
-<g><rect x="1010" y="80" width="180" height="66" rx="10" fill="#efe9fb" stroke="#7a5bd1" stroke-width="2"/><text x="1100" y="106" text-anchor="middle" class="t">Pantallas y reportes</text><text x="1100" y="124" text-anchor="middle" class="s">solo leen el resultado</text><text x="1100" y="138" text-anchor="middle" class="s">nunca recalculan</text></g>
-<path d="M160 113H198" class="fl" marker-end="url(#a)"/><path d="M340 113H378" class="fl" marker-end="url(#a)"/><path d="M530 113H568" class="fl" marker-end="url(#a)"/><path d="M760 113H798" class="fl" marker-end="url(#a)"/><path d="M970 113H1008" class="fl" marker-end="url(#a)"/>
-<path d="M1100 146V200H85V148" class="fl" stroke-dasharray="6 5" marker-end="url(#a)"/>
-<rect x="420" y="186" width="380" height="30" rx="8" fill="#fff" stroke="#8d95a3"/><text x="610" y="206" text-anchor="middle" class="s">Registrar, aceptar un pedido o cerrar el mes escriben un hecho nuevo en el libro</text>
-<g><rect x="800" y="10" width="170" height="44" rx="8" fill="#fff" stroke="#8d95a3"/><text x="885" y="30" text-anchor="middle" class="t">Sello del periodo</text><text x="885" y="45" text-anchor="middle" class="s">huella: mismo libro = mismo número</text></g>
-<path d="M885 54V78" class="fl" marker-end="url(#a)"/>
-</svg>
-
-<h2>2 · Los 6 destinos y sus módulos</h2>
-<p class="n">Cada punto de color es un criterio de la prueba de estrés, en este orden: <b>datos propios · Oria/Tino · práctico · decide rápido · formato estándar</b>.</p>
-<div class="ley"><span><i style="background:var(--ok)"></i>bien</span><span><i style="background:var(--warn)"></i>mejorable</span><span><i style="background:var(--bad)"></i>falla</span><span><i style="background:var(--na)"></i>no aplica / sin medir</span></div>
-<div class="destinos" id="destinos"></div>
-<div id="det" hidden></div>
-<div class="ley" style="margin-top:10px"><b style="color:var(--tinta)">De dónde viene cada dato:</b>
-<span><i style="background:var(--libro)"></i>del libro</span><span><i style="background:var(--calc)"></i>lo calcula el sistema</span><span><i style="background:var(--decision)"></i>decisión del usuario (correcto pedirlo)</span><span><i style="background:var(--repite)"></i>se pide pero el sistema ya lo tiene</span><span><i style="background:var(--supuesto)"></i>supuesto o política (debería ir en Definir)</span><span><i style="background:var(--tecnico)"></i>dato técnico interno</span></div>
-
-<h2>3 · El reparto por dentro (Oria)</h2>
-<p class="n">Cada etapa usa las dos matrices de Oria: <b>configuración</b> (qué criterio y cuánto le toca a cada destino) y <b>cálculo</b> (monto del origen × medida ÷ total). Lo que sale de una etapa es el monto de origen de la siguiente.</p>
-<div class="etapas">
-<div class="et"><b>P1 · P2 · P3</b>material, personal y servicios directos → orden o actividad</div><span>→</span>
-<div class="et"><b>P4A</b>indirectos → centros <i>o</i> actividades (nunca ambos)</div><span>→</span>
-<div class="et ap"><b>P4B</b>apoyo → productivos<br><small>entre apoyos: recíproco</small></div><span>→</span>
-<div class="et"><b>P4D</b>centro de actividad → actividades</div><span>→</span>
-<div class="et ap"><b>P4E</b>escalonado: estratégicas → apoyo → operativas<br><small>mismo nivel: recíproco</small></div><span>→</span>
-<div class="et"><b>P4C</b>actividades o centros → orden, por inductor</div><span>→</span>
-<div class="et"><b>P5 · P6 · P7</b>administración, ventas, financieros → orden (solo costo integral)</div>
+:root{--ok:#2f9e6a;--warn:#e39b12;--bad:#d6453d;--na:#c3c8cf;--libro:#3b7dd8;--calc:#2f9e6a;--decision:#7a5bd1;--repite:#d6453d;--supuesto:#e39b12;--tecnico:#8a8f98}
+body{margin:0;background:#f7f6f2;color:#1d2433;font:14px/1.3 "Segoe UI",system-ui,sans-serif}
+.w{max-width:1200px;margin:0 auto;padding:14px}h1{font-size:20px;margin:2px 0 10px}h2{font-size:15px;margin:22px 0 6px;color:#5b6474;letter-spacing:.5px}
+svg{width:100%;height:auto;display:block}svg text{font-family:"Segoe UI",system-ui,sans-serif}
+.nodo{cursor:pointer}.nodo:hover rect.b,.nodo.sel rect.b{stroke:#1d2433;stroke-width:2.5}
+.ley{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#5b6474;margin:4px 0}.ley i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+</style></head><body><div class="w">
+<h1>Sistema de costos · mapa visual (MN 01)</h1>
+<svg viewBox="0 0 1200 150" aria-label="Recorrido">
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#8d95a3"/></marker></defs>
+<g id="pipe"></g></svg>
+<div class="ley"><b>Toca un módulo ↓</b><span><i style="background:var(--ok)"></i>bien</span><span><i style="background:var(--warn)"></i>mejorable</span><span><i style="background:var(--bad)"></i>falla</span><span><i style="background:var(--na)"></i>no aplica</span><span>· 5 puntos = datos propios · Oria · práctico · decide rápido · formato</span></div>
+<svg id="mapa" viewBox="0 0 1200 470" aria-label="Destinos y módulos"></svg>
+<svg id="det" viewBox="0 0 1200 350" aria-label="Detalle del módulo"></svg>
+<div class="ley"><b>Origen del dato:</b><span><i style="background:var(--libro)"></i>libro</span><span><i style="background:var(--calc)"></i>calculado</span><span><i style="background:var(--decision)"></i>lo decides tú</span><span><i style="background:var(--repite)"></i>lo pide pero ya lo tiene</span><span><i style="background:var(--supuesto)"></i>supuesto</span><span><i style="background:var(--tecnico)"></i>técnico</span></div>
+<h2>EL REPARTO (ORIA)</h2>
+<svg viewBox="0 0 1200 250" aria-label="Etapas del reparto"><g id="rep"></g></svg>
+<h2>CÓDIGO: LO QUE CORRE Y LO QUE NO</h2>
+<svg viewBox="0 0 1200 150" aria-label="Código activo e inactivo"><g id="cod"></g></svg>
 </div>
-<p class="n">La capacidad no usada (ocio) y las pérdidas viajan con etiqueta por la misma cadena; la síntesis decide: REAL las muestra aparte, CONTABLE las manda a gasto (NIC 2).</p>
-<div class="mtx">
-<div><b>Matriz de configuración</b> (ejemplo de la captura: Alquiler S/ 498)
-<table><tr><th>Origen · criterio</th><th>CA_CAL</th><th>CA_MANT</th><th>CA_TALLER</th><th>Total</th></tr>
-<tr><td>Alquiler · DIST_ALQ</td><td>10</td><td>20</td><td>70</td><td>100</td></tr></table></div>
-<div><b>Matriz de cálculo</b> = 498 × medida ÷ 100
-<table><tr><th>Origen</th><th>CA_CAL</th><th>CA_MANT</th><th>CA_TALLER</th><th>Σ</th></tr>
-<tr><td>Alquiler</td><td>49.8</td><td>99.6</td><td>348.6</td><td>498 ✔</td></tr></table></div>
-</div>
-<p class="n" style="color:var(--bad)">Falla: la pantalla no muestra estas dos matrices; muestra tramos sueltos donde «cantidad × tasa» no da la cifra de la orden (E37).</p>
-
-<h2>4 · Código que existe pero no corre en el sistema</h2>
-<p class="n">Calculado siguiendo las importaciones desde el ejecutable: 51 módulos corren, 38 no. Lo que no corre no lo ve ningún usuario; tú decides si se archiva.</p>
-<div class="muerto">
-<div><b>Construido y no conectado</b><br><code>tramos_cantidad.py</code> (C34-3, costo por tramos de cantidad): tiene pruebas, pero el Pedido no lo usa.</div>
-<div><b>Métodos «cáscara» sin cálculo</b><br><code>ajustes_nic2</code>, <code>cif_aplicado</code>, <code>costo_objeto_ordenes</code>, <code>exceso_mermas</code>: solo el contrato, el cálculo nunca se hizo.</div>
-<div><b>Analítica antigua</b><br><code>analitica/</code> (10 módulos) y <code>analitica2/</code> (11 módulos), ≈2,000 líneas: reemplazadas por <code>analisis.py</code>, <code>aprendizaje.py</code> y <code>autonomia.py</code>.</div>
-<div><b>Métodos sueltos del almacén</b><br><code>personal_directo</code>, <code>costo_a_la_fecha</code>, <code>simular_cierre</code>, <code>publicar</code>, <code>correr_metodos</code>, <code>catalogo_dbd</code>.</div>
-<div style="border-color:var(--na)"><b>Herramientas de prueba (se quedan)</b><br><code>puerta</code>, <code>probar_metodos</code>, <code>direccion_capas</code>, <code>_plantilla_metodo</code>, <code>casos.comun</code>: no son del sistema, sirven para verificarlo.</div>
-</div>
-<p class="n">Por revisar fuera de esta lista: <code>intervalos_proyectados.py</code> sí corre pero su propio encabezado dice «preliminar, no conectado»; <code>comparar_laboratorio.py</code> dice «preliminar».</p>
-</div>
-
 <script>
-const C={libro:'var(--libro)',calc:'var(--calc)',decision:'var(--decision)',repite:'var(--repite)',supuesto:'var(--supuesto)',tecnico:'var(--tecnico)'};
-const S={ok:'var(--ok)',warn:'var(--warn)',bad:'var(--bad)',na:'var(--na)'};
-const CRIT=['Datos propios','Oria / Tino','Práctico','Decide rápido','Formato estándar'];
-const D=[
-{d:'Pedido',m:[
-{id:'cotizador',n:'Cotizar pedido',para:'Calcular cuánto cuesta y cuánto cobrar por un pedido; si se acepta, abre la orden.',
- in:[['Producto, cantidad, fecha, contrato','decision'],['Familia y sus parámetros (kg, m²…)','decision'],['Días de capacidad disponibles','repite'],['Preparación por lote, subcontrato, transporte, gastos generales, contingencia','supuesto'],['Margen, intervalo, curva de reparto, meses','supuesto'],['Actividades e inductores a mano (avanzado)','tecnico'],['Tasas por actividad del último periodo','calc']],
- prog:['pedido.py','recetas_pedido.py','conceptos_pedido.py','plazo_pedido.py','cotizador.py'],
- out:['Costo esperado con rango P05–P95','Precio sugerido frente a mercado','Plazo: llega o N días tarde','Fundamento: fórmula, supuesto, dato, límite','Aceptar → orden nueva (T09 → T13)'],
- dec:'Aceptar, rechazar o negociar el precio',sem:['bad','ok','bad','warn','bad'],
- h:['37 campos y 4 botones para un pedido (E31).','Pide datos que el cliente no sabe (E33).','La capacidad libre se pide aunque el sistema la calcula con las órdenes abiertas.','Los tramos de cantidad (C34-3) existen pero no se usan aquí.']},
-{id:'costos',n:'Órdenes',para:'Costo de cada orden del periodo, por elemento.',
- in:[['Resultado del cálculo','calc']],prog:['resultados.py'],out:['Material, mano de obra, CIF, administración, ventas, financiero','Costo total, unitario, ingreso y margen'],
- dec:'Qué orden pierde o gana',sem:['ok','ok','ok','warn','warn'],h:['Muestra cifras, no dice qué hacer con la orden que pierde.']},
-{id:'ruta',n:'Ruta de la orden',para:'De dónde sale cada sol de una orden: recurso → centro o actividad → orden.',
- in:[['Orden y elemento (elección)','decision'],['Trazas del reparto','calc'],['Kardex del material','calc']],prog:['resultados.py','metodos/reparto_etapas.py (trazar)'],
- out:['Hoja de costos de la orden','Ruta del costo con inductor y tasa','Kardex promedio ponderado'],dec:'Encontrar qué recurso encarece la orden',sem:['ok','warn','ok','na','bad'],
- h:['No muestra las matrices de configuración y cálculo de Oria.','«Cantidad × tasa» no reproduce la parte de la orden (E37).']}]},
-{d:'Operación',m:[
-{id:'operar',n:'Registrar movimiento',para:'Registrar un hecho del negocio: compra, consumo, avance, venta…',
- in:[['Transacción','decision'],['Usuario y documento de soporte','decision'],['Cabecera y líneas escritas en JSON','tecnico'],['Identificador de solicitud','tecnico']],prog:['store.py','motor_espejo.py'],
- out:['Hecho nuevo en el libro, validado'],dec:'—',sem:['warn','ok','bad','na','bad'],
- h:['El usuario debe escribir JSON: no apto para una persona de planta.','Es el mismo formulario que «Espacios de trabajo».']},
-{id:'importar',n:'Importar libro',para:'Traer un libro escribiendo su ruta en el computador.',
- in:[['Nombre del espacio','decision'],['Ruta del archivo en el servidor','tecnico']],prog:['store.py'],out:['Espacio de trabajo nuevo'],dec:'—',sem:['ok','na','warn','na','warn'],
- h:['Hace lo mismo que «Cargar empresa», que sí permite elegir el archivo.']},
-{id:'cierre',n:'Cierre y aprobación',para:'Cerrar el mes y sellarlo; quien registra no puede aprobar.',
- in:[['Usuario y comentario','decision']],prog:['cierre.py','calculo_local.py (sello)'],out:['Sello VIGENTE con huella','Paquete de decisión aprobado'],dec:'Dar por buenos los costos del mes',sem:['ok','ok','ok','ok','warn'],h:[]}]},
-{d:'Costos',m:[
-{id:'portada',n:'Inicio',para:'Tarjetas de acceso rápido.',in:[],prog:['index.html'],out:['Enlaces a pantallas'],dec:'—',sem:['na','na','warn','na','warn'],h:['Con el menú de 6 destinos queda repetido.']},
-{id:'dashboard',n:'Planta del costo',para:'Indicadores del mes y mapa de cómo fluye el costo.',in:[['Resultado del cálculo','calc']],prog:['resultados.py'],out:['Ventas, costo, margen, rentabilidad','Etapas P4A–P4D y su total'],dec:'Ver de un vistazo si el mes va bien',sem:['ok','ok','ok','warn','ok'],h:[]},
-{id:'periodos',n:'Periodos',para:'Ver costos por cualquier rango y agrupación (día a año).',in:[['Desde, hasta, agrupar por','decision'],['Síntesis','repite']],prog:['periodos.py'],out:['Serie por periodo'],dec:'Comparar tendencias',sem:['warn','na','ok','warn','warn'],h:['La síntesis ya está en la cabecera y se vuelve a pedir.']},
-{id:'reportes',n:'Reportes',para:'Descargar resultados en Excel, HTML y Word.',in:[['Resultado del cálculo','calc']],prog:['exportar.py','codigo_fuente.py'],out:['Excel resultados, analítica, proyección, datos','HTML sin conexión','Word con el código'],dec:'—',sem:['ok','na','ok','na','warn'],h:['«Word código» sirve a la monografía, no al usuario.']},
-{id:'inventarios',n:'Inventarios y pérdidas',para:'Producción en proceso, terminados, costo de ventas, pérdidas y ocio (NIC 2).',in:[['Resultado del cálculo','calc']],prog:['inventarios.py'],out:['Inventario final, costo de ventas','Pérdidas y capacidad ociosa'],dec:'Ver cuánto costo es ineficiencia',sem:['ok','ok','ok','warn','warn'],h:[]},
-{id:'normal',n:'Costeo normal',para:'CIF con tasa predeterminada frente al real; variaciones de material.',in:[['Tarifas del libro','libro'],['Resultado real','calc']],prog:['normal.py'],out:['Sobre o subaplicación','Variación de precio y de cantidad'],dec:'Saber si la tasa de cotizar está bien',sem:['ok','ok','ok','warn','warn'],h:['Moneda extranjera y devoluciones de clientes entraron con este módulo sin pedido registrado: revisar si se quedan.']}]},
-{d:'Futuro',m:[
-{id:'proyeccion',n:'Futuro',para:'Costo proyectado: pronostica cada recurso y lo pasa por el mismo reparto.',in:[['Mes, ver por','decision'],['Historia del libro','libro']],prog:['proyeccion.py'],out:['Costo proyectado por orden, recurso, centro o actividad','Precisión medida'],dec:'Anticipar el costo de los próximos meses',sem:['ok','ok','ok','warn','ok'],h:[]},
-{id:'laboratorio',n:'Laboratorio',para:'Copia del libro para probar «qué pasa si» sin tocar el original.',in:[['Hechos de prueba','decision']],prog:['laboratorio.py','comparar_laboratorio.py'],out:['Diferencias frente al original'],dec:'Probar un cambio antes de hacerlo',sem:['ok','na','warn','warn','warn'],h:['La comparación está marcada «preliminar» en su propio código.']},
-{id:'familias',n:'Familias',para:'Analizar la historia de una familia de productos parecidos.',in:[['Familia, componente, otra familia, unidades','decision']],prog:['familias.py'],out:['Receta de la familia'],dec:'Usar la receta para cotizar',sem:['ok','warn','warn','warn','warn'],
- h:['Hay dos mecanismos de familia: bloques (familias.py) y mínimos cuadrados (recetas_pedido.py). No está claro cuál manda.']},
-{id:'comparar',n:'Comparar síntesis',para:'Lado a lado: costo REAL frente a CONTABLE.',in:[['Resultado del cálculo','calc']],prog:['resultados.py'],out:['Diferencias por orden'],dec:'Explicar a contabilidad la diferencia',sem:['ok','ok','ok','warn','warn'],h:[]},
-{id:'decidir',n:'Decidir',para:'Producir o tercerizar, eliminar línea, pedido especial, asignar recurso escaso, vender o procesar.',
- in:[['Caso, producto, unidades, precio','decision'],['¿Hay capacidad ociosa?','repite'],['Unidades desplazadas','repite'],['Costo de mantener, de transición','supuesto'],['Demanda máxima = ventas × 1.5','supuesto'],['Margen de contribución por producto','calc']],
- prog:['decidir.py','variable.py'],out:['Diferencia de utilidad','Mezcla óptima o exportación a Solver'],dec:'Elegir la opción con más utilidad',sem:['bad','ok','warn','ok','warn'],
- h:['Pregunta si hay capacidad ociosa aunque el resultado ya la calcula (E35).','El 1.5 de la demanda máxima es un supuesto inventado.','«Pedido especial» repite lo que hace Cotizar pedido.']},
-{id:'propuestas',n:'Propuestas',para:'Qué mejorar según la causa: precio → Compras, cantidad → Producción.',in:[['Variaciones y controlabilidad','calc']],prog:['analisis.py'],out:['Propuesta con responsable'],dec:'Aprobar o rechazar la propuesta',sem:['ok','ok','ok','ok','warn'],h:[]}]},
-{d:'Aprendizaje',m:[
-{id:'aprendido',n:'Lo que aprendió',para:'Calibraciones que el sistema ajustó midiendo su error.',in:[['Errores medidos','calc']],prog:['aprendizaje.py','autonomia.py'],out:['Calibraciones aplicadas y su mejora'],dec:'Confiar más o menos en una propuesta',sem:['ok','na','ok','warn','warn'],h:[]},
-{id:'analisis',n:'Relevancia',para:'Qué costos pesan (regla del 10 %) y qué hallazgos hay.',in:[['Resultado del cálculo','calc']],prog:['analisis.py'],out:['Costos relevantes y hallazgos'],dec:'Dónde mirar primero',sem:['ok','ok','ok','ok','warn'],h:[]}]},
-{d:'Configuración',m:[
-{id:'modelo',n:'Modelo de costeo',para:'Cómo está armado el reparto de esta empresa.',in:[['Reglas y criterios del libro','libro']],prog:['resultados.py'],out:['Etapas, criterios e inductores'],dec:'—',sem:['ok','ok','ok','na','warn'],h:[]},
-{id:'datos',n:'Datos del libro',para:'Qué datos trae el libro y cuáles faltan.',in:[['Libro','libro']],prog:['resultados.py','suficiencia.py'],out:['Datos presentes y nivel de suficiencia'],dec:'—',sem:['ok','ok','ok','na','warn'],h:[]},
-{id:'cargar-libro',n:'Cargar empresa',para:'Subir el Excel de una empresa.',in:[['Archivo .xlsx','decision']],prog:['calculo_local.py','libro_dbd.py'],out:['Empresa disponible'],dec:'—',sem:['ok','ok','ok','na','ok'],h:[]},
-{id:'espacios',n:'Espacios de trabajo',para:'Listar espacios y registrar transacciones.',in:[['Mismos 6 campos que Registrar movimiento','tecnico']],prog:['store.py'],out:['Hecho nuevo'],dec:'—',sem:['warn','na','bad','na','bad'],h:['Duplica «Registrar movimiento».']},
-{id:'consultar',n:'Consultar tablas',para:'Ver cualquier tabla del libro, página por página.',in:[['Tabla','decision']],prog:['store.py'],out:['Filas de la tabla'],dec:'—',sem:['ok','na','warn','na','warn'],h:[]},
-{id:'control',n:'Calidad y cuadre',para:'Comprueba que lo repartido sea igual a lo gastado en cada etapa.',in:[['Trazas y montos','calc']],prog:['resultados.py (_control)'],out:['Lista de controles OK / diferencia'],dec:'Saber si se puede confiar en el mes',sem:['ok','ok','ok','ok','warn'],h:[]},
-{id:'simulacion',n:'Simulación (fuera del menú)',para:'Escenarios del resultado.',in:[['Resultado del cálculo','calc']],prog:['resultados.py'],out:['Escenarios'],dec:'—',sem:['na','na','bad','na','bad'],h:['La pantalla existe pero ningún botón del menú lleva a ella.']}]}];
-const $=id=>document.getElementById(id);
-function dots(s){return '<span class="dots">'+s.map(x=>`<b style="background:${S[x]}"></b>`).join('')+'</span>';}
-$('destinos').innerHTML=D.map(g=>`<div class="dest"><h3>${g.d}</h3>${g.m.map(m=>`<button class="mod" data-id="${m.id}"><span>${m.n}${m.h.length?`<span class="flag">${m.h.length}</span>`:''}</span>${dots(m.sem)}</button>`).join('')}</div>`).join('');
-const todos=D.flatMap(g=>g.m.map(m=>({...m,g:g.d})));
-function abrir(id){const m=todos.find(x=>x.id===id);document.querySelectorAll('.mod').forEach(b=>b.classList.toggle('sel',b.dataset.id===id));
-const det=$('det');det.hidden=false;
-det.innerHTML=`<h3>${m.g} › ${m.n}</h3><div>${m.para}</div>
-<div class="fila"><div class="col"><h4>ENTRA</h4>${m.in.length?m.in.map(([t,f])=>`<span class="chip" style="border-color:${C[f]}">${t}</span>`).join(''):'<span class="chip" style="border-color:var(--na)">nada</span>'}</div><div class="arr">→</div>
-<div class="col"><h4>LO CALCULA</h4>${m.prog.map(p=>`<span class="prog">${p}</span>`).join('')}</div><div class="arr">→</div>
-<div class="col"><h4>SALE</h4>${m.out.map(o=>`<span class="chip" style="border-color:var(--calc)">${o}</span>`).join('')}<h4 style="margin-top:8px">PERMITE DECIDIR</h4><span class="chip" style="border-color:var(--decision)">${m.dec}</span></div></div>
-<div class="sem">${m.sem.map((s,i)=>`<div style="background:${S[s]}"><span>${CRIT[i]}</span>${{ok:'bien',warn:'mejorable',bad:'falla',na:'no aplica'}[s]}</div>`).join('')}</div>
-${m.h.length?`<ul class="hall">${m.h.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}`;
-det.scrollIntoView({behavior:'smooth',block:'nearest'});}
-document.querySelectorAll('.mod').forEach(b=>b.addEventListener('click',()=>abrir(b.dataset.id)));
-abrir('cotizador');
-</script>
-</body></html>
+const D=[{"d": "Pedido", "c": "#3b7dd8", "m": [{"id": "cotizador", "n": "Cotizar pedido", "i": [["Qué, cuánto, cuándo", "decision"], ["Familia y medidas", "decision"], ["Capacidad libre", "repite"], ["Lote, flete, margen…", "supuesto"], ["Actividades a mano", "tecnico"], ["Tasas del mes", "calc"]], "o": ["Costo ± rango", "Precio sugerido", "Plazo", "Orden nueva"], "dec": "Aceptar o no", "s": ["bad", "ok", "bad", "warn", "bad"], "h": ["37 campos", "Pide lo que ya sabe", "Tramos sin conectar"]}, {"id": "costos", "n": "Órdenes", "i": [["Resultado", "calc"]], "o": ["Costo por orden", "Margen"], "dec": "Qué orden pierde", "s": ["ok", "ok", "ok", "warn", "warn"], "h": []}, {"id": "ruta", "n": "Ruta de la orden", "i": [["Orden", "decision"], ["Trazas", "calc"]], "o": ["Hoja de costos", "Ruta del sol"], "dec": "Qué la encarece", "s": ["ok", "warn", "ok", "na", "bad"], "h": ["Cifra no reproducible"]}]}, {"d": "Operación", "c": "#7a5bd1", "m": [{"id": "operar", "n": "Registrar movimiento", "i": [["Transacción", "decision"], ["Cabecera JSON", "tecnico"], ["Líneas JSON", "tecnico"]], "o": ["Hecho nuevo"], "dec": "—", "s": ["warn", "ok", "bad", "na", "bad"], "h": ["Escribir JSON", "Duplicado"]}, {"id": "importar", "n": "Importar libro", "i": [["Ruta del archivo", "tecnico"]], "o": ["Espacio nuevo"], "dec": "—", "s": ["ok", "na", "warn", "na", "warn"], "h": ["Duplicado"]}, {"id": "cierre", "n": "Cierre y aprobación", "i": [["Usuario", "decision"]], "o": ["Sello del mes"], "dec": "Aprobar el mes", "s": ["ok", "ok", "ok", "ok", "warn"], "h": []}]}, {"d": "Costos", "c": "#2f9e6a", "m": [{"id": "portada", "n": "Inicio", "i": [], "o": ["Accesos"], "dec": "—", "s": ["na", "na", "warn", "na", "warn"], "h": ["Sobra"]}, {"id": "dashboard", "n": "Planta del costo", "i": [["Resultado", "calc"]], "o": ["Indicadores", "Mapa del costo"], "dec": "¿Va bien el mes?", "s": ["ok", "ok", "ok", "warn", "ok"], "h": []}, {"id": "periodos", "n": "Periodos", "i": [["Rango", "decision"], ["Síntesis", "repite"]], "o": ["Serie"], "dec": "Tendencia", "s": ["warn", "na", "ok", "warn", "warn"], "h": ["Repite síntesis"]}, {"id": "reportes", "n": "Reportes", "i": [["Resultado", "calc"]], "o": ["Excel", "HTML", "Word"], "dec": "—", "s": ["ok", "na", "ok", "na", "warn"], "h": []}, {"id": "inventarios", "n": "Inventarios y pérdidas", "i": [["Resultado", "calc"]], "o": ["Inventario", "Pérdida", "Ocio"], "dec": "Cuánto es ineficiencia", "s": ["ok", "ok", "ok", "warn", "warn"], "h": []}, {"id": "normal", "n": "Costeo normal", "i": [["Tarifas", "libro"], ["Real", "calc"]], "o": ["Sobre/subaplicación", "Variaciones"], "dec": "¿Tasa correcta?", "s": ["ok", "ok", "ok", "warn", "warn"], "h": ["Moneda y devoluciones sin pedido"]}]}, {"d": "Futuro", "c": "#e39b12", "m": [{"id": "proyeccion", "n": "Futuro", "i": [["Mes", "decision"], ["Historia", "libro"]], "o": ["Costo proyectado", "Precisión"], "dec": "Anticipar", "s": ["ok", "ok", "ok", "warn", "ok"], "h": []}, {"id": "laboratorio", "n": "Laboratorio", "i": [["Hechos de prueba", "decision"]], "o": ["Diferencias"], "dec": "Probar antes", "s": ["ok", "na", "warn", "warn", "warn"], "h": ["Preliminar"]}, {"id": "familias", "n": "Familias", "i": [["Familia", "decision"]], "o": ["Receta"], "dec": "Cotizar parecido", "s": ["ok", "warn", "warn", "warn", "warn"], "h": ["Dos mecanismos"]}, {"id": "comparar", "n": "Comparar síntesis", "i": [["Resultado", "calc"]], "o": ["Real vs contable"], "dec": "Explicar diferencia", "s": ["ok", "ok", "ok", "warn", "warn"], "h": []}, {"id": "decidir", "n": "Decidir", "i": [["Caso, precio", "decision"], ["¿Capacidad ociosa?", "repite"], ["Demanda ×1.5", "supuesto"], ["Margen", "calc"]], "o": ["Mejor opción", "Mezcla óptima"], "dec": "Elegir opción", "s": ["bad", "ok", "warn", "ok", "warn"], "h": ["Pide lo que ya sabe", "Supuesto inventado", "Repite pedido"]}, {"id": "propuestas", "n": "Propuestas", "i": [["Variaciones", "calc"]], "o": ["Propuesta"], "dec": "Aprobar mejora", "s": ["ok", "ok", "ok", "ok", "warn"], "h": []}]}, {"d": "Aprendizaje", "c": "#d14f8a", "m": [{"id": "aprendido", "n": "Lo que aprendió", "i": [["Errores medidos", "calc"]], "o": ["Calibraciones"], "dec": "Cuánto confiar", "s": ["ok", "na", "ok", "warn", "warn"], "h": []}, {"id": "analisis", "n": "Relevancia", "i": [["Resultado", "calc"]], "o": ["Lo que pesa"], "dec": "Dónde mirar", "s": ["ok", "ok", "ok", "ok", "warn"], "h": []}]}, {"d": "Configuración", "c": "#8a8f98", "m": [{"id": "modelo", "n": "Modelo de costeo", "i": [["Reglas", "libro"]], "o": ["Etapas"], "dec": "—", "s": ["ok", "ok", "ok", "na", "warn"], "h": []}, {"id": "datos", "n": "Datos del libro", "i": [["Libro", "libro"]], "o": ["Suficiencia"], "dec": "—", "s": ["ok", "ok", "ok", "na", "warn"], "h": []}, {"id": "cargar", "n": "Cargar empresa", "i": [["Archivo", "decision"]], "o": ["Empresa"], "dec": "—", "s": ["ok", "ok", "ok", "na", "ok"], "h": []}, {"id": "espacios", "n": "Espacios", "i": [["Igual a registrar", "tecnico"]], "o": ["Hecho"], "dec": "—", "s": ["warn", "na", "bad", "na", "bad"], "h": ["Duplicado"]}, {"id": "consultar", "n": "Consultar tablas", "i": [["Tabla", "decision"]], "o": ["Filas"], "dec": "—", "s": ["ok", "na", "warn", "na", "warn"], "h": []}, {"id": "control", "n": "Calidad y cuadre", "i": [["Trazas", "calc"]], "o": ["OK / diferencia"], "dec": "¿Confiable?", "s": ["ok", "ok", "ok", "ok", "warn"], "h": []}, {"id": "simulacion", "n": "Simulación", "i": [["Resultado", "calc"]], "o": ["Escenarios"], "dec": "—", "s": ["na", "na", "bad", "na", "bad"], "h": ["Sin enlace"]}]}];
+const NS='http://www.w3.org/2000/svg';
+const el=(p,t,a,txt)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e};
+const S={ok:'#2f9e6a',warn:'#e39b12',bad:'#d6453d',na:'#c3c8cf'};
+const F={libro:'#3b7dd8',calc:'#2f9e6a',decision:'#7a5bd1',repite:'#d6453d',supuesto:'#e39b12',tecnico:'#8a8f98'};
+// recorrido
+const P=[['📗','Libro'],['✔','Revisa'],['⇅','Ordena'],['⚙','Reparte'],['📊','Resultado'],['🖥','Pantallas']];
+const pipe=document.getElementById('pipe');
+P.forEach(([ic,t],i)=>{const x=30+i*195;el(pipe,'circle',{cx:x+40,cy:50,r:36,fill:i==3?'#dff3e9':'#fff',stroke:'#7d8796','stroke-width':2});el(pipe,'text',{x:x+40,y:60,'text-anchor':'middle','font-size':28},ic);el(pipe,'text',{x:x+40,y:108,'text-anchor':'middle','font-size':14,'font-weight':700},t);if(i<5)el(pipe,'path',{d:`M${x+80} 50H${x+150}`,stroke:'#8d95a3','stroke-width':2.5,'marker-end':'url(#a)'});});
+el(pipe,'path',{d:'M1063 118Q620 175 88 118',fill:'none',stroke:'#8d95a3','stroke-width':1.6,'stroke-dasharray':'5 5','marker-end':'url(#a)'});
+// destinos
+const M=document.getElementById('mapa');const cw=196;let sel=null;
+D.forEach((g,ci)=>{const x=6+ci*cw;el(M,'rect',{x,y:4,width:cw-10,height:36,rx:10,fill:g.c});el(M,'text',{x:x+(cw-10)/2,y:28,'text-anchor':'middle',fill:'#fff','font-size':15,'font-weight':700},g.d);
+ g.m.forEach((m,ri)=>{const y=52+ri*60;const n=el(M,'g',{class:'nodo',tabindex:0});n.dataset.id=m.id;
+  el(n,'rect',{class:'b',x,y,width:cw-10,height:52,rx:9,fill:'#fff',stroke:g.c,'stroke-width':1.5});
+  el(n,'text',{x:x+10,y:y+21,'font-size':13,'font-weight':650},m.n);
+  m.s.forEach((s,k)=>el(n,'circle',{cx:x+16+k*16,cy:y+38,r:6,fill:S[s]}));
+  if(m.h.length){el(n,'circle',{cx:x+cw-26,cy:y+30,r:11,fill:'#d6453d'});el(n,'text',{x:x+cw-26,y:y+35,'text-anchor':'middle',fill:'#fff','font-size':13,'font-weight':700},m.h.length);}
+  n.addEventListener('click',()=>abrir(m,g,n));n.addEventListener('keydown',e=>{if(e.key==='Enter')abrir(m,g,n)});
+ });});
+function wrapTxt(p,x,y,t,o){el(p,'text',Object.assign({x,y,'font-size':13},o||{}),t)}
+function abrir(m,g,n){if(sel)sel.classList.remove('sel');sel=n;n.classList.add('sel');const R=document.getElementById('det');R.innerHTML='';
+ el(R,'rect',{x:2,y:2,width:1196,height:346,rx:14,fill:'#fff',stroke:g.c,'stroke-width':2});
+ el(R,'text',{x:20,y:30,'font-size':17,'font-weight':700,fill:g.c},`${g.d} › ${m.n}`);
+ const ins=m.i.length?m.i:[['—','tecnico']];const cy=180,bx=470;
+ ins.forEach(([t,f],k)=>{const y=cy-(ins.length-1)*22+k*44;el(R,'rect',{x:30,y:y-17,width:250,height:34,rx:17,fill:F[f],opacity:.15});el(R,'rect',{x:30,y:y-17,width:10,height:34,rx:5,fill:F[f]});wrapTxt(R,50,y+5,t);el(R,'path',{d:`M282 ${y}C380 ${y} 380 ${cy} ${bx-4} ${cy}`,fill:'none',stroke:F[f],'stroke-width':2.2,opacity:.8});});
+ el(R,'circle',{cx:bx+60,cy,r:58,fill:g.c,opacity:.12,stroke:g.c,'stroke-width':2});el(R,'text',{x:bx+60,y:cy+10,'text-anchor':'middle','font-size':30},'⚙');
+ m.o.forEach((t,k)=>{const y=cy-(m.o.length-1)*24+k*48;el(R,'path',{d:`M${bx+120} ${cy}C${bx+200} ${cy} ${bx+200} ${y} ${bx+250} ${y}`,fill:'none',stroke:'#2f9e6a','stroke-width':2.2});el(R,'rect',{x:bx+252,y:y-17,width:190,height:34,rx:8,fill:'#dff3e9',stroke:'#2f9e6a'});wrapTxt(R,bx+264,y+5,t);});
+ const dx=bx+470;el(R,'path',{d:`M${bx+442} ${cy}H${dx}`,stroke:'#7a5bd1','stroke-width':2.2,'marker-end':'url(#a)'});
+ el(R,'rect',{x:dx+4,y:cy-26,width:220,height:52,rx:26,fill:'#efe9fb',stroke:'#7a5bd1','stroke-width':2});el(R,'text',{x:dx+114,y:cy-4,'text-anchor':'middle','font-size':11,fill:'#5b6474'},'PERMITE');el(R,'text',{x:dx+114,y:cy+14,'text-anchor':'middle','font-size':14,'font-weight':700},m.dec);
+ const C=['Datos','Oria','Práctico','Rápido','Formato'];m.s.forEach((s,k)=>{const x=330+k*110;el(R,'circle',{cx:x,cy:42,r:11,fill:S[s]});el(R,'text',{x:x+16,y:47,'font-size':12,fill:'#5b6474'},C[k]);});
+ m.h.forEach((h,k)=>{const x=20+k*260;el(R,'rect',{x,y:310,width:245,height:28,rx:14,fill:'#fbe3e0'});el(R,'text',{x:x+14,y:329,'font-size':13,fill:'#a32117','font-weight':600},'✘ '+h);});
+}
+abrir(D[0].m[0],D[0],M.querySelector('.nodo'));
+// reparto
+const RP=document.getElementById('rep');
+const E=[['P1-P3','Directos','→ orden'],['P4A','Indirectos','→ centros'],['P4B','Apoyo','→ productivos','⟲'],['P4D','Centros','→ actividades'],['P4E','Escalonado','estrat.→apoyo→oper.','⟲'],['P4C','Inductor','→ orden'],['P5-P7','Adm, ventas, fin.','→ orden']];
+E.forEach(([c,a,b,r],i)=>{const x=10+i*170;el(RP,'rect',{x,y:10,width:150,height:76,rx:12,fill:'#fff',stroke:r?'#7a5bd1':'#2f9e6a','stroke-width':2});el(RP,'text',{x:x+75,y:34,'text-anchor':'middle','font-size':15,'font-weight':800},c);el(RP,'text',{x:x+75,y:54,'text-anchor':'middle','font-size':12.5},a);el(RP,'text',{x:x+75,y:72,'text-anchor':'middle','font-size':12,fill:'#5b6474'},b);if(r)el(RP,'text',{x:x+140,y:28,'text-anchor':'end','font-size':16,fill:'#7a5bd1'},r);if(i<6)el(RP,'path',{d:`M${x+150} 48H${x+168}`,stroke:'#8d95a3','stroke-width':2,'marker-end':'url(#a)'});});
+el(RP,'text',{x:10,y:110,'font-size':12,fill:'#7a5bd1'},'⟲ recíproco entre pares del mismo nivel');
+function mat(x,tit,filas,res){el(RP,'text',{x,y:138,'font-size':13,'font-weight':700},tit);const cols=['','CAL','MANT','TALLER','Σ'];cols.forEach((c,k)=>el(RP,'text',{x:x+40+k*90,y:160,'text-anchor':'middle','font-size':12,fill:'#5b6474'},c));filas.forEach((f,k)=>f.forEach((v,j)=>{el(RP,'rect',{x:x+j*90-5,y:168,width:86,height:30,fill:j==4?'#dff3e9':(j? '#fff':'#eef1f5'),stroke:'#c9ced6'});el(RP,'text',{x:x+40+j*90-5,y:188,'text-anchor':'middle','font-size':13},v);}));el(RP,'text',{x,y:222,'font-size':12,fill:'#5b6474'},res);}
+mat(20,'① Configuración: cuánto le toca',[['Alquiler','10','20','70','100']],'criterio DIST_ALQ');
+mat(620,'② Cálculo: 498 × medida ÷ 100',[['Alquiler','49.8','99.6','348.6','498 ✔']],'lo repartido = lo gastado');
+el(RP,'text',{x:540,y:190,'font-size':26,fill:'#8d95a3'},'⇒');
+el(RP,'text',{x:1180,y:245,'text-anchor':'end','font-size':12,fill:'#d6453d','font-weight':600},'✘ la pantalla no muestra estas dos matrices');
+// código
+const CD=document.getElementById('cod');const G=[['Corre',51,'#2f9e6a'],['Analítica antigua',21,'#d6453d'],['Cáscaras sin cálculo',4,'#e39b12'],['Métodos sueltos',7,'#e39b12'],['Herramientas de prueba',5,'#c3c8cf'],['Tramos (sin conectar)',1,'#7a5bd1']];
+const tot=G.reduce((a,g)=>a+g[1],0);let x=10;G.forEach(([t,n,c],i)=>{const w=1180*n/tot;el(CD,'rect',{x,y:20,width:w-2,height:46,rx:6,fill:c});if(w>40)el(CD,'text',{x:x+w/2,y:49,'text-anchor':'middle',fill:'#fff','font-size':15,'font-weight':800},n);const ly=i%2?120:94;el(CD,'path',{d:`M${x+w/2} 68V${ly-14}`,stroke:c,'stroke-width':1.5});el(CD,'text',{x:x+w/2,y:ly,'text-anchor':i==0?'middle':'middle','font-size':12.5,'font-weight':600,fill:'#1d2433'},w>40?t:`${t} (${n})`);x+=w;});
+</script></body></html>
