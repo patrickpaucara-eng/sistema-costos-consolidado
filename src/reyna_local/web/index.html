@@ -222,7 +222,7 @@
       .rail nav { display: flex; flex-wrap: wrap; gap: .1rem; }
       .rail nav a { padding: .32rem .5rem; }
       .rail p { display: none; }
-      .split, .detail { grid-template-columns: minmax(0, 1fr); }
+      .split, .detail, .pedido-producto-campo { grid-template-columns: minmax(0, 1fr); }
       #table-select { min-width: 0; }
     }
 
@@ -265,6 +265,7 @@ main#principal{padding-top:0}
 .acciones-portada label{display:inline-flex;align-items:center;gap:.35rem}
 .acciones-portada .acciones-status{display:inline-flex;gap:.75rem;flex-wrap:wrap}
 .sens-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 1fr;gap:.5rem;align-items:center}.sens-track{position:relative;height:28px;border-left:1px solid transparent;background:linear-gradient(to right,transparent 49.8%,#333 49.8%,#333 50.2%,transparent 50.2%)}.sens-track span{position:absolute;display:block;height:10px}
+.pedido-progreso{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0;margin:.5rem 0}.pedido-progreso li{border:1px solid #aaa;border-radius:999px;padding:.3rem .7rem;font-size:.85rem;color:#555}.pedido-progreso li[aria-current=step]{background:#333;color:#fff;border-color:#333;font-weight:700}.pedido-paso{border:1px solid #bbb;border-radius:8px;background:#fafafa;padding:1rem}.pedido-paso[hidden],.pedido-faltantes[hidden]{display:none!important}.pedido-producto-campo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;border:1px solid #aaa;border-radius:8px;padding:.65rem}.pedido-producto-campo legend,.pedido-faltantes legend,.pedido-config-cargas legend{font-weight:700;padding:0 .3rem}.pedido-faltantes,.pedido-config-cargas{border:1px solid #b88a42;border-radius:8px;padding:.8rem}.pedido-faltantes{background:#fff8e7}.pedido-preliminar{padding:.6rem;border-left:5px solid #ad7100;background:#fff4d4}.pedido-firme{padding:.6rem;border-left:5px solid #176c4c;background:#e9f6ef}.pedido-resumen{padding:.65rem;background:#f1f1f1;border-radius:8px;font-weight:650}
 </style></head>
 <body>
   <a class="skip" href="#principal">Ir al contenido</a>
@@ -299,77 +300,68 @@ main#principal{padding-top:0}
       <section id="familias" class="panel stack section-link"><h2>Familias de componentes</h2><p>Ingrese historia por recurso o actividad en formato JSON: {"CODIGO": [10, 11, 9]}. La historia permanece en esta pantalla y no se guarda; la receta es una propuesta sujeta a revisión. Al cotizar con ella, reemplaza las actividades manuales.</p><p class="legend" id="c33-limite-familias" role="note">Supone que el proceso no cambió; si cambió máquina, proveedor o método, reinicie la historia de la familia.</p><label>Historia de la familia <textarea id="fam-historia" rows="4" placeholder='{"ACT": [10, 11, 9, 10, 10]}'></textarea></label><label>Componente a comprobar (opcional) <textarea id="fam-componente" rows="2" placeholder='{"ACT": 11.5}'></textarea></label><label>Otra familia para comparar (opcional) <textarea id="fam-comparar" rows="3" placeholder='{"ACT": [10.2, 9.8, 10.5]}'></textarea></label><button type="button" id="fam-analizar">Analizar historia</button><p id="fam-estado" role="status"></p><div id="fam-receta" class="result-table"></div><p id="fam-decision"></p><label>Unidades para cotizar <input id="fam-unidades" type="number" min="0.001" step="any" value="1"></label><button type="button" id="fam-usar">Usar receta en cotizador</button><button type="button" id="fam-quitar">Quitar receta seleccionada</button></section>
       <section id="cotizador" class="panel stack section-link">
         <h2>Pedido</h2>
-        <p>Describe lo que necesita el cliente. El sistema calcula el costo con la familia técnica configurada y muestra precio, plazo y supuestos.</p>
+        <p>En tres pasos: describe lo que necesita el cliente, revisa el resultado y acepta para abrir la OT.</p>
         <p class="legend" id="c33-limite-cotizador" role="note">El costo variable se proyecta lineal dentro del rango observado de cantidades.</p>
-        <form id="pedido-form" class="stack">
-          <h3>1. Cliente y entrega</h3>
-          <div class="fields">
-            <label>Producto o servicio <input id="pedido-producto" required placeholder="Ej.: SW50"></label>
-            <label>Cantidad del pedido <input id="pedido-cantidad" type="number" min="0.001" step="any" required value="1"></label>
-            <label>Cliente <input id="pedido-cliente" required value="MERCADO"></label>
-            <label>Fecha requerida <input id="pedido-fecha" type="date" required></label>
-            <label>Días de capacidad disponibles hasta esa fecha <input id="pedido-dias" type="number" min="0" step="1" placeholder="Ej.: 12"></label>
-            <label>Tipo de contrato <select id="pedido-contrato"><option value="CERRADO">Precio cerrado</option><option value="REAJUSTE">Con reajuste</option></select></label>
-          </div>
-          <h3>2. Especificación técnica</h3>
-          <label>Familia del producto <select id="pedido-familia" required><option value="">Cargando familias…</option></select></label>
-          <p id="pedido-familia-estado" role="status" class="legend"></p>
-          <div id="pedido-parametros" class="fields"></div>
-          <h3>Capacidad y carga abierta</h3>
-          <p class="legend">Para comparar el plazo, indica la capacidad práctica y las horas u otras unidades del inductor que ya reservan las OTs abiertas cada día. El resultado se expresa en días de capacidad.</p>
-          <div id="pedido-capacidades" class="fields"></div>
-          <h3>3. Preparación y conceptos adicionales</h3>
-          <div class="fields">
-            <label>Unidades por lote <input id="pedido-lote-unidades" type="number" min="0.001" step="any" placeholder="Si queda vacío, un lote"></label>
-            <label>Comparar con este tamaño de lote <input id="pedido-lote-comparar" type="number" min="0.001" step="any" placeholder="Opcional"></label>
-            <label>Preparación fija por lote (S/) <input id="pedido-preparacion" type="number" min="0" step="any" value="0"></label>
-            <label>Subcontrato (S/) <input id="pedido-subcontrato" type="number" min="0" step="any" value="0"></label>
-            <label>Transporte (S/) <input id="pedido-transporte" type="number" min="0" step="any" value="0"></label>
-            <label>Gastos generales (S/) <input id="pedido-generales" type="number" min="0" step="any" value="0"></label>
-            <label>Contingencia (%) <input id="pedido-contingencia" type="number" min="0" max="100" step="any" value="0"></label>
-          </div>
-          <h3>Precio y horizonte</h3>
-          <div class="fields">
+        <ol class="pedido-progreso" aria-label="Pasos del pedido"><li data-pedido-paso="1">Qué pide el cliente</li><li data-pedido-paso="2">Resultado</li><li data-pedido-paso="3">Aceptar</li></ol>
+        <form id="pedido-form" class="stack" novalidate>
+          <section id="pedido-paso-cliente" class="pedido-paso stack" data-paso="1">
+            <h3>1. Qué pide el cliente</h3>
+            <div class="fields">
+              <fieldset class="pedido-producto-campo"><legend>Producto o servicio / familia</legend>
+                <select id="pedido-familia" aria-label="Familia del producto" required><option value="">Cargando familias…</option></select>
+                <input id="pedido-producto" aria-label="Producto o servicio" required placeholder="Ej.: SW50">
+              </fieldset>
+              <label>Cantidad <input id="pedido-cantidad" type="number" min="0.001" step="any" required></label>
+              <label>Cliente <input id="pedido-cliente" required placeholder="Nombre del cliente"></label>
+              <label>Fecha requerida <input id="pedido-fecha" type="date" required></label>
+              <label>Contrato <select id="pedido-contrato"><option value="CERRADO">Precio cerrado</option><option value="REAJUSTE">Con reajuste</option></select></label>
+              <label>Condición de pago <input id="pedido-condicion-pago" required placeholder="Ej.: contado o 30 días"></label>
+            </div>
+            <p id="pedido-familia-estado" role="status" class="legend"></p>
+            <div id="pedido-parametros" class="fields"></div>
+            <button id="pedido-continuar" type="button">Ver resultado</button>
+          </section>
+          <section id="pedido-paso-resultado" class="pedido-paso stack" data-paso="2" hidden>
+            <h3>2. Resultado y comparación</h3>
+            <p class="legend">El margen, los intervalos y otros criterios se definen en Configuración; aquí solo se indica el precio observado del mercado.</p>
             <label>Precio de mercado (S/) <input id="pedido-precio" type="number" min="0" step="any" required></label>
-            <label>Margen objetivo (%) <input id="pedido-margen" type="number" min="0" max="99.99" step="any" value="30" required></label>
-            <label>Meses de ejecución proyectada (0 = costo REAL actual) <input id="pedido-meses" type="number" min="0" max="24" step="1" value="0"></label>
-            <label>Intervalo de proyección (meses) <select id="pedido-intervalo"><option>1</option><option>2</option><option selected>3</option><option>6</option><option>12</option></select></label>
-            <label>Reparto en el tiempo <select id="pedido-curva"><option value="s" selected>Curva S</option><option value="pareja">Parejo</option><option value="inicio">Cargado al inicio</option><option value="final">Cargado al final</option></select></label>
-          </div>
-          <button type="submit">Calcular pedido</button>
+            <label>Unidades por lote alternativo (opcional) <input id="pedido-lote-comparar" type="number" min="0.001" step="any"></label>
+            <fieldset id="pedido-falta-confirmar" class="pedido-faltantes" hidden><legend>Falta confirmar</legend><p>El sistema no pudo derivar estos datos con la historia disponible.</p><div id="pedido-parametros-tecnicos" class="fields"></div></fieldset>
+            <div class="actions"><button id="pedido-volver" class="secondary" type="button">Volver a los datos</button><button id="pedido-calcular" type="submit">Calcular resultado</button></div>
+            <p id="pedido-estado" role="status"></p>
+            <div id="pedido-resultado" class="result-table"></div>
+            <button id="pedido-guardar-preliminar" class="secondary" type="button" hidden>Guardar como preliminar</button>
+          </section>
         </form>
-        <p id="pedido-estado" role="status"></p>
-        <div id="pedido-resultado" class="result-table"></div>
         <details id="cot-avanzado">
           <summary>Avanzado: cotización manual por actividades e inductores</summary>
-          <p>Usa este modo para revisar o introducir manualmente la cantidad de cada actividad y material. No sustituye el pedido guiado.</p>
+          <p>Usa este modo para introducir actividades e inductores. El contrato y las políticas vienen de Configuración; el precio de mercado se indica en el paso Resultado.</p>
           <form id="cotizar-form" class="fields">
             <label>Actividades <select id="cot-actividad"></select></label><label>Cantidad actividad <input id="cot-actividad-cantidad" type="number" min="0" step="any" value="1"></label>
             <label>Material opcional <select id="cot-material"></select></label><label>Cantidad material <input id="cot-material-cantidad" type="number" min="0" step="any" value="0"></label>
-            <label>Duración (meses; 0 = solo el mes actual) <input id="cot-meses" type="number" min="0" max="24" step="1" value="0"></label>
-            <label>Intervalo (meses) <select id="cot-intervalo"><option>1</option><option>2</option><option selected>3</option><option>6</option><option>12</option></select></label>
-            <label>Reparto en el tiempo <select id="cot-curva"><option value="pareja">Parejo</option><option value="inicio">Cargado al inicio</option><option value="final">Cargado al final</option><option value="s">Curva S</option></select></label>
-            <label>Contrato <select id="cot-contrato"><option value="CERRADO">Precio cerrado</option><option value="REAJUSTE">Con reajuste</option></select></label>
-            <label>Precio <input id="cot-precio" type="number" min="0" step="any" required></label>
-            <label>Margen objetivo (%) <input id="cot-margen" type="number" min="0" max="100" step="any" value="30" required></label>
             <button type="submit">Cotizar manualmente</button>
           </form>
           <p class="legend">Para varias actividades o materiales, agrega cada línea antes de cotizar.</p>
           <button type="button" id="cot-agregar">Agregar a la lista</button><div id="cot-lista" class="result-table"></div>
           <p id="cot-estado" role="status"></p><div id="cot-resultado" class="result-table"></div>
         </details>
+        <section id="pedido-paso-aceptar" class="pedido-paso stack" data-paso="3" hidden>
+        <h3>3. Aceptar</h3>
+        <div id="pedido-resumen-confirmacion" class="pedido-resumen"></div>
+        <p id="pedido-aceptar-estado" role="status">Revisa el resultado antes de aceptar.</p>
+        <button id="pedido-editar-resultado" class="secondary" type="button">Volver al resultado</button>
         <details id="cot-aceptar-box">
           <summary>Aceptar el pedido y abrir la OT</summary>
           <p class="legend">Registra la estimación (T09) y abre la orden (T13) con su costo congelado, en una sola operación: si algo falla, no se registra nada.</p>
           <form id="cot-aceptar" class="fields split">
             <label>Espacio de trabajo <select id="ac-espacio"></select></label><label>Usuario <input id="ac-usuario" value="JCOSTOS"></label>
-            <label>Producto <input id="ac-producto" placeholder="SW50"></label><label>Cantidad <input id="ac-cantidad" type="number" step="any" min="0"></label>
-            <label>Cliente <input id="ac-cliente" value="MERCADO"></label><label>Código de la OT <input id="ac-objeto" value="Se asigna al aceptar" readonly></label>
-            <label>Fecha (AAAAMMDD) <input id="ac-fecha" placeholder="20101228"></label><label>Periodo <input id="ac-periodo" placeholder="2010-12"></label>
+            <label>Código de la OT <input id="ac-objeto" value="Se asigna al aceptar" readonly></label>
+            <input id="ac-producto" type="hidden"><input id="ac-cantidad" type="hidden"><input id="ac-cliente" type="hidden"><input id="ac-fecha" type="hidden"><input id="ac-periodo" type="hidden">
             <button type="submit">Aceptar y abrir OT</button>
           </form>
           <p id="ac-estado" role="status"></p>
         </details>
+        </section>
       </section>
       <section id="laboratorio" class="panel stack section-link"><h2>Laboratorio</h2><p>Selecciona un espacio original en Registrar → Espacios de trabajo. Se creará una copia independiente; registra los hechos de prueba en ella y luego compara.</p><button type="button" id="lab-crear">Crear laboratorio del espacio seleccionado</button><p id="lab-estado" role="status"></p><p id="lab-identidad"></p><div class="actions"><button type="button" id="lab-editar" disabled>Registrar hechos en la copia</button><button type="button" id="lab-comparar" disabled>Recalcular y comparar</button></div><div id="lab-tabla" class="result-table"></div></section>
       <section id="proyeccion" class="panel stack section-link"><h2>Futuro: costo proyectado</h2><p class="legend">Se pronostica cada recurso (precio, cantidad e inductor) con su historia y se pasa por el mismo motor ABC: el costo sale por recurso, centro, actividad y orden.</p><p class="legend" id="c33-limite-futuro" role="note">El costo variable se proyecta lineal dentro del rango observado de cantidades.</p><p id="futuro-estado" role="status"></p><div id="futuro-meses" class="result-table"></div><div class="fields split"><label>Mes <select id="futuro-mes"></select></label><label>Ver por <select id="futuro-nivel"><option value="ordenes">Orden</option><option value="recursos">Recurso</option><option value="centros">Centro</option><option value="actividades">Actividad</option></select></label></div><div id="futuro-desglose" class="result-table"></div><h3>Proyección estadística del margen</h3><p id="banda-aviso" class="legend"></p><div id="result-proyeccion" class="result-table"></div><h3>Sensibilidad del margen (±10 %)</h3><p id="sensibilidad-estado" role="status"></p><div id="sensibilidad-tornado"></div></section>
@@ -387,7 +379,30 @@ main#principal{padding-top:0}
       <section id="cierre" class="panel stack section-link"><h2>Cierre del periodo y aprobación</h2><p class="legend">Cerrar = verificar (todos los controles en REAL y CONTABLE) + conciliar (cuentas del motor operativo contra el costeo) + sellar (huella SHA-256 del paquete). Luego el revisor (CONTAB) y el gerente (GERENCIA) lo aprueban; quien emite o revisa no puede aprobar. Reabrir emite una nueva versión que apunta a la anterior: nada se borra.</p>
         <div class="ruta-sel"><div class="field"><label for="cierre-usuario">Usuario</label><input id="cierre-usuario" placeholder="JCOSTOS, CONTAB1, GERENTE…"></div><div class="field"><label for="cierre-motivo">Motivo o comentario</label><input id="cierre-motivo" placeholder="Opcional; obligatorio para reabrir"></div><button id="cierre-emitir" type="button">Cerrar y sellar el periodo elegido</button></div>
         <p id="cierre-estado" role="status"></p><div id="cierre-conc" class="result-table"></div><h3>Paquetes de cierre de la empresa</h3><div id="cierre-lista" class="result-table"></div></section>
-      <section id="modelo" class="panel stack section-link"><h2>Modelo de costeo</h2><p>Metodología ABC escalonada de W. Oria</p><div id="modelo-niveles" class="paso"></div><h3>Flujos de costo observados</h3><p class="legend">Las flechas corresponden a trazas del periodo seleccionado; el libro no declara el destino en cada regla.</p><div id="modelo-flujos" class="result-table"></div><p class="legend">El modelo se define con datos del libro DBD (no está programado): cambiar de empresa es cambiar estas tablas.</p><h3>Reglas de reparto por etapa</h3><div id="modelo-reglas" class="result-table"></div><h3>Recursos</h3><div id="modelo-recursos" class="result-table"></div><h3>Actividades</h3><div id="modelo-actividades" class="result-table"></div><h3>Inductores</h3><div id="modelo-inductores" class="result-table"></div></section>
+      <section id="modelo" class="panel stack section-link"><h2>Modelo de costeo</h2>
+        <details id="pedido-definir" class="panel">
+          <summary>Definir políticas para cotizar pedidos</summary>
+          <p class="legend">Estos valores se usan como valores iniciales para los pedidos. Por ahora quedan guardados solo en este navegador y equipo; no se comparten con otros usuarios.</p>
+          <form id="pedido-config-form" class="fields">
+            <label>Días disponibles para producir <input id="pedido-config-dias" type="number" min="0" step="1"></label>
+            <label>Margen objetivo (%) <input id="pedido-config-margen" type="number" min="0" max="99.99" step="any" required></label>
+            <label>Meses de ejecución proyectada <input id="pedido-config-meses" type="number" min="0" max="24" step="1" required></label>
+            <label>Intervalo de proyección (meses) <select id="pedido-config-intervalo"><option>1</option><option>2</option><option>3</option><option>6</option><option>12</option></select></label>
+            <label>Distribución en el tiempo <select id="pedido-config-curva"><option value="s">Curva S</option><option value="pareja">Pareja</option><option value="inicio">Cargada al inicio</option><option value="final">Cargada al final</option></select></label>
+            <label>Unidades por lote <input id="pedido-config-lote" type="number" min="0.001" step="any"></label>
+            <label>Preparación fija por lote (S/) <input id="pedido-config-preparacion" type="number" min="0" step="any" required></label>
+            <label>Contingencia (%) <input id="pedido-config-contingencia" type="number" min="0" max="100" step="any" required></label>
+            <label>Subcontrato por pedido (S/) <input id="pedido-config-subcontrato" type="number" min="0" step="any" required></label>
+            <label>Transporte por pedido (S/) <input id="pedido-config-transporte" type="number" min="0" step="any" required></label>
+            <label>Gastos generales por pedido (S/) <input id="pedido-config-generales" type="number" min="0" step="any" required></label>
+            <label>Monto máximo para cotización firme (S/) <input id="pedido-config-umbral-monto" type="number" min="0" step="any" placeholder="Requerido para firmar"></label>
+            <label>Ancho máximo P05–P95 / costo (%) <input id="pedido-config-umbral-ancho" type="number" min="0" step="any" placeholder="Requerido para firmar"></label>
+            <fieldset class="pedido-config-cargas"><legend>Capacidad práctica y carga abierta por familia e inductor</legend><div id="pedido-config-capacidades" class="fields"></div></fieldset>
+            <button type="submit">Guardar valores para este equipo</button>
+          </form>
+          <p id="pedido-config-estado" role="status"></p>
+        </details>
+        <p>Metodología ABC escalonada de W. Oria</p><div id="modelo-niveles" class="paso"></div><h3>Flujos de costo observados</h3><p class="legend">Las flechas corresponden a trazas del periodo seleccionado; el libro no declara el destino en cada regla.</p><div id="modelo-flujos" class="result-table"></div><p class="legend">El modelo se define con datos del libro DBD (no está programado): cambiar de empresa es cambiar estas tablas.</p><h3>Reglas de reparto por etapa</h3><div id="modelo-reglas" class="result-table"></div><h3>Recursos</h3><div id="modelo-recursos" class="result-table"></div><h3>Actividades</h3><div id="modelo-actividades" class="result-table"></div><h3>Inductores</h3><div id="modelo-inductores" class="result-table"></div></section>
       <section id="datos" class="panel stack section-link"><h2>Datos del libro</h2><p class="legend">Tablas del libro DBD de la empresa para el periodo elegido (todo dato guardado se puede ver).</p><h3>Ventas</h3><div id="datos-ventas" class="result-table"></div><h3>Órdenes registradas</h3><div id="datos-ordenes" class="result-table"></div><h3>Centros</h3><div id="datos-centros" class="result-table"></div><h3>Clientes</h3><div id="datos-clientes" class="result-table"></div><h3>Medidas de los inductores</h3><input id="buscar-medida" class="buscador" type="search" placeholder="Buscar inductor o destino…" aria-label="Buscar medida"><div id="datos-medidas" class="result-table"></div></section>
       <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Descarga los resultados de la empresa, el periodo y la síntesis elegidos. El Excel de resultados incluye la ruta del costo (una hoja por etapa P1…P7), el kardex, el modelo ABC y el panel de calidad.</p><div class="actions"><button type="button" data-exportar="resultados">Excel resultados</button><button type="button" data-exportar="analitica">Excel analítica</button><button type="button" data-exportar="proyeccion">Excel proyección</button><button type="button" data-exportar="sistema">Sistema HTML sin conexión (todas las pantallas)</button><button type="button" data-exportar="html">Informe HTML</button><button type="button" data-exportar="entrada">Excel datos de entrada (libro DBD)</button><button type="button" data-exportar="codigo">Word código</button></div><p id="export-status" role="status"></p></section>
       <section id="cargar-libro" class="panel stack section-link"><h2>Cargar empresa (libro DBD)</h2><p class="legend">El sistema acepta un solo formato: el libro del DBD. Si los datos de tu ERP vienen en otro formato, se usa un adaptador (como el de Frenosa) que llena la plantilla. El libro se valida completo antes de aceptarlo; si algo no cumple, se rechaza y se explica qué corregir.</p>
@@ -1357,66 +1372,114 @@ main#principal{padding-top:0}
     [...new Set((r.kardex||[]).map(x=>x.material).filter(Boolean))].sort().forEach(x=>{const o=cell(m,'option',x);o.value=x;});
   }
   let familiasPedido=[];
-  async function cargarFamiliasPedido(){
-    const select=$('pedido-familia'), estado=$('pedido-familia-estado');
-    select.replaceChildren(new Option('Cargando familias…',''));
-    $('pedido-parametros').replaceChildren();$('pedido-capacidades').replaceChildren();
-    try{
-      const response=await fetch('/api/pedido/familias?'+new URLSearchParams({empresa:$('result-empresa').value}));
-      const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudieron leer las familias.');
-      familiasPedido=data.familias||[];select.replaceChildren(new Option('Selecciona una familia',''));
-      familiasPedido.forEach(f=>{const option=new Option(f.codigo,f.codigo);select.add(option);});
-      if(!familiasPedido.length){estado.textContent=data.aviso||'Este libro no tiene familias parametrizadas. Usa Avanzado o agrega la hoja FAMILIA_PARAM.';$('cot-avanzado').open=true;return;}
-      estado.textContent='Elige la familia para ver sus parámetros obligatorios.';$('cot-avanzado').open=false;
-    }catch(error){familiasPedido=[];select.replaceChildren(new Option('Sin familias configuradas',''));estado.textContent='No se pudieron leer las plantillas del libro. '+error.message;$('cot-avanzado').open=true;}
+  let ultimaCotizacion=null;
+  const pedidoConfigBase={dias:'',margen:30,meses:0,intervalo:3,curva:'s',lote:'',preparacion:0,contingencia:0,
+    subcontrato:0,transporte:0,generales:0,umbralMonto:'',umbralAncho:'',capacidad:{},comprometida:{}};
+  let pedidoConfig={...pedidoConfigBase};
+  function pedidoClave(sufijo){return `reyna-pedido:${$('result-empresa').value||'sin-empresa'}:${sufijo}`;}
+  function guardarPedidoLocal(clave,valor){try{localStorage.setItem(clave,JSON.stringify(valor));return true;}catch{return false;}}
+  function cargarConfigPedido(){
+    try{const guardada=JSON.parse(localStorage.getItem(pedidoClave('config'))||'{}');pedidoConfig={...pedidoConfigBase,...guardada};}
+    catch{pedidoConfig={...pedidoConfigBase};}
+    for(const [id,clave] of [['pedido-config-dias','dias'],['pedido-config-margen','margen'],['pedido-config-meses','meses'],['pedido-config-intervalo','intervalo'],['pedido-config-curva','curva'],['pedido-config-lote','lote'],['pedido-config-preparacion','preparacion'],['pedido-config-contingencia','contingencia'],['pedido-config-subcontrato','subcontrato'],['pedido-config-transporte','transporte'],['pedido-config-generales','generales'],['pedido-config-umbral-monto','umbralMonto'],['pedido-config-umbral-ancho','umbralAncho']]){
+      const input=$(id);if(input)input.value=pedidoConfig[clave]??'';
+    }
   }
+  function renderCapacidadesDefinir(){
+    const root=$('pedido-config-capacidades');if(!root)return;root.replaceChildren();
+    familiasPedido.forEach(f=>{const grupo=cell(root,'fieldset','');cell(grupo,'legend',`Familia ${f.codigo}`);
+      (f.inductores||[]).forEach(r=>{const item=cell(grupo,'fieldset','');cell(item,'legend',`Inductor ${r.codigo}`);
+        const c=cell(item,'label','Capacidad práctica por día');const ci=document.createElement('input');ci.type='number';ci.min='0';ci.step='any';ci.dataset.defCapacidad=r.codigo;ci.dataset.familia=f.codigo;ci.value=pedidoConfig.capacidad?.[f.codigo]?.[r.codigo]??'';c.append(ci);
+        const o=cell(item,'label','Carga de OTs abiertas por día');const oi=document.createElement('input');oi.type='number';oi.min='0';oi.step='any';oi.dataset.defComprometida=r.codigo;oi.dataset.familia=f.codigo;oi.value=pedidoConfig.comprometida?.[f.codigo]?.[r.codigo]??'';o.append(oi);
+      });
+    });
+  }
+  function guardarConfigPedido(){
+    const claves=[['pedido-config-dias','dias'],['pedido-config-margen','margen'],['pedido-config-meses','meses'],['pedido-config-intervalo','intervalo'],['pedido-config-curva','curva'],['pedido-config-lote','lote'],['pedido-config-preparacion','preparacion'],['pedido-config-contingencia','contingencia'],['pedido-config-subcontrato','subcontrato'],['pedido-config-transporte','transporte'],['pedido-config-generales','generales'],['pedido-config-umbral-monto','umbralMonto'],['pedido-config-umbral-ancho','umbralAncho']];
+    pedidoConfig={...pedidoConfigBase,...pedidoConfig};for(const [id,clave] of claves){const valor=$(id).value;pedidoConfig[clave]=valor===''?'':(['curva'].includes(clave)?valor:Number(valor));}
+    pedidoConfig.capacidad={};pedidoConfig.comprometida={};
+    document.querySelectorAll('[data-def-capacidad]').forEach(x=>{if(x.value!==''){pedidoConfig.capacidad[x.dataset.familia]||={};pedidoConfig.capacidad[x.dataset.familia][x.dataset.defCapacidad]=Number(x.value);}});
+    document.querySelectorAll('[data-def-comprometida]').forEach(x=>{if(x.value!==''){pedidoConfig.comprometida[x.dataset.familia]||={};pedidoConfig.comprometida[x.dataset.familia][x.dataset.defComprometida]=Number(x.value);}});
+    $('pedido-config-estado').textContent=guardarPedidoLocal(pedidoClave('config'),pedidoConfig)
+      ?'Valores guardados en este navegador y equipo.'
+      :'No se pudieron guardar: el almacenamiento local del navegador está bloqueado o lleno.';
+  }
+  $('pedido-config-form').addEventListener('submit',event=>{event.preventDefault();guardarConfigPedido();});
+  function mostrarPasoPedido(paso){
+    $('pedido-paso-cliente').hidden=paso!==1;$('pedido-paso-resultado').hidden=paso!==2;$('pedido-paso-aceptar').hidden=paso!==3;
+    document.querySelectorAll('[data-pedido-paso]').forEach(x=>{x.setAttribute('aria-current',Number(x.dataset.pedidoPaso)===paso?'step':'false');});
+  }
+  mostrarPasoPedido(1);
+  $('pedido-continuar').addEventListener('click',()=>{
+    if(!familiasPedido.length&&$('cot-avanzado').open){mostrarPasoPedido(2);$('pedido-precio').focus();return;}
+    const paso=$('pedido-paso-cliente');const faltante=[...paso.querySelectorAll('input,select')].find(x=>!x.checkValidity());
+    if(faltante){faltante.reportValidity();faltante.focus();return;}mostrarPasoPedido(2);$('pedido-precio').focus();
+  });
+  $('pedido-volver').addEventListener('click',()=>mostrarPasoPedido(1));
+  $('pedido-editar-resultado').addEventListener('click',()=>mostrarPasoPedido(2));
+  function pedidoUltimo(familia){try{return JSON.parse(localStorage.getItem(pedidoClave(`ultimo:${familia}`))||'null');}catch{return null;}}
   function pintarParametrosPedido(){
-    const familia=familiasPedido.find(f=>f.codigo===$('pedido-familia').value), params=$('pedido-parametros'), recursos=$('pedido-capacidades');
-    params.replaceChildren();recursos.replaceChildren();if(!familia)return;
-    (familia.parametros||[]).forEach(p=>{const label=cell(params,'label',`${p.nombre} (${p.unidad})${p.minimo!=null||p.maximo!=null?` · rango ${p.minimo??'sin mínimo'}–${p.maximo??'sin máximo'}`:''}`);
-      const input=document.createElement('input');input.type='number';input.step='any';input.dataset.parametro=p.codigo;input.required=!!p.obligatorio; if(p.minimo!=null)input.min=p.minimo;if(p.maximo!=null)input.max=p.maximo;label.appendChild(input);});
-    if((familia.inductores||[]).length){cell(recursos,'p','Capacidad práctica por día y carga de OTs abiertas. Déjalas vacías si el libro no tiene un dato aprobado; el plazo aparecerá como no disponible.');}
-    (familia.inductores||[]).forEach(r=>{const grupo=cell(recursos,'fieldset','');cell(grupo,'legend',`Inductor ${r.codigo}`);
-      const cap=cell(grupo,'label','Capacidad práctica por día');const ci=document.createElement('input');ci.type='number';ci.min='0';ci.step='any';ci.dataset.capacidad=r.codigo;cap.appendChild(ci);
-      const com=cell(grupo,'label','Carga de OTs abiertas por día');const oi=document.createElement('input');oi.type='number';oi.min='0';oi.step='any';oi.value='0';oi.dataset.comprometida=r.codigo;com.appendChild(oi);});
+    const familia=familiasPedido.find(f=>f.codigo===$('pedido-familia').value), params=$('pedido-parametros');params.replaceChildren();
+    $('pedido-falta-confirmar').hidden=true;$('pedido-parametros-tecnicos').replaceChildren();$('pedido-resultado').replaceChildren();$('pedido-estado').textContent='';
+    if(!familia)return;const ultimo=pedidoUltimo(familia.codigo);
+    if(ultimo){$('pedido-producto').value||=ultimo.producto||'';$('pedido-cliente').value=ultimo.cliente||$('pedido-cliente').value;$('pedido-condicion-pago').value=ultimo.condicion_pago||'';$('pedido-contrato').value=ultimo.contrato||'CERRADO';$('pedido-precio').value=ultimo.precio_mercado??'';}
+    let clientes=0;
+    (familia.parametros||[]).filter(p=>p.quien_sabe==='cliente').forEach(p=>{clientes++;const label=cell(params,'label',`${p.nombre} (${p.unidad})${p.minimo!=null||p.maximo!=null?` · rango ${p.minimo??'sin mínimo'}–${p.maximo??'sin máximo'}`:''}`);
+      const input=document.createElement('input');input.type='number';input.step='any';input.dataset.parametro=p.codigo;input.required=!!p.obligatorio;if(p.minimo!=null)input.min=p.minimo;if(p.maximo!=null)input.max=p.maximo;if(ultimo?.parametros?.[p.codigo]!=null)input.value=ultimo.parametros[p.codigo];label.appendChild(input);});
+    $('pedido-familia-estado').textContent=clientes?'Completa solo las medidas que conoce el cliente. Los parámetros derivados se calcularán con la receta aprendida.':'Esta familia no requiere medidas adicionales del cliente.';
+  }
+  function pintarFaltantesPedido(faltantes,anteriores={}){
+    const box=$('pedido-falta-confirmar'),root=$('pedido-parametros-tecnicos');root.replaceChildren();box.hidden=!(faltantes||[]).length;
+    (faltantes||[]).forEach(p=>{const label=cell(root,'label',`${p.nombre} (${p.unidad}) · ${p.motivo}`);const input=document.createElement('input');input.type='number';input.step='any';input.dataset.parametroTecnico=p.codigo;input.required=true;if(anteriores[p.codigo]!=null)input.value=anteriores[p.codigo];label.append(input);});
+  }
+  async function cargarFamiliasPedido(){
+    const select=$('pedido-familia'),estado=$('pedido-familia-estado');select.replaceChildren(new Option('Cargando familias…',''));$('pedido-parametros').replaceChildren();
+    cargarConfigPedido();
+    try{const response=await fetch('/api/pedido/familias?'+new URLSearchParams({empresa:$('result-empresa').value}));const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudieron leer las familias.');
+      familiasPedido=data.familias||[];select.replaceChildren(new Option('Selecciona una familia',''));familiasPedido.forEach(f=>select.add(new Option(f.codigo,f.codigo)));
+      renderCapacidadesDefinir();if(!familiasPedido.length){estado.textContent=data.aviso||'Este libro no tiene familias parametrizadas. Usa Avanzado o agrega la hoja FAMILIA_PARAM.';$('cot-avanzado').open=true;return;}
+      estado.textContent='Elige una familia para cargar sus datos.';$('cot-avanzado').open=false;
+    }catch(error){familiasPedido=[];select.replaceChildren(new Option('Sin familias configuradas',''));estado.textContent='No se pudieron leer las plantillas del libro. '+error.message;$('cot-avanzado').open=true;renderCapacidadesDefinir();}
   }
   $('pedido-familia').addEventListener('change',pintarParametrosPedido);
   $('pedido-form').addEventListener('submit',async event=>{
-    event.preventDefault();const estado=$('pedido-estado'), root=$('pedido-resultado');estado.textContent='Calculando pedido…';root.replaceChildren();
+    event.preventDefault();const paso=$('pedido-paso-resultado'),invalido=[...paso.querySelectorAll('input,select')].find(x=>!x.checkValidity());if(invalido){invalido.reportValidity();invalido.focus();return;}
+    const estado=$('pedido-estado'),root=$('pedido-resultado');estado.textContent='Calculando el pedido…';root.replaceChildren();$('pedido-guardar-preliminar').hidden=true;$('pedido-paso-aceptar').hidden=true;
     const familia=familiasPedido.find(f=>f.codigo===$('pedido-familia').value);if(!familia){estado.textContent='Elige una familia parametrizada.';return;}
     const parametros=Object.fromEntries([...document.querySelectorAll('[data-parametro]')].map(x=>[x.dataset.parametro,x.value]));
-    const capacidades=Object.fromEntries([...document.querySelectorAll('[data-capacidad]')].filter(x=>x.value!=='').map(x=>[x.dataset.capacidad,Number(x.value)]));
-    const comprometidas=Object.fromEntries([...document.querySelectorAll('[data-comprometida]')].filter(x=>x.value!=='').map(x=>[x.dataset.comprometida,Number(x.value)]));
-    const conceptos=[];for(const [id,concepto,campo] of [['pedido-subcontrato','SUBCONTRATO','importe'],['pedido-transporte','TRANSPORTE','importe'],['pedido-generales','GASTOS_GENERALES','importe']]){const importe=Number($(id).value)||0;if(importe>0)conceptos.push({concepto,[campo]:importe});}
-    const contingencia=Number($('pedido-contingencia').value)||0;if(contingencia>0)conceptos.push({concepto:'CONTINGENCIA',porcentaje:contingencia});
-    const dias=$('pedido-dias').value;
-    const body={empresa:$('result-empresa').value,producto:$('pedido-producto').value,cliente:$('pedido-cliente').value,
-      fecha_requerida:$('pedido-fecha').value,cantidad:Number($('pedido-cantidad').value),familia:familia.codigo,parametros,
-      precio_mercado:Number($('pedido-precio').value),margen_objetivo:Number($('pedido-margen').value)/100,
-      contrato:$('pedido-contrato').value,unidades_por_lote:$('pedido-lote-unidades').value===''?null:Number($('pedido-lote-unidades').value),
+    const parametrosTecnicos=Object.fromEntries([...document.querySelectorAll('[data-parametro-tecnico]')].filter(x=>x.value!=='').map(x=>[x.dataset.parametroTecnico,x.value]));
+    const concepto=[];for(const [clave,nombre,campo] of [['subcontrato','SUBCONTRATO','importe'],['transporte','TRANSPORTE','importe'],['generales','GASTOS_GENERALES','importe']]){const importe=Number(pedidoConfig[clave])||0;if(importe>0)concepto.push({concepto:nombre,[campo]:importe});}
+    const contingencia=Number(pedidoConfig.contingencia)||0;if(contingencia>0)concepto.push({concepto:'CONTINGENCIA',porcentaje:contingencia});
+    const body={empresa:$('result-empresa').value,producto:$('pedido-producto').value,cliente:$('pedido-cliente').value,condicion_pago:$('pedido-condicion-pago').value,
+      fecha_requerida:$('pedido-fecha').value,cantidad:Number($('pedido-cantidad').value),familia:familia.codigo,parametros,parametros_tecnicos:parametrosTecnicos,
+      precio_mercado:Number($('pedido-precio').value),margen_objetivo:Number(pedidoConfig.margen)/100,contrato:$('pedido-contrato').value,
+      unidades_por_lote:pedidoConfig.lote===''?null:Number(pedidoConfig.lote),preparacion_por_lote:Number(pedidoConfig.preparacion)||0,conceptos_adicionales:concepto,
       comparar_unidades_por_lote:$('pedido-lote-comparar').value===''?null:Number($('pedido-lote-comparar').value),
-      preparacion_por_lote:Number($('pedido-preparacion').value)||0,conceptos_adicionales:conceptos,
-      capacidad_practica_diaria:capacidades,ot_comprometidas_por_dia:comprometidas,dias_solicitados:dias===''?null:Number(dias),
-      meses:Number($('pedido-meses').value)||0,intervalo:Number($('pedido-intervalo').value),curva:$('pedido-curva').value};
-    try{
-      const response=await fetch('/api/pedido/cotizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo calcular el pedido.');ultimaCotizacion=data;
-      cell(root,'h3',`Costo esperado: S/ ${number(data.costo_esperado)}`);
-      cell(root,'p',data.rango_p05_p95?`Rango P05–P95: S/ ${number(data.rango_p05_p95.p05)} a S/ ${number(data.rango_p05_p95.p95)} · ${data.rango_p05_p95.metodo}`:'Rango P05–P95: no estimable con la historia disponible.');
-      const plazo=data.plazo||{};cell(root,'p',plazo.dias_earliest==null?`Entrega: no estimable. ${plazo.motivo||''}`:`Entrega más temprana: ${plazo.dias_earliest} días de capacidad · fecha requerida ${data.fecha_requerida} · ${plazo.estado}.`);
-      cell(root,'p',`Precio sugerido: S/ ${number(data.precio_sugerido)} · mercado: S/ ${number(data.precio_mercado)} · diferencia: S/ ${number(data.brecha_mercado)}.`);
-      cell(root,'p',data.decision);cell(root,'p',data.recomendacion);
-      const just=cell(root,'details','');cell(just,'summary','Fundamento del cálculo');
-      [['Fórmula',data.fundamento.formula],['Supuesto',data.fundamento.supuesto],['Dato usado',data.fundamento.dato_usado],['Límite',data.fundamento.limite]].forEach(([titulo,texto])=>cell(just,'p',`${titulo}: ${texto}`));
-      if(data.costo_lote){const d=cell(root,'details','');cell(d,'summary','Preparación y conceptos adicionales');cell(d,'p',`${data.costo_lote.numero_lotes} lotes · preparación S/ ${number(data.costo_lote.costo_preparacion)} · variable S/ ${number(data.costo_lote.costo_variable)} · adicionales S/ ${number(data.costo_lote.costo_adicionales||0)}.`);}
-      if(data.comparacion_lotes){const d=cell(root,'details','');cell(d,'summary','Comparación de tamaños de lote');
-        data.comparacion_lotes.alternativas.forEach((alternativa,i)=>cell(d,'p',`${i===0?'Actual':'Alternativa'}: ${number(alternativa.unidades_por_lote)} unidades por lote · ${alternativa.numero_lotes} lotes · S/ ${number(alternativa.costo_pedido)} · diferencia vs. actual S/ ${number(alternativa.diferencia_vs_primera)}.`));
-        cell(d,'p',`Diferencia máxima entre alternativas: S/ ${number(data.comparacion_lotes.diferencia_max_min)}.`);}
+      capacidad_practica_diaria:pedidoConfig.capacidad?.[familia.codigo]||{},ot_comprometidas_por_dia:pedidoConfig.comprometida?.[familia.codigo]||{},
+      dias_solicitados:pedidoConfig.dias===''?null:Number(pedidoConfig.dias),meses:Number(pedidoConfig.meses)||0,intervalo:Number(pedidoConfig.intervalo),curva:pedidoConfig.curva,
+      umbral_firme:{monto:pedidoConfig.umbralMonto===''?null:Number(pedidoConfig.umbralMonto),ancho_pct:pedidoConfig.umbralAncho===''?null:Number(pedidoConfig.umbralAncho)}};
+    try{const response=await fetch('/api/pedido/cotizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo calcular el pedido.');
+      ultimaCotizacion={...data,_pedido:body};pintarFaltantesPedido(data.faltantes,parametrosTecnicos);
+      const preliminar=data.estado!=='FIRME';const titulo=cell(root,'h3',preliminar?'Cotización preliminar':`Cotización firme · costo esperado: S/ ${number(data.costo_esperado)}`);titulo.className=preliminar?'pedido-preliminar':'pedido-firme';
+      if(data.costo_esperado!=null){cell(root,'p',data.rango_p05_p95?`Rango P05–P95: S/ ${number(data.rango_p05_p95.p05)} a S/ ${number(data.rango_p05_p95.p95)} · ${data.rango_p05_p95.metodo}`:'Rango P05–P95: no estimable con la historia disponible.');
+        const plazo=data.plazo||{};cell(root,'p',plazo.dias_earliest==null?`Entrega más temprana: no estimable. ${plazo.motivo||''}`:(plazo.dias_tarde>0?`Entrega más temprana: ${plazo.dias_earliest} días de capacidad. Llega ${plazo.dias_tarde} días tarde.`:`Entrega más temprana: ${plazo.dias_earliest} días de capacidad. Llega dentro del plazo solicitado.`));
+        cell(root,'p',`Precio sugerido: S/ ${number(data.precio_sugerido)} · mercado: S/ ${number(data.precio_mercado)} · diferencia: S/ ${number(data.brecha_mercado)}.`);cell(root,'p',data.decision||'');
+      }
+      try{const x=await fetch('/api/suficiencia?'+new URLSearchParams({empresa:$('result-empresa').value})),j=await x.json();if(x.ok)cell(root,'p',j.nivel==null?'Suficiencia de datos: sin determinar.':`Suficiencia de datos: nivel ${j.nivel}${j.falta?` · para subir: ${j.falta}`:''}.`);}catch{cell(root,'p','Suficiencia de datos: no disponible.');}
+      if(data.fundamento){const just=cell(root,'details','');cell(just,'summary','Fundamento en 4 líneas');[['Fórmula',data.fundamento.formula],['Supuesto',data.fundamento.supuesto],['Dato usado',data.fundamento.dato_usado],['Límite',data.fundamento.limite]].forEach(([a,b])=>cell(just,'p',`${a}: ${b}`));}
+      if(data.comparacion_lotes){const comparacion=cell(root,'details','');cell(comparacion,'summary','Comparación de tamaños de lote');cell(comparacion,'p',`La diferencia máxima entre alternativas es S/ ${number(data.comparacion_lotes.diferencia_max_min)}.`);(data.comparacion_lotes.alternativas||[]).forEach(x=>cell(comparacion,'p',`${number(x.unidades_por_lote)} unidades por lote: costo S/ ${number(x.costo_pedido)}; diferencia frente a la primera alternativa: S/ ${number(x.diferencia_vs_primera)}.`));}
       (data.avisos||[]).forEach(x=>cell(root,'p',`Aviso: ${x}`));
-      estado.textContent='Pedido calculado. Revisa costo, plazo, precio y fundamento antes de aceptar.';
-      $('ac-producto').value=data.producto;$('ac-cantidad').value=data.cantidad;$('ac-cliente').value=data.cliente;
-      $('ac-fecha').value=data.fecha_requerida.replaceAll('-','');$('ac-periodo').value=data.fecha_requerida.slice(0,7);$('cot-aceptar-box').open=true;
+      if(preliminar){$('pedido-guardar-preliminar').hidden=false;estado.textContent='Revisa los faltantes o guarda la cotización como preliminar. No abre una OT.';}
+      else{mostrarPasoPedido(3);const resumen=$('pedido-resumen-confirmacion');resumen.replaceChildren(...[...root.children].map(x=>x.cloneNode(true)));$('pedido-aceptar-estado').textContent='Revisa costo, rango, plazo y fundamento antes de aceptar.';
+        $('ac-producto').value=data.producto;$('ac-cantidad').value=data.cantidad;$('ac-cliente').value=data.cliente;$('ac-fecha').value=data.fecha_requerida.replaceAll('-','');$('ac-periodo').value=data.fecha_requerida.slice(0,7);$('cot-aceptar-box').open=true;estado.textContent='Resultado firme. Revisa el fundamento antes de aceptar y abrir la OT.';}
     }catch(error){estado.textContent='No se pudo calcular: '+error.message;}
+  });
+  $('pedido-guardar-preliminar').addEventListener('click',()=>{
+    if(!ultimaCotizacion)return;const clave=pedidoClave('borradores');let filas=[];try{filas=JSON.parse(localStorage.getItem(clave)||'[]');}catch{}
+    filas.push({guardado:new Date().toISOString(),pedido:ultimaCotizacion._pedido,resultado:ultimaCotizacion});
+    $('pedido-estado').textContent=guardarPedidoLocal(clave,filas.slice(-20))
+      ?'Cotización preliminar guardada en este navegador y equipo. No se creó una OT.'
+      :'No se pudo guardar la cotización preliminar: el almacenamiento local está bloqueado o lleno. No se creó una OT.';
   });
   const cotLista={actividades:{},materiales:{}};
   function pintarCotLista(){const filas=[...Object.entries(cotLista.actividades).map(([c,q])=>({tipo:'Actividad',codigo:c,cantidad:q})),...Object.entries(cotLista.materiales).map(([c,q])=>({tipo:'Material',codigo:c,cantidad:q}))];
@@ -1435,23 +1498,25 @@ main#principal{padding-top:0}
     event.preventDefault(); const estado=$('cot-estado'); estado.textContent='Cotizando…'; $('cot-resultado').replaceChildren();
     const a=$('cot-actividad').value, m=$('cot-material').value; const vacia=!Object.keys(cotLista.actividades).length&&!Object.keys(cotLista.materiales).length;
     const act=vacia?(a?{[a]:Number($('cot-actividad-cantidad').value)}:{}):cotLista.actividades, mat=vacia?(m?{[m]:Number($('cot-material-cantidad').value)}:{}):cotLista.materiales;
-    const meses=Number($('cot-meses').value)||0;
-    const body={empresa:$('result-empresa').value,actividades:act,materiales:mat,precio_mercado:Number($('cot-precio').value),margen_objetivo:Number($('cot-margen').value)/100};
-    if(meses>0)Object.assign(body,{meses,intervalo:Number($('cot-intervalo').value),curva:$('cot-curva').value,contrato:$('cot-contrato').value});
+    const meses=Number(pedidoConfig.meses)||0, precio=Number($('pedido-precio').value);
+    if($('pedido-precio').value===''||!Number.isFinite(precio)){estado.textContent='Indica el precio de mercado en el paso Resultado antes de usar Avanzado.';return;}
+    const body={empresa:$('result-empresa').value,actividades:act,materiales:mat,precio_mercado:precio,margen_objetivo:Number(pedidoConfig.margen)/100};
+    if(meses>0)Object.assign(body,{meses,intervalo:Number(pedidoConfig.intervalo),curva:pedidoConfig.curva,contrato:$('pedido-contrato').value});
     if(familiaParaCotizar){if(!meses){estado.textContent='La receta requiere duración proyectada mayor que cero.';return;} if(historiaAnalizada!==firmaFamilia()){estado.textContent='La historia cambió; analiza la receta otra vez.';familiaParaCotizar=null;return;}Object.assign(body,{familia:familiaParaCotizar,unidades:Number($('fam-unidades').value)});}
-    try {const response=await fetch('/api/cotizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo cotizar.'); ultimaCotizacion=data;
+    try {const response=await fetch('/api/cotizar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||'No se pudo cotizar.');
       if(meses>0){estado.textContent=`Costo proyectado de la OT: S/ ${number(data.total)} (hoy costaría S/ ${number(data.costo_base_mes_actual)}) · objetivo: S/ ${number(data.costo_objetivo)} · brecha: S/ ${number(data.brecha)}. ${data.recomendacion} ${(data.avisos||[]).join(' · ')}`;
         table('cot-resultado',data.intervalos.map(x=>({tramo:`Mes ${x.desde_mes}–${x.hasta_mes}`,medio:x.mes_medio,proporcion:number(x.proporcion*100)+' %',costo:x.costo})),[['tramo','Intervalo'],['medio','Mes medio (tasa)'],['proporcion','Parte de la obra'],['costo','Costo S/']]);}
       else{estado.textContent=`Costo: S/ ${number(data.costo_pedido)} · objetivo: S/ ${number(data.costo_objetivo)} · brecha: S/ ${number(data.brecha)}. ${(data.avisos||[]).join(' · ')}`;table('cot-resultado',data.lineas||[],[['tipo','Tipo'],['codigo','Código'],['cantidad','Cantidad'],['tasa','Tasa'],['importe','Importe S/']]);}
     } catch(e){estado.textContent=e.message;}
   });
-  let ultimaCotizacion=null;
   $('cot-aceptar-box').addEventListener('toggle',async()=>{try{const x=await fetch('/api/workspaces'),j=await x.json();$('ac-espacio').replaceChildren(...(j.workspaces||j||[]).map(w=>{const o=document.createElement('option');o.value=w.id;o.textContent=w.name||w.id;return o;}));}catch{}});
   $('cot-aceptar').addEventListener('submit',async e=>{e.preventDefault(); const est=$('ac-estado');
-    const monto=ultimaCotizacion?(ultimaCotizacion.total??ultimaCotizacion.costo_pedido):null; if(!monto){est.textContent='Primero cotiza.';return;}
+    const monto=ultimaCotizacion?(ultimaCotizacion.total??ultimaCotizacion.costo_pedido):null; if(!monto||!ultimaCotizacion.cotizacion_firme){est.textContent='Solo se pueden aceptar cotizaciones firmes.';return;}
     const body={user:$('ac-usuario').value,request_id:'acep-'+Date.now(),periodo:$('ac-periodo').value,fecha:$('ac-fecha').value,producto:$('ac-producto').value,cantidad:Number($('ac-cantidad').value),cliente:$('ac-cliente').value,objeto:$('ac-objeto').value,monto,huella:String(monto)};
     try{const x=await fetch(`/api/workspaces/${encodeURIComponent($('ac-espacio').value)}/aceptar-cotizacion`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}),j=await x.json();
-      est.textContent=x.ok?`OT ${j.objeto} abierta con costo proyectado S/ ${number(monto)} (versión ${j.version}).`:(j.error||'No se pudo aceptar.');}catch(err){est.textContent=err.message;}});
+      est.textContent=x.ok?`OT ${j.objeto} abierta con costo proyectado S/ ${number(monto)} (versión ${j.version}).`:(j.error||'No se pudo aceptar.');
+      if(x.ok&&ultimaCotizacion?._pedido){const pedido=ultimaCotizacion._pedido,guardado=guardarPedidoLocal(pedidoClave(`ultimo:${pedido.familia}`),{producto:pedido.producto,cliente:pedido.cliente,condicion_pago:pedido.condicion_pago,contrato:pedido.contrato,parametros:pedido.parametros,precio_mercado:pedido.precio_mercado});if(!guardado)est.textContent+=' Los datos previos no se guardaron en este navegador.';}
+    }catch(err){est.textContent=err.message;}});
   async function cargarPrecision(){
     const empresa=$('result-empresa').value, est=$('precision-estado'); if(!est)return; est.textContent='Calculando…';
     try{const x=await fetch('/api/precision?'+new URLSearchParams({empresa})), j=await x.json(); if(!x.ok)throw Error(j.error||'No se pudo calcular.'); if(empresa!==$('result-empresa').value)return;
@@ -1784,7 +1849,7 @@ main#principal{padding-top:0}
   // DBD p. 26: opción por defecto = el último periodo disponible de la empresa
   function ajustarPeriodo(ultimo){ const o=$('result-empresa').selectedOptions[0]; if(!o) return; const ps=JSON.parse(o.dataset.periodos||'[]');
     if(ps.length){ $('result-periodo').min=ps[0]; $('result-periodo').max=ps[ps.length-1]; if(ultimo||!ps.includes($('result-periodo').value)) $('result-periodo').value=ps[ps.length-1]; } }
-  $('result-empresa').addEventListener('change',()=>{ajustarPeriodo(true);versionesLibro();load();cargarFamiliasPedido();});
+  $('result-empresa').addEventListener('change',()=>{ajustarPeriodo(true);versionesLibro();load();ultimaCotizacion=null;mostrarPasoPedido(1);cargarFamiliasPedido();});
   async function versionesLibro(){ try{ const id=$('result-empresa').value; const j=await (await fetch('/api/libros/versiones?id='+encodeURIComponent(id))).json();
       const filas=(j.versiones||[]).map(v=>({version:v,fecha:v.split('__')[1].replace('.xlsx','')}));
       table('libro-versiones',filas,[['fecha','Guardada el'],['version','Archivo']]);

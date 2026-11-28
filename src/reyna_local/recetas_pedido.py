@@ -17,6 +17,8 @@ COLUMNAS_FAMILIA_PARAM = (
 )
 HOJA_FAMILIA_PRED = "FAMILIA_PRED"
 COLUMNAS_FAMILIA_PRED = ("FAM_COD", "IND_COD", "ESTADISTICA_JSON")
+HOJA_FAMILIA_ROL = "FAMILIA_ROL"
+COLUMNAS_FAMILIA_ROL = ("FAM_COD", "PAR_COD", "QUIEN_SABE", "DERIVACION_JSON")
 
 
 def _numero(valor, etiqueta):
@@ -55,10 +57,14 @@ def _definiciones(parametros):
         maximo = None if maximo in (None, "") else _numero(maximo, f"Máximo de {nombre}")
         if minimo is not None and maximo is not None and minimo > maximo:
             raise ValueError(f"Rango inválido para {nombre}: mínimo mayor que máximo")
+        quien_sabe = str(item.get("quien_sabe") or "cliente").strip().lower()
+        if quien_sabe not in {"cliente", "derivado", "tecnico"}:
+            raise ValueError(f"Quién conoce {nombre} debe ser cliente, derivado o tecnico")
         if codigo in salida:
             raise ValueError(f"Parámetro duplicado: {codigo}")
         salida[codigo] = {"codigo": codigo, "nombre": nombre, "unidad": unidad,
-                          "minimo": minimo, "maximo": maximo, "obligatorio": True}
+                          "minimo": minimo, "maximo": maximo, "obligatorio": True,
+                          "quien_sabe": quien_sabe}
     if not salida:
         raise ValueError("La familia requiere al menos un parámetro")
     return salida
@@ -205,14 +211,110 @@ def aprender_familia(codigo_familia, definiciones, ordenes_reales):
     if any(set(o["inductores"]) != codigos_inductor for o in ordenes_reales):
         raise ValueError("Las órdenes históricas deben declarar los mismos inductores, incluido cero cuando no se use")
     aprendidos = {}
+    observaciones_parametros = [validar_parametros(defs, orden["parametros"]) for orden in ordenes_reales]
     for inductor in sorted(codigos_inductor):
-        observaciones = []
-        for orden in ordenes_reales:
-            parametros = validar_parametros(defs, orden["parametros"])
-            observaciones.append({"parametros": parametros,
-                                  "cantidad": _numero(orden["inductores"][inductor], f"Cantidad de {inductor}")})
+        observaciones = [{"parametros": parametros,
+                          "cantidad": _numero(orden["inductores"][inductor], f"Cantidad de {inductor}")}
+                         for orden, parametros in zip(ordenes_reales, observaciones_parametros)]
         aprendidos[inductor] = _ajustar_lineal(observaciones, defs)
-    return {"familia": familia, "parametros": defs, "inductores": aprendidos}
+    codigos_cliente = [codigo for codigo, definicion in defs.items()
+                       if definicion["quien_sabe"] == "cliente"]
+    derivaciones = {}
+    for codigo, definicion in defs.items():
+        if definicion["quien_sabe"] == "cliente":
+            continue
+        receta = None
+        # Sin grados de libertad residuales no hay evidencia para presentar la
+        # regresión como derivación automática; el campo queda para confirmar.
+        if codigos_cliente and len(observaciones_parametros) > len(codigos_cliente) + 1:
+            filas = [{"parametros": {c: fila[c] for c in codigos_cliente}, "cantidad": fila[codigo]}
+                     for fila in observaciones_parametros]
+            try:
+                receta = _ajustar_lineal(filas, codigos_cliente)
+            except ValueError:
+                receta = None
+        derivaciones[codigo] = receta
+    return {"familia": familia, "parametros": defs, "inductores": aprendidos,
+            "derivaciones": derivaciones}
+
+
+def resolver_parametros(modelo, valores_cliente, valores_tecnicos=None):
+    """Resuelve los datos del pedido sin completar con ceros ni extrapolar rangos.
+
+    Los parámetros ``cliente`` deben venir de la persona que cotiza. Los de
+    ``derivado`` y ``tecnico`` se calculan solo cuando existe una receta
+    aprendida con historia REAL suficiente; los demás se devuelven en
+    ``faltantes`` para confirmar en pantalla.
+    """
+    defs = _definiciones(modelo.get("parametros", {}))
+    if not isinstance(valores_cliente, dict) or not isinstance(valores_tecnicos or {}, dict):
+        raise ValueError("Los parámetros de cliente y técnicos deben ser mapas")
+    valores_tecnicos = valores_tecnicos or {}
+    desconocidos = sorted((set(map(str, valores_cliente)) | set(map(str, valores_tecnicos))) - set(defs))
+    if desconocidos:
+        raise ValueError("Parámetro no declarado: " + ", ".join(desconocidos))
+    repetidos = sorted(set(valores_cliente) & set(valores_tecnicos))
+    if repetidos:
+        raise ValueError("Un parámetro no puede declararse como dato de cliente y técnico a la vez")
+    codigos_cliente = {codigo for codigo, definicion in defs.items()
+                       if definicion["quien_sabe"] == "cliente"}
+    if set(map(str, valores_cliente)) - codigos_cliente:
+        raise ValueError("El pedido solo puede enviar como datos de cliente los parámetros marcados cliente")
+    parametros = {}
+    origen = {}
+    faltantes = []
+
+    def validar_valor(codigo, valor):
+        definicion = defs[codigo]
+        numero = _numero(valor, definicion["nombre"])
+        if definicion["minimo"] is not None and numero < definicion["minimo"]:
+            raise ValueError(f"{definicion['nombre']} está debajo del mínimo válido ({definicion['minimo']:g} {definicion['unidad']})")
+        if definicion["maximo"] is not None and numero > definicion["maximo"]:
+            raise ValueError(f"{definicion['nombre']} supera el máximo válido ({definicion['maximo']:g} {definicion['unidad']})")
+        return numero
+
+    for codigo in codigos_cliente:
+        valor = valores_cliente.get(codigo)
+        if valor in (None, ""):
+            faltantes.append({"codigo": codigo, "nombre": defs[codigo]["nombre"],
+                              "unidad": defs[codigo]["unidad"], "motivo": "Dato que debe declarar el cliente."})
+        else:
+            parametros[codigo] = validar_valor(codigo, valor)
+            origen[codigo] = "cliente"
+
+    derivaciones = modelo.get("derivaciones") or {}
+    for codigo, definicion in defs.items():
+        if codigo in codigos_cliente:
+            continue
+        if valores_tecnicos.get(codigo) not in (None, ""):
+            parametros[codigo] = validar_valor(codigo, valores_tecnicos[codigo])
+            origen[codigo] = "confirmado_tecnico"
+            continue
+        receta = derivaciones.get(codigo)
+        # Evita intentar inferir con datos incompletos o una receta obsoleta.
+        if receta and all(c in parametros for c in codigos_cliente):
+            coeficientes = receta.get("coeficientes") or {}
+            if set(coeficientes) != codigos_cliente:
+                raise ValueError(f"La derivación aprendida de {definicion['nombre']} no coincide con sus datos de cliente")
+            estimado = _numero(receta.get("base"), f"Base derivada de {definicion['nombre']}")
+            estimado += sum(_numero(coeficientes[c], f"Coeficiente derivado de {definicion['nombre']}/{c}")
+                            * parametros[c] for c in codigos_cliente)
+            if (not math.isfinite(estimado)
+                    or (definicion["minimo"] is not None and estimado < definicion["minimo"])
+                    or (definicion["maximo"] is not None and estimado > definicion["maximo"])):
+                faltantes.append({"codigo": codigo, "nombre": definicion["nombre"],
+                                  "unidad": definicion["unidad"],
+                                  "motivo": "La receta queda fuera del rango aprendido; requiere confirmación técnica."})
+            else:
+                parametros[codigo] = estimado
+                origen[codigo] = "derivado"
+            continue
+        motivo = ("No hay una receta aprendida suficiente; confirma el dato técnico."
+                  if definicion["quien_sabe"] == "tecnico"
+                  else "No se pudo derivar con la historia disponible; confirma el dato técnico.")
+        faltantes.append({"codigo": codigo, "nombre": definicion["nombre"],
+                          "unidad": definicion["unidad"], "motivo": motivo})
+    return {"parametros": parametros, "origen": origen, "faltantes": faltantes}
 
 
 def calcular_cantidades(modelo, valores):
@@ -301,6 +403,26 @@ def guardar_familias_en_libro(libro, modelos):
                 hoja.append((familia, inductor, parametro, definicion["nombre"], definicion["unidad"],
                              definicion["minimo"], definicion["maximo"], base,
                              _numero(coeficientes[parametro], f"Coeficiente de {inductor}/{parametro}"), n))
+    tiene_roles = any(definicion.get("quien_sabe", "cliente") != "cliente"
+                      for modelo in modelos.values() for definicion in _definiciones(modelo.get("parametros", {})).values())
+    if tiene_roles or HOJA_FAMILIA_ROL in libro.sheetnames:
+        hoja_roles = libro[HOJA_FAMILIA_ROL] if HOJA_FAMILIA_ROL in libro.sheetnames else libro.create_sheet(HOJA_FAMILIA_ROL)
+        encabezados = tuple(hoja_roles.cell(1, i + 1).value for i in range(len(COLUMNAS_FAMILIA_ROL)))
+        if all(valor is None for valor in encabezados):
+            for i, encabezado in enumerate(COLUMNAS_FAMILIA_ROL, 1):
+                hoja_roles.cell(1, i, encabezado)
+        elif encabezados != COLUMNAS_FAMILIA_ROL:
+            raise ValueError(f"La hoja {HOJA_FAMILIA_ROL} tiene una cabecera incompatible")
+        if hoja_roles.max_row > 1:
+            hoja_roles.delete_rows(2, hoja_roles.max_row - 1)
+        for familia, modelo in sorted(modelos.items()):
+            defs = _definiciones(modelo.get("parametros", {}))
+            for codigo, definicion in defs.items():
+                if definicion["quien_sabe"] == "cliente":
+                    continue
+                receta = (modelo.get("derivaciones") or {}).get(codigo)
+                hoja_roles.append((familia, codigo, definicion["quien_sabe"],
+                                   json.dumps(receta, ensure_ascii=False, sort_keys=True) if receta else None))
     predicciones = []
     for familia, modelo in sorted(modelos.items()):
         for inductor, receta in sorted(modelo.get("inductores", {}).items()):
@@ -344,7 +466,7 @@ def leer_familias_de_libro(libro):
         definicion = {"codigo": parametro, "nombre": datos["PAR_NOMBRE"], "unidad": datos["PAR_UNIDAD"],
                       "minimo": datos["PAR_MIN"], "maximo": datos["PAR_MAX"]}
         definicion = _definiciones([definicion])[parametro]
-        modelo = salida.setdefault(familia, {"familia": familia, "parametros": {}, "inductores": {}})
+        modelo = salida.setdefault(familia, {"familia": familia, "parametros": {}, "inductores": {}, "derivaciones": {}})
         previa = modelo["parametros"].get(parametro)
         if previa is not None and previa != definicion:
             raise ValueError(f"Fila {numero_fila}: definición inconsistente para {parametro}")
@@ -361,6 +483,34 @@ def leer_familias_de_libro(libro):
         for inductor, receta in modelo["inductores"].items():
             if set(receta["coeficientes"]) != requeridos:
                 raise ValueError(f"La receta de {familia}/{inductor} está incompleta")
+    if HOJA_FAMILIA_ROL in libro.sheetnames:
+        hoja_roles = libro[HOJA_FAMILIA_ROL]
+        encabezados = tuple(hoja_roles.cell(1, i + 1).value for i in range(len(COLUMNAS_FAMILIA_ROL)))
+        if encabezados != COLUMNAS_FAMILIA_ROL:
+            raise ValueError(f"La hoja {HOJA_FAMILIA_ROL} tiene una cabecera incompatible")
+        vistos = set()
+        for numero_fila, fila in enumerate(hoja_roles.iter_rows(min_row=2, values_only=True), 2):
+            if not any(valor is not None for valor in fila[:len(COLUMNAS_FAMILIA_ROL)]):
+                continue
+            familia, parametro, rol, texto = fila[:len(COLUMNAS_FAMILIA_ROL)]
+            familia, parametro = str(familia or "").strip(), str(parametro or "").strip()
+            clave = (familia, parametro)
+            if clave in vistos or familia not in salida or parametro not in salida[familia]["parametros"]:
+                raise ValueError(f"Fila {numero_fila}: rol duplicado o sin parámetro de familia")
+            if str(rol or "").strip().lower() not in {"derivado", "tecnico"}:
+                raise ValueError(f"Fila {numero_fila}: rol de parámetro inválido")
+            salida[familia]["parametros"][parametro]["quien_sabe"] = str(rol).strip().lower()
+            if texto not in (None, ""):
+                try:
+                    receta = json.loads(texto)
+                except (TypeError, json.JSONDecodeError):
+                    raise ValueError(f"Fila {numero_fila}: derivación inválida") from None
+                if not isinstance(receta, dict) or not isinstance(receta.get("coeficientes"), dict):
+                    raise ValueError(f"Fila {numero_fila}: derivación inválida")
+                salida[familia]["derivaciones"][parametro] = receta
+            else:
+                salida[familia]["derivaciones"][parametro] = None
+            vistos.add(clave)
     if HOJA_FAMILIA_PRED in libro.sheetnames:
         hoja_pred = libro[HOJA_FAMILIA_PRED]
         encabezados = tuple(hoja_pred.cell(1, i + 1).value for i in range(len(COLUMNAS_FAMILIA_PRED)))

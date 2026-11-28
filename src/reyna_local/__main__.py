@@ -373,7 +373,10 @@ class ReynaHandler(BaseHTTPRequestHandler):
                     modelos = leer_familias_de_libro(wb)
                 finally:
                     wb.close()
-                familias = [{"codigo": codigo, "parametros": list(modelo["parametros"].values()),
+                familias = [{"codigo": codigo,
+                             "parametros": [{**parametro,
+                                             "derivable": bool((modelo.get("derivaciones") or {}).get(parametro["codigo"]))}
+                                            for parametro in modelo["parametros"].values()],
                              "inductores": [{"codigo": ind} for ind in sorted(modelo["inductores"])]}
                             for codigo, modelo in sorted(modelos.items())]
             except (OSError, ValueError, KeyError):
@@ -416,7 +419,7 @@ class ReynaHandler(BaseHTTPRequestHandler):
                     raise ValueError('Resultado publicado incompatible con el periodo o la empresa.')
                 if es_pedido:
                     from openpyxl import load_workbook
-                    from .recetas_pedido import leer_familias_de_libro
+                    from .recetas_pedido import leer_familias_de_libro, resolver_parametros
                     from .pedido import cotizar_pedido
                     wb = load_workbook(libro, read_only=True, data_only=True)
                     try:
@@ -426,9 +429,72 @@ class ReynaHandler(BaseHTTPRequestHandler):
                     familia = str(body.get('familia') or '')
                     if familia not in modelos:
                         raise ValueError('Elige una familia parametrizada en el libro.')
+                    modelo = modelos[familia]
+                    resueltos = resolver_parametros(modelo, body.get('parametros') or {},
+                                                    body.get('parametros_tecnicos') or {})
+                    if resueltos['faltantes']:
+                        quote = {
+                            'estado': 'PRELIMINAR', 'cotizacion_firme': False,
+                            'producto': str(body.get('producto') or '').strip(),
+                            'cliente': str(body.get('cliente') or '').strip(),
+                            'fecha_requerida': str(body.get('fecha_requerida') or '').strip(),
+                            'parametros_resueltos': resueltos['parametros'],
+                            'origen_parametros': resueltos['origen'],
+                            'faltantes': resueltos['faltantes'],
+                            'avisos': ['Faltan datos para calcular el costo; completa la confirmación técnica.'],
+                            'fundamento': {
+                                'formula': 'El costo del pedido se calcula después de completar los parámetros requeridos.',
+                                'supuesto': 'Solo se completan parámetros con una receta aprendida y dentro del rango declarado.',
+                                'dato_usado': f"Familia {familia}; cantidad {body.get('cantidad')}; parámetros recibidos {body.get('parametros') or {}}.",
+                                'limite': 'No se calculó el costo porque hay datos técnicos pendientes.',
+                            },
+                        }
+                        self._json(HTTPStatus.OK, quote)
+                        return
                     from .libro_dbd import empresa as leer_empresa
                     quote = cotizar_pedido(libro, leer_empresa(libro)[0], result, data['MEDIDA'],
-                                           modelos[familia], body)
+                                           modelo, {**body, 'parametros': resueltos['parametros']})
+                    quote['parametros_resueltos'] = resueltos['parametros']
+                    quote['origen_parametros'] = resueltos['origen']
+                    limites = body.get('umbral_firme', {})
+                    if limites is None:
+                        limites = {}
+                    if not isinstance(limites, dict):
+                        raise ValueError('Los límites de cotización firme deben ser un mapa.')
+                    monto_maximo, ancho_maximo = limites.get('monto'), limites.get('ancho_pct')
+                    motivos = []
+                    if monto_maximo in (None, '') or ancho_maximo in (None, ''):
+                        motivos.append('Define en Configuración el monto máximo y el ancho máximo del rango para autorizar una cotización firme.')
+                    else:
+                        if isinstance(monto_maximo, bool) or isinstance(ancho_maximo, bool):
+                            raise ValueError('Los límites de cotización firme deben ser numéricos.')
+                        try:
+                            monto_maximo, ancho_maximo = float(monto_maximo), float(ancho_maximo)
+                        except (TypeError, ValueError):
+                            raise ValueError('Los límites de cotización firme deben ser numéricos.') from None
+                        import math
+                        if (not math.isfinite(monto_maximo) or monto_maximo < 0
+                                or not math.isfinite(ancho_maximo) or ancho_maximo < 0):
+                            raise ValueError('Los límites de cotización firme deben ser finitos y no negativos.')
+                        if quote['costo_esperado'] > monto_maximo:
+                            motivos.append('El monto supera el límite configurado; requiere confirmación técnica.')
+                        rango = quote.get('rango_p05_p95')
+                        if rango is None:
+                            motivos.append('El rango P05–P95 no es estimable; la cotización queda preliminar.')
+                        elif quote['costo_esperado'] > 0:
+                            ancho = 100 * (rango['p95'] - rango['p05']) / quote['costo_esperado']
+                            if ancho > ancho_maximo:
+                                motivos.append(f'El ancho del rango ({ancho:.2f} %) supera el límite; requiere confirmación técnica.')
+                    if quote.get('plazo', {}).get('estado') == 'NO_DISPONIBLE':
+                        motivos.append('Falta información de capacidad o carga para confirmar la fecha de entrega.')
+                    quote['estado'] = 'PRELIMINAR' if motivos else 'FIRME'
+                    quote['cotizacion_firme'] = not motivos
+                    quote['avisos'] = list(quote.get('avisos') or []) + motivos
+                    quote['condicion_pago'] = str(body.get('condicion_pago') or '').strip()
+                    if resueltos['origen']:
+                        usados = ', '.join(f"{modelo['parametros'][codigo]['nombre']}={valor:g} ({resueltos['origen'][codigo]})"
+                                           for codigo, valor in resueltos['parametros'].items())
+                        quote['fundamento']['dato_usado'] += f" Parámetros: {usados}."
                 elif body.get('familia') is not None:
                     import math
                     familia=body['familia']; unidades=body.get('unidades')

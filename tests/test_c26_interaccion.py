@@ -25,7 +25,12 @@ def test_pantallas_c26_en_chromium(tmp_path):
             page.locator('#planta-bloques button').first.click()
             assert page.locator('#planta-detalle tbody tr').count()>0
             page.screenshot(path=str(output/'E04_planta.png'))
-            ir_a_pestana(page, '#cotizador');page.locator('#cot-precio').fill('5000')
+            ir_a_pestana(page, '#cotizador')
+            page.locator('#cot-avanzado').wait_for(state='visible')
+            if not page.locator('#cot-avanzado').evaluate('e => e.open'):
+                page.locator('#cot-avanzado summary').click()
+            page.locator('#pedido-continuar').click()
+            page.locator('#pedido-precio').fill('5000')
             page.locator('#cotizar-form button').click()
             sync.expect(page.locator('#cot-estado')).to_contain_text('Costo:',timeout=30000)
             page.screenshot(path=str(output/'E15_cotizador.png'))
