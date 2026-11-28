@@ -1,0 +1,6 @@
+# OT-C39 — Contrato de costos para el sistema de planeamiento (A → B)
+Base: `desarrollo/mono` después de C38. Diseño: `docs/diseno/B_TRES_DECISIONES.md` §3. Rama `codex/C39`, un PR, nunca fusionar ni main.
+1. `contrato.py`: tres campos **opcionales** nuevos `capacidad`, `recetas`, `ordenes_abiertas` con su validación (si están, deben tener la forma de §3; si no están, el contrato sigue válido → nada existente se rompe). Actualizar `resultados_ejemplo.json`.
+2. `resultados.py` los publica: capacidad desde MEDIDA nivel CAP del periodo; recetas desde `recetas_pedido` (por familia) y, si no hay familia, promedio por producto de las trazas de órdenes terminadas con su n; órdenes abiertas desde OBJETO (estado ≠ terminado) con avance.
+3. Columna opcional `EST_FEC_ENT` en ESTIMACION; el Pedido la guarda al aceptar (ya pide la fecha requerida); se publica en `ordenes_abiertas.fecha_entrega` (vacío si no existe, nunca inventado).
+4. Pruebas: con SERVITEC los tres campos aparecen y cuadran con el libro (capacidad = Σ MEDIDA CAP; receta de una orden terminada reproducible a mano); con un libro sin MEDIDA CAP, `capacidad` vacío y el contrato sigue válido. Compuerta VERDE y oráculo SERVITEC en 0.00.

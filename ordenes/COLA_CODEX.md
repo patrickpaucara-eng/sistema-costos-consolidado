@@ -11,5 +11,6 @@ Regla: termina una orden (PRs abiertos con compuerta VERDE) y pasa a la siguient
    - 32 `docs/entrega/GUION_PRUEBA_DUENO.md`: prueba de 15 min del EXE sin internet con SERVITEC (REB 22,975 / MPR 5,165), casilla OK/FALLA por paso, 4 pasos con `tests/datos/libros_hostiles/`.
 3. **Manual de usuario (entregable 10)** `docs/entrega/MANUAL_USUARIO.docx`: pantalla por pantalla con capturas del EXE final; se hace DESPUÉS de que Claude una C37 y C38.
 
-## MONOGRAFÍA 2 (después del 9-dic, salvo que la cola de MN 1 termine antes)
-4. **Retomar B** desde `docs/entrega/otra_ia/B/BITACORA_B.md`: piezas 5–18 y 19–23 tal como están escritas ahí (spec: `tools/mapa_b/spec.py`; B vive solo en `src/planeamiento/`, `tests/planeamiento/`, `docs/planeamiento/`; piezas 1, 2 y 4 ya hechas y verificadas en `docs/entrega/otra_ia/B/`, moverlas en la pieza 19). Reemplaza a OT-B01.
+## MONOGRAFÍA 2
+3b. **OT-C39** contrato A → B (capacidad, recetas, órdenes abiertas con fecha de entrega). (después del 9-dic, salvo que la cola de MN 1 termine antes)
+4. **Retomar B** — ESPERAR decisión del dueño sobre la misión (M6 vs. 27-nov, `docs/diseno/B_TRES_DECISIONES.md` §1) antes de la pieza 5. desde `docs/entrega/otra_ia/B/BITACORA_B.md`: piezas 5–18 y 19–23 tal como están escritas ahí (spec: `tools/mapa_b/spec.py`; B vive solo en `src/planeamiento/`, `tests/planeamiento/`, `docs/planeamiento/`; piezas 1, 2 y 4 ya hechas y verificadas en `docs/entrega/otra_ia/B/`, moverlas en la pieza 19). Reemplaza a OT-B01.
