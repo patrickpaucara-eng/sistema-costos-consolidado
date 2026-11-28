@@ -50,3 +50,5 @@
 
 - 27-nov (AUTORIZACIÓN C35-1): Codex puede actualizar las pruebas que solo dependen del menú (`test_c26_e23.py`, `test_c26_interaccion.py`, `test_esqueleto_navegacion.py` y otras de navegación) para recorrer destino → pestaña. Solo cambian selectores y pasos de navegación; ninguna aserción de cálculo, monto o dato. Lista de archivos tocados en el PR.
 - 27-nov: el mapa a detalle se construye mejorando `docs/diagramas/sistema-actual-reyna.html` (drill-down por módulo), no desde cero.
+
+- 27-nov: `mapa-presupuesto-B.html` mejorado con «Vista simple» en lenguaje cotidiano (hechos → plan → salidas → lazo de corrección); B1/B2 quedan como detalle técnico. Punteado = sin aprobar (misión, horizonte, herramienta de solución, parámetros reales, enunciado de Oria).
