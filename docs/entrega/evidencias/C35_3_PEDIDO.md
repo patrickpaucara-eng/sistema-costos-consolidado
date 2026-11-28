@@ -2,7 +2,9 @@
 
 ## Estado de verificación
 
-La rama `codex/C35-3` parte de `4363065`. Las cinco pruebas nuevas de `tests/test_c35_3_pedido.py` pasan en local (4 pruebas de receta/persistencia y 1 recorrido Chromium); pytest informa una advertencia de compatibilidad de `anyio`. La compuerta completa no se ha ejecutado todavía: la prueba funcional preexistente `tests/test_c34_5_pedido.py::test_pedido_guiado_en_chromium_hasta_abrir_ot` usa controles y una interacción anterior. No se editó; requiere una decisión sobre actualizar su preparación del flujo conservando sus aserciones.
+La rama `codex/C35-3` parte de `4363065`. Las cinco pruebas nuevas de `tests/test_c35_3_pedido.py` pasan en local (4 pruebas de receta/persistencia y 1 recorrido Chromium); los cuatro casos C34-6 también pasan sin cambiar sus cifras. Pytest informa una advertencia de compatibilidad de `anyio`.
+
+La única ejecución de la compuerta completa quedó **ROJA: 65 pasaron, 1 falló, 1 advertencia; el contrato de resultados cumple**. El primer fallo fue `tests/test_c26_interaccion.py::test_pantallas_c26_en_chromium`: el recorrido conserva el precio `#cot-precio` del formulario anterior, ahora centralizado en `#pedido-precio` y accesible en el paso Resultado. La prueba C34-5 también usa campos de política trasladados a Definir; la compuerta se detuvo antes de ejecutarla. No se editaron pruebas existentes; adaptar estas interacciones requiere autorización.
 
 ## Qué quedó implementado
 
@@ -22,12 +24,13 @@ La rama `codex/C35-3` parte de `4363065`. Las cinco pruebas nuevas de `tests/tes
 | Roles y derivaciones sobreviven al guardado y lectura del XLSX | Pasa |
 | La derivación se aprende solo con historia REAL suficiente | Pasa |
 | Chromium: seis campos, derivación de área, confirmación de densidad pendiente y aceptación de OT | Pasa; crea `OT-FRE-SW50-0001` en libro temporal |
+| Cuatro casos manuales de C34-6 | 4/4 pasan; importes esperados intactos |
 
-Comando focalizado: `PATH=/tmp/reyna-costos-test/bin:$PATH PYTHONPATH=src python -m pytest -q tests/test_c35_3_pedido.py` → **5 passed, 1 warning**. No se ejecutó la compuerta completa en esta etapa.
+Comando focalizado: `PATH=/tmp/reyna-costos-test/bin:$PATH PYTHONPATH=src python -m pytest -q tests/test_c35_3_pedido.py` → **5 passed, 1 warning**. Cuatro casos: `PATH=/tmp/reyna-costos-test/bin:$PATH PYTHONPATH=src python -m pytest -q tests/test_c34_6_cuatro_rubros.py` → **4 passed, 1 warning**. Compuerta: **ROJA** según el resultado anterior.
 
 ## Límites pendientes
 
 - Las políticas, los borradores preliminares y los últimos valores se guardan en `localStorage`, por navegador y equipo; aún no se comparten entre puestos ni se guardan en el libro.
 - La condición de pago queda en la solicitud y en el valor local predeterminado, pero el esquema/flujo T09→T13 no tiene un campo persistente para ella. `store.py` está excluido por instrucciones vigentes; requiere decidir el contrato de almacenamiento antes de ofrecer persistencia.
 - El cálculo de plazo continúa en días de capacidad, sin calendario laboral ni carga automática de OTs abiertas. El rango combinado sigue suponiendo errores independientes, límite preexistente.
-- Pendiente: adaptar con autorización la prueba funcional C34-5 a la interfaz nueva, sin cambiar aserciones de costo, adicionales, plazo, rango ni aceptación. Después ejecutar una vez la compuerta completa.
+- Pendiente: autorización para actualizar la preparación/selector de cotización en `test_c26_interaccion.py` y `test_c34_5_pedido.py`, conservando todas las aserciones de costo, adicionales, plazo, rango, comparación de lotes y aceptación. Luego corregir el recorrido y volver a ejecutar la compuerta antes de abrir PR.
