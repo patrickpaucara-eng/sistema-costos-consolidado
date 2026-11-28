@@ -190,3 +190,6 @@ En «Ver todos los tramos», las columnas Cantidad del destino × Tasa dan el mo
 - **E41** «Pedido especial» de Decidir repite la evaluación del Pedido; además Decidir usa demanda máxima = ventas × 1.5 (supuesto inventado) y pregunta capacidad ociosa que `resultado["capacidad_ociosa"]` ya trae (amplía E35).
 - **E42** La sección Simulación existe pero ningún enlace del menú lleva a ella.
 - **E43** 38 de 89 módulos de `src/` no se alcanzan desde el ejecutable (analitica/, analitica2/, cuatro métodos «cáscara» sin cálculo, métodos sueltos). Decisión del dueño: archivar o conservar.
+
+## E44 · Defectos del libro que pasan sin aviso (otra IA, pieza 24, 28-nov; SIN corregir)
+Con `tests/datos/libros_hostiles/` (copias de SERVITEC): `validar()` acepta sin aviso (04) fechas al revés, (05) clave duplicada — la segunda fila pisa a la primera, cantidad 10 → 12 —, (06) criterio que suma 0 (falla recién al calcular, regla I8), números escritos como texto («30000») y no revisa montos de LINEA. **Decisión del dueño: corregir antes del 9-dic dentro de C37-7.**

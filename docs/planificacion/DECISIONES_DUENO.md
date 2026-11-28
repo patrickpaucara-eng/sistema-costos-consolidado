@@ -67,3 +67,5 @@
 - 27-nov: OT-C37 (funcionalidad MN 01: practicidad, valor, entorno hostil) reemplaza a OT-C36; el mapa a detalle ya lo hizo Claude. Archivar código que no corre (E43) sigue pendiente de decisión del dueño.
 
 - 28-nov (AUTORIZACIÓN C35-3/4): Codex puede adaptar preparación, selectores y pasos de `test_c26_interaccion.py` y `test_c34_5_pedido.py` al Pedido de 3 pasos. Prohibido cambiar aserciones, cifras esperadas o datos de entrada que alteren el resultado; el PR lista cada línea cambiada.
+
+- 28-nov: los defectos E44 (fechas al revés, clave duplicada, criterio suma 0, número como texto, montos de LINEA) se corrigen antes del 9-dic en C37-7. La validación de lo que entregue la otra IA la hacen Codex (por pruebas) o la propia IA con validaciones automáticas, no Claude.

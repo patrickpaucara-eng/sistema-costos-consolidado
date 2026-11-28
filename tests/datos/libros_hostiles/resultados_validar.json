@@ -1,0 +1,113 @@
+[
+ {
+  "archivo": "00_control_sin_defecto.xlsx",
+  "defecto": "Ninguno: copia del libro base con la hoja LEEME añadida.",
+  "esperado": "Sin errores; el cálculo de julio debe dar REB 22,975 y MPR 5,165 (cifras del dueño).",
+  "detecta": "SÍ (acepta)",
+  "actual": [],
+  "cambios": [],
+  "fuente": "Control: demuestra que la hoja LEEME y el guardado con openpyxl no rompen el libro."
+ },
+ {
+  "archivo": "01_hoja_obligatoria_borrada.xlsx",
+  "defecto": "Se borró una hoja obligatoria: CRITERIO.",
+  "esperado": "Falta la hoja CRITERIO. Inductores (unidad de medida).",
+  "detecta": "SÍ",
+  "actual": [
+   "Falta la hoja CRITERIO. Inductores (unidad de medida)."
+  ],
+  "cambios": [
+   "CRITERIO: hoja eliminada"
+  ],
+  "fuente": "libro_dbd.validar(): «Falta la hoja {n}. {DESCRIPCION}»."
+ },
+ {
+  "archivo": "02_celdas_vacias_MEDIDA.xlsx",
+  "defecto": "Celdas vacías en MEDIDA: la cantidad de HORAS_MOD de julio quedó en blanco.",
+  "esperado": "Hoja MEDIDA, fila 184: la cantidad debe ser un número ≥ 0. (y lo mismo para las filas 185 y 186)",
+  "detecta": "SÍ",
+  "actual": [
+   "Hoja MEDIDA, fila 184: la cantidad debe ser un número ≥ 0.",
+   "Hoja MEDIDA, fila 185: la cantidad debe ser un número ≥ 0.",
+   "Hoja MEDIDA, fila 186: la cantidad debe ser un número ≥ 0."
+  ],
+  "cambios": [
+   "MEDIDA fila 184: MED_CAN 300 → vacío",
+   "MEDIDA fila 185: MED_CAN 500 → vacío",
+   "MEDIDA fila 186: MED_CAN 200 → vacío"
+  ],
+  "fuente": "libro_dbd.validar(): revisa MED_CAN con _num() y ≥ 0."
+ },
+ {
+  "archivo": "03_texto_en_monto.xlsx",
+  "defecto": "Texto en un monto: el ingreso de julio de REB se escribió «30,000» (texto con coma).",
+  "esperado": "Hoja VENTA, fila 14: el ingreso (VTA_ING) debe ser un número.",
+  "detecta": "SÍ",
+  "actual": [
+   "Hoja VENTA, fila 14: el ingreso (VTA_ING) debe ser un número."
+  ],
+  "cambios": [
+   "VENTA fila 14: VTA_ING 30000 → '30,000' (texto)"
+  ],
+  "fuente": "libro_dbd.validar(): revisa VTA_ING con _num(). Ojo: «30000» como texto SÍ pasa, porque float('30000') funciona; y LINEA.LIN_MTO no se revisa (ver hallazgos)."
+ },
+ {
+  "archivo": "04_fechas_al_reves.xlsx",
+  "defecto": "Fechas al revés: el periodo 2025-07 empieza después de terminar.",
+  "esperado": "PROPUESTO: «Hoja PERIODO, fila 8: PER_INI (20250731) es posterior a PER_FIN (20250701).»",
+  "detecta": "NO (hallazgo)",
+  "actual": [],
+  "cambios": [
+   "PERIODO fila 8: PER_INI 20250701 → 20250731; PER_FIN 20250731 → 20250701"
+  ],
+  "fuente": "libro_dbd.validar() solo revisa que PER_COD tenga la forma AAAA-MM; no compara PER_INI con PER_FIN. Efecto en el cálculo: POR VERIFICAR (motor_espejo.py ordena los periodos abiertos por PER_INI)."
+ },
+ {
+  "archivo": "05_codigo_duplicado.xlsx",
+  "defecto": "Código duplicado: la orden OT-SRV-REB-2025-07 aparece dos veces en OBJETO con cantidades distintas.",
+  "esperado": "PROPUESTO: «Hoja OBJETO, fila 18: OBJ_NUM «OT-SRV-REB-2025-07» está repetido (ya está en la fila 14).»",
+  "detecta": "NO (hallazgo)",
+  "actual": [],
+  "cambios": [
+   "OBJETO fila 18: copia de la fila 14 con OBJ_CAN 12"
+  ],
+  "fuente": "libro_dbd.validar() guarda OBJETO en un diccionario por OBJ_NUM: la segunda fila pisa a la primera sin aviso (cantidad 12 en lugar de 10). motor_espejo.py tiene «Clave duplicada en {tabla} para la empresa del evento», pero solo al leer tablas durante una transacción: POR VERIFICAR si se dispara al calcular."
+ },
+ {
+  "archivo": "06_criterio_suma_cero.xlsx",
+  "defecto": "Criterio que suma 0: el inductor DES_OT de julio quedó en cero para las dos órdenes.",
+  "esperado": "Al calcular: «I8: P4C DES tiene monto [monto] y su criterio DES_OT suma cero» (validar() lo acepta porque 0 es ≥ 0).",
+  "detecta": "PARCIAL: validar() NO; el cálculo SÍ (por lectura de código, POR VERIFICAR en ejecución)",
+  "actual": [],
+  "cambios": [
+   "MEDIDA fila 190: MED_CAN 200 → 0",
+   "MEDIDA fila 191: MED_CAN 100 → 0"
+  ],
+  "fuente": "metodos/reparto_etapas.py, línea 290: Rechazo I8 cuando el criterio de un origen con monto suma cero. El monto exacto de la actividad DES en julio no se pudo calcular aquí (falta fuente/DBD_Fuente.xlsx en el repo ligero)."
+ },
+ {
+  "archivo": "07_archivo_truncado.xlsx",
+  "defecto": "Archivo truncado: se cortó el archivo a la mitad de sus bytes (descarga o copia interrumpida).",
+  "esperado": "El archivo no es un libro Excel (.xlsx) legible.",
+  "detecta": "SÍ",
+  "actual": [
+   "El archivo no es un libro Excel (.xlsx) legible."
+  ],
+  "cambios": [
+   "(se trunca después de guardar)"
+  ],
+  "fuente": "libro_dbd.validar(): cualquier excepción al abrir el libro devuelve ese mensaje."
+ },
+ {
+  "archivo": "08_columnas_otro_orden.xlsx",
+  "defecto": "Columnas en otro orden: MEDIDA y OBJETO tienen sus columnas invertidas (mismos nombres, mismos datos).",
+  "esperado": "Sin errores: el sistema lee por nombre de columna, no por posición. El cálculo de julio debe dar lo mismo que el control (REB 22,975 / MPR 5,165).",
+  "detecta": "SÍ (acepta)",
+  "actual": [],
+  "cambios": [
+   "MEDIDA: 6 columnas invertidas",
+   "OBJETO: 13 columnas invertidas"
+  ],
+  "fuente": "libro_dbd._tablas(): arma cada fila con dict(zip(cabecera, fila)). Resultado del cálculo: POR VERIFICAR en ejecución."
+ }
+]

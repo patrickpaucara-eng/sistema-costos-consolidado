@@ -30,6 +30,7 @@ Regla: `recetas_pedido` (mínimos cuadrados) es el mecanismo de cotización; `fa
 Simulación: si aporta, entra al menú en Futuro; si duplica Laboratorio/Futuro, se oculta (decidir con evidencia en el PR). Inicio: se reduce a 3 accesos (Cotizar pedido, Registrar, Planta del costo). «Word código» pasa a Configuración (es de la monografía).
 
 ## C37-7 Prueba de entorno hostil
+Usar los libros ya fabricados en `tests/datos/libros_hostiles/` (LEEME con mensaje esperado y obtenido). Además corregir E44 en `libro_dbd.validar()`: fechas al revés, clave duplicada (usar PK del DBD), criterio que suma 0 detectado en la carga, número escrito como texto y montos de LINEA. Cada caso con su prueba.
 `tests/test_entorno_hostil.py` con copias del libro SERVITEC: (a) hoja obligatoria borrada, (b) celdas vacías en MEDIDA, (c) texto en un monto, (d) archivo truncado, (e) dos cálculos simultáneos, (f) sin red (EXE offline). Esperado: mensaje en español con hoja y columna, sin traza de Python en pantalla, sin 0 silenciosos, libro original intacto. Evidencia con capturas.
 
 ## Fuera de esta orden (decisión del dueño pendiente)
