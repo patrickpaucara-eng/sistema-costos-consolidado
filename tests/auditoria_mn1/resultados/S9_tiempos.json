@@ -1,0 +1,26 @@
+{
+ "2": {
+  "llamadas_correr": 31,
+  "segundos": 2.82,
+  "ordenes": 2,
+  "tramos": 79
+ },
+ "10": {
+  "llamadas_correr": 91,
+  "segundos": 2.99,
+  "ordenes": 10,
+  "tramos": 249
+ },
+ "20": {
+  "llamadas_correr": 171,
+  "segundos": 3.1,
+  "ordenes": 20,
+  "tramos": 499
+ },
+ "50": {
+  "llamadas_correr": 411,
+  "segundos": 3.58,
+  "ordenes": 50,
+  "tramos": 1249
+ }
+}

@@ -155,13 +155,14 @@ docs/diseno/METODO_PLANEAMIENTO.md dice «No se construye antes del 9-dic» y AG
 | 2 calculadora.py + test_calculadora.py | TERMINADA y verificada | `python3.11 -m unittest -v test_calculadora.py`: 13/13. El tiempo con 50 OT: plan ≈5 s; plan más costo de restricciones ≈33 s |
 | 3 mn02_borrador.docx | TERMINADA, **sin verificación automática** | Revisada a ojo: 7 páginas. Cita de Tino Reyna corregida (MCD §3.4; TECNIA 2016, pp. 84-85). Falta un script que compruebe sus cifras contra casos_B / calculadora |
 | 4 eventos.py + test_eventos.py | TERMINADA y verificada | `SPEC_B=<ruta a spec.py> python3.11 -m unittest -v test_eventos.py`: 25/25 |
+| A · Auditoría MN 1 | **HECHA** (28/11, 06:35); falta medir S9 con cientos de órdenes | `pruebas_auditoria/correr_auditoria.py <repo>`: 9/9 CONFIRMADAS, todos los controles OK. Ver AUDITORIA_MN1.md |
 | 5–18 | NO EMPEZADAS | — |
 | 19–23 | NO EMPEZADAS (enunciado recibido el 28/11, abajo) | — |
 
 Las piezas de MN 1 (24, 25 y 30) están hechas y verificadas; su registro está en ENTREGA_MN1.md, no aquí.
 
 ### Orden de la cola (dueño, 28/11)
-A) Auditoría MN 1 (ver SOSPECHAS_AUDITORIA.md: 9 sospechas, ninguna ejecutada) → B) piezas 5–18 → C) piezas 19–23 → D) piezas MN 1: 26–29 y 31–32.
+~~A) Auditoría MN 1~~ (hecha el 28/11) → B) piezas 5–18 → C) piezas 19–23 → D) piezas MN 1: 26–29 y 31–32.
 
 ### Entorno
 - **Python 3.11** con `pulp==2.9.0`. La 2.9.0 trae CBC incluido; PuLP 4.x ya no lo trae y la calculadora no corre. Las piezas 4 en adelante usan Python puro.
@@ -186,3 +187,29 @@ A) Auditoría MN 1 (ver SOSPECHAS_AUDITORIA.md: 9 sospechas, ninguna ejecutada) 
 
 ### Preguntas abiertas que siguen vigentes
 Son la 1–8 y la 10–17 de esta bitácora; la 9 (referencia de Tino Reyna) quedó resuelta con el repo, salvo el título del artículo de TECNIA. La más urgente para B es la **10**: el contrato de costos no publica capacidad práctica, receta ni fecha de entrega. La pieza 12 ya tiene una regla de reemplazo para eso (arriba).
+
+---
+
+## Auditoría MN 1 (punto A de la cola) — 28/11/2026, 06:35
+
+### Qué se hizo
+- `pruebas_auditoria/`: `_comun.py` (arnés: copia de SERVITEC → cambio con openpyxl → registrar() y calcular() reales en una carpeta temporal), un `test_S<n>_*.py` por sospecha, cada uno con su control sin defecto, y `correr_auditoria.py`, que imprime CONFIRMADO / SOSPECHA. Trae su copia de SERVITEC en `datos/`.
+- `AUDITORIA_MN1.md`: resumen, hallazgos por severidad, observaciones, correcciones propuestas y POR VERIFICAR.
+
+### Resultado
+- CRÍTICO: S1, S2, S3, S4 (sube: el material negativo cae en otra orden) y S6 (sube: el panel no puede fallar en esos casos).
+- ALTO: S7 (se aprueba un cierre sin revisión de contabilidad editando el JSON).
+- MEDIO: S5.
+- BAJO: S8 (5 de 30 en el código; 0 de 2 con el calcular real) y S9 (50 órdenes = 3.6 s).
+- Corrección a la sospecha S2: `variable.py:112` no usa LIN_MTO primero.
+
+### Entorno usado
+Python 3.11 con openpyxl 3.1.5, defusedxml 0.7.1, python-docx 1.1.2 y pulp 2.9.0. Repo: `repo/` + `fuente/DBD_Fuente.xlsx` + `casos/plantilla_dbd.xlsx`. La corrida completa tarda unos 4 min.
+
+### Pendiente de la auditoría (POR VERIFICAR)
+1. S9 con 100, 200 y 400 órdenes: la corrida se interrumpió a pedido del dueño. Comando: `cd pruebas_auditoria && AUDIT_REPO=<repo> AUDIT_S9_N=2,100,200,400 python3.11 -m unittest test_S9_trazas_cuadraticas`.
+2. S8: más intentos con el calcular real, y `accion()` concurrente.
+3. Observación para el dueño: el cierre de julio de SERVITEC se bloquea en la conciliación (COP_PERD vacío contra 126 del costeo). Las pruebas S7 y S8 agregan esa cuenta.
+
+### Siguiente
+Pieza 5 (`parametros.py`, B0): ver «Cómo retomar la pieza 5», arriba.
