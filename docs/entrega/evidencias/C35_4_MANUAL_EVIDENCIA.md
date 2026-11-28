@@ -1,6 +1,6 @@
 # C35-4 · Manual y capturas
 
-Base: rama apilada `codex/C35-4` sobre `codex/C35-3` (`5c952af`).
+Base: rama apilada `codex/C35-4` sobre `codex/C35-3` (`ba16ac5`).
 
 ## Cambios
 
@@ -11,7 +11,7 @@ Base: rama apilada `codex/C35-4` sobre `codex/C35-3` (`5c952af`).
 
 ## Estado
 
-Las capturas se generaron con el libro Frenosa copiado en un espacio temporal y una OT de prueba; no se alteró el libro fuente. C35-4 no cambia código ni cálculo. La compuerta completa no se ejecutó en esta rama: la prueba funcional heredada C34-5 usa los campos retirados del pedido antiguo y su actualización requiere la decisión documentada en `ordenes/RESPUESTAS_CODEX_24NOV.md`. Las pruebas propias de C35-3 que generaron las capturas pasaron (5/5).
+Las capturas se generaron con el libro Frenosa copiado en un espacio temporal y una OT de prueba; no se alteró el libro fuente. C35-4 no cambia código ni cálculo. La compuerta completa C35-3 dio ROJA (65 pasaron, 1 falló en la prueba de interacción C26); C35-4 está apilada sobre esa rama y no tiene compuerta ni PR propios aún. Las pruebas propias de C35-3 que generaron las capturas pasaron (5/5). La decisión requerida para adaptar las E2E heredadas consta en `ordenes/RESPUESTAS_CODEX_24NOV.md`.
 
 ![Menú del sistema](C35_4_MENU.png)
 
