@@ -264,6 +264,7 @@ main#principal{padding-top:0}
 .acciones-portada .acciones-campos{display:flex;align-items:end;gap:.7rem;flex-wrap:wrap}
 .acciones-portada label{display:inline-flex;align-items:center;gap:.35rem}
 .acciones-portada .acciones-status{display:inline-flex;gap:.75rem;flex-wrap:wrap}
+.campo-control{display:grid;gap:.25rem;min-width:0}.campo-control input,.campo-control select{width:100%;min-width:0}
 .sens-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 1fr;gap:.5rem;align-items:center}.sens-track{position:relative;height:28px;border-left:1px solid transparent;background:linear-gradient(to right,transparent 49.8%,#333 49.8%,#333 50.2%,transparent 50.2%)}.sens-track span{position:absolute;display:block;height:10px}
 .pedido-progreso{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0;margin:.5rem 0}.pedido-progreso li{border:1px solid #aaa;border-radius:999px;padding:.3rem .7rem;font-size:.85rem;color:#555}.pedido-progreso li[aria-current=step]{background:#333;color:#fff;border-color:#333;font-weight:700}.pedido-paso{border:1px solid #bbb;border-radius:8px;background:#fafafa;padding:1rem}.pedido-paso[hidden],.pedido-faltantes[hidden]{display:none!important}.pedido-producto-campo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.65rem;border:1px solid #aaa;border-radius:8px;padding:.65rem}.pedido-producto-campo legend,.pedido-faltantes legend,.pedido-config-cargas legend{font-weight:700;padding:0 .3rem}.pedido-faltantes,.pedido-config-cargas{border:1px solid #b88a42;border-radius:8px;padding:.8rem}.pedido-faltantes{background:#fff8e7}.pedido-preliminar{padding:.6rem;border-left:5px solid #ad7100;background:#fff4d4}.pedido-firme{padding:.6rem;border-left:5px solid #176c4c;background:#e9f6ef}.pedido-resumen{padding:.65rem;background:#f1f1f1;border-radius:8px;font-weight:650}
 </style></head>
@@ -274,7 +275,7 @@ main#principal{padding-top:0}
       <div class="brand"><span class="brand-mark" aria-hidden="true">R</span><span>Sistema de Costos Reyna</span></div>
       <nav aria-label="Secciones del sistema" id="nav-destinos">
         <details class="nav-menu" data-destino="pedido"><summary>Pedido</summary><div><a href="#cotizador">Cotizar pedido</a><a href="#costos">Órdenes</a><a href="#ruta">Ruta de la orden</a></div></details>
-        <details class="nav-menu" data-destino="operacion"><summary>Operación</summary><div><a href="#operar">Registrar movimiento</a><a href="#importar">Importar libro</a><a href="#cierre">Cierre y aprobación</a></div></details>
+        <details class="nav-menu" data-destino="operacion"><summary>Operación</summary><div><a href="#operar">Registrar movimiento</a><a href="#cierre">Cierre y aprobación</a></div></details>
         <details class="nav-menu" data-destino="costos" open><summary>Costos</summary><div><a href="#portada">Inicio</a><a href="#dashboard">Planta del costo</a><a href="#periodos">Periodos</a><a href="#reportes">Reportes</a><a href="#inventarios">Inventarios y pérdidas</a><a href="#normal">Costeo normal</a></div></details>
         <details class="nav-menu" data-destino="futuro"><summary>Futuro</summary><div><a href="#proyeccion">Futuro</a><a href="#laboratorio">Laboratorio</a><a href="#familias">Familias</a><a href="#comparar">Comparar síntesis</a><a href="#decidir">Decidir</a><a href="#propuestas">Propuestas</a></div></details>
         <details class="nav-menu" data-destino="aprendizaje"><summary>Aprendizaje</summary><div><a href="#aprendido">Lo que aprendió</a><a href="#analisis">Relevancia</a></div></details>
@@ -405,7 +406,7 @@ main#principal{padding-top:0}
         <p>Metodología ABC escalonada de W. Oria</p><div id="modelo-niveles" class="paso"></div><h3>Flujos de costo observados</h3><p class="legend">Las flechas corresponden a trazas del periodo seleccionado; el libro no declara el destino en cada regla.</p><div id="modelo-flujos" class="result-table"></div><p class="legend">El modelo se define con datos del libro DBD (no está programado): cambiar de empresa es cambiar estas tablas.</p><h3>Reglas de reparto por etapa</h3><div id="modelo-reglas" class="result-table"></div><h3>Recursos</h3><div id="modelo-recursos" class="result-table"></div><h3>Actividades</h3><div id="modelo-actividades" class="result-table"></div><h3>Inductores</h3><div id="modelo-inductores" class="result-table"></div></section>
       <section id="datos" class="panel stack section-link"><h2>Datos del libro</h2><p class="legend">Tablas del libro DBD de la empresa para el periodo elegido (todo dato guardado se puede ver).</p><h3>Ventas</h3><div id="datos-ventas" class="result-table"></div><h3>Órdenes registradas</h3><div id="datos-ordenes" class="result-table"></div><h3>Centros</h3><div id="datos-centros" class="result-table"></div><h3>Clientes</h3><div id="datos-clientes" class="result-table"></div><h3>Medidas de los inductores</h3><input id="buscar-medida" class="buscador" type="search" placeholder="Buscar inductor o destino…" aria-label="Buscar medida"><div id="datos-medidas" class="result-table"></div></section>
       <section id="reportes" class="panel stack section-link"><h2>Reportes</h2><p>Descarga los resultados de la empresa, el periodo y la síntesis elegidos. El Excel de resultados incluye la ruta del costo (una hoja por etapa P1…P7), el kardex, el modelo ABC y el panel de calidad.</p><div class="actions"><button type="button" data-exportar="resultados">Excel resultados</button><button type="button" data-exportar="analitica">Excel analítica</button><button type="button" data-exportar="proyeccion">Excel proyección</button><button type="button" data-exportar="sistema">Sistema HTML sin conexión (todas las pantallas)</button><button type="button" data-exportar="html">Informe HTML</button><button type="button" data-exportar="entrada">Excel datos de entrada (libro DBD)</button><button type="button" data-exportar="codigo">Word código</button></div><p id="export-status" role="status"></p></section>
-      <section id="cargar-libro" class="panel stack section-link"><h2>Cargar empresa (libro DBD)</h2><p class="legend">El sistema acepta un solo formato: el libro del DBD. Si los datos de tu ERP vienen en otro formato, se usa un adaptador (como el de Frenosa) que llena la plantilla. El libro se valida completo antes de aceptarlo; si algo no cumple, se rechaza y se explica qué corregir.</p>
+      <section id="cargar-libro" class="panel stack section-link"><h2>Cargar empresa (libro DBD)</h2><p class="legend">El sistema acepta un solo formato: el libro del DBD. Si los datos de tu ERP vienen en otro formato, se usa un adaptador (como el de Frenosa) que llena la plantilla. El libro se valida completo antes de aceptarlo; si algo no cumple, se rechaza y se explica qué corregir.</p><p class="legend">Carga aquí el libro y, después de validarlo, crea el mismo espacio de operación que usarás para registrar movimientos. No necesitas volver a importar el archivo desde otra pantalla.</p>
         <div class="actions"><a class="button" href="/api/plantilla" download>Descargar plantilla vacía</a><label class="button" for="libro-archivo">Elegir libro .xlsx</label><input id="libro-archivo" type="file" accept=".xlsx" hidden><button id="libro-operar" type="button" class="secondary">Operar la empresa elegida (crear espacio)</button></div><p class="legend">Flujo único: el espacio de operación es el MISMO libro. Lo que registres allí (compras, consumos, cierre) se costea al elegir el espacio en «Empresa» y pulsar Calcular.</p><p id="libro-estado" role="status"></p><div id="libro-confirmar" class="confirmar" hidden><span id="libro-confirmar-texto"></span><button id="libro-si" type="button">Reemplazar</button><button id="libro-no" type="button" class="secondary">Cancelar</button></div><h3>Versiones anteriores del libro elegido</h3><div id="libro-versiones" class="result-table"></div><ul id="libro-errores"></ul></section>
       <div id="vista-erp">
       <header class="page-heading">
@@ -420,26 +421,6 @@ main#principal{padding-top:0}
         <p>Cada espacio queda vinculado a una sola empresa operativa. El piloto verifica a los usuarios con permisos para las transacciones activas y rechaza un ámbito empresarial ambiguo; el aislamiento integral de todas las tablas sigue en validación.</p>
       </div>
 
-      <div class="top-grid">
-        <section class="panel" id="importar" aria-labelledby="import-heading">
-          <div class="panel-heading">
-            <div><h2 id="import-heading">Importar libro</h2><p>Crea un espacio de trabajo a partir de un libro local.</p></div>
-          </div>
-          <form id="import-form" class="fields">
-            <div class="field">
-              <label for="workspace-name">Nombre del espacio</label>
-              <input id="workspace-name" name="name" type="text" autocomplete="off" required placeholder="Ej. Prueba de compras">
-            </div>
-            <div class="field">
-              <label for="workbook-path">Ruta del libro en el servidor local</label>
-              <input id="workbook-path" name="workbook_path" type="text" class="mono" autocomplete="off" spellcheck="false" required aria-describedby="path-help" placeholder="/ruta/local/Sistema_Costos.xlsx">
-              <p id="path-help" class="helper">Escribe la ruta completa de un libro accesible desde la máquina que ejecuta el servidor Python.</p>
-            </div>
-            <div class="actions"><button id="import-button" type="submit">Importar libro</button></div>
-          </form>
-          <div id="import-status" class="notice" role="status"></div>
-        </section>
-
         <section class="panel" id="espacios" aria-labelledby="workspace-heading">
           <div class="panel-heading">
             <div><h2 id="workspace-heading">Espacios de trabajo</h2><p>Selecciona el espacio en el que vas a operar.</p></div>
@@ -449,7 +430,6 @@ main#principal{padding-top:0}
           <ul id="workspace-list" class="workspace-list"></ul>
           <div id="workspace-status" class="notice" role="status"></div>
         </section>
-      </div>
 
       <section class="panel stack" id="operar" aria-labelledby="execute-heading">
         <div class="panel-heading"><div><h2 id="execute-heading">Ejecutar transacción</h2><p>Usa un código de usuario autorizado en el libro importado.</p></div></div>
@@ -478,20 +458,6 @@ main#principal{padding-top:0}
             <div id="guided-form" class="fields"><p>Elige una transacción para mostrar sus campos.</p></div>
             <button id="add-line" class="secondary" type="button" hidden>Agregar línea</button>
             <div class="field"><label for="support-document">Documento de soporte</label><input id="support-document" type="file"><p id="support-hash" class="helper">El archivo permanece en este equipo. Se muestra su nombre y huella SHA-256.</p></div>
-            <details id="advanced-json">
-              <summary>Modo avanzado: editar JSON</summary>
-              <p class="helper">La cabecera es un objeto, por ejemplo <code>{"FECHA": 20261118}</code>. Las líneas forman una lista de objetos, por ejemplo <code>[{"CANT": 1}]</code>. Completa la estructura con los campos y códigos que requiere tu libro.</p>
-            <div class="fields split">
-              <div class="field">
-                <label for="json-header">Cabecera en JSON</label>
-                <textarea id="json-header" name="header" spellcheck="false">{}</textarea>
-              </div>
-              <div class="field">
-                <label for="json-lines">Líneas en JSON</label>
-                <textarea id="json-lines" name="lines" spellcheck="false">[{}]</textarea>
-              </div>
-            </div>
-            </details>
             <div class="field">
               <label for="request-id">Identificador de solicitud</label>
               <input id="request-id" name="request_id" class="mono" type="text" autocomplete="off" spellcheck="false" required aria-describedby="request-help">
@@ -553,9 +519,6 @@ main#principal{padding-top:0}
     const connection = byId("connection");
     const workspaceList = byId("workspace-list");
     const workspaceStatus = byId("workspace-status");
-    const importForm = byId("import-form");
-    const importButton = byId("import-button");
-    const importStatus = byId("import-status");
     const executeForm = byId("execute-form");
     const executeFields = byId("execute-fields");
     const executeStatus = byId("execute-status");
@@ -565,8 +528,6 @@ main#principal{padding-top:0}
     const closeRequestId = byId("close-request-id");
     const transaction = byId("transaction");
     const operator = byId("operator");
-    const headerInput = byId("json-header");
-    const linesInput = byId("json-lines");
     const requestId = byId("request-id");
     const tableSelect = byId("table-select");
     const tableStatus = byId("table-status");
@@ -705,8 +666,6 @@ main#principal{padding-top:0}
       formDrafts.set(selectedWorkspace.id, {
         transaction: transaction.value,
         operator: operator.value,
-        header: headerInput.value,
-        lines: linesInput.value,
         requestId: requestId.value
       });
     }
@@ -726,11 +685,7 @@ main#principal{padding-top:0}
       if (transaction.value) loadGuidedFields();
       else loadTransactionCatalog(space);
       operator.value = draft?.operator ?? "";
-      headerInput.value = draft?.header ?? "{}";
-      linesInput.value = draft?.lines ?? "[{}]";
       requestId.value = draft?.requestId || newRequestId();
-      headerInput.removeAttribute("aria-invalid");
-      linesInput.removeAttribute("aria-invalid");
     }
 
     function displayWorkspace(space) {
@@ -831,22 +786,6 @@ main#principal{padding-top:0}
       paging = undefined;
     }
 
-    function parseField(input, objectOnly) {
-      let data;
-      try {
-        data = JSON.parse(input.value);
-      } catch {
-        throw new Error(objectOnly
-          ? "La cabecera no es JSON válido. Revisa llaves, comillas y comas."
-          : "Las líneas no son JSON válido. Revisa corchetes, llaves, comillas y comas.");
-      }
-      const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
-      if (objectOnly ? !isObject(data) : !Array.isArray(data) || data.some((line) => !isObject(line))) {
-        throw new Error(objectOnly ? "La cabecera debe ser un objeto JSON." : "Las líneas deben ser una lista de objetos JSON.");
-      }
-      return data;
-    }
-
     let guidedFields = [];
     let guidedRevision = 0;
     let currentGuidedCode = "";
@@ -860,17 +799,74 @@ main#principal{padding-top:0}
     const addLine = byId("add-line");
     function fieldControl(field) {
       const assigned = guidedObjectSpec?.variable === field.variable;
-      const el = document.createElement(!assigned && field.lista ? "select" : "input");
+      const wrapper = document.createElement("span");
+      wrapper.className = "campo-control";
+      if (!assigned && field.lista) {
+        const opciones = (field.valores || []).map(value => String(value));
+        const buscar = document.createElement("input");
+        buscar.type = "search";
+        buscar.autocomplete = "off";
+        buscar.setAttribute("aria-label", `Buscar ${field.etiqueta || field.variable}`);
+        buscar.placeholder = "Escribe para filtrar";
+        const select = document.createElement("select");
+        select.dataset.variable = field.variable;
+        select.dataset.tipo = field.tipo || "lista";
+        select.dataset.opciones = JSON.stringify(opciones);
+        select.setAttribute("aria-label", field.etiqueta || field.variable);
+        const llenar = () => {
+          const valor = select.value;
+          const consulta = buscar.value.trim().toLocaleLowerCase();
+          const filtradas = opciones.filter(opcion => opcion.toLocaleLowerCase().includes(consulta));
+          if (valor && !filtradas.includes(valor)) filtradas.unshift(valor);
+          select.replaceChildren(makeOption("", "Selecciona"), ...filtradas.map(value => makeOption(value)));
+          if (valor) select.value = valor;
+        };
+        buscar.addEventListener("input", llenar);
+        llenar();
+        wrapper.append(buscar, select);
+        return wrapper;
+      }
+      const el = document.createElement("input");
       el.dataset.variable = field.variable;
+      el.dataset.tipo = field.tipo || (field.lista ? "lista" : "texto");
       el.setAttribute("aria-label", field.etiqueta || field.variable);
+      el.autocomplete = "off";
+      el.spellcheck = false;
       if (assigned) {
         el.readOnly = true;
         el.setAttribute("aria-readonly", "true");
         el.dataset.sistemaAsignado = "true";
         el.title = "Código generado por el sistema; solo lectura.";
-      } else if (field.lista) el.replaceChildren(makeOption("", "Selecciona"), ...field.valores.map(value => makeOption(String(value))));
-      return el;
+      } else if (field.tipo === "numero") {
+        el.type = "number";
+        el.step = "any";
+        el.inputMode = "decimal";
+      } else if (field.tipo === "fecha") {
+        el.type = "text";
+        el.inputMode = "numeric";
+        el.maxLength = 8;
+        el.pattern = "[0-9]{8}";
+        el.placeholder = "AAAAMMDD";
+      }
+      wrapper.append(el);
+      return wrapper;
     }
+    guided.addEventListener("input", event => {
+      const control = event.target.closest?.("[data-variable]");
+      if (control) control.dataset.tocado = "true";
+    });
+    guided.addEventListener("keydown", event => {
+      const control = event.target.closest?.("[data-variable]");
+      if (control) control.dataset.tocado = "true";
+    });
+    executeForm.addEventListener("invalid", event => {
+      const control = event.target;
+      if (control.dataset?.tipo === "numero" && control.validity?.badInput) {
+        event.preventDefault();
+        const field = guidedFields.find(item => item.variable === control.dataset.variable);
+        notice(executeStatus, `Escribe un número válido en «${field?.etiqueta || control.dataset.variable}». No se envió la transacción.`, "error");
+      }
+    }, true);
     async function refreshGuidedObjectCode() {
       const revision = ++guidedObjectRevision;
       const spec = guidedObjectSpec, id = selectedWorkspace?.id, trx = currentGuidedCode;
@@ -1019,22 +1015,33 @@ main#principal{padding-top:0}
         user: operator.value.trim(),
         request_id: requestId.value.trim()
       };
-      if (!byId("advanced-json").open) {
-        if (!guidedFields.length) throw new Error("Espera a que se carguen los campos de la transacción.");
-        payload.header = {};
-        for (const field of guidedFields.filter(f => f.nivel === "C")) {
-          const control = [...guided.querySelectorAll(":scope > label [data-variable]")].find(el => el.dataset.variable === field.variable);
-          if (control && control.value !== "") payload.header[field.variable] = control.value;
+      if (!guidedFields.length) throw new Error("Espera a que se carguen los campos de la transacción.");
+      payload.header = {};
+      for (const field of guidedFields.filter(f => f.nivel === "C")) {
+        const control = [...guided.querySelectorAll(":scope > label [data-variable]")].find(el => el.dataset.variable === field.variable);
+        if (control && control.value !== "") payload.header[field.variable] = control.value;
+      }
+      payload.lines = [...guided.querySelectorAll("tbody tr")].map(collectFields);
+      for (const field of guidedFields) {
+        const control = [...guided.querySelectorAll("[data-variable]")].find(el => el.dataset.variable === field.variable);
+        if (!control) continue;
+        const value = control.value.trim();
+        if (field.tipo === "numero" && control.dataset.tocado === "true" && value === "") {
+          control.focus();
+          throw new Error(`Escribe un número válido en «${field.etiqueta || field.variable}».`);
         }
-        payload.lines = [...guided.querySelectorAll("tbody tr")].map(collectFields);
-      } else for (const [input, key] of [[headerInput, "header"], [linesInput, "lines"]]) {
-        try {
-          payload[key] = parseField(input, key === "header");
-          input.removeAttribute("aria-invalid");
-        } catch (error) {
-          input.setAttribute("aria-invalid", "true");
-          input.focus();
-          throw error;
+        if (value !== "" && field.tipo === "numero" && !Number.isFinite(Number(value))) {
+          control.focus();
+          throw new Error(`Escribe un número válido en «${field.etiqueta || field.variable}».`);
+        }
+        if (value !== "" && field.tipo === "fecha" && !/^\d{8}$/.test(value)) {
+          control.focus();
+          throw new Error(`Escribe la fecha de «${field.etiqueta || field.variable}» como AAAAMMDD.`);
+        }
+        if (value !== "" && field.lista && !control.dataset.sistemaAsignado
+            && !JSON.parse(control.dataset.opciones || "[]").includes(value)) {
+          control.focus();
+          throw new Error(`Selecciona «${field.etiqueta || field.variable}» de la lista.`);
         }
       }
       // El kardex del libro usa fechas AAAAMMDD numéricas; evitar mezclar texto y números en la copia.
@@ -1144,33 +1151,6 @@ main#principal{padding-top:0}
     });
     tablePrev.addEventListener("click", () => loadTable(Math.max(0, paging.offset - paging.limit)));
     tableNext.addEventListener("click", () => loadTable(paging.offset + paging.limit));
-    for (const input of [headerInput, linesInput]) {
-      input.addEventListener("input", () => input.removeAttribute("aria-invalid"));
-    }
-
-    importForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const name = byId("workspace-name").value.trim();
-      const workbookPath = byId("workbook-path").value.trim();
-      if (!name || !workbookPath) {
-        notice(importStatus, "Completa el nombre del espacio y la ruta del libro.", "error");
-        return;
-      }
-      importButton.disabled = true;
-      notice(importStatus, "Importando el libro…");
-      try {
-        const space = await api("/api/workspaces", { name, workbook_path: workbookPath });
-        workspaces = [...workspaces.filter((entry) => entry.id !== space.id), space];
-        renderWorkspaceList();
-        notice(importStatus, `Se importó «${space.name}».`, "success");
-        await selectWorkspace(space.id);
-      } catch (error) {
-        notice(importStatus, `No se pudo importar el libro. ${error.message} Revisa la ruta y que el servidor pueda leer el archivo.`, "error");
-      } finally {
-        importButton.disabled = false;
-      }
-    });
-
     executeForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (!selectedWorkspace || loadingDetail || executing) return;
@@ -1657,7 +1637,7 @@ main#principal{padding-top:0}
     espacio:n=>`✓ Espacio de operación creado para ${n}. Regístralo en «Registrar movimiento»; luego elígelo en «Empresa» y pulsa Calcular.`,
     reemplazado:n=>`✓ Libro de ${n} reemplazado. La versión anterior quedó guardada.`,restaurado:n=>`✓ Se volvió a la versión elegida del libro de ${n}.`,cancelado:'Operación cancelada: no se cambió nada.',
     sinConexion:'No se pudo conectar con el programa.',preparando:'Preparando reporte…',reporteMal:'No se pudo descargar el reporte.',sinDatos:'Información aún no disponible para esta selección.'};
-  const VISTAS_ERP=['importar','espacios','operar','consultar','close-form'];
+  const VISTAS_ERP=['espacios','operar','consultar','close-form'];
   const gruposNav=[...document.querySelectorAll('#nav-destinos .nav-menu')];
   const tabsNav=$('module-tabs');
   function activarGrupo(grupo){
@@ -1681,6 +1661,7 @@ main#principal{padding-top:0}
   const resizeInicio=new ResizeObserver(()=>{const inicio=$('inicio');if(inicio)document.documentElement.style.setProperty('--selector-height',`${inicio.offsetHeight}px`);});
   resizeInicio.observe($('inicio'));
   function mostrar(){
+    if(location.hash==='#importar') history.replaceState(null,'','#cargar-libro');
     const h=(location.hash||'#portada').slice(1), erp=VISTAS_ERP.includes(h);
     document.querySelectorAll('#principal > section').forEach(sec=>sec.classList.toggle('vista-oculta',erp||sec.id!==h));
     const v=document.getElementById('vista-erp'); if(v) v.classList.toggle('vista-oculta',!erp);

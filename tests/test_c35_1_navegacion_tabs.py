@@ -1,4 +1,4 @@
-"""C35-1/E34: seis destinos, recorrido de las 26 vistas y pestaña persistente."""
+"""C35-1/E34: seis destinos, recorrido de las 25 vistas y pestaña persistente."""
 from __future__ import annotations
 
 import threading
@@ -10,7 +10,7 @@ from reyna_local.__main__ import ReynaServer
 
 DESTINOS = {
     "Pedido": ("#cotizador", "#costos", "#ruta"),
-    "Operación": ("#operar", "#importar", "#cierre"),
+    "Operación": ("#operar", "#cierre"),
     "Costos": ("#portada", "#dashboard", "#periodos", "#reportes", "#inventarios", "#normal"),
     "Futuro": ("#proyeccion", "#laboratorio", "#familias", "#comparar", "#decidir", "#propuestas"),
     "Aprendizaje": ("#aprendido", "#analisis"),
@@ -18,7 +18,7 @@ DESTINOS = {
 }
 
 
-def test_recorrido_26_pantallas_y_pestana_activa_tras_actualizar(tmp_path):
+def test_recorrido_25_pantallas_y_pestana_activa_tras_actualizar(tmp_path):
     sync = pytest.importorskip("playwright.sync_api")
     server = ReynaServer(tmp_path, 0)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -51,7 +51,7 @@ def test_recorrido_26_pantallas_y_pestana_activa_tras_actualizar(tmp_path):
                     assert page.locator(f"#module-tabs [role='tab'][href='{href}'][aria-current='page']").count() == 1
                     visitadas.append(href)
 
-            assert len(visitadas) == len(set(visitadas)) == 26
+            assert len(visitadas) == len(set(visitadas)) == 25
             costos = page.locator("#nav-destinos details[data-destino='costos']")
             if not costos.evaluate("e => e.open"):
                 costos.locator("summary").click()

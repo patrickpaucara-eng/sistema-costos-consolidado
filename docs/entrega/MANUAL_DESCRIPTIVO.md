@@ -68,3 +68,6 @@ El resultado operativo es el mismo en REAL y CONTABLE; solo cambia qué se carga
 
 **No incluido (no funcional):** base SQLite, integración ERP/MES/IoT, rendimiento a gran escala.
 **Arquitectura objetivo:** captura por adaptadores (MES/IoT), MFCA ISO 14051, flujo de valor, benchmarking y un sistema de presupuesto/planeamiento aparte que lee el contrato de costos.
+
+## 7. Registrar un movimiento
+En **Cargar empresa**, elige el libro DBD local, espera su validación y pulsa «Operar la empresa elegida» para crear el espacio. En **Operación → Registrar movimiento**, elige ese espacio, la transacción y el usuario. Completa la cabecera y las líneas del formulario: las listas se filtran escribiendo, las cantidades usan campos numéricos y una entrada inválida muestra el motivo antes de enviar. La pantalla construye la solicitud; no pide editar JSON. **Espacios de trabajo** sirve para elegir y actualizar la lista de espacios.

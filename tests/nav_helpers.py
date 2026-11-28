@@ -2,7 +2,7 @@
 
 DESTINO_POR_HREF = {
     "#cotizador": "pedido", "#costos": "pedido", "#ruta": "pedido",
-    "#operar": "operacion", "#importar": "operacion", "#cierre": "operacion",
+    "#operar": "operacion", "#cierre": "operacion",
     "#portada": "costos", "#dashboard": "costos", "#periodos": "costos",
     "#reportes": "costos", "#inventarios": "costos", "#normal": "costos",
     "#proyeccion": "futuro", "#laboratorio": "futuro", "#familias": "futuro",

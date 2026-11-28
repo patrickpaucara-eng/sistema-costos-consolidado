@@ -10,6 +10,7 @@ from pathlib import Path
 import signal
 import sys
 import traceback
+import unicodedata
 from urllib.parse import parse_qs, unquote, urlsplit
 import webbrowser
 
@@ -26,6 +27,20 @@ SECURITY_POLICY = (
     "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
     "connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 )
+
+
+def _tipo_campo(etiqueta, referencia):
+    """Tipo de control derivado de la etiqueta y referencia declaradas en el DBD."""
+    if referencia:
+        return "lista"
+    texto = unicodedata.normalize("NFKD", str(etiqueta or "")).encode("ascii", "ignore").decode("ascii").casefold()
+    if "fecha" in texto:
+        return "fecha"
+    cuantitativos = ("cantidad", "importe", "monto", "costo", "precio", "tasa", "porcentaje",
+                     "unidad", "hora", "dia", "avance", "peso", "volumen", "duracion", "consumo")
+    if any(palabra in texto for palabra in cuantitativos):
+        return "numero"
+    return "texto"
 
 
 class ReynaServer(ThreadingHTTPServer):
@@ -608,7 +623,8 @@ class ReynaHandler(BaseHTTPRequestHandler):
                         value = item[ci]
                         if value not in (None, '') and isinstance(value, (str, int, float)) and value not in options:
                             options.append(value)
-                fields.append(dict(secuencia=sequence, variable=variable, etiqueta=label, nivel=level, lista=reference, valores=options))
+                fields.append(dict(secuencia=sequence, variable=variable, etiqueta=label, nivel=level,
+                                   tipo=_tipo_campo(label, reference), lista=reference, valores=options))
             fields.sort(key=lambda field: int(field['secuencia']))
             from .correlativo_objeto import especificacion_creacion
             object_spec = especificacion_creacion(tables, trx)
