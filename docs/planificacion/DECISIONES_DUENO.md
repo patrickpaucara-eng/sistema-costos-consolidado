@@ -82,3 +82,5 @@
 - 28-nov (MN 02): misión de B = la del 27-nov (programación de recursos comprometidos). Los presupuestos (operativo, efectivo, inversiones, financiero, control, estados) son síntesis configurables del plan; cada línea de ticket lleva fecha de devengo, fecha de caja, clase y estado. M6 queda cubierta como conjunto de síntesis.
 
 - 28-nov: el dueño aprueba E43 tal como está en `docs/entrega/E43_ARCHIVO_PROPUESTA.md` → OT-C40 en la cola de Codex, después de C38.
+
+- 28-nov (K4 aprobado): autonomía por niveles medida; sin habilitación escrita del dueño el sistema solo PROPONE; cada propuesta se acepta, rechaza o pospone con motivo. C41-4 se ejecuta.

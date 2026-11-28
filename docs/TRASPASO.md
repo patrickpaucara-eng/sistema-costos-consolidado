@@ -28,7 +28,7 @@ Mapa general: `docs/diagramas/mapa-sistemas-AB.html` (botón Gerente/Desarrollad
 ## 4. Estado al 28-nov 09:45 (verifica PRs abiertos y compuerta antes de confiar en esto)
 - `desarrollo/mono` en VERDE (571 pruebas). Unidas: C32–C35, C37-0, C37-1, C37-2.
 - **Cola de Codex** (`ordenes/COLA_CODEX.md`): E45+E46 (vista de matrices) → C37-3…7 → **C38** (10 correcciones de cálculo de la auditoría; si al 3-dic C37 no terminó, C38 va primero) → **C41** (lo que pide Oria en su SIC-ABCDIEP: precisión contra modelo ingenuo, Monte Carlo honesto, margen por capas; ver `docs/diseno/CONTRASTE_CLEIN.md`) → **C40** (archivar código que no corre; E43 aprobado) → documentos MN 1 → manual → C39 (contrato A→B) → B piezas 5–23.
-- **Decisión pendiente del dueño:** K4 de `CONTRASTE_CLEIN.md` (autonomía: el sistema solo «propone» salvo habilitación escrita del dueño; Oria prohíbe cambios automáticos de precios, compras o personal).
+- **K4 aprobado (28-nov):** K4 de `CONTRASTE_CLEIN.md` (autonomía: el sistema solo «propone» salvo habilitación escrita del dueño; Oria prohíbe cambios automáticos de precios, compras o personal).
 - **Pendiente del coordinador:** unir PRs que lleguen; generar el EXE final (GitHub Actions, workflow de Windows; `tools/windows/build.py`) cuando C37+C38 estén unidas; llenar cifras finales en documentos.
 - **Pendiente del dueño:** probar el EXE sin internet con el guion; horas (`docs/entrega/tiempos/`); exportar chats (entregable 1); decidir qué código que no corre se archiva (E43: `analitica/`, `analitica2/`, métodos «cáscara»); zip de 13 entregables; ensayo.
 
