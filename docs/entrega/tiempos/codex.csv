@@ -64,3 +64,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-27,23:12,23:47,OT-C35-2 navegación autorizada y compuerta final,Monografía,Codex,"3 pruebas focalizadas pasaron en Chromium; segunda compuerta VERDE: 564 pruebas, 1 advertencia, 26 subpruebas; contrato válido"
 2026-11-28,00:20,00:47,OT-C35-3 Pedido de tres pasos y derivación de parámetros,Monografía,Codex,"5 pruebas propias y 4 casos C34-6 pasan; compuerta única ROJA (65 pasaron, 1 falló en C26 interacción, contrato válido); autorización necesaria para adaptar dos E2E heredadas"
 2026-11-28,05:18,06:00,"OT-C35-3 adapta recorridos autorizados y cierra compuerta",Monografía,Codex,"13 pruebas focalizadas verdes; compuerta VERDE: 569 pruebas y contrato de resultados válido"
+2026-11-28,00:38,00:41,OT-C35-4 manual y evidencias visuales,Monografía,Codex,"Manual aumenta 49 palabras; capturas nuevas de menú y Pedido tomadas desde espacio temporal; compuerta integral pendiente de decisión sobre prueba C34-5"

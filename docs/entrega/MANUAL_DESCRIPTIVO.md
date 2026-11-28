@@ -12,6 +12,8 @@
 
 Reglas de diseño: las pantallas y documentos **solo leen el contrato**; nunca recalculan costos. Ninguna clave la teclea el usuario (el sistema asigna el código de la OT) y el motor rechaza claves repetidas.
 
+**Menú:** seis destinos — Pedido, Operación, Costos, Futuro, Aprendizaje y Configuración — agrupan las pantallas por trabajo; cada destino abre pestañas para sus vistas.
+
 ## 2. Modelo de costeo (MCD/DBD de Tino Reyna; ABC escalonado de W. Oria)
 | Etapa | Origen → destino | Base |
 |---|---|---|
@@ -40,7 +42,7 @@ El resultado operativo es el mismo en REAL y CONTABLE; solo cambia qué se carga
 | Propuestas | Por causa (precio → compras; cantidad → producción); sin propuestas sobre costos no controlables; prioridad = impacto × probabilidad (Beta-Binomial); mensajes por área |
 | Costeo variable y relevancia | Fijo/variable por recurso; margen de contribución; punto de equilibrio preciso por producto (el ponderado solo como respaldo); relevancia al 10 % |
 | Decidir | Producir o tercerizar, eliminar línea, pedido especial (con y sin capacidad ociosa), un recurso escaso (orden por MC por unidad del recurso, con tope de demanda), procesar o vender; exporta a Excel un modelo para Solver cuando hay varias restricciones |
-| Pedido (cotización) | Familia con parámetros obligatorios y receta aprendida; preparación por lote aparte del costo por unidad; tramos de cantidad; conceptos adicionales; costo proyectado por intervalos (curvas pareja, inicio, final, S) con contrato reajustable o cerrado; plazo por capacidad; rango P05–P95; al aceptar abre la OT |
+| Pedido (cotización) | Sigue tres pasos: describe (familia/producto, cantidad, cliente, fecha, contrato y pago, más medidas del cliente); revisa costo, rango P05–P95, precio y plazo, suficiencia y fundamento; acepta o guarda como preliminar. Los parámetros derivados no se piden; los no derivables requieren confirmación técnica. Políticas y umbrales se definen fuera del pedido y se guardan en el navegador actual. La OT se abre por T09→T13 solo si la cotización queda firme. |
 | Familias | Aprende la receta de cada familia con intervalo de predicción 95 %; prueba pertenencia y propone fusionar con ANOVA (siempre aprueba el dueño) |
 | Aprendizaje | Recalibra estándares y umbrales solo si mejora fuera de muestra y cambia ≤ 20 %; si no, pide aprobación; nunca toca el costo real |
 | Laboratorio | Copia del espacio, transacción de prueba, recálculo y comparación por orden contra el original intacto |
