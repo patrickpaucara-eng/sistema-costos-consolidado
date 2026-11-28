@@ -245,6 +245,87 @@ def proyectar_granular(libro, emp, meses=6, factores=None, carpeta_aprendizaje=N
     return {'base':last,'meses':outputs,'sensibilidad':sensitivity,'bloques':outputs[0]['bloques']}
 
 
+MODELOS = ('sistema', 'ultimo_valor', 'promedio_3')
+_NOMBRE = {'sistema': 'el sistema', 'ultimo_valor': 'el último valor real', 'promedio_3': 'el promedio de los 3 últimos reales'}
+
+
+def _medidas(pares):
+    """MAE, WAPE y sesgo de pares (real, proyectado). Sesgo = promedio(real − proyectado): positivo = subestima."""
+    if not pares:
+        return {'n': 0, 'mae': None, 'wape_pct': None, 'sesgo': None, 'motivo': 'No hay meses comparables.'}
+    err = [r - p for r, p in pares]; base = sum(abs(r) for r, _ in pares)
+    out = {'n': len(pares), 'mae': round(sum(abs(e) for e in err)/len(err), 2), 'wape_pct': None,
+           'sesgo': round(sum(err)/len(err), 2), 'motivo': None}
+    if base: out['wape_pct'] = round(sum(abs(e) for e in err)/base*100, 2)
+    else: out['motivo'] = 'WAPE indefinido: la suma de los costos reales es 0.'
+    return out
+
+
+def _ganador(modelos):
+    """Modelo de menor WAPE y por cuánto le gana al siguiente; empate o falta de dato dicho con texto."""
+    w = {k: v['wape_pct'] for k, v in modelos.items() if v['wape_pct'] is not None}
+    if not w:
+        motivo = next((v['motivo'] for v in modelos.values() if v['motivo']), 'No hay meses comparables.')
+        return {'modelo': None, 'ganadores': [], 'ventaja_puntos': None, 'sistema_gana': None, 'texto': f'No se puede decidir: {motivo}'}
+    mejor = min(w.values()); ganadores = [k for k in MODELOS if k in w and abs(w[k]-mejor) < 1e-9]
+    resto = sorted(v for k, v in w.items() if k not in ganadores)
+    ventaja = round(resto[0]-mejor, 2) if resto else None
+    ing = [w[k] for k in ('ultimo_valor', 'promedio_3') if k in w]
+    gana_sis = None if 'sistema' not in w or not ing else w['sistema'] < min(ing) - 1e-9
+    if len(ganadores) > 1:
+        texto = 'Empate en WAPE ' + f'{mejor:.2f} %' + ' entre ' + ' y '.join(_NOMBRE[k] for k in ganadores) + '.'
+    else:
+        texto = f'Gana {_NOMBRE[ganadores[0]]}: WAPE {mejor:.2f} %' + (f', {ventaja:.2f} puntos menos que el siguiente.' if ventaja is not None else '.')
+    if gana_sis is False: texto += ' El sistema no le gana al modelo ingenuo.'
+    return {'modelo': ganadores[0] if len(ganadores) == 1 else 'empate', 'ganadores': ganadores, 'wape_pct': mejor,
+            'ventaja_puntos': ventaja, 'sistema_gana': gana_sis, 'texto': texto}
+
+
+def _comparar(filas):
+    """Evalúa los tres modelos sobre las MISMAS filas (las que tienen pronóstico de los tres)."""
+    comunes = [f for f in filas if all(f.get(k) is not None for k in ('proyectado', 'ingenuo_ultimo', 'ingenuo_prom3'))]
+    faltan = [f"{f['periodo']}{' ' + f['producto'] if f.get('producto') else ''}: {f.get('motivo_ingenuo') or 'sin pronóstico'}"
+              for f in filas if f not in comunes]
+    modelos = {'sistema': _medidas([(f['real'], f['proyectado']) for f in comunes]),
+               'ultimo_valor': _medidas([(f['real'], f['ingenuo_ultimo']) for f in comunes]),
+               'promedio_3': _medidas([(f['real'], f['ingenuo_prom3']) for f in comunes])}
+    return {'comparables': len(comunes), 'sin_historia': faltan, 'modelos': modelos, 'gana': _ganador(modelos),
+            'sistema_todas_las_filas': _medidas([(f['real'], f['proyectado']) for f in filas if f.get('proyectado') is not None])}
+
+
+def medir_contra_ingenuos(filas, reales):
+    """K1 de CONTRASTE_CLEIN (criterio de Oria): MAE, WAPE y sesgo del sistema y de dos modelos ingenuos con el mismo
+    origen móvil (solo historia hasta t−1). `filas`: [{periodo, producto, proyectado, real}] del sistema; `reales`:
+    {periodo: {producto: costo real}} de todos los meses. Ingenuos por producto: (a) último real observado antes de t,
+    (b) promedio de los 3 últimos reales observados antes de t. Un mes sin dato del producto no cuenta como 0.
+    Completa cada fila con `ingenuo_ultimo`, `ingenuo_prom3` y `motivo_ingenuo` y devuelve el resumen."""
+    meses = sorted(set(reales) | {f['periodo'] for f in filas})
+    for f in filas:
+        hist = [reales[m][f['producto']] for m in meses if m < f['periodo'] and f['producto'] in reales.get(m, {})]
+        f['ingenuo_ultimo'] = round(hist[-1], 2) if hist else None
+        f['ingenuo_prom3'] = round(sum(hist[-3:])/3, 2) if len(hist) >= 3 else None
+        f['motivo_ingenuo'] = None if len(hist) >= 3 else (
+            f"{f['producto']} tiene {len(hist)} mes(es) real(es) antes de {f['periodo']}; el promedio de 3 necesita 3." if hist
+            else f"{f['producto']} no tiene costo real antes de {f['periodo']}.")
+    por_mes = []
+    for m in sorted({f['periodo'] for f in filas}):
+        fm = [f for f in filas if f['periodo'] == m]; fila = {'periodo': m, 'real': round(sum(f['real'] for f in fm), 2),
+              'proyectado': round(sum(f['proyectado'] for f in fm), 2), 'motivo_ingenuo': None}
+        for k in ('ingenuo_ultimo', 'ingenuo_prom3'):
+            fila[k] = None if any(f[k] is None for f in fm) else round(sum(f[k] for f in fm), 2)
+        if fila['ingenuo_ultimo'] is None or fila['ingenuo_prom3'] is None:
+            fila['motivo_ingenuo'] = ' '.join(f['motivo_ingenuo'] for f in fm if f['motivo_ingenuo'])
+        por_mes.append(fila)
+    productos = sorted({f['producto'] for f in filas})
+    return {'mes_total': _comparar(por_mes), 'producto': _comparar(filas),
+            'por_cada_producto': {p: _comparar([f for f in filas if f['producto'] == p]) for p in productos},
+            'ingenuo_por_mes': [{k: x[k] for k in ('periodo', 'ingenuo_ultimo', 'ingenuo_prom3', 'motivo_ingenuo')} for x in por_mes],
+            'definiciones': {'mae': 'promedio de |real − proyectado| (S/)', 'wape_pct': 'Σ|real − proyectado| / Σ|real| × 100',
+                             'sesgo': 'promedio de (real − proyectado) (S/); positivo = el modelo subestima',
+                             'ultimo_valor': 'costo real del último mes observado del producto', 'promedio_3': 'promedio de los 3 últimos meses reales observados del producto',
+                             'comparacion': 'los tres modelos se miden sobre las mismas filas, con historia solo hasta el mes anterior'}}
+
+
 def precision(libro, emp, minimo=4):
     """A2 (decisión 25-nov, reemplaza la síntesis ESTIMADO): para cada mes pasado t, lo que el sistema habría proyectado con la
     historia hasta t−1 (mismo motor, recursos pronosticados) contra el costo real de t, por producto y total.
@@ -253,12 +334,14 @@ def precision(libro, emp, minimo=4):
     from .resultados import calcular_periodos
     book=Path(libro); cache=calcular_periodos(book,emp); por=cache[0]
     objs={str(o['OBJ_NUM']):str(o['OBJ_PRO']) for o in P.leer(book,['OBJETO'])['OBJETO']}
-    per=sorted(por); filas=[]
-    for i in range(minimo, len(per)):
-        t=per[i]; pr=proyectar_granular(book, emp, 1, hasta=per[i-1], _cache=cache)['meses'][0]
-        real=defaultdict(float)
+    per=sorted(por); filas=[]; reales={}
+    for t in per:
+        real=reales[t]=defaultdict(float)
         for o,v in por[t].items():
             real[objs.get(str(o),str(o))]+=sum(float(x) for k,x in v.items() if k.split('|')[0] in ('MD','PD','SD','CIF','GAD','GVT','GFI'))
+    for i in range(minimo, len(per)):
+        t=per[i]; pr=proyectar_granular(book, emp, 1, hasta=per[i-1], _cache=cache)['meses'][0]
+        real=reales[t]
         for p in pr['productos']:
             r=real.get(p['producto'],0.0)
             filas.append({'periodo':t,'producto':p['producto'],'proyectado':p['costo_total'],'real':round(r,2),
@@ -267,5 +350,7 @@ def precision(libro, emp, minimo=4):
     for f in filas: tot[f['periodo']][0]+=f['proyectado']; tot[f['periodo']][1]+=f['real']
     resumen=[{'periodo':k,'proyectado':round(a,2),'real':round(b,2),'error_pct':round((a-b)/b*100,2) if b else None} for k,(a,b) in sorted(tot.items())]
     errs=[abs(x['error_pct']) for x in resumen if x['error_pct'] is not None]
-    return {'por_producto':filas,'por_mes':resumen,'error_medio_abs_pct':round(sum(errs)/len(errs),2) if errs else None,
+    medidas=medir_contra_ingenuos(filas,{k:dict(v) for k,v in reales.items()})
+    for fila,ing in zip(resumen,medidas['ingenuo_por_mes']): fila.update({k:v for k,v in ing.items() if k!='periodo'})
+    return {'medidas':medidas,'gana':medidas['mes_total']['gana'],'por_producto':filas,'por_mes':resumen,'error_medio_abs_pct':round(sum(errs)/len(errs),2) if errs else None,
             'metodo':'proyección de un mes con la historia hasta el mes anterior, por el mismo motor ABC'}
