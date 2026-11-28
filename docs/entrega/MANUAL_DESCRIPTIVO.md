@@ -40,7 +40,7 @@ El resultado operativo es el mismo en REAL y CONTABLE; solo cambia qué se carga
 | Función | Método |
 |---|---|
 | Diagnóstico | Elemento que más explica la variación del costo unitario; umbral aprendido max(5 %, 2·MAD) |
-| Proyección | 6 meses por recurso (precio, cantidad, inductor), mismo motor; desglose por recurso, centro, actividad y orden; precisión contra lo real |
+| Proyección | 6 meses por recurso (precio, cantidad, inductor), mismo motor; desglose por recurso, centro, actividad y orden; precisión contra lo real. Futuro también muestra los escenarios simulados, sus rangos y probabilidad de pérdida. |
 | Propuestas | Por causa (precio → compras; cantidad → producción); sin propuestas sobre costos no controlables; prioridad = impacto × probabilidad (Beta-Binomial); mensajes por área |
 | Costeo variable y relevancia | Fijo/variable por recurso; margen de contribución; punto de equilibrio preciso por producto (el ponderado solo como respaldo); relevancia al 10 % |
 | Decidir | Producir o tercerizar, eliminar línea, asignar un recurso escaso y procesar o vender. La capacidad y su ocio informado provienen del resultado REAL; la demanda inicial usa ventas del periodo y se puede cambiar. Los faltantes se piden explícitamente. Pedido se evalúa en su propia pantalla. Solver exporta la mezcla con varias restricciones. |

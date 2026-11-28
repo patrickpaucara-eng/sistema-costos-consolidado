@@ -117,3 +117,5 @@ El usuario carga el libro DBD y crea el espacio desde «Cargar empresa»; «Espa
 
 ### OT-C37-5 · una receta en la interfaz (parcial)
 Familias selecciona la familia parametrizada del libro y abre Pedido; ambas vistas muestran el costo devuelto por la misma cotización. La historia por bloques se presenta como diagnóstico. La API antigua todavía acepta una receta de bloques directamente: su retirada contradice una aserción existente y queda pendiente de decisión. Evidencia: `evidencias/C37_5_FAMILIA_UNICA.md`.
+### OT-C37-6 · accesos y escenarios
+Inicio ofrece Cotizar pedido, Registrar y Planta del costo; conserva las acciones de consulta. Futuro incorpora los escenarios publicados y Configuración → Modelo ofrece Word código. La descarga conserva su extensión. Ver [evidencia](evidencias/C37_6_ACCESOS.md).
