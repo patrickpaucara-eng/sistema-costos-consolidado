@@ -12,7 +12,7 @@ Base: rama apilada `codex/C35-4` sobre `codex/C35-3` (`93f4bc9`).
 
 ## Estado
 
-Las capturas se generaron con el libro Frenosa copiado en un espacio temporal y una OT de prueba; no se alteró el libro fuente. C35-4 no cambia código ni cálculo. C35-3 ya pasó su compuerta completa (569 pruebas; contrato válido) después de la decisión del dueño del 28-nov. C35-4 está apilada sobre `codex/C35-3`; su compuerta propia se ejecutará antes de abrir el PR. Las pruebas focalizadas del Pedido pasan (13/13).
+Las capturas se generaron con el libro Frenosa copiado en un espacio temporal y una OT de prueba; no se alteró el libro fuente. C35-4 no cambia código ni cálculo. C35-3 y C35-4 pasaron sus compuertas completas: 569 pruebas cada una; contrato válido. C35-4 está apilada sobre `codex/C35-3`. Las pruebas focalizadas del Pedido pasan (13/13).
 
 ![Menú del sistema](C35_4_MENU.png)
 
