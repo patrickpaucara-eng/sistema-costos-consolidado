@@ -43,3 +43,5 @@
 | 27-nov | E29 se ejecuta como OT-C34 (6 piezas chicas en serie) | `ordenes/OT-C34_E29_PEDIDO.md` |
 | 27-nov | ACLARADO: no hay datawarehouse compartido entre costos y presupuesto. Presupuesto es libro aparte con su propia base (partidas, caja, financiamiento); lee de costos solo el contrato publicado (`contrato.py`), nunca la base interna. Misma regla que ya usan pantallas y dashboard. C (analítica/decidir/familias) no es tercer sistema: vive dentro de costos porque necesita la traza completa, no un resumen | Claude |
 | 27-nov | Validado: Kendo / Finanzas Corporativas I (FIEECS, prof. Heber Baldeón) es OTRO curso del dueño, no de Oria. Se usa como referencia metodológica para rellenar PF (deuda con bonos/leasing NIIF16, impuesto corriente/diferido, VAN/TIR, valorización FCD) sin copiar sus hojas ni su código; la práctica de Kendo (rondas R1-R6) es entrega propia de ese curso, no se integra al sistema | Claude |
+
+- 27-nov: el dueño pide corregir E30–E33 en una sola orden (OT-C35) antes de continuar la revisión; la agrupación del menú por ciclo del pedido es propuesta de Claude, pendiente de contraste con Tino.
