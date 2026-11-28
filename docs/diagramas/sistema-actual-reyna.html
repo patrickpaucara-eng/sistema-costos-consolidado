@@ -52,6 +52,7 @@
 <p style="margin:1em auto;max-width:1100px;padding:0 1em">OT-C32 punto 4: en Decidir se elige una capacidad escasa; Python ordena los productos por MC unitario dividido por consumo unitario y distribuye hasta la demanda máxima editable.</p>
 <p style="margin:1em auto;max-width:1100px;padding:0 1em">OT-C32-1b: en el formulario guiado, Python lee la secuencia DBD y anticipa el siguiente código para las transacciones que crean OBJETO; el campo queda de solo lectura. La sugerencia no reserva el número: la clave única se valida al registrar.</p>
 <p style="margin:1em auto;max-width:1100px;padding:0 1em">OT-C37-1: «Cargar empresa» concentra la carga del libro DBD y la creación del espacio de operación; «Espacios de trabajo» solo lista espacios. Registrar movimiento usa campos generados por /api/trx-campos, listas buscables y validación numérica local, sin editor JSON. El tipo escalar se infiere desde la etiqueta porque TRX_CAMPO no declara un tipo explícito.</p>
+<p style="margin:1em auto;max-width:1100px;padding:0 1em">OT-C37-3: Decidir muestra la capacidad y el ocio publicados, precarga la demanda con ventas del periodo y pide datos ausentes antes de asignar un recurso. La evaluación del pedido se abre en Pedido; la asignación requiere medidas CAP y una sola restricción.</p>
 <p style="margin:1em auto;max-width:1100px;padding:0 1em">OT-C32 punto 5: Decidir compara, por unidad, el ingreso adicional de procesar después del punto de separación con su costo incremental y recomienda procesar solo si la diferencia es positiva.</p>
 
 <div class="lienzo">
