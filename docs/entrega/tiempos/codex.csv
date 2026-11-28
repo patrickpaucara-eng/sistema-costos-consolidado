@@ -58,3 +58,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-27,15:51,16:10,OT-C34-4 curva S y capacidad/plazo,Monografía,Codex,7 pruebas focalizadas OK; compuerta VERDE: 555 pruebas, 1 advertencia, 26 subpruebas
 2026-11-27,16:10,16:54,OT-C34-5 Pedido guiado,Monografía,Codex,"28 pruebas focalizadas OK con Chromium E2E; compuerta VERDE: 558 pruebas, 1 advertencia y 26 subpruebas; PR incluye la pila previa de C34-1 a C34-4"
 2026-11-27,16:54,17:13,OT-C34-6 pedidos sintéticos en cuatro rubros,Monografía,Codex,"4 pruebas focalizadas OK; compuerta VERDE: 562 pruebas, 1 advertencia y 26 subpruebas; PR apilado sobre C34-5"
+2026-11-27,19:43,20:04,OT-C35-1 navegación y E34,Monografía,Codex,"2 pruebas focalizadas OK en Chromium; primera compuerta: ROJA (63 pasaron, 1 fallo por selector aria-label ya restaurado); no se abre PR hasta decidir actualización de pruebas de navegación dependientes"
