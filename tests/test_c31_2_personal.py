@@ -6,6 +6,7 @@ import threading
 from pathlib import Path
 from openpyxl import load_workbook
 import pytest
+from nav_helpers import ir_a_pestana
 from reyna_local.calculo_local import calcular
 from reyna_local.__main__ import ReynaServer
 
@@ -50,7 +51,7 @@ def test_tres_tecnicos_ruta_y_conservacion_en_navegador(tmp_path):
             page=browser.new_page();page.goto(f'http://127.0.0.1:{server.server_port}/')
             page.locator('#result-empresa').select_option('segundo_personas');page.locator('#result-periodo').fill('2025-07');page.locator('#result-cargar').click()
             sync.expect(page.locator('#result-status')).to_contain_text('actualizados',timeout=30000)
-            page.locator('nav a[href="#ruta"]').click();page.locator('#ruta-objeto').select_option(by['REB']['codigo'])
+            ir_a_pestana(page, '#ruta');page.locator('#ruta-objeto').select_option(by['REB']['codigo'])
             for i in (1,2,3):sync.expect(page.locator('#ruta-personas')).to_contain_text(f'Técnico {i}')
             assert page.locator('#ruta-personas tbody tr').count()>=3
             if os.environ.get('C31_CAPTURA'):

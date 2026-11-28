@@ -6,6 +6,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 import pytest
+from nav_helpers import ir_a_pestana
 
 from reyna_local import decidir as D
 from reyna_local.__main__ import ReynaServer
@@ -112,7 +113,7 @@ def test_chromium_muestra_capacidad_no_usada_y_caso_a_mano(server):
             page = browser.new_page()
             page.goto(base)
             sync.expect(page.locator("#dc-recurso option")).to_have_count(1, timeout=30000)
-            page.locator('nav a[href="#decidir"]').click()
+            ir_a_pestana(page, '#decidir')
             page.locator("#dc-recurso").select_option(value=json.dumps(["HM", "MAQUINA"], separators=(",", ":")))
             page.locator('#dc-demanda-maxima input[data-producto="A"]').fill("4")
             page.locator('#dc-demanda-maxima input[data-producto="B"]').fill("10")

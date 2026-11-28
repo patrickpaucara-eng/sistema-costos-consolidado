@@ -4,6 +4,7 @@ import threading
 from urllib.request import Request, urlopen
 
 import pytest
+from nav_helpers import ir_a_pestana
 
 from reyna_local import decidir as D
 from reyna_local.__main__ import ReynaServer
@@ -46,7 +47,7 @@ def test_panel_permite_comparar_en_el_punto_de_separacion(server):
             browser = p.chromium.launch(executable_path='/usr/bin/chromium', args=['--no-sandbox'])
         page = browser.new_page()
         page.goto(server)
-        page.locator('nav a[href="#decidir"]').click()
+        ir_a_pestana(page, '#decidir')
         page.locator('#dc-proceso-venta-actual').fill('10')
         page.locator('#dc-proceso-venta-final').fill('14')
         page.locator('#dc-proceso-costo').fill('3')

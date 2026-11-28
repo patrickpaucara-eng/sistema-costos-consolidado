@@ -6,6 +6,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from pathlib import Path
 import pytest
+from nav_helpers import ir_a_pestana
 from reyna_local.__main__ import ReynaServer
 
 
@@ -38,7 +39,7 @@ def test_pantalla_real(server):
     with sync.sync_playwright() as p:
         try: browser=p.chromium.launch(args=['--no-sandbox'])
         except Exception: browser=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
-        page=browser.new_page();page.goto(server);page.locator('nav a[href="#familias"]').click()
+        page=browser.new_page();page.goto(server);ir_a_pestana(page, '#familias')
         page.locator('#fam-historia').fill('{"ACT": [10,11,9,10,10]}')
         page.locator('#fam-componente').fill('{"ACT": 11.5}')
         page.locator('#fam-analizar').click()

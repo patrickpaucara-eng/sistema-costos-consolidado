@@ -1,6 +1,7 @@
 import threading
 import pytest
 from reyna_local.__main__ import ReynaServer
+from nav_helpers import ir_a_pestana
 
 
 def test_aristas_y_nodos_en_chromium(tmp_path):
@@ -12,7 +13,7 @@ def test_aristas_y_nodos_en_chromium(tmp_path):
             except Exception: b=p.chromium.launch(executable_path='/usr/bin/chromium',args=['--no-sandbox'])
             page=b.new_page();page.goto(f'http://127.0.0.1:{s.server_port}/')
             sync.expect(page.locator('#result-status')).to_contain_text('actualizados',timeout=30000)
-            page.locator('nav a[href="#dashboard"]').click()
+            ir_a_pestana(page, '#dashboard')
             line=page.locator('#planta-grafo .planta-arista').first
             sync.expect(line).to_contain_text(' → ')
             line.locator('button').first.click()

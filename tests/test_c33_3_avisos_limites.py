@@ -2,6 +2,7 @@
 import threading
 
 import pytest
+from nav_helpers import ir_a_pestana
 
 from reyna_local.__main__ import ReynaServer
 
@@ -41,7 +42,7 @@ def test_chromium_muestra_cada_aviso_fijo_en_su_seccion(local_server):
             page = browser.new_page()
             page.goto(local_server)
             for section, notice_id, expected in AVISOS:
-                page.locator(f'nav a[href="#{section}"]').click()
+                ir_a_pestana(page, f'#{section}')
                 notice = page.locator(f"#{notice_id}")
                 sync.expect(notice).to_be_visible(timeout=10000)
                 sync.expect(notice).to_have_text(expected)
