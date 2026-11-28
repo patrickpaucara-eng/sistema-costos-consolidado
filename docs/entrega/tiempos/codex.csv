@@ -60,3 +60,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-27,16:54,17:13,OT-C34-6 pedidos sintéticos en cuatro rubros,Monografía,Codex,"4 pruebas focalizadas OK; compuerta VERDE: 562 pruebas, 1 advertencia y 26 subpruebas; PR apilado sobre C34-5"
 2026-11-27,19:43,20:04,OT-C35-1 navegación y E34,Monografía,Codex,"2 pruebas focalizadas OK en Chromium; primera compuerta: ROJA (63 pasaron, 1 fallo por selector aria-label ya restaurado); no se abre PR hasta decidir actualización de pruebas de navegación dependientes"
 2026-11-27,22:14,22:31,OT-C35-1 adaptar pruebas destino-pestaña y verificación final,Monografía,Codex,"Pruebas de navegación ajustadas sin tocar aserciones de negocio; compuerta VERDE: 563 pruebas, 1 advertencia, 26 subpruebas y contrato válido"
+2026-11-28,06:38,07:17,OT-C37-1 formulario tipado y compuerta,Monografía,Codex,"7 pruebas focalizadas; COMPUERTA VERDE: 564 pruebas en 915.48 s y contrato válido"
