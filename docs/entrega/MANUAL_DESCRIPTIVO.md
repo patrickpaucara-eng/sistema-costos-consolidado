@@ -27,6 +27,8 @@ Reglas de diseño: las pantallas y documentos **solo leen el contrato**; nunca r
 
 **Naturaleza del costo:** NORMAL, PÉRDIDA (merma en exceso, rechazo sin reproceso) y OCIO (capacidad no usada) viajan hasta la orden con su etiqueta.
 
+En «Ruta del costo», el detalle separa la base de distribución, la medida y el total, el monto que avanza por el tramo y la parte atribuida a la OT tras las etapas posteriores. «Ver matrices» muestra por etapa los orígenes × destinos, sus inductores y la medida/total, además del cálculo y el cuadre por origen. Las diferencias se señalan sin ajustar los importes.
+
 ## 3. Síntesis
 | Síntesis | Costo de la orden | Uso |
 |---|---|---|
