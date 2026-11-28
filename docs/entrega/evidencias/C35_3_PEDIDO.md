@@ -28,7 +28,7 @@ Con esa autorización, C26 ahora abre Avanzado, avanza al paso Resultado y conse
 | C26 sin familias: entrar a Avanzado, ir al precio y cotizar con S/ 5 000 | Pasa; conserva la aserción «Costo:» |
 | C34-5: configurar políticas en Definir, cotizar, revisar el fundamento y comparar lote antes de aceptar | Pasa; conserva los datos de costo, aserciones y OT `OT-FRE-SW50-0001` |
 
-Comando focalizado posterior a la autorización: `PYTHONPATH=src /tmp/reyna-c35-venv/bin/python -m pytest -q tests/test_c26_interaccion.py tests/test_c34_5_pedido.py tests/test_c35_3_pedido.py tests/test_c34_6_cuatro_rubros.py` → **13 passed**. La compuerta final de C35-3 se ejecutará una vez después de completar los cambios documentales.
+Comando focalizado posterior a la autorización: `PYTHONPATH=src /tmp/reyna-c35-venv/bin/python -m pytest -q tests/test_c26_interaccion.py tests/test_c34_5_pedido.py tests/test_c35_3_pedido.py tests/test_c34_6_cuatro_rubros.py` → **13 passed**. La compuerta final ejecutada una vez en C35-3 dio **VERDE: 569 passed en 919.17 s; contrato de resultados válido**.
 
 ## Límites pendientes
 
