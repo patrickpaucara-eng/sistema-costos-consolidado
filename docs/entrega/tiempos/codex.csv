@@ -69,3 +69,4 @@ fecha,inicio,termino,actividad,etapa,responsable,resultado
 2026-11-28,06:22,06:37,"OT-C37-0 plantilla UIX y compuerta",Monografía,Codex,"Plantilla de 276 palabras; compuerta VERDE: 563 pruebas y contrato válido"
 2026-11-28,06:38,07:17,OT-C37-1 formulario tipado y compuerta,Monografía,Codex,"7 pruebas focalizadas; COMPUERTA VERDE: 564 pruebas en 915.48 s y contrato válido"
 2026-11-28,07:38,08:04,OT-C37-2 ruta reproducible y matrices por etapa,Monografía,Codex,"3 pruebas focalizadas OK; primera compuerta ROJA por texto histórico requerido; preservado sin cambiar pruebas; compuerta final VERDE: 564 pruebas y contrato válido"
+2026-11-28,09:13,09:35,OT-C37-4 revisión de bloqueo y C37-5 familia en interfaz,Monografía,Codex,"C37-4 pendiente por correspondencia de recurso e intervalos; C37-5 parcial: 4 pruebas focalizadas y compuerta VERDE con 572 pruebas y contrato válido"
