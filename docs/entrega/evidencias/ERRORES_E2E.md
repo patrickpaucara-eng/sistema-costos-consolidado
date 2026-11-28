@@ -182,3 +182,11 @@ El dueño exige, antes de cerrar la MN 01, un mapa detallado de cada módulo (pa
 
 ## E37 · Tabla de tramos de la orden mezcla dos niveles (dueño, 27-nov; validado en captura, SIN corregir)
 En «Ver todos los tramos», las columnas Cantidad del destino × Tasa dan el monto del **centro** (10 × 30 = 300), pero «Parte de esta orden» muestra 49.8 (la proporción de la orden dentro de ese monto). El usuario no puede reproducir la cifra con las columnas visibles. **Esperado:** mostrar la cadena completa en una fila (monto del tramo → % que toma la orden → parte de la orden) o una línea de verificación «Σ partes = total del origen» visible en pantalla. Entra en C36 (criterios 1 y 2).
+
+## E38–E43 · Hallazgos del mapa a detalle (Claude, 27-nov; leídos del código, SIN corregir)
+- **E38** Registrar movimiento y Espacios de trabajo son el mismo formulario y exigen escribir cabecera y líneas en JSON: no apto para un usuario de planta. Importar libro duplica Cargar empresa.
+- **E39** `tramos_cantidad.py` (C34-3) tiene pruebas pero no está conectado al Pedido ni a ninguna pantalla.
+- **E40** Dos mecanismos de familia sin regla de cuál manda: bloques (`familias.py`) y mínimos cuadrados (`recetas_pedido.py`).
+- **E41** «Pedido especial» de Decidir repite la evaluación del Pedido; además Decidir usa demanda máxima = ventas × 1.5 (supuesto inventado) y pregunta capacidad ociosa que `resultado["capacidad_ociosa"]` ya trae (amplía E35).
+- **E42** La sección Simulación existe pero ningún enlace del menú lleva a ella.
+- **E43** 38 de 89 módulos de `src/` no se alcanzan desde el ejecutable (analitica/, analitica2/, cuatro métodos «cáscara» sin cálculo, métodos sueltos). Decisión del dueño: archivar o conservar.
