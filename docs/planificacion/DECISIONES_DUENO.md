@@ -61,3 +61,5 @@
 - 27-nov (ajuste): en el mapa no se etiqueta lo que el dueño ya decidió (queda implícito). Solo se marca lo que **no tiene justificación** (sin requisito ni valor para el sistema), como candidato a archivar.
 
 - 27-nov: mapa a detalle de B (MN 02) generado desde una especificación en datos (`tools/mapa_b/spec.py`) y validado con `tools/mapa_b/validar.py` (10 pruebas: entradas resueltas, sin ciclos, restricciones con datos, eventos con ticket, parámetros con vigencia y 3 casos calculados). Todos los valores de parámetros son SUPUESTO. La validación detectó un hueco (los tickets no llegaban a la recomendación) y un ciclo entre inversión y plan, ambos corregidos. No prueba realismo de los supuestos, rapidez del solucionador ni coincidencia con el enunciado de Oria.
+
+- 27-nov (AUTORIZACIÓN C35-2): Codex puede cambiar solo los pasos de navegación de `test_pantalla_modelo_costeo.py::test_modelo_y_avisos_en_chromium` (ir a Inicio, consultar, volver a Modelo), sin tocar aserciones, y correr una segunda compuerta completa. La misma regla vale para cualquier otra prueba de C35 que solo dependa de navegación.

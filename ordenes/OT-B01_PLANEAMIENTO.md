@@ -1,0 +1,11 @@
+# OT-B01 — Sistema de planeamiento (MN 02), primera versión
+Fuente única: `tools/mapa_b/spec.py` (módulos B0–B9, eventos, tickets, restricciones R1–R9, parámetros) y `docs/diagramas/mapa-detalle-mn02.html`. Empieza DESPUÉS de cerrar C35 y C36. Rama `codex/B01-N`, PR por pieza contra `desarrollo/mono`, nunca fusionar ni ir a main.
+Reglas: paquete nuevo `src/planeamiento/`; NO importa nada de `reyna_local` salvo `contrato.py` (lectura del resultado publicado) — B lee, no recalcula costos; libro propio `PLAN_<empresa>.xlsx` (no toca el libro de costos); todo parámetro con valor SUPUESTO y vigencia (desde/hasta), nunca se borra; cada pieza con caso calculado a mano en la prueba; compuerta completa una vez al final de cada rama.
+## B01-1 Libro y parámetros (B0) · tablas TICKET, EVENTO_PLAN, PARAMETRO (con vigencia), los 10 parámetros de spec.py como semilla SUPUESTO.
+## B01-2 Lectura de costos (B2) · función que devuelve costo por actividad, capacidad práctica, órdenes abiertas y receta desde el resultado publicado. Prueba: con el libro SERVITEC, las cifras coinciden con `/api/resultados`.
+## B01-3 Eventos y tickets (B1, B3) · los 6 eventos de spec.py validan su dato y mueven el estado del ticket (máquina de estados de spec.py). Evento inválido → rechazo con mensaje, nunca corrección silenciosa.
+## B01-4 Calculadora (B4) · modelo entero mixto con R1–R9, objetivo maximizar utilidad descontada. Dependencia: PuLP + CBC (agregar a pyproject; si el EXE no la empaqueta, alternativa: exportar a Solver y declararlo). Pruebas: los 3 casos de `tools/mapa_b/validar.py` (8,200; 94,619/74,607; financiamiento 7,000) deben salir del solucionador, no escritos. Medir tiempo con 50 OT sintéticas y reportarlo.
+## B01-5 Caja (B5) y desviación (B7) · saldo por periodo con caja mínima; desviación > umbral dispara recálculo desde el estado actual (no deltas encadenados).
+## B01-6 Estados proyectados (B8) · flujo de caja, resultados y balance a n periodos; VAN, TIR y recuperación.
+## B01-7 Pantalla «Plan» con la plantilla UIX de C36 (pestañas arriba, entradas, resultado, fundamento, siguiente acción) y recomendación al gerente (B9: acepta o hace otra cosa; se registra).
+Reporte final: PRs, compuerta, tiempos del solucionador y lo que quedó como límite.
