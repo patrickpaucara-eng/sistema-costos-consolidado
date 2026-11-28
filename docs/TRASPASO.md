@@ -53,3 +53,16 @@ Mapa general: `docs/diagramas/mapa-sistemas-AB.html` (botón Gerente/Desarrollad
 
 ## 7. Cómo hablarle al dueño
 Español, frases cortas, sin jerga; responder primero lo que preguntó; cuando haya algo que decidir, una pregunta concreta con recomendación. Le preocupa no cumplir la MN 01, el costo en tokens y que las IA supongan cosas: **verifica en el código antes de afirmar** y di «no lo sé» cuando no esté verificado.
+
+## 8. Lo que el coordinador revisaba con Opus, ya convertido en reglas (para revisar sin Opus)
+**Al unir C38 (cálculo), rechaza el PR si falla cualquiera de estas, aunque la compuerta esté VERDE:**
+1. `python3 -I tests/auditoria_mn1/correr_auditoria.py .` → cada S1–S8 ya NO reproduce su defecto y su control sin defecto sigue igual.
+2. `tests/datos/oraculo_servitec/verificar_pieza30.py` → diferencia 0.00 por orden, elemento y etapa (REB 22,975 · MPR 5,165).
+3. `tests/test_modelo3_oria.py` sin cambios y en verde (recíproco y escalonado a mano).
+4. `tools/e2e_recorrido.py` → 30/30.
+5. El diff no toca ninguna prueba existente salvo la aserción final de `tests/auditoria_mn1/test_S*.py` (de «el defecto ocurre» a «ya no ocurre»).
+6. Ningún monto se corrige en silencio: todo dato malo termina en rechazo con hoja, fila y valor (nunca en 0 ni en descarte).
+7. CONTABLE: ocio, pérdida y financieros nunca en el costo del objeto (lo valida `contrato.py`).
+Si 1–7 pasan, unir con `tools/unir_pr.py`. Si alguno falla, devolver a Codex con el número de regla.
+
+**EXE final:** GitHub → Actions → «Paquete offline de Windows» → *Run workflow* sobre `desarrollo/mono` (también corre solo con cada push). El artefacto es `ReynaCostos-Windows-x64.zip`. Hacerlo cuando C37 y C38 estén unidas; luego el dueño lo prueba con `docs/entrega/GUION_PRUEBA_DUENO.md`.
