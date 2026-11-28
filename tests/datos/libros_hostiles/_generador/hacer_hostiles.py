@@ -34,7 +34,7 @@ def caso(num, slug, defecto, que_se_toco, esperado, detecta_hoy, fuente_msg):
 
 
 @caso("00", "control_sin_defecto", "Ninguno: copia del libro base con la hoja LEEME añadida.",
-      "Solo se agrega la hoja LEEME.", "Sin errores; el cálculo de julio debe dar REB 22,975 y MPR 5,165 (cifras del dueño).",
+      "Solo se agrega la hoja LEEME.", "Sin errores; el cálculo de julio da REB 22,975 y MPR 5,165 (verificado con calcular() del motor completo, 28/11/2026).",
       "SÍ (acepta)", "Control: demuestra que la hoja LEEME y el guardado con openpyxl no rompen el libro.")
 def c00(wb):
     return []
@@ -83,7 +83,7 @@ def c03(wb):
       "PERIODO, fila 8 (2025-07): PER_INI 20250701 ↔ PER_FIN 20250731 intercambiados.",
       "PROPUESTO: «Hoja PERIODO, fila 8: PER_INI (20250731) es posterior a PER_FIN (20250701).»",
       "NO (hallazgo)", "libro_dbd.validar() solo revisa que PER_COD tenga la forma AAAA-MM; no compara PER_INI con PER_FIN. "
-                       "Efecto en el cálculo: POR VERIFICAR (motor_espejo.py ordena los periodos abiertos por PER_INI).")
+                       "calcular() 2025-07 tampoco avisa y da los mismos costos (REB 22,975 / MPR 5,165): el error pasa en silencio.")
 def c04(wb):
     ws = wb["PERIODO"]
     i = fila_de(ws, lambda r: r[0] == "2025-07")
@@ -96,9 +96,9 @@ def c04(wb):
 @caso("05", "codigo_duplicado", "Código duplicado: la orden OT-SRV-REB-2025-07 aparece dos veces en OBJETO con cantidades distintas.",
       "OBJETO: se agrega la fila 18, copia de la fila 14 (OT-SRV-REB-2025-07) con OBJ_CAN 12 en vez de 10.",
       "PROPUESTO: «Hoja OBJETO, fila 18: OBJ_NUM «OT-SRV-REB-2025-07» está repetido (ya está en la fila 14).»",
-      "NO (hallazgo)", "libro_dbd.validar() guarda OBJETO en un diccionario por OBJ_NUM: la segunda fila pisa a la primera sin aviso "
-                       "(cantidad 12 en lugar de 10). motor_espejo.py tiene «Clave duplicada en {tabla} para la empresa del evento», "
-                       "pero solo al leer tablas durante una transacción: POR VERIFICAR si se dispara al calcular.")
+      "NO (hallazgo GRAVE)", "libro_dbd.validar() guarda OBJETO en un diccionario por OBJ_NUM: la segunda fila pisa a la primera sin aviso. "
+                       "calcular() 2025-07 lo acepta: REB queda con cantidad 12, costo total 22,975 y costo unitario 1,914.58 "
+                       "(correcto: 2,297.50, −16.7 %); el margen del mes sube de 9,860 a 13,422.33. Nada avisa.")
 def c05(wb):
     ws = wb["OBJETO"]
     i = fila_de(ws, lambda r: r[0] == "OT-SRV-REB-2025-07")
@@ -110,10 +110,10 @@ def c05(wb):
 
 @caso("06", "criterio_suma_cero", "Criterio que suma 0: el inductor DES_OT de julio quedó en cero para las dos órdenes.",
       "MEDIDA, filas 190–191 (2025-07, DES_OT → OT-SRV-REB-2025-07 / OT-SRV-MPR-2025-07): MED_CAN 200/100 → 0.",
-      "Al calcular: «I8: P4C DES tiene monto [monto] y su criterio DES_OT suma cero» (validar() lo acepta porque 0 es ≥ 0).",
-      "PARCIAL: validar() NO; el cálculo SÍ (por lectura de código, POR VERIFICAR en ejecución)",
-      "metodos/reparto_etapas.py, línea 290: Rechazo I8 cuando el criterio de un origen con monto suma cero. "
-      "El monto exacto de la actividad DES en julio no se pudo calcular aquí (falta fuente/DBD_Fuente.xlsx en el repo ligero).")
+      "Al calcular: «I8: P4C DES tiene monto 5700.00 y su criterio DES_OT suma cero» (validar() lo acepta porque 0 es ≥ 0).",
+      "PARCIAL: validar() NO; calcular() SÍ lo rechaza (verificado)",
+      "metodos/reparto_etapas.py, línea 290: Rechazo I8. Mensaje real de calcular(): «I8: P4C DES tiene monto 5700.00 y su "
+      "criterio DES_OT suma cero». El usuario solo se entera al calcular, no al cargar el libro.")
 def c06(wb):
     ws = wb["MEDIDA"]
     c = col(ws, "MED_CAN")
@@ -138,7 +138,7 @@ def c07(wb):
       "MEDIDA y OBJETO: orden de columnas invertido (la última pasa a ser la primera).",
       "Sin errores: el sistema lee por nombre de columna, no por posición. El cálculo de julio debe dar lo mismo que el control "
       "(REB 22,975 / MPR 5,165).",
-      "SÍ (acepta)", "libro_dbd._tablas(): arma cada fila con dict(zip(cabecera, fila)). Resultado del cálculo: POR VERIFICAR en ejecución.")
+      "SÍ (acepta)", "libro_dbd._tablas(): arma cada fila con dict(zip(cabecera, fila)). calcular() 2025-07 da REB 22,975 / MPR 5,165, igual que el control (verificado).")
 def c08(wb):
     cambios = []
     for n in ("MEDIDA", "OBJETO"):
@@ -164,7 +164,7 @@ def leeme(wb, c, cambios, actual):
         ("¿Lo detecta hoy validar()?", c["detecta"]),
         ("Mensaje real de validar() en esta copia", " | ".join(actual) if actual else "(ninguno: libro aceptado)"),
         ("De dónde sale", c["fuente"]),
-        ("Libro base", "SERVITEC_sintetico.xlsx (sintético, sin datos reales). Corrida de validar() del repo ligero, 28/11/2026."),
+        ("Libro base", "SERVITEC_sintetico.xlsx (sintético, sin datos reales). validar() y calcular() del repo con fuente/DBD_Fuente.xlsx, 28/11/2026."),
         ("Cómo probarlo", "En el sistema: subir este archivo en «Cargar libro» (calculo_local.registrar) y, si se acepta, calcular "
                           "2025-07 REAL. Anotar el mensaje y compararlo con la fila «Mensaje que debería dar»."),
     ]

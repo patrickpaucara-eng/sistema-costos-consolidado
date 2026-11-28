@@ -69,3 +69,6 @@
 - 28-nov (AUTORIZACIÓN C35-3/4): Codex puede adaptar preparación, selectores y pasos de `test_c26_interaccion.py` y `test_c34_5_pedido.py` al Pedido de 3 pasos. Prohibido cambiar aserciones, cifras esperadas o datos de entrada que alteren el resultado; el PR lista cada línea cambiada.
 
 - 28-nov: los defectos E44 (fechas al revés, clave duplicada, criterio suma 0, número como texto, montos de LINEA) se corrigen antes del 9-dic en C37-7. La validación de lo que entregue la otra IA la hacen Codex (por pruebas) o la propia IA con validaciones automáticas, no Claude.
+
+- 28-nov: entregas de la otra IA (piezas 24, 25, 30) incorporadas sin revisión de Claude: libros hostiles y oráculo SERVITEC en `tests/datos/`, textos de monografía en `docs/entrega/otra_ia/`. Codex debe convertir `verificar_pieza24.py` y `verificar_pieza30.py` en pruebas de la compuerta (C37-7).
+- 28-nov (pendiente A→B): el contrato de resultados (`contrato.py`) no publica capacidad práctica, receta por producto ni fecha de entrega de las órdenes, que B necesita. Ampliar el contrato es tarea de A después de C37 (orden futura), no de B.
