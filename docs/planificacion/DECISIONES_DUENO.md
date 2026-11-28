@@ -57,3 +57,5 @@
 
 - 27-nov (REGLA DE ALCANCE): el mapa detallado modela todo lo existente y cada módulo/método declara su **justificación** (decisión del dueño, requisito de la MN 01, o «sin decisión»). Lo «sin decisión» que no aporte valor al sistema se **archiva o relega** (desactivado, no activo en el sistema; código conservado en `archivo/`), porque el dueño debe conocer a detalle todo lo que corre. Candidato inicial a revisar: costeo normal con sobre/subaplicación, variaciones de material, moneda extranjera y devoluciones (commit ea58a63, 21-nov), sin decisión explícita registrada. Nada se archiva sin decisión del dueño sobre cada pieza.
 - 27-nov: el dueño valida pasar la sesión a Opus con esfuerzo alto para el mapa detallado.
+
+- 27-nov (ajuste): en el mapa no se etiqueta lo que el dueño ya decidió (queda implícito). Solo se marca lo que **no tiene justificación** (sin requisito ni valor para el sistema), como candidato a archivar.
