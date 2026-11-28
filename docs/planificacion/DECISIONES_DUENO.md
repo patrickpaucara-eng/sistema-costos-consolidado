@@ -52,3 +52,5 @@
 - 27-nov: el mapa a detalle se construye mejorando `docs/diagramas/sistema-actual-reyna.html` (drill-down por módulo), no desde cero.
 
 - 27-nov: `mapa-presupuesto-B.html` mejorado con «Vista simple» en lenguaje cotidiano (hechos → plan → salidas → lazo de corrección); B1/B2 quedan como detalle técnico. Punteado = sin aprobar (misión, horizonte, herramienta de solución, parámetros reales, enunciado de Oria).
+
+- 27-nov (MN 02, propuesta del dueño, pendiente de aprobación formal): **misión del sistema B** = «entregar la programación de realización de los recursos comprometidos para el cumplimiento de los objetivos». **Horizonte** = n unidades de tiempo hacia adelante (n es parámetro); **frecuencia de actualización** = tiempo real, disparada por eventos (no por calendario); son dos cosas distintas. **Calculadora** = investigación de operaciones. **Parámetros** = arrancan como supuestos declarados (SUPUESTO) y se ajustan con la experiencia; los valores obsoletos se cierran con fin de vigencia, no se borran.
