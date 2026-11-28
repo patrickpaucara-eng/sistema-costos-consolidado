@@ -47,3 +47,6 @@
 - 27-nov: el dueño pide corregir E30–E33 en una sola orden (OT-C35) antes de continuar la revisión; la agrupación del menú por ciclo del pedido es propuesta de Claude, pendiente de contraste con Tino.
 
 - 27-nov (AUTORIZACIÓN): el dueño autoriza a Codex a actualizar `tests/test_c26_e22.py` para que refleje el menú nuevo de OT-C35-1 (seis destinos, un solo menú abierto). Solo ese cambio de la prueba; el resto de pruebas existentes sigue sin tocarse. Codex lo declara en el PR.
+
+- 27-nov (AUTORIZACIÓN C35-1): Codex puede actualizar las pruebas que solo dependen del menú (`test_c26_e23.py`, `test_c26_interaccion.py`, `test_esqueleto_navegacion.py` y otras de navegación) para recorrer destino → pestaña. Solo cambian selectores y pasos de navegación; ninguna aserción de cálculo, monto o dato. Lista de archivos tocados en el PR.
+- 27-nov: el mapa a detalle se construye mejorando `docs/diagramas/sistema-actual-reyna.html` (drill-down por módulo), no desde cero.
