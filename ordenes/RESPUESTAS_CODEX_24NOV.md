@@ -86,3 +86,10 @@ C13 → (PR de C14, C15, C19 si sus compuertas terminaron VERDE) → C16 → C18
 - La compuerta única de `codex/C35-2` dio ROJA: 521 pruebas pasaron, 1 falló, 15 subpruebas pasaron y el contrato de resultados cumplió. Falló `tests/test_pantalla_modelo_costeo.py::test_modelo_y_avisos_en_chromium` antes de sus aserciones de datos: entra a `#modelo` y espera visible «Resultados actualizados.»; C35-2 mueve consulta/estado a Inicio.
 - El dueño autorizó (DECISIONES_DUENO.md, 27-nov) cambiar solo los pasos de navegación: Inicio → consultar → volver a Modelo; las aserciones se conservan. La prueba también usa destino → pestaña para ir a Calidad.
 - Las tres pruebas focalizadas de cabecera y Chromium pasan. La segunda compuerta completa quedó VERDE: 564 pruebas, 1 advertencia, 26 subpruebas y contrato válido; C35-2 puede abrir su PR.
+
+# C35-3 — decisión requerida sobre prueba funcional heredada
+
+- La interfaz `#cotizador` ahora separa el flujo en tres pasos y mueve políticas, preparación y adicionales a Definir. `tests/test_c34_5_pedido.py::test_pedido_guiado_en_chromium_hasta_abrir_ot` aún intenta llenar controles que ya no existen (`#pedido-dias`, `#pedido-lote-unidades`, `#pedido-preparacion`, entre otros) y acciona el formulario anterior. No es una prueba que solo dependa de navegación, por lo que la autorización del dueño del 27-nov para cambiar pasos de navegación no la cubre.
+- Solicito autorización para actualizar solo su preparación e interacción Chromium a Pedido → Definir → Resultado → Aceptar, conservando sin cambios las aserciones de cifras, P05–P95, plazo, adicionales, comparación de lotes, atomicidad y filas T09/OBJETO. No modificaré pruebas de cálculo ni el resultado esperado.
+- Sin ese ajuste autorizado, la compuerta completa previsiblemente falla en la prueba heredada y no se puede abrir un PR que cumpla la barrera verde. Evidencia de C35-3: `docs/entrega/evidencias/C35_3_PEDIDO.md`.
+- Límite de contrato: `condicion_pago` entra a la solicitud y al valor predeterminado local, pero no tiene columna persistente en T09/T13. `store.py` sigue excluido; la condición de pago no se declara persistida en el libro.
